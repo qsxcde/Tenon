@@ -2,7 +2,7 @@
 
 ## 当前基线
 
-`test-foundation-stability` 完成后，测试按源码层级组织。经过拆分、契约集中和异步稳定性改造，2026-08-30 v0.4 基线全量测试为 **1532 passed**；v0.5 增加 Subagent 契约、运行时、事件与展示回归后，2026-10-10 复核的全量测试为 **1673 passed，3 skipped**（1676 collected）。`test-foundation-stability` 与 `test-structure-coverage` 均已归档；大型文件的现状和本变更目标如下：
+`test-foundation-stability` 完成后，测试按源码层级组织。经过拆分、契约集中和异步稳定性改造，2026-08-30 v0.4 基线全量测试为 **1532 passed**；v0.5 增加 Subagent 契约、运行时、事件与展示回归后，2026-10-10 复核的全量测试为 **1695 passed，3 skipped**（1698 collected）。`test-foundation-stability` 与 `test-structure-coverage` 均已归档；大型文件的现状和本变更目标如下：
 
 | 当前文件 | 当前职责 | 目标拆分 |
 | --- | --- | --- |

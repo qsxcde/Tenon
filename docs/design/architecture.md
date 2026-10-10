@@ -53,7 +53,7 @@
 - 会话树(v0.3 阶段 4):`build_tree` 纯函数、`/tree` 导航及 `/sessions list` 父子缩进展示。
 - 会话列表、搜索、筛选和 `continue_recent` 使用派生索引完成候选元数据读取与排序；单个索引缺失、损坏或过期时只对目标会话回源，其它会话不重复扫描 JSONL，最终目标恢复允许单独检查。
 - 安全确认环(v0.2):执行前 `ApprovalPolicy`(组合根把 `tools/security.py` 分类器适配为端口),`ask` 由循环 emit `confirmation_requested` 并等待会话确认队列;headless 缺省 deny(fail closed),`--yes` 逃生舱。
- - 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型),`uv run pytest -q` **1673 passed，3 skipped**(1676 collected,2026-10-10, Windows);本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。
+ - 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型),`uv run pytest -q` **1695 passed，3 skipped**(1698 collected,2026-10-10, Windows);本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。
  - TUI 性能验收:`benchmark/` 使用 schema v2 的固定离线 fixture 测量提交首帧、首 token、帧 p50/p95、控制延迟、峰值 Python 分配和协调器的 dropped/over-budget 计数；`compare_benchmark.py` 只在 schema、平台、Python、视口和 fixture 一致时比较，`update_tui_baseline.py` 负责生成受约束的 Linux/Python 3.12 候选基线。
 
 **v0.5 当前状态与远期**:V4-01～V4-38 与 V5-00～V5-10 均已完成实现与验收；发布包版本已统一为 `0.5.0`，CHANGELOG 已补齐 v0.5 使用者条目，历史 annotated `v0.4.0` 标签固定指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。当前工程治理已接入覆盖率报告、Ruff、构建安装冒烟和 CI 跨平台矩阵；TUI schema v2 的正式 Linux/Python 3.12 基线仍按 CI artifact 与人工复核流程推进，性能暂保持非阻塞。v0.5 交付的是**串行、只读**的 Subagent MVP：委派深度固定为 1、子 Agent 工具白名单为 `read` / `grep` / `find` / `ls` / `skill`、预算与输出均有界、子 transcript 默认临时且进程重启只折叠为 `abandoned/process_restarted`。并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆继续作为后续方向；插件系统、轻量记忆及 Web/HTTP 事件流订阅待出现真实消费者或价值域扩大时重估。
@@ -155,7 +155,7 @@ codeagent/
 │   └── resources/                    # [资源层]  ← Pi 资源系统(v0.3 已启用 skills)
 │       └── skills/ prompts/          #   *.md 技能文件 / 提示词模板
 │
-└── tests/                            # 按行为域分包,1673 passed，3 skipped(2026-10-10)
+└── tests/                            # 按行为域分包,1695 passed，3 skipped(2026-10-10)
     ├── conftest.py / fixtures/       # 全局 marker、隔离环境和共享离线夹具
     ├── contracts/                    # AI、core、session、tools 边界契约
     ├── ai/ / core/ / mcp/            # 模型、编排和 MCP 行为
@@ -371,6 +371,12 @@ TUI:    app/main.py --tui → create_tui_app() → TuiApp.start()
 | `app/main.py` | container、session、bus | core、ai、tools(直接) |
 | `app/tui/` | session、core(events)、TUI state/presentation | ai、tools、config;textual 仅 `adapters/textual/` |
 
+补充说明(2026-10-10 边界校准):
+
+- `tools/` 禁止 import `core/` 是现行规则而非疏漏:具体工具在组合根经 `AgentToolAdapter` 挂载为 `AgentTool`,因此需要 core 契约的委派入口 `delegate` 属于 `app/composition/subagent/delegate_tool.py`,不下沉到 `tools/`。
+- Subagent 的**领域规则**位于 `core/subagent/`:`policy.py`(预算默认值与硬上限、深度与配额、诊断上限)、`admission.py`(准入顺序与终态归因)、`slots.py`(委派槽位登记与重复保护)。`app/composition/subagent/` 只保留子 Session 工厂、事件发布与资源收尾装配,并通过 `budget.py` 等模块复用 core 常量,不再维护第二份数值。
+- 规模、格式化与类型现在是可执行门禁:`scripts/scale_scan.py` + `tests/contracts/test_scale_limits.py` 覆盖全部生产层(≤300 行文件 / ≤80 行函数),`ruff format --check` 固化唯一格式化方案,`scripts/type_scan.py` + `docs/type-baseline.json` 以分层棘轮约束 mypy 债务。
+
 ## 9. 解耦判据(泄漏检测)
 
 分层是否成立,不看文件多整齐,看**改一层要不要动另一层**:
@@ -385,7 +391,7 @@ TUI:    app/main.py --tui → create_tui_app() → TuiApp.start()
 
 最严格判据:**`core/` 里 grep 不到 `config / tools / ai / session` 字面量 → 横切解耦成立;`session/` 里 grep 不到 `ai / tools / config` → 纵切解耦成立。**
 
-> `tests/test_decoupling.py` 逐文件 AST 扫描强制校验(2026-08-14 重写,70+ 项断言),并带 anti-wargaming 守卫(`test_scan_has_content` / `test_composition_roots_exist` / `test_textual_only_in_engine_backend`),规则写错或例外文件被删都会被抓住。
+> `tests/test_decoupling.py` 逐文件 AST 扫描强制校验(2026-08-14 重写,断言持续扩充),并带 anti-wargaming 守卫(`test_scan_has_content` / `test_composition_roots_exist` / `test_textual_only_in_engine_adapter_zone`),规则写错或例外文件被删都会被抓住。
 
 ## 10. 决策溯源
 
@@ -413,7 +419,7 @@ TUI:    app/main.py --tui → create_tui_app() → TuiApp.start()
 | **v0.4 Runtime 产品化** | Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 稳定性 | V4-01～V4-38 已完成实现；`0.4.0` 元数据和 `v0.4.0` 标签已固定 |
 | **v0.5 Subagent 协作** | 串行只读委派:`delegate` 工具、`explore` / `review` profile registry、显式上下文隔离、有界预算与取消、结构化结果与证据、父子事件诊断、父会话有界运行记录、TUI / headless 可观察性 | V5-00～V5-10 已完成实现与验收;新增 `subagent-contract` / `subagent-runtime` / `subagent-observability` / `subagent-run-records` 主规格;`0.5.0` 元数据与 CHANGELOG 已收口 |
 
- v0.5 当前进度:V4-01～V4-38 与 V5-00～V5-10 已全部落地；2026-10-10（Windows / Python 3.12）复核结果为 `uv run pytest -q` **1673 passed，3 skipped**（1676 collected）、快速质量集 **1503 passed，3 skipped，170 deselected**、覆盖率 **84.29%**、跨边界集合 **212 passed**、`openspec validate --specs` **24/24**、release check 以 `0.5.0` 通过（wheel/sdist、资源、敏感文件、干净安装、fake provider CLI）。上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 TUI schema v1 基线保留为历史数据，schema v2 候选由 CI 生成并人工复核，性能暂不启用硬阈值。
+ v0.5 当前进度:V4-01～V4-38 与 V5-00～V5-10 已全部落地；2026-10-10（Windows / Python 3.12）复核结果为 `uv run pytest -q` **1695 passed，3 skipped**（1698 collected）、快速质量集 **1525 passed，3 skipped，170 deselected**、覆盖率 **84.39%**、跨边界集合 **212 passed**、`openspec validate --specs` **24/24**、release check 以 `0.5.0` 通过（wheel/sdist、资源、敏感文件、干净安装、fake provider CLI）。上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 TUI schema v1 基线保留为历史数据，schema v2 候选由 CI 生成并人工复核，性能暂不启用硬阈值。
 
 ## 12. 参考
 

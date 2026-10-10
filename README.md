@@ -4,7 +4,7 @@
 
 当前 **v0.5.0 已完成并固定基线**：V4-01～V4-38 覆盖 Runtime 可靠性、上下文治理、TUI 交互、会话管理、生命周期 Hook、工具与 Provider 稳定性；V5-00～V5-10 在此之上引入串行只读 Subagent 委派（`delegate` 工具、`explore` / `review` profile registry、有界预算与取消治理、结构化结果与证据回传、父子事件诊断、父会话有界运行记录与 TUI / headless 可观察性）。发布包版本为 `0.5.0`；历史 annotated `v0.4.0` 标签仍指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。模型配置层(`ai/`)、自研 Agent 编排(`core/`)、工具层(`tools/`)、会话层(`session/`)与终端交互层(`app/tui/`)均可用；CLI 可对话、可调用 8 个内建工具与按配置加载的 MCP 工具，可把只读子任务委派给子 Agent，事件流可订阅，会话可恢复 / 切换 / 压缩 / 分叉 / 树形导航。
 
-当前验收基线（2026-10-10，Windows / Python 3.12 复核）：`uv run pytest -q` **1673 passed，3 skipped**（1676 collected）；快速质量集（unit/contract）为 **1503 passed，3 skipped，170 deselected**，覆盖率 **84.29%**（覆盖率硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 **212 passed**。`openspec validate --specs` 为 **24/24**，release check 已固化 wheel/sdist、干净安装、资源和 fake provider CLI 检查并在本地以 `0.5.0` 复跑通过；上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 `docs/benchmarks/tui-baseline.json` 仍是 schema v1 历史基线，schema v2 候选基线由 CI 生成并经人工复核后再更新。TUI 硬上限和相对回归判定见 [`docs/benchmarks/tui-performance-policy.md`](docs/benchmarks/tui-performance-policy.md)。Ruff 首阶段只检查阻塞级正确性问题（`E9` / `F821` / `F841`），不把历史风格债务混入本次变更。
+当前验收基线（2026-10-10，Windows / Python 3.12 复核）：`uv run pytest -q` **1695 passed，3 skipped**（1698 collected）；快速质量集（unit/contract）为 **1525 passed，3 skipped，170 deselected**，覆盖率 **84.39%**（覆盖率硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 **212 passed**。`openspec validate --specs` 为 **24/24**，release check 已固化 wheel/sdist、干净安装、资源和 fake provider CLI 检查并在本地以 `0.5.0` 复跑通过；上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 `docs/benchmarks/tui-baseline.json` 仍是 schema v1 历史基线，schema v2 候选基线由 CI 生成并经人工复核后再更新。TUI 硬上限和相对回归判定见 [`docs/benchmarks/tui-performance-policy.md`](docs/benchmarks/tui-performance-policy.md)。Ruff 首阶段只检查阻塞级正确性问题（`E9` / `F821` / `F841`），不把历史风格债务混入本次变更。质量门禁已扩展三项并接入 `quality-fast`：`uv run ruff format --check src tests scripts`（唯一格式化方案，行宽 100）、`uv run python scripts/type_scan.py`（mypy 分层棘轮，基线 `docs/type-baseline.json`：core 15 / ai 14 / tools 24 / session 311 / app 696，只降不升）、`uv run python scripts/scale_scan.py`（全部生产层 ≤300 行文件 / ≤80 行函数，由 `tests/contracts/test_scale_limits.py` 执行）。
 
 ## 项目介绍
 
@@ -195,7 +195,7 @@ codeagent/
     │
     └── resources/               # [资源层] 内建 skills / prompts（Skills 已启用）
 
-tests/                          # 按行为域分包，1673 passed，3 skipped（2026-10-10）
+tests/                          # 按行为域分包，1695 passed，3 skipped（2026-10-10）
 ├── conftest.py / fixtures/     #   marker、隔离环境和共享离线夹具
 ├── contracts/                  #   跨实现公共契约与分层边界
 ├── ai/ / core/ / mcp/          #   模型、编排和 MCP 行为

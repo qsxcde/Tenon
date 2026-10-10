@@ -38,6 +38,9 @@ uv run pytest -m "not slow" -q                          # 排除慢测试的日�
 uv run pytest -q                                         # 完整离线测试
 uv run pytest tests/session/test_store.py::test_create_and_header
 uv run ruff check src tests scripts                      # 当前 CI 的正确性检查
+uv run ruff format --check src tests scripts             # 当前 CI 的统一格式化门禁
+uv run python scripts/type_scan.py                       # 当前 CI 的类型债务棘轮
+uv run python scripts/scale_scan.py                      # 全生产层规模门禁(也被 contract 测试覆盖)
 uv run pytest -m "unit or contract" -q --cov=codeagent --cov-report=term-missing
 uv build                                                 # 构建发行产物
 openspec validate --specs                                # 验证 OpenSpec 规格说明
@@ -51,7 +54,8 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - `core/` 负责领域模型、协议和核心编排，不直接依赖 `config`、`ai`、`tools`、`session` 或具体基础设施。
 - `session/` 负责会话状态和持久化，不依赖 `ai`、`tools` 或 `config` 的具体实现。
 - `ai/` 负责模型和传输，不把 UI 行为或会话编排塞入提供商实现。
-- `tools/` 负责工具适配，不把工具细节泄漏到核心领域层。
+- `tools/` 负责工具适配，不把工具细节泄漏到核心领域层。`tools/` 不得 import `core/`（由 `tests/test_decoupling.py` 强制），需要 core 契约的桥接只发生在 `app/composition/*`。
+- Subagent 的领域规则（预算与硬上限、深度与配额、准入顺序、终态归因、委派槽位仲裁）位于 `core/subagent/`；子 Session 创建、事件发布与资源收尾等装配留在 `app/composition/subagent/`。应用层不得自行维护第二份预算默认值或上限常量。
 - 配置、领域逻辑、外部适配和展示逻辑必须保持分离；跨层依赖只能沿既定方向流动。
 - 外部依赖应通过接口、协议或工厂注入；核心代码不得为了测试直接绑定真实网络、用户目录或外部进程。
 
@@ -63,10 +67,12 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - 公共函数、类和模块接口必须有清晰的类型注解；复杂类型应使用命名类型、数据类或协议提升可读性。
 - 注释说明设计原因、约束和取舍，不逐行复述代码。
 - 保持模块内聚，避免重复代码、隐式全局状态和无理由的魔法数字。
-- 生产代码文件原则上不超过 300 行；函数原则上不超过 50–80 行。接近或超过规模时，应按职责拆分，而不是继续向原文件追加代码。
-- 若修改后生产文件超过 300 行，应在本次变更中完成拆分，除非有充分理由并在提交说明中注明。生成文件、第三方代码和必要的兼容层可例外处理。
-- 当前 CI 已配置 Ruff，但仅启用 `E9`、`F821` 和 `F841` 等基础正确性检查；Black、完整 Ruff 规则集、mypy 和 pyright 尚未作为现行门禁。接入新工具时必须同步更新 `pyproject.toml`、CI 和本文档。
-- 统一格式化工具确定后，项目只能选择一种主要格式化方案；行宽遵循 `pyproject.toml` 中的配置，目前为 100 个字符。
+- 规模约束是可执行门禁而非口头约定：`scripts/scale_scan.py` 扫描**全部生产层**（`app`/`core`/`session`/`ai`/`tools`）强制单文件 ≤ 300 行、单函数 ≤ 80 行，并由 `tests/contracts/test_scale_limits.py` 纳入 `unit or contract` 门禁。接近上限时必须按职责拆分，而不是继续向原文件追加代码。
+- 规模豁免只允许通过 `scripts/scale_scan.py` 的 `COMPATIBILITY_EXCEPTIONS` 逐项登记文件路径与书面理由；未登记的文件超限会使 CI 失败。生成文件与第三方代码不进入扫描范围。
+- 当前 CI 的正确性检查仍只启用 Ruff `E9`、`F821` 和 `F841`；完整 Ruff 规则集与 pyright 尚未接入门禁。
+- 格式化门禁已确定并接入 CI：唯一方案是 `ruff format`（不引入 Black），行宽遵循 `pyproject.toml`，目前为 100 个字符；提交前运行 `uv run ruff format src tests scripts`，CI 用 `--check` 校验。
+- 类型门禁以 mypy 分层棘轮方式接入：`scripts/type_scan.py` 逐层统计错误数并与 `docs/type-baseline.json` 比较，任何一层回升即失败；债务下降后用 `--update` 固化基线。禁止为通过门禁而放宽 `pyproject.toml` 中的 mypy 配置或扩大基线。
+- 接入更多工具或调整上述任一门禁时，必须同步更新 `pyproject.toml`、CI 和本文档。
 
 ## 错误处理与异步规范
 
@@ -140,7 +146,7 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - 需求行为已实现，且没有改变无关行为。
 - 相关测试已新增或更新，回归测试覆盖了修复场景。
 - 已运行与变更范围匹配的窄测试和分层测试；必要时已运行完整测试。
-- 当前可用的 Ruff 检查、`git diff --check` 和相关构建检查已通过。
+- 当前可用的 Ruff 正确性检查、`uv run ruff format --check src tests scripts`、`uv run python scripts/type_scan.py`（类型棘轮）、`uv run python scripts/scale_scan.py`（规模门禁）、`git diff --check` 和相关构建检查已通过。
 - 相关文档或 OpenSpec 已同步。
 - 没有提交密钥、临时文件、用户数据或无关修改。
 - 最终回复列出修改摘要、验证命令、验证结果和已知限制。

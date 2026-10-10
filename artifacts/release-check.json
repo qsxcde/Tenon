@@ -2,9 +2,9 @@
   "schema_version": 1,
   "status": "passed",
   "project": "codeagent",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "python": "3.12.13",
-  "platform": "darwin",
+  "platform": "win32",
   "checks": {
     "build": "passed",
     "distribution_contents": "passed",
@@ -15,22 +15,22 @@
     {
       "status": "passed",
       "name": "codeagent",
-      "version": "0.4.0",
-      "filename": "codeagent-0.4.0-py3-none-any.whl",
+      "version": "0.5.0",
+      "filename": "codeagent-0.5.0-py3-none-any.whl",
       "format": "wheel",
-      "member_count": 346,
+      "member_count": 393,
       "required_resources": 3,
-      "sha256": "b135b535c6b43c1f6d338a5692b64bd20cc2ca6b57eed7e643585c0505fd560d"
+      "sha256": "e46b64aa073a6b880ce0afa4d9d8079b1d79f52887efce664ba0e9f0c0d4ca1d"
     },
     {
       "status": "passed",
       "name": "codeagent",
-      "version": "0.4.0",
-      "filename": "codeagent-0.4.0.tar.gz",
+      "version": "0.5.0",
+      "filename": "codeagent-0.5.0.tar.gz",
       "format": "sdist",
-      "member_count": 289,
+      "member_count": 334,
       "required_resources": 3,
-      "sha256": "da6305cdc40ab298ebedc7f1d443bc0e2be7b7070dbf1e4f242f8fa6363cb6e5"
+      "sha256": "52a0c6c23dff6feffb7de1cee3850a7d726d0e5df19291906e4205b507afee45"
     }
   ],
   "smoke": {
