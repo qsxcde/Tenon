@@ -9,7 +9,6 @@ import subprocess
 import tomllib
 from pathlib import Path
 
-from ..modes import is_mutating_command
 
 from .models import VerificationCommand, WorkspaceDiff, WorkspaceSnapshot
 

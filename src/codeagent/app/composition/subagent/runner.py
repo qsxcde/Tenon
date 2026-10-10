@@ -36,7 +36,7 @@ from .runner_results import (
     rejected_result,
 )
 from .runner_support import (
-    DEFAULT_CLEANUP_TIMEOUT,
+    DEFAULT_CLEANUP_TIMEOUT_SECONDS,
     cancel_session,
     close_active,
 )
@@ -56,7 +56,7 @@ class SerialSubagentRunner:
         self,
         child_session_factory: ChildSessionFactory,
         *,
-        cleanup_timeout: float = DEFAULT_CLEANUP_TIMEOUT,
+        cleanup_timeout: float = DEFAULT_CLEANUP_TIMEOUT_SECONDS,
     ) -> None:
         if not callable(child_session_factory):
             raise TypeError("child_session_factory must be callable")

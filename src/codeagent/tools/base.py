@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Generic, TypeVar
 
 from pydantic import BaseModel
 

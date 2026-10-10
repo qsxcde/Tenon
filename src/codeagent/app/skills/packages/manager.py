@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import shutil
 import subprocess
 import tempfile

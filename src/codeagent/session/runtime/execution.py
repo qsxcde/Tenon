@@ -8,16 +8,17 @@ from dataclasses import fields, replace
 import inspect
 from typing import Any
 
-from codeagent.core import Agent, AgentContext, ToolDecision
+from codeagent.core import AgentContext, ToolDecision
 from codeagent.core.context.contracts import BeforeToolCall
 from codeagent.core.contracts.events import AgentEvent, EventType
 from codeagent.core.contracts.messages import Message
 from codeagent.core.contracts.ports import ApprovalPolicy
-from codeagent.core.context.contracts import TransformContext
+from codeagent.core.context.contracts import ContextTransformer
 from codeagent.core.orchestration.config import AgentLoopConfig
+from codeagent.session.runtime.host import SessionRuntimeHost
 
 
-class SessionExecutionMixin:
+class SessionExecutionMixin(SessionRuntimeHost):
     """Create and run one core Agent without owning runtime state."""
 
     async def execute(
@@ -29,7 +30,7 @@ class SessionExecutionMixin:
         recursion_limit: int,
         tool_timeout: float | None,
         policy: ApprovalPolicy | None = None,
-        transform_context: TransformContext | None = None,
+        transform_context: ContextTransformer | None = None,
     ) -> list[Message]:
         if self.active_run_id is None:
             raise RuntimeError("run must be started before execution")
@@ -71,7 +72,7 @@ class SessionExecutionMixin:
         run_id: str,
         tool_timeout: float | None,
         policy: ApprovalPolicy | None,
-        transform_context: TransformContext | None,
+        transform_context: ContextTransformer | None,
     ) -> AgentLoopConfig:
         values = {item.name: getattr(config, item.name) for item in fields(AgentLoopConfig)}
         values.update(

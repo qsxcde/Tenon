@@ -18,7 +18,6 @@ __all__ = [
     "ContextPreparer",
     "ContextTransformer",
     "ContextToolDefinition",
-    "TransformContext",
 ]
 
 
@@ -32,10 +31,6 @@ class ContextBudgetPort(Protocol):
     ) -> ContextBudgetSnapshot: ...
 
 
-async def _identity_context(messages: list[Message]) -> list[Message]:
-    return list(messages)
-
-
 class ContextTransformer(Protocol):
     """Provider-neutral transformation applied to one request's messages."""
 
@@ -45,8 +40,6 @@ class ContextTransformer(Protocol):
     ) -> Awaitable[Iterable[Message]] | Iterable[Message]: ...
 
 
-# Compatibility name retained for callers that use the original contract.
-TransformContext = ContextTransformer
 ContextPreparer = Callable[
     ["ContextPreparationRequest"], Awaitable[Iterable[Message]] | Iterable[Message]
 ]

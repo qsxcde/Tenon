@@ -9,7 +9,6 @@ from typing import Any
 
 from codeagent.core.contracts.events import AgentEvent
 from codeagent.core.contracts.hooks import (
-    HookDiagnostic,
     HookFailureStage,
     HookPhase,
     HookScope,

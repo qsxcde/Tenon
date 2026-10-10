@@ -16,7 +16,7 @@ from codeagent.core.context.contracts import (
     BeforeToolCall,
     ContextBudgetPort,
     ContextPreparer,
-    TransformContext,
+    ContextTransformer,
     identity_context,
 )
 from codeagent.core.context.preflight import ContextPreflightConfig
@@ -25,7 +25,7 @@ from codeagent.core.contracts.ports import (
     ModelPort,
     ToolExecutionRuntimePort,
 )
-from codeagent.core.contracts.hooks import LifecycleHook, LifecycleHookEvent
+from codeagent.core.contracts.hooks import LifecycleHook
 
 __all__ = ["AgentLoopConfig"]
 
@@ -36,7 +36,7 @@ class AgentLoopConfig:
 
     model: ModelPort
     tools: list[AgentTool] = field(default_factory=list)
-    transform_context: TransformContext = identity_context
+    transform_context: ContextTransformer = identity_context
     context_preparer: ContextPreparer | None = None
     #: Maximum wait for each request-local context extension invocation.
     context_transform_timeout: float | None = None

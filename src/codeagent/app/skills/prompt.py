@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from .discovery import (
-    SKILL_FILE,
     builtin_skills_dir,
     discover_skills_in,
     package_records,

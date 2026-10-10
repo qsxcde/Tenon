@@ -19,8 +19,8 @@ from .state.model import TuiModel
 from .presentation.status import FooterInfo
 from .rendering.coordinator import TuiEventBuffer, TuiRenderCoordinator
 from .commands.interaction import (
+    _SUGGESTION_WINDOW as _SUGGESTION_WINDOW,
     TuiInteractionCoordinator,
-    _SUGGESTION_WINDOW,
 )
 from .session.coordinator import TuiSessionCoordinator
 from .session.conversation import TuiConversationCoordinator

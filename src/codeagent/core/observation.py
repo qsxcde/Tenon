@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import Any
+from typing import Any, cast
 
 from codeagent.core.contracts.events import AgentEvent
 from codeagent.core.contracts.hooks import (
     HookDiagnostic,
     HookFailureStage,
+    HookPhase,
+    HookScope,
     LifecycleHook,
     LifecycleHookEvent,
     classify_core_event,

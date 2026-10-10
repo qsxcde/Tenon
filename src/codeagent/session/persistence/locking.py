@@ -13,6 +13,7 @@ import os
 import threading
 import time
 from pathlib import Path
+from typing import Any, cast
 
 _path_locks: dict[str, "PathLock"] = {}
 _guard = threading.Lock()

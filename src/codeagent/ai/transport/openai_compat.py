@@ -10,9 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import copy
-import json
-import uuid
-from typing import Any, AsyncIterator
+from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
@@ -22,7 +20,6 @@ from codeagent.ai.errors import classify_provider_error
 from codeagent.ai.model.types import (
     ChatMessage,
     ChatResponse,
-    StreamEvent,
     ToolCall,
     ToolDefinition,
 )
@@ -180,11 +177,6 @@ class OpenAICompatClient(OpenAICompatStreamingMixin):
         return body
 
     # -- 调用 --------------------------------------------------------------
-
-    @staticmethod
-    def _is_retryable(exc: Exception) -> bool:
-        """429 / 5xx / 传输层错误可重试;4xx(除 429)不重试。"""
-        return classify_provider_error(exc).retryable
 
     async def generate(
         self,

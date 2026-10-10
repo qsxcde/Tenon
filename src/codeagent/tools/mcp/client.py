@@ -26,6 +26,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 from codeagent.tools.mcp.content import McpCallResult, McpToolInfo, extract_result
+from codeagent.tools.mcp.server_config import McpServerSpec
 
 __all__ = ["McpServerClient"]
 

@@ -19,12 +19,11 @@ from codeagent.core.orchestration.loop import run_agent_loop
 from codeagent.core.orchestration.config import AgentLoopConfig
 
 
-def test_context_transformer_contract_is_explicit_and_compatibly_exported():
+def test_context_transformer_contract_is_explicit_and_publicly_exported():
     from codeagent.core import ContextTransformer as PublicContextTransformer
-    from codeagent.core.context.contracts import ContextTransformer, TransformContext
+    from codeagent.core.context.contracts import ContextTransformer
 
     assert getattr(ContextTransformer, "_is_protocol", False) is True
-    assert TransformContext is ContextTransformer
     assert PublicContextTransformer is ContextTransformer
 
 

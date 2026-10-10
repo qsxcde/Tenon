@@ -16,7 +16,7 @@ MCP 工具进入 Agent Runtime 前还会经过
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict
 

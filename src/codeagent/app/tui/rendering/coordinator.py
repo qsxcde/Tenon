@@ -8,7 +8,7 @@ from collections.abc import Callable
 
 from ..ports.backend import TuiBackend
 from ..state.model import TuiModel
-from .event_buffer import TuiEventBuffer
+from .event_buffer import TuiEventBuffer as TuiEventBuffer
 from .scheduler import FrameScheduler, ResizeDebouncer
 from .status_timer import StatusTimer
 

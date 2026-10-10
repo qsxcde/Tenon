@@ -52,10 +52,6 @@ class RuntimeEventMixin:
         linked_parent = event.parent_run_id or metadata.get("parent_run_id")
         return str(linked_parent or "") == str(parent_run_id)
 
-    @staticmethod
-    def _map_agent_event(event: AgentEvent) -> list[AgentEvent]:
-        return EventMapper.map_agent_event(event)
-
     def observe_event(self, event: AgentEvent) -> None:
         self._side_effects.observe(event)
         self._advance_phase(event)

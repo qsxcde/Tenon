@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess
 from typing import Any
 
 __all__ = ["PosixProcessBackend"]

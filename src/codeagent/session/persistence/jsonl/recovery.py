@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from codeagent.session.persistence.codec import CURRENT_VERSION, _dict_to_message
 from codeagent.session.persistence.models import (
     RecoveryDiagnostic,
     SessionRecoveryReport,

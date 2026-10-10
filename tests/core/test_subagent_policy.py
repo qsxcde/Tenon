@@ -165,4 +165,7 @@ def test_application_layer_delegates_limits_and_cleanup_to_core_policy() -> None
     assert app_budget.effective_budget(SubagentBudget()) == resolve_budget(SubagentBudget())
     assert app_budget.MAX_MAX_TURNS is core_policy.MAX_MAX_TURNS
     assert app_budget.DEFAULT_MAX_CHILDREN_PER_RUN == core_policy.DEFAULT_MAX_CHILDREN_PER_RUN
-    assert runner_support.DEFAULT_CLEANUP_TIMEOUT == (core_policy.DEFAULT_CLEANUP_TIMEOUT_SECONDS)
+    assert (
+        runner_support.DEFAULT_CLEANUP_TIMEOUT_SECONDS
+        is core_policy.DEFAULT_CLEANUP_TIMEOUT_SECONDS
+    )

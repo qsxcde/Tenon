@@ -7,14 +7,14 @@ from collections.abc import Callable, Iterable
 from dataclasses import is_dataclass
 from typing import Any
 
-from codeagent.core.contracts.hooks import LifecycleHook, LifecycleHookEvent
+from codeagent.core.contracts.hooks import LifecycleHook, LifecycleHookEvent as LifecycleHookEvent
 from codeagent.core.contracts.ports import AgentTool, ApprovalPolicy
 from codeagent.core.orchestration.config import AgentLoopConfig
 from codeagent.session.compaction.summarizer import Summarizer
 from codeagent.session.compaction import CompactionPolicyConfig
 from codeagent.session.constants import DEFAULT_CONTEXT_WINDOW
 from codeagent.session.contracts import SessionCloser
-from codeagent.session.events.bus import EventBus, Subscriber
+from codeagent.session.events.bus import Subscriber
 from codeagent.session.manager.archive import SessionManagerArchiveOperations
 from codeagent.session.manager.operations import SessionManagerOperations
 from codeagent.session.manager.registry import SessionManagerRegistry

@@ -11,9 +11,7 @@ from codeagent.ai.model.types import ChatMessage
 
 from . import budget as _model_budget
 from .budget import (
-    DEFAULT_MODEL_CONTEXT_WINDOW,
-    DEFAULT_OUTPUT_RESERVE,
-    DEFAULT_RESERVE_TOKENS,
+    DEFAULT_RESERVE_TOKENS as DEFAULT_RESERVE_TOKENS,
     ModelBudgetMetadata,
     fit_budget_reserves as _fit_budget_reserves,
 )

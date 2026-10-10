@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import threading
 from collections.abc import Awaitable
-from typing import Any
 
 from codeagent.core.contracts.events import AgentEvent, EventType
 from codeagent.core.contracts.ports import ApprovalPolicy

@@ -6,7 +6,6 @@ from typing import Any
 
 from codeagent.core.contracts.messages import ToolExecutionStatus, ToolResult
 from codeagent.core.contracts.subagents import (
-    SubagentReasonCode,
     SubagentResult,
     SubagentStatus,
 )

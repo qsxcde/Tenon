@@ -6,23 +6,19 @@ import time
 from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import replace
-from typing import Any
 
 from ..presentation.blocks import (
     ActivityBlock,
     AssistantBlock,
-    CancelledBlock,
-    ErrorBlock,
     ToolCallBlock,
     UserBlock,
 )
 from .model_events import ModelEventMixin
 from .model_history import ModelHistoryMixin
 from ..presentation.primitives import RichLine, _visible_user_content
-from .runtime import RuntimePhase, RuntimeReducer, RuntimeSnapshot
+from .runtime import RuntimeReducer, RuntimeSnapshot
 from ..presentation.status import StatusBar
 from .transcript import Transcript
-from codeagent.core.contracts.events import AgentEvent
 from codeagent.core.context.diagnostics import ContextDiagnostics
 
 _PROGRESSIVE_BLOCK_THRESHOLD = 32

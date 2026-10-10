@@ -9,14 +9,14 @@ from dataclasses import is_dataclass, replace
 from typing import Any
 
 from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.core.context.contracts import TransformContext
+from codeagent.core.context.contracts import ContextTransformer
 from codeagent.core.context.diagnostics import ContextDiagnostics
 from codeagent.core.context.preflight import ContextPreflightResult
 from codeagent.core.contracts.events import AgentEvent
 from codeagent.core.contracts.hooks import (
     HookDiagnostic,
     LifecycleHook,
-    LifecycleHookEvent,
+    LifecycleHookEvent as LifecycleHookEvent,
 )
 from codeagent.core.contracts.ports import ApprovalPolicy
 from codeagent.core.contracts.messages import Message
@@ -72,7 +72,7 @@ class AgentSession(
         defer_persistence: bool = False,
         persistence_options: dict[str, Any] | None = None,
         runtime_closer: SessionCloser | None = None,
-        transform_context: TransformContext | None = None,
+        transform_context: ContextTransformer | None = None,
         policy: ApprovalPolicy | None = None,
         lifecycle_hooks: tuple[LifecycleHook, ...] | None = None,
     ) -> None:

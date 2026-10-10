@@ -14,7 +14,6 @@ from codeagent.core.subagent.policy import (
 
 _MAX_DIAGNOSTIC_CHARS = DIAGNOSTIC_LIMITS.max_chars
 _MAX_DIAGNOSTICS = DIAGNOSTIC_LIMITS.max_items
-DEFAULT_CLEANUP_TIMEOUT = DEFAULT_CLEANUP_TIMEOUT_SECONDS
 
 
 async def observe_event(result: Any, active: Any) -> None:
@@ -166,7 +165,7 @@ def mark_cleanup_uncertain(active: Any, prefix: str, error: Exception | None) ->
 
 def _cleanup_timeout(active: Any, timeout: float | None) -> float:
     value = timeout if timeout is not None else getattr(active, "cleanup_timeout", None)
-    return max(0.001, float(value if value is not None else DEFAULT_CLEANUP_TIMEOUT))
+    return max(0.001, float(value if value is not None else DEFAULT_CLEANUP_TIMEOUT_SECONDS))
 
 
 def _remaining(deadline: float) -> float:

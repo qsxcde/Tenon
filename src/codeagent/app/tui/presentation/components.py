@@ -16,16 +16,6 @@ from .primitives import (
     Component,
     RichLine,
     Span,
-    _cell_width,
-    _format_token_count,
-    _plain,
-    _seg,
-    _truncate,
-    _truncate_spans,
-    _visible_user_content,
-    _wrap,
-    _wrap_rich,
-    rich_to_plain,
 )
 from ..state.runtime import RuntimePhase, RuntimeReducer, RuntimeSnapshot
 from .status import FooterInfo, StatusBar

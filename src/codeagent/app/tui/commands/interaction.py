@@ -6,7 +6,7 @@ from .dispatch import TuiCommandDispatcher
 from .parser import Command, Literal, UnknownCommand, default_registry, parse
 from .fuzzy import fuzzy_rank
 from ..presentation.primitives import Span
-from ..presentation.theme import ACCENT, DIM, ERROR, SUCCESS, WARNING
+from ..presentation.theme import ACCENT, DIM, SUCCESS
 
 
 _COMMANDS = default_registry()

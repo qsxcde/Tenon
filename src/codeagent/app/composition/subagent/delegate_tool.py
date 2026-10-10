@@ -14,9 +14,7 @@ from codeagent.core.contracts.subagents import (
     SubagentContextItem,
     SubagentReasonCode,
     SubagentRequest,
-    SubagentResult,
     SubagentRunner,
-    SubagentStatus,
 )
 
 from .context import (

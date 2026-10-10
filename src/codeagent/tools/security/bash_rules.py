@@ -6,7 +6,6 @@ import re
 from pathlib import Path
 
 from codeagent.tools.security.shell_parse import (
-    split_segments,
     tokenize_shell,
 )
 

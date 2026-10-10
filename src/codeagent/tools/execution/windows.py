@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import subprocess
-from typing import Any
+from typing import Any, cast
 
 __all__ = ["WindowsProcessBackend"]
 

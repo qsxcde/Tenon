@@ -16,7 +16,7 @@ from codeagent.core.contracts.subagents import (
 )
 
 from .budget import EffectiveSubagentBudget
-from .runner_support import DEFAULT_CLEANUP_TIMEOUT
+from .runner_support import DEFAULT_CLEANUP_TIMEOUT_SECONDS
 
 
 @dataclass
@@ -36,7 +36,7 @@ class ActiveDelegation:
     event_tasks: set[asyncio.Task[Any]] = field(default_factory=set)
     diagnostics: list[str] = field(default_factory=list)
     budget: EffectiveSubagentBudget | None = None
-    cleanup_timeout: float = DEFAULT_CLEANUP_TIMEOUT
+    cleanup_timeout: float = DEFAULT_CLEANUP_TIMEOUT_SECONDS
     cleanup_uncertain: bool = False
     cleanup_error: str | None = None
     budget_detail: str | None = None

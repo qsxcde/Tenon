@@ -6,7 +6,6 @@ import asyncio
 import inspect
 from typing import Any
 
-from codeagent.ai.model.types import ToolDefinition
 from codeagent.app.errors.reporting import report_unexpected_error
 from codeagent.core.contracts.messages import (
     OutputCompleteness,

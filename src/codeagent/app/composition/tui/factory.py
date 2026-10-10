@@ -8,7 +8,6 @@ from typing import Any
 from codeagent.core.context.preflight import ContextPreflightConfig
 from codeagent.tools.shared import ToolResourceLimits
 
-from ..model import selection as model_selection
 from ..prompts import _workspace, agents_sources, skills_view
 from ..runtime.factory import close_runtime_for_config
 from ..runtime.extensions import RuntimeExtensions

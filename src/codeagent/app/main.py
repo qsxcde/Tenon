@@ -9,7 +9,7 @@ from pathlib import Path
 
 from codeagent.app import container
 from codeagent.app.headless import (
-    _format_usage_line,
+    _format_usage_line as _format_usage_line,
     _headless_loop,
     _headless_once,
     _print_context_diagnostics,

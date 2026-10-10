@@ -7,7 +7,6 @@ import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Protocol
 
 from codeagent.tools.execution.posix import PosixProcessBackend

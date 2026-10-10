@@ -18,8 +18,8 @@ from codeagent.tools.mcp.adapter import McpArgs, McpTool
 from codeagent.tools.mcp.budget import apply_budget, truncate_description
 from codeagent.tools.mcp.client import McpServerClient
 from codeagent.tools.mcp.content import McpToolInfo
-from codeagent.tools.mcp.config import McpServerSpec, parse_mcp_config
 from codeagent.tools.mcp.loader import close_mcp_tools, load_mcp_tools
+from codeagent.tools.mcp.server_config import McpServerSpec, parse_mcp_config
 
 MOCK_SERVER = str(Path(__file__).parent / "mock_server.py")
 
@@ -325,7 +325,7 @@ def test_permissions_parse_from_config(tmp_path):
         ),
         encoding="utf-8",
     )
-    from codeagent.tools.mcp.config import parse_mcp_permissions
+    from codeagent.tools.mcp.permissions import parse_mcp_permissions
 
     rules = parse_mcp_permissions(tmp_path)
     assert "mcp__db" in rules.deny
@@ -339,7 +339,7 @@ def test_permissions_missing_config_empty():
     """无配置文件 → 空规则(默认全部放行)。"""
     import tempfile
 
-    from codeagent.tools.mcp.config import parse_mcp_permissions
+    from codeagent.tools.mcp.permissions import parse_mcp_permissions
 
     with tempfile.TemporaryDirectory() as td:
         rules = parse_mcp_permissions(td)
@@ -350,7 +350,7 @@ def test_permissions_missing_config_empty():
 def test_classify_mcp_rules():
     """安全分类器:deny/ask 命中;未命中与无规则 → 默认放行。"""
     from codeagent.tools.security import classify_mcp
-    from codeagent.tools.mcp.config import McpPermissionRules
+    from codeagent.tools.mcp.permissions import McpPermissionRules
 
     rules = McpPermissionRules(deny=("mcp__db",), ask=("mcp__github",))
     denied = classify_mcp("mcp__db__query", rules)

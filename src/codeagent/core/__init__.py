@@ -27,7 +27,6 @@ from codeagent.core.context.contracts import (
     ContextPreparer,
     ContextTransformer,
     ContextToolDefinition,
-    TransformContext,
 )
 from codeagent.core.agent import Agent
 from codeagent.core.contracts.errors import (
@@ -128,7 +127,6 @@ __all__ = [
     "ContextPreparationRequest",
     "ContextPreparer",
     "ContextTransformer",
-    "TransformContext",
     "ContextPreparationError",
     "ContextPreflightConfig",
     "ContextPreflightError",

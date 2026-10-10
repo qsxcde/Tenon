@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 from typing import Any, Literal, Protocol

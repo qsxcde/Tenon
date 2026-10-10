@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypeVar
 
 from codeagent.core.contracts.errors import SubagentContractError
 
