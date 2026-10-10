@@ -24,6 +24,8 @@ REQUIRED_RESOURCES = (
     "codeagent/resources/skills/dependency-audit/SKILL.md",
 )
 SENSITIVE_NAMES = {".env", ".envrc", "credentials.json", "secrets.json"}
+
+
 class PackageInspectionError(RuntimeError):
     """Raised when a distribution is not safe or complete enough to publish."""
 
@@ -35,8 +37,10 @@ def _normalise_name(value: str) -> str:
 def _is_sensitive(member: str) -> bool:
     parts = {part.lower() for part in Path(member).parts}
     basename = Path(member).name.lower()
-    return bool(parts & SENSITIVE_NAMES) or basename in SENSITIVE_NAMES or basename.endswith(
-        (".pem", ".key")
+    return (
+        bool(parts & SENSITIVE_NAMES)
+        or basename in SENSITIVE_NAMES
+        or basename.endswith((".pem", ".key"))
     )
 
 
@@ -126,7 +130,9 @@ def inspect_distribution(
     }
 
 
-def _run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+def _run(
+    command: list[str], *, cwd: Path, env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
         cwd=cwd,
@@ -196,7 +202,12 @@ def run_release_check(*, root: Path, dist_dir: Path, report_path: Path) -> dict[
         for key in ("DEEPSEEK_API_KEY", "OPENAI_API_KEY", "PYTHONPATH"):
             smoke_environment.pop(key, None)
         smoke = _run(
-            [str(python), str(root / "scripts" / "package_smoke.py"), "--output", str(smoke_result_path)],
+            [
+                str(python),
+                str(root / "scripts" / "package_smoke.py"),
+                "--output",
+                str(smoke_result_path),
+            ],
             cwd=temporary_root,
             env=smoke_environment,
         )
@@ -235,7 +246,9 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     root = Path(__file__).resolve().parents[1]
     try:
-        report = run_release_check(root=root, dist_dir=args.dist_dir.resolve(), report_path=args.output.resolve())
+        report = run_release_check(
+            root=root, dist_dir=args.dist_dir.resolve(), report_path=args.output.resolve()
+        )
     except (
         OSError,
         RuntimeError,
@@ -246,10 +259,14 @@ def main(argv: list[str] | None = None) -> int:
     ) as exc:
         report = {"schema_version": 1, "status": "failed", "error": str(exc)}
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        args.output.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 1
-    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 

@@ -50,8 +50,7 @@ def _validate(reports: list[dict[str, Any]]) -> tuple[str, dict[str, Any], dict[
         scenario = report.get("scenario")
         if scenario not in REQUIRED_SCENARIOS or scenario in scenarios:
             raise ValueError(
-                "reports must contain one of each required scenario, "
-                f"got {scenario!r}"
+                f"reports must contain one of each required scenario, got {scenario!r}"
             )
         if report.get("schema_version") != SCHEMA_VERSION:
             raise ValueError(f"{scenario}: schema_version must be {SCHEMA_VERSION}")
@@ -88,10 +87,14 @@ def _validate(reports: list[dict[str, Any]]) -> tuple[str, dict[str, Any], dict[
     assert first_parameters is not None
     assert first_environment is not None
     assert first_commit is not None
-    return first_commit, first_parameters, {
-        "environment": first_environment,
-        "scenarios": scenarios,
-    }
+    return (
+        first_commit,
+        first_parameters,
+        {
+            "environment": first_environment,
+            "scenarios": scenarios,
+        },
+    )
 
 
 def _parser() -> argparse.ArgumentParser:

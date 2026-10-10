@@ -13,7 +13,9 @@ def _load(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"invalid benchmark payload: {path}")
-    if not isinstance(payload.get("metrics"), dict) and not isinstance(payload.get("scenarios"), dict):
+    if not isinstance(payload.get("metrics"), dict) and not isinstance(
+        payload.get("scenarios"), dict
+    ):
         raise ValueError(f"invalid benchmark payload: {path}")
     return payload
 
@@ -41,11 +43,19 @@ def _compatibility_reason(current: dict[str, Any], baseline: dict[str, Any]) -> 
     for key in ("os", "python_major_minor"):
         current_value = current_env.get(key)
         baseline_value = baseline_env.get(key)
-        if current_value is not None and baseline_value is not None and current_value != baseline_value:
+        if (
+            current_value is not None
+            and baseline_value is not None
+            and current_value != baseline_value
+        ):
             return f"environment.{key} differs"
     current_viewport = current.get("environment", {}).get("viewport")
     baseline_viewport = baseline.get("environment", {}).get("viewport")
-    if current_viewport is not None and baseline_viewport is not None and current_viewport != baseline_viewport:
+    if (
+        current_viewport is not None
+        and baseline_viewport is not None
+        and current_viewport != baseline_viewport
+    ):
         return "environment.viewport differs"
     return None
 
@@ -80,7 +90,9 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _comparison(current: dict[str, Any], baseline: dict[str, Any], limit: float) -> list[dict[str, Any]]:
+def _comparison(
+    current: dict[str, Any], baseline: dict[str, Any], limit: float
+) -> list[dict[str, Any]]:
     changes: list[dict[str, Any]] = []
     current_metrics = current["metrics"]
     baseline_metrics = baseline["metrics"]

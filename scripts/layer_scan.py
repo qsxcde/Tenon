@@ -104,9 +104,9 @@ def main() -> int:
     print("-" * len(header))
     for f in LAYERS + ("other",):
         row = edges.get(f, {})
-        cells = "".join(
-            f"{(row.get(t) or '.'):>11}" for t in LAYERS
-        ) + f"{(row.get('root') or '.'):>8}"
+        cells = (
+            "".join(f"{(row.get(t) or '.'):>11}" for t in LAYERS) + f"{(row.get('root') or '.'):>8}"
+        )
         print(f"{f:<8}{cells}")
 
     print()
@@ -116,13 +116,64 @@ def main() -> int:
     for f in LAYERS:
         pkgs = sorted(external.get(f, ()))
         std = {
-            "__future__", "abc", "asyncio", "collections", "contextlib", "copy", "dataclasses",
-            "datetime", "enum", "functools", "hashlib", "importlib", "inspect", "io", "itertools",
-            "json", "logging", "math", "os", "pathlib", "re", "shlex", "string", "sys", "textwrap",
-            "threading", "time", "traceback", "types", "typing", "unicodedata", "uuid", "warnings",
-            "weakref", "tempfile", "subprocess", "shutil", "platform", "socket", "base64", "secrets",
-            "urllib", "html", "difflib", "glob", "fnmatch", "posixpath", "ntpath", "random", "struct",
-            "zoneinfo", "contextvars", "signal", "stat", "errno", "binascii", "codecs", "decimal",
+            "__future__",
+            "abc",
+            "asyncio",
+            "collections",
+            "contextlib",
+            "copy",
+            "dataclasses",
+            "datetime",
+            "enum",
+            "functools",
+            "hashlib",
+            "importlib",
+            "inspect",
+            "io",
+            "itertools",
+            "json",
+            "logging",
+            "math",
+            "os",
+            "pathlib",
+            "re",
+            "shlex",
+            "string",
+            "sys",
+            "textwrap",
+            "threading",
+            "time",
+            "traceback",
+            "types",
+            "typing",
+            "unicodedata",
+            "uuid",
+            "warnings",
+            "weakref",
+            "tempfile",
+            "subprocess",
+            "shutil",
+            "platform",
+            "socket",
+            "base64",
+            "secrets",
+            "urllib",
+            "html",
+            "difflib",
+            "glob",
+            "fnmatch",
+            "posixpath",
+            "ntpath",
+            "random",
+            "struct",
+            "zoneinfo",
+            "contextvars",
+            "signal",
+            "stat",
+            "errno",
+            "binascii",
+            "codecs",
+            "decimal",
         }
         third = [p for p in pkgs if p not in std]
         print(f"\n{f}: 共 {len(pkgs)} 个顶层包")
