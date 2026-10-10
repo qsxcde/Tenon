@@ -2,9 +2,9 @@
 
 基于**自研编排**(2026-08-14 起,已弃用 langgraph/langchain)的编程 Agent,采用 Pi-Agent 的设计哲学(三层协作 / 双层 loop / 事件驱动 / 会话即状态),配合端口-适配器(hexagonal)做横切解耦。
 
-当前 **v0.4.0 已发布并固定基线**：V4-01～V4-38 已覆盖 Runtime 可靠性、上下文治理、TUI 交互、会话管理、生命周期 Hook、工具与 Provider 稳定性。发布包版本为 `0.4.0`，发布说明已固定，annotated `v0.4.0` 标签指向纯 v0.4 提交 `b981534`；当前 `main` 已进入 v0.5 Subagent 开发。模型配置层(`ai/`)、自研 Agent 编排(`core/`)、工具层(`tools/`)、会话层(`session/`)与终端交互层(`app/tui/`)均可用；CLI 可对话、可调用 8 个内建工具与按配置加载的 MCP 工具，事件流可订阅，会话可恢复 / 切换 / 压缩 / 分叉 / 树形导航。
+当前 **v0.5.0 已完成并固定基线**：V4-01～V4-38 覆盖 Runtime 可靠性、上下文治理、TUI 交互、会话管理、生命周期 Hook、工具与 Provider 稳定性；V5-00～V5-10 在此之上引入串行只读 Subagent 委派（`delegate` 工具、`explore` / `review` profile registry、有界预算与取消治理、结构化结果与证据回传、父子事件诊断、父会话有界运行记录与 TUI / headless 可观察性）。发布包版本为 `0.5.0`；历史 annotated `v0.4.0` 标签仍指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。模型配置层(`ai/`)、自研 Agent 编排(`core/`)、工具层(`tools/`)、会话层(`session/`)与终端交互层(`app/tui/`)均可用；CLI 可对话、可调用 8 个内建工具与按配置加载的 MCP 工具，可把只读子任务委派给子 Agent，事件流可订阅，会话可恢复 / 切换 / 压缩 / 分叉 / 树形导航。
 
-当前验收基线（2026-08-30）：`uv run pytest -q` **1532 passed**（macOS，35.50s）；快速质量集为 **1391 passed，141 deselected**，覆盖率 **83.61%**。`openspec validate --specs` 为 **20/20**，release check 已固化 wheel/sdist、干净安装、资源和 fake provider CLI 检查；仓库内 `docs/benchmarks/tui-baseline.json` 仍是 schema v1 历史基线，schema v2 候选基线由 CI 生成并经人工复核后再更新。TUI 硬上限和相对回归判定见 [`docs/benchmarks/tui-performance-policy.md`](docs/benchmarks/tui-performance-policy.md)。Ruff 首阶段只检查阻塞级正确性问题，不把历史风格债务混入本次变更。
+当前验收基线（2026-10-10，Windows / Python 3.12 复核）：`uv run pytest -q` **1673 passed，3 skipped**（1676 collected）；快速质量集（unit/contract）为 **1503 passed，3 skipped，170 deselected**，覆盖率 **84.29%**（覆盖率硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 **212 passed**。`openspec validate --specs` 为 **24/24**，release check 已固化 wheel/sdist、干净安装、资源和 fake provider CLI 检查并在本地以 `0.5.0` 复跑通过；上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 `docs/benchmarks/tui-baseline.json` 仍是 schema v1 历史基线，schema v2 候选基线由 CI 生成并经人工复核后再更新。TUI 硬上限和相对回归判定见 [`docs/benchmarks/tui-performance-policy.md`](docs/benchmarks/tui-performance-policy.md)。Ruff 首阶段只检查阻塞级正确性问题（`E9` / `F821` / `F841`），不把历史风格债务混入本次变更。
 
 ## 项目介绍
 
@@ -15,9 +15,9 @@
 - **可感知**:会话运行过程以事件流对外暴露,CLI、TUI、测试和 CI 都能订阅,而不是只拿一个最终返回值。
 - **可测试**:核心编排层零网络、零密钥即可运行(注入 `FakeClient` 离线假模型)。
 
-设计参考:[earendil-works/pi](https://github.com/earendil-works/pi) 的"三层协作 / 双层 loop / 事件驱动 / 会话即状态"思想。架构设计见 [`docs/design/architecture.md`](docs/design/architecture.md),需求基线见 [`docs/design/requirements-analysis.md`](docs/design/requirements-analysis.md),迭代记录见 [`docs/iteration/v0.1.md`](docs/iteration/v0.1.md) / [`v0.2.md`](docs/iteration/v0.2.md) / [`v0.3.md`](docs/iteration/v0.3.md) / [`v0.4.md`](docs/iteration/v0.4.md)。
+设计参考:[earendil-works/pi](https://github.com/earendil-works/pi) 的"三层协作 / 双层 loop / 事件驱动 / 会话即状态"思想。架构设计见 [`docs/design/architecture.md`](docs/design/architecture.md),需求基线见 [`docs/design/requirements-analysis.md`](docs/design/requirements-analysis.md),迭代记录见 [`docs/iteration/v0.1.md`](docs/iteration/v0.1.md) / [`v0.2.md`](docs/iteration/v0.2.md) / [`v0.3.md`](docs/iteration/v0.3.md) / [`v0.4.md`](docs/iteration/v0.4.md) / [`v0.5.md`](docs/iteration/v0.5.md)。
 
-### 当前能力(v0.4.0 已发布)
+### 当前能力(v0.5.0)
 
 - **交互式 TUI**(`--tui` 进入):Codex 风格终端界面——无边框多行 composer(Enter 提交 / Shift+Enter 换行,1~4 行自动增高)、全宽用户消息块、圆点前缀的流式 Agent 正文、隐藏原始思维链与低频"思考中"提示、人类可读的工具摘要及可展开 edit/write 意图差异、model/effort/cwd 状态栏、斜杠命令体系(含 `/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/sessions` `/sessions search` `/sessions filter` `/sessions archive` `/sessions archived` `/sessions recovery` `/sessions delete ... confirm` `/tree` `/tools` `/status` `/quit`)与模糊补全 / 选择器、Markdown 渲染、Esc 运行中打断 / 空闲退出并打印完整文档。
 - **Headless CLI**(默认形态):`--prompt` 一次性输入或 stdin 逐行读取,事件聚合输出最终回复。
@@ -27,6 +27,7 @@
 - **模型配置层**:每 provider 一个文件(配置 + 工厂自包含),内置模型目录 + `models.json` 按 id upsert 合并,支持思考强度(`model:effort`)与运行时热切换(/provider /model /effort /login)。
 - **工具层(hexagonal)**:`AtomicTool` 无状态基类 + `FsOps` 文件系统抽象缝 + cwd 注入;read / write / edit / bash / grep / find / ls / skill 八个内建工具;MCP 客户端可按用户配置接入 `tools/list` / `tools/call` 工具，并以 `mcp__<server>__<tool>` 命名空间化和分组预算控制提示词膨胀。
 - **Skills 技能系统**:SKILL.md 格式 + 三源发现(内建 / 个人 / 项目)+ 渐进式披露(描述入 system prompt,**正文经 `skill` 工具按需获取**);`/skills` 手动加载。
+- **Subagent 委派(v0.5 起)**:`delegate` 工具把只读子任务委派给独立子 Agent——串行执行、`explore` / `review` 两种 profile、工具白名单为 `read` / `grep` / `find` / `ls` / `skill`,默认预算 `max_turns=8` / `max_tool_calls=32` / `timeout 120s` / 输出 8000 字符,单次父运行最多 4 个子任务且不可递归委派;子 Agent 只接收显式传递的上下文,父级收回有界摘要与结构化证据而非完整 transcript,委派事实以有界 `subagent` 运行记录落库,进程重启后非终态记录转为 `abandoned`。
 - **用量透明**:归一并累计输入 / 输出 / 推理 / 缓存命中 token；`/status` 与 headless CLI 展示会话或本轮用量（不估算费用）。
 - **离线可测**:`fake` provider + `FakeClient`,无需网络与密钥即可跑通全部测试；测试分层和 CI 命令见 [`docs/testing.md`](docs/testing.md)。
 
@@ -144,7 +145,7 @@ codeagent/
 ├── AGENTS.md                    # Agent 工作指南(当前树的权威快速参考)
 ├── docs/
 │   ├── design/                  # 需求分析 / 架构设计 / 自研蓝图
-│   ├── iteration/               # v0.1 / v0.2 / v0.3 / v0.4 迭代记录(权威)
+│   ├── iteration/               # v0.1 / v0.2 / v0.3 / v0.4 / v0.5 迭代记录(权威)
 │   ├── testing.md               # 测试分层、CI、覆盖率和安装冒烟
 │   └── benchmarks/              # TUI 性能观测、边界策略、历史基线与优化记录
 ├── openspec/                    # OpenSpec 规格与归档变更
@@ -194,7 +195,7 @@ codeagent/
     │
     └── resources/               # [资源层] 内建 skills / prompts（Skills 已启用）
 
-tests/                          # 按行为域分包，1532 passed（2026-08-30）
+tests/                          # 按行为域分包，1673 passed，3 skipped（2026-10-10）
 ├── conftest.py / fixtures/     #   marker、隔离环境和共享离线夹具
 ├── contracts/                  #   跨实现公共契约与分层边界
 ├── ai/ / core/ / mcp/          #   模型、编排和 MCP 行为
@@ -211,9 +212,9 @@ tests/                          # 按行为域分包，1532 passed（2026-08-30�
 
 ## 当前状态与后续
 
-v0.4.0 功能范围已完成实现，详见 [`docs/iteration/v0.4.md`](docs/iteration/v0.4.md)；发布包版本为 `0.4.0`，发布说明已固定，annotated `v0.4.0` 标签已指向 `b981534`。当前 `main` 已进入 v0.5 Subagent 开发；费用估算、Web / HTTP 事件订阅、轻量记忆、插件系统和自动化任务仍不属于 v0.4.0。
+v0.5.0 的 V5-00～V5-10 已完成实现、验收与归档，详见 [`docs/iteration/v0.5.md`](docs/iteration/v0.5.md)；发布包版本已升为 `0.5.0`，CHANGELOG 已补齐 v0.5 使用者条目，历史 annotated `v0.4.0` 标签仍指向 `b981534`，`v0.5.0` 标签由发布流程创建。费用估算、Web / HTTP 事件订阅、轻量记忆、插件系统和自动化任务仍不属于当前范围。
 
-工程后续优先级是完成 v0.5 Subagent MVP、持续维护质量证据和审查 TUI schema v2 基线候选。ContextTransformer、生命周期 Hook、工具资源保护、Provider 错误分类和模型能力诊断契约均已落地；性能报告在正式 Linux/Python 3.12 v2 基线提交前保持非阻塞，但 TUI 帧和控制事件硬上限必须持续满足。
+v0.5 交付的是**串行、只读**的 Subagent MVP。后续版本再评估的能力包括并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆与自动任务调度；`tester` profile 与子 Agent 命令执行同样属于后续独立变更。工程侧后续优先级是把类型检查与统一格式化接入 CI（当前 Ruff 仅启用 `E9` / `F821` / `F841` 阻塞级正确性检查），并持续审查 TUI schema v2 基线候选。ContextTransformer、生命周期 Hook、工具资源保护、Provider 错误分类和模型能力诊断契约均已落地；性能报告在正式 Linux/Python 3.12 v2 基线提交前保持非阻塞，但 TUI 帧和控制事件硬上限必须持续满足。
 
 ## 参考
 
