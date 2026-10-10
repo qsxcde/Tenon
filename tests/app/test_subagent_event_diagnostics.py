@@ -100,7 +100,9 @@ class _EventChild:
             payload=payload,
             session_id=self.session_id,
             run_id=self.active_run_id,
-            metadata={"sequence": self._sequence, "phase": phase} if phase else {"sequence": self._sequence},
+            metadata={"sequence": self._sequence, "phase": phase}
+            if phase
+            else {"sequence": self._sequence},
             phase=phase,
             tool_name=tool_name,
         )
@@ -180,6 +182,7 @@ async def test_runner_isolates_async_observer_failure_and_ignores_late_child_eve
             raise RuntimeError("observer failed")
 
     events: list[AgentEvent] = []
+
     async def on_event(event: AgentEvent) -> None:
         events.append(event)
         await observer(event)
@@ -210,7 +213,9 @@ async def test_runner_emits_one_cancelled_terminal_with_cleanup_diagnostic() -> 
     child = _EventChild("cancel", block=asyncio.Event(), cleanup_confirmed=False)
     events: list[AgentEvent] = []
     runner = SerialSubagentRunner(lambda _request: child)
-    task = asyncio.create_task(runner.execute(_request("delegation-cancel"), on_event=events.append))
+    task = asyncio.create_task(
+        runner.execute(_request("delegation-cancel"), on_event=events.append)
+    )
     await asyncio.wait_for(child.started.wait(), timeout=1)
 
     assert await runner.cancel("delegation-cancel") is True
@@ -303,7 +308,10 @@ async def test_real_fake_parent_receives_top_level_subagent_events_and_continues
         await session.close()
 
     subagent_events = [
-        event for event in events if event.type in {
+        event
+        for event in events
+        if event.type
+        in {
             EventType.SUBAGENT_QUEUED,
             EventType.SUBAGENT_STARTED,
             EventType.SUBAGENT_PROGRESS,

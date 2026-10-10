@@ -232,7 +232,10 @@ def test_structured_result_rejects_bounds_duplicate_ids_and_unknown_references()
         result_type(
             delegation_id="delegation-1",
             status=status_type.COMPLETED,
-            evidence=(evidence, evidence_type(evidence_id="evidence-1", source="tool:grep", summary="y")),
+            evidence=(
+                evidence,
+                evidence_type(evidence_id="evidence-1", source="tool:grep", summary="y"),
+            ),
         )
     assert raised.value.code == "invalid_result"
 

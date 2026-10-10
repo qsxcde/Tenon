@@ -22,7 +22,6 @@ def test_read_result_exposes_path_range_and_completeness(tmp_path):
     assert out.output_metadata["completeness"] == "truncated"
 
 
-
 def test_read_limit_truncates(tmp_path):
     f = tmp_path / "big.txt"
     f.write_text("\n".join(f"line{i}" for i in range(100)), encoding="utf-8")
@@ -30,7 +29,6 @@ def test_read_limit_truncates(tmp_path):
     assert "line0" in out and "line4" in out
     assert "line5" not in out
     assert "已截断" in out
-
 
 
 def test_read_default_limit_is_2000(tmp_path):
@@ -43,14 +41,12 @@ def test_read_default_limit_is_2000(tmp_path):
     assert "line2000" not in out
 
 
-
 def test_read_offset(tmp_path):
     f = tmp_path / "a.txt"
     f.write_text("\n".join(f"line{i}" for i in range(10)), encoding="utf-8")
     out = _invoke(ReadTool(), file_path=str(f), offset=5, limit=2)
     assert "line5" in out and "line6" in out
     assert "line4" not in out
-
 
 
 def test_read_offset_out_of_bounds(tmp_path):
@@ -63,13 +59,11 @@ def test_read_offset_out_of_bounds(tmp_path):
         _invoke(ReadTool(), file_path=str(f), offset=3)
 
 
-
 def test_read_offset_negative_rejected(tmp_path):
     f = tmp_path / "a.txt"
     f.write_text("line1\n", encoding="utf-8")
     with pytest.raises(ValueError, match="不能为负"):
         _invoke(ReadTool(), file_path=str(f), offset=-1)
-
 
 
 def test_read_empty_file(tmp_path):
@@ -79,11 +73,9 @@ def test_read_empty_file(tmp_path):
     assert "[0 行]" in out
 
 
-
 def test_read_not_found(tmp_path):
     with pytest.raises(ValueError, match="文件不存在"):
         _invoke(ReadTool(), file_path=str(tmp_path / "nope.txt"))
-
 
 
 def test_read_binary_safe(tmp_path):
@@ -91,7 +83,6 @@ def test_read_binary_safe(tmp_path):
     f.write_bytes(b"\xff\xfe\x00binary\x01\x02")
     out = _invoke(ReadTool(), file_path=str(f))
     assert "二进制" in out
-
 
 
 def test_write_creates_new_file(tmp_path):
@@ -102,7 +93,6 @@ def test_write_creates_new_file(tmp_path):
     assert out.output_metadata["change_summary"] == "wrote 5 bytes"
 
 
-
 def test_write_overwrites(tmp_path):
     target = tmp_path / "out.txt"
     target.write_text("old", encoding="utf-8")
@@ -110,12 +100,10 @@ def test_write_overwrites(tmp_path):
     assert target.read_text(encoding="utf-8") == "new"
 
 
-
 def test_write_creates_parent_dirs(tmp_path):
     target = tmp_path / "a" / "b" / "c.txt"
     _invoke(WriteTool(), file_path=str(target), content="x")
     assert target.exists()
-
 
 
 def test_edit_unique_replace(tmp_path):
@@ -125,13 +113,11 @@ def test_edit_unique_replace(tmp_path):
     assert f.read_text(encoding="utf-8") == "foo qux baz"
 
 
-
 def test_edit_not_found(tmp_path):
     f = tmp_path / "e.txt"
     f.write_text("hello", encoding="utf-8")
     with pytest.raises(ValueError, match="未找到匹配文本"):
         _invoke(EditTool(), file_path=str(f), old_string="nope", new_string="x")
-
 
 
 def test_edit_multiple_rejected(tmp_path):
@@ -141,13 +127,11 @@ def test_edit_multiple_rejected(tmp_path):
         _invoke(EditTool(), file_path=str(f), old_string="a", new_string="z")
 
 
-
 def test_edit_replace_all(tmp_path):
     f = tmp_path / "e.txt"
     f.write_text("a b a", encoding="utf-8")
     _invoke(EditTool(), file_path=str(f), old_string="a", new_string="z", replace_all=True)
     assert f.read_text(encoding="utf-8") == "z b z"
-
 
 
 def test_edit_empty_old_string_rejected(tmp_path):
@@ -159,14 +143,12 @@ def test_edit_empty_old_string_rejected(tmp_path):
     assert f.read_text(encoding="utf-8") == "abcd"
 
 
-
 def test_edit_without_read_is_allowed(tmp_path):
     """无状态:不要求预先 Read。"""
     f = tmp_path / "e.txt"
     f.write_text("hello world", encoding="utf-8")
     _invoke(EditTool(), file_path=str(f), old_string="hello", new_string="hi")
     assert f.read_text(encoding="utf-8") == "hi world"
-
 
 
 def test_all_which_returns_all_path_hits(tmp_path, monkeypatch):
@@ -185,7 +167,6 @@ def test_all_which_returns_all_path_hits(tmp_path, monkeypatch):
     assert len(all_which("bash")) == 2
 
 
-
 def test_ls_lists_directory_with_dir_suffix(tmp_path):
     (tmp_path / "a.txt").write_text("")
     (tmp_path / "sub").mkdir()
@@ -197,17 +178,14 @@ def test_ls_lists_directory_with_dir_suffix(tmp_path):
     assert out.output_metadata["total_lines"] == 2
 
 
-
 def test_ls_empty_dir(tmp_path):
     out = _invoke(LsTool(cwd=str(tmp_path)), path=".")
     assert "(空目录)" in out
 
 
-
 def test_ls_not_found(tmp_path):
     with pytest.raises(ValueError, match="路径不存在"):
         _invoke(LsTool(cwd=str(tmp_path)), path="nope")
-
 
 
 def test_find_recursive_glob(tmp_path):
@@ -219,7 +197,6 @@ def test_find_recursive_glob(tmp_path):
     assert "pkg/b.py" in out
 
 
-
 def test_find_skips_noise_dirs(tmp_path):
     (tmp_path / "node_modules").mkdir()
     (tmp_path / "node_modules" / "x.js").write_text("")
@@ -229,11 +206,9 @@ def test_find_skips_noise_dirs(tmp_path):
     assert "node_modules" not in out
 
 
-
 def test_find_no_match(tmp_path):
     out = _invoke(FindTool(cwd=str(tmp_path)), pattern="*.nope")
     assert "无匹配文件" in out
-
 
 
 def test_grep_regex_output_format(tmp_path):
@@ -244,13 +219,11 @@ def test_grep_regex_output_format(tmp_path):
     assert "src.py:3: x = foo()" in out
 
 
-
 def test_grep_literal(tmp_path):
     f = tmp_path / "a.txt"
     f.write_text("a.b\n", encoding="utf-8")
     out = _invoke(GrepTool(cwd=str(tmp_path)), pattern="a.b", literal=True)
     assert "a.txt:1: a.b" in out
-
 
 
 def test_grep_context_lines(tmp_path):
@@ -262,7 +235,6 @@ def test_grep_context_lines(tmp_path):
     assert "a.txt-3- line3" in out
 
 
-
 def test_grep_skips_noise_dirs(tmp_path):
     (tmp_path / "node_modules").mkdir()
     (tmp_path / "node_modules" / "x.js").write_text("secret", encoding="utf-8")
@@ -272,11 +244,9 @@ def test_grep_skips_noise_dirs(tmp_path):
     assert "node_modules" not in out
 
 
-
 def test_grep_no_match(tmp_path):
     out = _invoke(GrepTool(cwd=str(tmp_path)), pattern="zzz_nothing")
     assert "无匹配" in out
-
 
 
 def test_parallel_writes_same_file_do_not_lose_updates(tmp_path):

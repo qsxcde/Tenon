@@ -27,7 +27,7 @@ async def test_abort_cancels_and_emits_run_cancelled():
         with pytest.raises(asyncio.CancelledError):
             await task
 
-    await (scenario())
+    await scenario()
     assert EventType.RUN_CANCELLED in _event_types(seen)
     assert sess.history == []
 
@@ -125,7 +125,6 @@ async def test_session_cancel_propagates_uncertain_sync_tool_cleanup():
     assert cancelled.metadata["cleanup_uncertain"] is True
 
 
-
 async def test_steer_injects_message():
     """运行中 steer:注入消息成为后续轮次的 user 消息(回归:事件确定性)。"""
 
@@ -144,7 +143,12 @@ async def test_steer_injects_message():
 
     model = SlowFirstModel(
         steps=[
-            {"content": "", "tool_calls": [{"name": "bash", "args": {"command": "echo a"}, "id": "s1", "type": "tool_call"}]},
+            {
+                "content": "",
+                "tool_calls": [
+                    {"name": "bash", "args": {"command": "echo a"}, "id": "s1", "type": "tool_call"}
+                ],
+            },
             {"content": "已处理注入"},
         ]
     )
@@ -157,7 +161,7 @@ async def test_steer_injects_message():
         release.set()
         await task
 
-    await (scenario())
+    await scenario()
     users = [m.content for m in sess.history if m.role == "user"]
     assert "运行中注入" in users
     # 注入消息进入第二轮模型输入(下一轮循环前消费,而非事后追加)

@@ -109,7 +109,9 @@ async def test_headless_once_prints_child_lines_near_parent_reply(monkeypatch, c
         async def run(self, _prompt, *, mode):
             del mode
             session.emit(_event(EventType.SUBAGENT_QUEUED, status="queued", child_run_id=None))
-            session.emit(_event(EventType.SUBAGENT_STARTED, status="running", child_phase="starting"))
+            session.emit(
+                _event(EventType.SUBAGENT_STARTED, status="running", child_phase="starting")
+            )
             session.emit(AgentEvent(EventType.AGENT_MESSAGE, payload="父回复"))
             session.emit(
                 _event(

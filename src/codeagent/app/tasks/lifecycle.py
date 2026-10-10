@@ -75,13 +75,34 @@ class TaskLifecycleMixin:
             latest_diff = self.inspector.compare(baseline, after)
             if result.status is TaskStatus.VERIFIED:
                 self._emit(TaskEvent(TaskPhase.COMPLETED, result=result, attempt=repairs + 1))
-                return TaskResult(TaskStatus.VERIFIED, mode, latest_diff.changed_files, result, repairs, "验证通过")
+                return TaskResult(
+                    TaskStatus.VERIFIED,
+                    mode,
+                    latest_diff.changed_files,
+                    result,
+                    repairs,
+                    "验证通过",
+                )
             if result.status is TaskStatus.CANCELLED or self._cancelled:
-                return TaskResult(TaskStatus.CANCELLED, mode, latest_diff.changed_files, result, repairs, "任务已取消")
+                return TaskResult(
+                    TaskStatus.CANCELLED,
+                    mode,
+                    latest_diff.changed_files,
+                    result,
+                    repairs,
+                    "任务已取消",
+                )
             fingerprint = self._fingerprint(result, latest_diff)
             if fingerprint in seen_failures or repairs >= self.max_repairs:
                 self._emit(TaskEvent(TaskPhase.FAILED, result=result, attempt=repairs + 1))
-                return TaskResult(TaskStatus.FAILED, mode, latest_diff.changed_files, result, repairs, "验证失败，已停止自动修复")
+                return TaskResult(
+                    TaskStatus.FAILED,
+                    mode,
+                    latest_diff.changed_files,
+                    result,
+                    repairs,
+                    "验证失败，已停止自动修复",
+                )
             seen_failures.add(fingerprint)
             repairs += 1
             self._emit(
@@ -96,4 +117,11 @@ class TaskLifecycleMixin:
             )
             await self._run_agent(self._repair_prompt(result, latest_diff), TaskMode.CODE)
             if self._cancelled:
-                return TaskResult(TaskStatus.CANCELLED, mode, latest_diff.changed_files, result, repairs, "任务已取消")
+                return TaskResult(
+                    TaskStatus.CANCELLED,
+                    mode,
+                    latest_diff.changed_files,
+                    result,
+                    repairs,
+                    "任务已取消",
+                )

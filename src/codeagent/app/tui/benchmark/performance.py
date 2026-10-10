@@ -81,9 +81,7 @@ class BenchmarkResult:
             "scenario": self.scenario,
             "parameters": dict(self.parameters),
             "iterations": self.iterations,
-            "metrics": {
-                name: summary.to_dict() for name, summary in self.metrics.items()
-            },
+            "metrics": {name: summary.to_dict() for name, summary in self.metrics.items()},
             "counters": dict(self.counters),
             "environment": dict(self.environment),
             "required_metrics": list(self.required_metrics),

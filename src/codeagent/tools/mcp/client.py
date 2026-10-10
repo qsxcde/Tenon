@@ -20,34 +20,17 @@ from __future__ import annotations
 import asyncio
 import concurrent.futures
 import threading
-from dataclasses import dataclass
 from typing import Any
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from mcp.types import TextContent
 
-__all__ = ["McpCallResult", "McpServerClient", "McpToolInfo"]
+from codeagent.tools.mcp.content import McpCallResult, McpToolInfo, extract_result
+
+__all__ = ["McpServerClient"]
 
 #: 调用兜底超时(SDK 无显式超时时防无限挂起;会话级 tool_timeout 可覆盖)。
 DEFAULT_CALL_TIMEOUT = 60.0
-
-
-@dataclass(frozen=True)
-class McpCallResult:
-    """Text projection plus explicit facts for non-text MCP content."""
-
-    text: str
-    metadata: dict[str, Any]
-
-
-class McpToolInfo:
-    """SDK ``tools/list`` 返回的工具元数据(适配器构造 McpTool 用)。"""
-
-    def __init__(self, name: str, description: str, input_schema: dict[str, Any]) -> None:
-        self.name = name
-        self.description = description or ""
-        self.input_schema = input_schema or {}
 
 
 class McpServerClient:
@@ -97,7 +80,9 @@ class McpServerClient:
             self.close()
             raise failure
 
-    def call_tool(self, name: str, arguments: dict[str, Any] | None, timeout: float | None = None) -> str:
+    def call_tool(
+        self, name: str, arguments: dict[str, Any] | None, timeout: float | None = None
+    ) -> str:
         """同步调用 server 工具(桥接回后台事件循环),返回文本结果。
 
         - timeout 缺省 ``DEFAULT_CALL_TIMEOUT``(防无限挂起);会话级
@@ -115,7 +100,7 @@ class McpServerClient:
         except concurrent.futures.TimeoutError:
             future.cancel()
             raise TimeoutError(f"MCP 工具 {self._name}:{name} 调用超时({timeout}s)")
-        extracted = _extract_result(result)
+        extracted = extract_result(result)
         text = extracted.text
         if getattr(result, "is_error", False):
             raise RuntimeError(f"MCP 工具 {self._name}:{name} 返回错误: {text}")
@@ -136,7 +121,7 @@ class McpServerClient:
         except concurrent.futures.TimeoutError:
             future.cancel()
             raise TimeoutError(f"MCP 工具 {self._name}:{name} 调用超时({timeout}s)")
-        extracted = _extract_result(result)
+        extracted = extract_result(result)
         if getattr(result, "is_error", False):
             raise RuntimeError(f"MCP 工具 {self._name}:{name} 返回错误: {extracted.text}")
         return extracted
@@ -175,10 +160,14 @@ class McpServerClient:
             future.cancel()
             try:
                 await asyncio.wait_for(asyncio.shield(wrapped), timeout=5.0)
-            except (asyncio.CancelledError, asyncio.TimeoutError, concurrent.futures.CancelledError):
+            except (
+                asyncio.CancelledError,
+                asyncio.TimeoutError,
+                concurrent.futures.CancelledError,
+            ):
                 pass
             raise
-        extracted = _extract_result(result)
+        extracted = extract_result(result)
         text = extracted.text
         if getattr(result, "is_error", False):
             raise RuntimeError(f"MCP 工具 {self._name}:{name} 返回错误: {text}")
@@ -199,10 +188,14 @@ class McpServerClient:
             future.cancel()
             try:
                 await asyncio.wait_for(asyncio.shield(wrapped), timeout=5.0)
-            except (asyncio.CancelledError, asyncio.TimeoutError, concurrent.futures.CancelledError):
+            except (
+                asyncio.CancelledError,
+                asyncio.TimeoutError,
+                concurrent.futures.CancelledError,
+            ):
                 pass
             raise
-        extracted = _extract_result(result)
+        extracted = extract_result(result)
         if getattr(result, "is_error", False):
             raise RuntimeError(f"MCP 工具 {self._name}:{name} 返回错误: {extracted.text}")
         return extracted
@@ -250,58 +243,7 @@ class McpServerClient:
                 listed = await session.list_tools()
                 self._session = session
                 self._tools = [
-                    McpToolInfo(t.name, t.description, dict(t.input_schema))
-                    for t in listed.tools
+                    McpToolInfo(t.name, t.description, dict(t.input_schema)) for t in listed.tools
                 ]
                 self._ready.set()
                 await self._stop.wait()
-
-
-def _extract_text(result: Any) -> str:
-    """兼容旧调用方的文本投影。"""
-    return _extract_result(result).text
-
-
-def _extract_result(result: Any) -> McpCallResult:
-    """Extract text and explicit diagnostics for every MCP content block."""
-    parts: list[str] = []
-    unsupported: list[dict[str, Any]] = []
-    for block in getattr(result, "content", []) or []:
-        if isinstance(block, TextContent):
-            parts.append(block.text)
-        else:
-            text = getattr(block, "text", None)
-            if isinstance(text, str):
-                parts.append(text)
-                continue
-            block_type = str(getattr(block, "type", type(block).__name__))
-            reference = getattr(block, "uri", None) or getattr(block, "url", None)
-            unsupported.append(
-                {
-                    "type": block_type,
-                    "reference": str(reference) if reference else None,
-                    "mime_type": getattr(block, "mimeType", None)
-                    or getattr(block, "mime_type", None),
-                }
-            )
-    text = "\n".join(parts).strip()
-    if unsupported:
-        suffix = "\n".join(
-            f"[MCP 内容不支持直接显示: {item['type']}"
-            + (f",引用={item['reference']}" if item["reference"] else "")
-            + "]"
-            for item in unsupported
-        )
-        text = f"{text}\n{suffix}" if text else suffix
-    return McpCallResult(
-        text,
-        {
-            "completeness": "unsupported" if unsupported else "complete",
-            "unsupported_blocks": unsupported,
-            "artifact_ref": next(
-                (item["reference"] for item in unsupported if item["reference"]),
-                None,
-            ),
-            "source": "mcp",
-        },
-    )

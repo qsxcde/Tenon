@@ -46,9 +46,7 @@ class ConfirmationCoordinator:
         request = ConfirmationRequest(request_id, loop.create_future())
         self._requests[request_id] = request
         if timeout is not None:
-            request.timeout_handle = loop.call_later(
-                max(0.0, timeout), self._expire, request_id
-            )
+            request.timeout_handle = loop.call_later(max(0.0, timeout), self._expire, request_id)
         return True
 
     async def wait(self, request_id: str, timeout: float | None = None) -> bool:
@@ -100,9 +98,7 @@ class ConfirmationCoordinator:
         if request is None or request.status != "pending" or request.future.done():
             return
         request.status = "expired"
-        request.future.set_exception(
-            ConfirmationTimeoutError(f"确认请求已超时: {request_id}")
-        )
+        request.future.set_exception(ConfirmationTimeoutError(f"确认请求已超时: {request_id}"))
 
     def clear(self) -> None:
         """Cancel pending requests and discard stale compatibility responses."""

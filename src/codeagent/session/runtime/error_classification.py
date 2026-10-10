@@ -33,16 +33,18 @@ def classify_error(
     code = _error_code(exc, phase_value)
     budget = _budget_metadata(exc)
     provider_retryable = (
-        _provider_retryable(exc)
-        if phase_value == RunPhase.MODEL_WAIT.value
-        else None
+        _provider_retryable(exc) if phase_value == RunPhase.MODEL_WAIT.value else None
     )
     retryable = (
-        provider_retryable
-        if provider_retryable is not None
-        else code
-        in {"model_auth", "model_network", "model_timeout", "model_rate_limit", "model_error"}
-    ) and side_effect_state == "none" and not cleanup_uncertain
+        (
+            provider_retryable
+            if provider_retryable is not None
+            else code
+            in {"model_auth", "model_network", "model_timeout", "model_rate_limit", "model_error"}
+        )
+        and side_effect_state == "none"
+        and not cleanup_uncertain
+    )
     return RuntimeFailure(
         code=code,
         message=friendly_error(exc) if isinstance(exc, Exception) else str(exc),

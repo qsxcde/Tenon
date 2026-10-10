@@ -126,9 +126,7 @@ async def test_run_agent_loop_returns_new_messages_and_agent_events():
     context = AgentContext()
     events = []
 
-    new_messages = await (
-        run_agent_loop(context, _config(model), "hi", emit=events.append)
-    )
+    new_messages = await run_agent_loop(context, _config(model), "hi", emit=events.append)
 
     assert [message.role for message in new_messages] == ["user", "assistant"]
     assert context.messages == []
@@ -150,12 +148,10 @@ async def test_run_agent_loop_returns_new_messages_and_agent_events():
 async def test_run_agent_loop_continue_reuses_context_without_duplicate_prompt():
     model = _Model([{"content": "first"}, {"content": "second"}])
     context = AgentContext()
-    await (run_agent_loop(context, _config(model), "hi"))
+    await run_agent_loop(context, _config(model), "hi")
     context.messages.extend(model.calls[0])
 
-    new_messages = await (
-        run_agent_loop_continue(context, _config(model), emit=lambda _: None)
-    )
+    new_messages = await run_agent_loop_continue(context, _config(model), emit=lambda _: None)
 
     assert [message.content for message in new_messages] == ["second"]
     assert sum(message.content == "hi" for message in model.calls[-1]) == 1
@@ -179,18 +175,18 @@ async def test_run_agent_loop_transform_and_before_hook_control_tools():
         return ToolDecision.block("not allowed")
 
     context = AgentContext()
-    new_messages = await (
-        run_agent_loop(
-            context,
-            _config(model, tool, transform_context=transform, before_tool_call=before),
-            "read",
-        )
+    new_messages = await run_agent_loop(
+        context,
+        _config(model, tool, transform_context=transform, before_tool_call=before),
+        "read",
     )
 
     assert transformed
     assert context.messages == []
     assert tool.calls == []
-    assert any(message.role == "tool" and "not allowed" in message.content for message in new_messages)
+    assert any(
+        message.role == "tool" and "not allowed" in message.content for message in new_messages
+    )
 
 
 async def test_new_loop_sequential_mode_does_not_overlap_tools():
@@ -212,7 +208,7 @@ async def test_new_loop_sequential_mode_does_not_overlap_tools():
         assert second.max_active == 1
         assert active_ref[1] == 1
 
-    await (scenario())
+    await scenario()
 
 
 async def test_new_loop_parallel_emits_completion_order_but_backfills_call_order():
@@ -233,15 +229,13 @@ async def test_new_loop_parallel_emits_completion_order_but_backfills_call_order
         )
 
         ended = [
-            event.payload.name
-            for event in events
-            if event.type == EventType.TOOL_EXECUTION_END
+            event.payload.name for event in events if event.type == EventType.TOOL_EXECUTION_END
         ]
         tool_messages = [message for message in messages if message.role == "tool"]
         assert ended == ["b", "a"]
         assert [message.content for message in tool_messages] == ["a", "b"]
 
-    await (scenario())
+    await scenario()
 
 
 async def test_tool_lifecycle_events_are_correlated_and_queued_before_start() -> None:
@@ -324,9 +318,7 @@ async def test_tool_message_keeps_structured_output_metadata() -> None:
             {"content": "done"},
         ]
     )
-    messages = await run_agent_loop(
-        AgentContext(), _config(model, _Tool()), "read"
-    )
+    messages = await run_agent_loop(AgentContext(), _config(model, _Tool()), "read")
 
     tool_message = next(message for message in messages if message.role == "tool")
     assert tool_message.tool_output is not None
@@ -357,10 +349,9 @@ async def test_new_loop_runtime_timeout_returns_structured_timeout_result():
         ended = next(
             event
             for event in events
-            if event.type == EventType.TOOL_EXECUTION_END
-            and event.payload.tool_call_id == "c0"
+            if event.type == EventType.TOOL_EXECUTION_END and event.payload.tool_call_id == "c0"
         )
         assert ended.payload.status == "timed_out"
         assert result.content.startswith("[工具执行超时]")
 
-    await (scenario())
+    await scenario()

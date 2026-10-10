@@ -86,8 +86,7 @@ class FakeClient(ChatClient):
                 id=tc.get("id", f"call_{i}"),
                 name=tc.get("name", ""),
                 arguments=(
-                    tc.get("args_json")
-                    or (json.dumps(tc.get("args", {}), ensure_ascii=False))
+                    tc.get("args_json") or (json.dumps(tc.get("args", {}), ensure_ascii=False))
                 ),
             )
             for i, tc in enumerate(script_tool_calls or [])

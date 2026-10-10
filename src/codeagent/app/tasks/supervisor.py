@@ -111,7 +111,13 @@ class TaskSupervisor(TaskLifecycleMixin):
     def _fingerprint(result: VerificationResult, diff: WorkspaceDiff) -> str:
         normalized = re.sub(r"\s+", " ", result.output_tail.strip().lower())[-4000:]
         payload = "|".join(
-            [result.command, str(result.exit_code), normalized, diff.summary, ",".join(diff.changed_files)]
+            [
+                result.command,
+                str(result.exit_code),
+                normalized,
+                diff.summary,
+                ",".join(diff.changed_files),
+            ]
         )
         return hashlib.sha256(payload.encode("utf-8", errors="replace")).hexdigest()
 

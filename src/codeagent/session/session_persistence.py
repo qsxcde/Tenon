@@ -133,9 +133,7 @@ class SessionPersistence:
         state = self._store.load_context(self._session_id)
         saved_context = self._store.get_meta(self._session_id, "last_context_tokens")
         context_tokens = (
-            saved_context
-            if type(saved_context) is int and saved_context >= 0
-            else None
+            saved_context if type(saved_context) is int and saved_context >= 0 else None
         )
         loader = getattr(self._store, "load_subagent_records", None)
         records = list(loader(self._session_id)) if callable(loader) else []

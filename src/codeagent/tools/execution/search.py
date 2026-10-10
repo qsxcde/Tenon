@@ -62,9 +62,7 @@ def run_optional_search(
             return None
         with output_path.open("rb") as output:
             raw = output.read(max_output_bytes + 1)
-        return ExternalSearchResult(
-            raw[:max_output_bytes], truncated=len(raw) > max_output_bytes
-        )
+        return ExternalSearchResult(raw[:max_output_bytes], truncated=len(raw) > max_output_bytes)
     except OSError:
         return None
     finally:

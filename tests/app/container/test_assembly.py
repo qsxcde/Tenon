@@ -67,7 +67,6 @@ def test_create_agent_config_injects_one_resource_limits_bundle():
     del SimpleNamespace
 
 
-
 def test_create_agent_session_returns_session():
     """create_agent_session 返回可订阅的 AgentSession。"""
     with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
@@ -81,7 +80,6 @@ def test_create_agent_session_returns_session():
     assert hasattr(sess, "subscribe")
     assert hasattr(sess, "abort")
     assert hasattr(sess, "steer")
-
 
 
 def test_create_tui_app_assembles_with_stub_backend():
@@ -100,7 +98,6 @@ def test_create_tui_app_assembles_with_stub_backend():
     assert app.model.status.cwd != ""
 
 
-
 def test_create_tui_app_resolves_footer_info():
     """状态栏装配数据的 model · effort 优先级:model 内联后缀 > provider 配置默认(design D5)。"""
     with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
@@ -109,14 +106,15 @@ def test_create_tui_app_resolves_footer_info():
         mock_llm.return_value = FakeClient(response="测试回复")
         from codeagent.app.container import create_tui_app
 
-        app = create_tui_app(provider="deepseek", model="deepseek-v4-pro:low", backend=_StubBackend())
+        app = create_tui_app(
+            provider="deepseek", model="deepseek-v4-pro:low", backend=_StubBackend()
+        )
         assert app.model.status.model == "deepseek-v4-pro"
         assert app.model.status.effort == "low"
 
         app = create_tui_app(provider="deepseek", backend=_StubBackend())
         assert app.model.status.model == "deepseek-v4-flash"
         assert app.model.status.effort == "high"
-
 
 
 def test_create_tui_app_injects_rebuild_config():
@@ -168,14 +166,11 @@ async def test_tui_async_rebuild_waits_for_old_runtime_close():
         _ = app._manager.tools
         assert len(clients) == 1
 
-        model_id, effort = await app._rebuild_ports_async(
-            "fake", "fake-model:high", None
-        )
+        model_id, effort = await app._rebuild_ports_async("fake", "fake-model:high", None)
 
     assert (model_id, effort) == ("fake-model", "high")
     assert clients[0].closed == 1
     assert clients[1].closed == 0
-
 
 
 def test_rebuild_config_syncs_model_context_window():
@@ -212,13 +207,9 @@ def test_create_agent_config_binds_catalog_window_to_model_budget():
         registry._catalogs.setdefault("fake", {})["small-model"] = ModelSpec(
             id="small-model", context_window=32_000, max_tokens=2_000
         )
-        config = create_agent_config(
-            provider="fake", model="small-model", registry=registry
-        )
+        config = create_agent_config(provider="fake", model="small-model", registry=registry)
 
-    budget = config.model.describe_context_budget(
-        [Message(role="user", content="hello")], []
-    )
+    budget = config.model.describe_context_budget([Message(role="user", content="hello")], [])
 
     assert budget.context_window == 32_000
     assert budget.output_reserve == 2_000
@@ -241,9 +232,7 @@ def test_create_agent_config_injects_model_capabilities():
             prompt_cache=True,
             context_window=32_000,
         )
-        config = create_agent_config(
-            provider="fake", model="diagnostic-model", registry=registry
-        )
+        config = create_agent_config(provider="fake", model="diagnostic-model", registry=registry)
 
     capabilities = config.model_capabilities
     assert capabilities is config.model.capabilities
@@ -303,9 +292,7 @@ def test_create_agent_config_keeps_tiny_catalog_window_budget_valid():
         registry._catalogs.setdefault("fake", {})["tiny-model"] = ModelSpec(
             id="tiny-model", context_window=8_000
         )
-        config = create_agent_config(
-            provider="fake", model="tiny-model", registry=registry
-        )
+        config = create_agent_config(provider="fake", model="tiny-model", registry=registry)
 
     budget = config.model.describe_context_budget([], [])
 
@@ -319,9 +306,7 @@ def test_create_tui_app_uses_provider_default_model_context_window():
         patch("codeagent.app.composition.model.selection.create_llm") as mock_llm,
         patch(
             "codeagent.app.composition.model.factory._provider_config",
-            return_value=SimpleNamespace(
-                model="configured-model", reasoning_effort="high"
-            ),
+            return_value=SimpleNamespace(model="configured-model", reasoning_effort="high"),
         ),
     ):
         from codeagent.ai.catalog.registry import ModelRegistry
@@ -334,9 +319,7 @@ def test_create_tui_app_uses_provider_default_model_context_window():
         registry._catalogs.setdefault("deepseek", {})["configured-model"] = ModelSpec(
             id="configured-model", context_window=64_000
         )
-        app = create_tui_app(
-            provider="deepseek", registry=registry, backend=_StubBackend()
-        )
+        app = create_tui_app(provider="deepseek", registry=registry, backend=_StubBackend())
 
     assert app._manager.current.context_window == 64_000
 
@@ -354,9 +337,7 @@ def test_create_agent_session_uses_model_context_window():
         registry._catalogs.setdefault("fake", {})["small-model"] = ModelSpec(
             id="small-model", context_window=32_000
         )
-        session = create_agent_session(
-            provider="fake", model="small-model", registry=registry
-        )
+        session = create_agent_session(provider="fake", model="small-model", registry=registry)
 
     assert session.context_window == 32_000
 
@@ -367,9 +348,7 @@ def test_create_agent_session_uses_provider_default_context_window():
         patch("codeagent.app.composition.model.selection.create_llm") as mock_llm,
         patch(
             "codeagent.app.composition.model.factory._provider_config",
-            return_value=SimpleNamespace(
-                model="configured-model", reasoning_effort="high"
-            ),
+            return_value=SimpleNamespace(model="configured-model", reasoning_effort="high"),
         ),
     ):
         from codeagent.ai.catalog.registry import ModelRegistry
@@ -391,7 +370,6 @@ def test_create_agent_session_uses_provider_default_context_window():
     assert session.context_window == 64_000
 
 
-
 def test_create_tui_app_injects_selector_candidates():
     """选择器候选经组合根注入(T-45):provider/model/effort 各一份。"""
     with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
@@ -410,7 +388,6 @@ def test_create_tui_app_injects_selector_candidates():
     assert candidates["model"]["deepseek"] == sorted(candidates["model"]["deepseek"])
 
 
-
 def test_policy_deny_mode_default_and_fails_closed():
     """缺省/deny 模式:ask 降级 deny(未确认不得执行);allow 直通。"""
     _, policy = _config_with_mode("deny")
@@ -420,7 +397,6 @@ def test_policy_deny_mode_default_and_fails_closed():
     assert policy.decide("bash", {"command": "rm -rf /"}).action == "deny"  # 黑名单
 
 
-
 def test_policy_interactive_mode_keeps_ask():
     """interactive 模式(TUI):ask 保留,交用户确认。"""
     _, policy = _config_with_mode("interactive")
@@ -428,13 +404,11 @@ def test_policy_interactive_mode_keeps_ask():
     assert decision.action == "ask" and "推送" in decision.reason
 
 
-
 def test_policy_allow_mode_approves_asks():
     """allow 模式(--yes):ask 放行(显式承担风险)。"""
     _, policy = _config_with_mode("allow")
     assert policy.decide("bash", {"command": "git push"}).action == "allow"
     assert policy.decide("bash", {"command": "rm -rf /"}).action == "deny"  # 黑名单仍拦
-
 
 
 def test_policy_file_boundary_modes(tmp_path, monkeypatch):
@@ -453,7 +427,6 @@ def test_policy_file_boundary_modes(tmp_path, monkeypatch):
     assert deny.decide("write", {"file_path": "../secret.txt"}).action == "deny"
     read = interactive.decide("read", {"file_path": "../secret.txt"})
     assert read.action == "allow" and read.warning is True  # 越界读警告放行
-
 
 
 def test_tui_app_gets_compaction_capable_manager():
@@ -525,7 +498,6 @@ def test_tui_app_gets_compaction_capable_manager():
     assert app._manager._summarizer is not None  # /compact 可用
 
 
-
 def test_create_tui_app_injects_save_key(tmp_path, monkeypatch):
     """组合根注入 save_key:/login 写 .env(<PREFIX>_API_KEY)并热切换。"""
     from codeagent.app import config as app_config
@@ -550,7 +522,6 @@ def test_create_tui_app_injects_save_key(tmp_path, monkeypatch):
     assert (model_id, effort) == ("deepseek-v4-flash", "high")
 
 
-
 def test_create_tui_app_without_api_key_starts_lazy():
     """TUI 首启无 API key:不崩溃,端口/摘要器延迟到首次使用(回归:M-7)。
 
@@ -565,7 +536,6 @@ def test_create_tui_app_without_api_key_starts_lazy():
     assert isinstance(app._manager._summarizer, _LazySummarizer)
     assert app._manager._config._real is None  # 尚未装配:首次对话才构造
     assert app._manager._summarizer._real is None  # 首次 /compact 才构造
-
 
 
 def test_save_key_unknown_provider_raises(tmp_path, monkeypatch):
@@ -586,14 +556,13 @@ def test_save_key_unknown_provider_raises(tmp_path, monkeypatch):
         app._save_key("nosuch", "sk-x")
 
 
-
 def test_create_tui_app_injects_configured_providers(tmp_path, monkeypatch):
     """configured_providers 从 .env 解析:仅非空 key 的 provider 进入登录 ✓ 集。"""
     from codeagent.app import config as app_config
 
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "DEEPSEEK_API_KEY=sk-1\nGLM_API_KEY=\nKIMI_API_KEY=\"sk-2\"\n",
+        'DEEPSEEK_API_KEY=sk-1\nGLM_API_KEY=\nKIMI_API_KEY="sk-2"\n',
         encoding="utf-8",
     )
     monkeypatch.setattr(app_config, "CONFIG_ENV_FILE", env_file)
@@ -609,7 +578,6 @@ def test_create_tui_app_injects_configured_providers(tmp_path, monkeypatch):
     assert app._candidates["login"] == app._candidates["provider"]
 
 
-
 def test_config_append_mcp_tools(tmp_path, monkeypatch):
     """组合根装配:用户级 mcp.json → MCP 工具追加到内建工具之后(命名前缀)。"""
     monkeypatch.chdir(tmp_path)
@@ -619,7 +587,9 @@ def test_config_append_mcp_tools(tmp_path, monkeypatch):
     mock_server = str(Path(__file__).parents[2] / "mcp" / "mock_server.py")
     (tmp_path / ".codeagent").mkdir(exist_ok=True)
     (tmp_path / ".codeagent" / "mcp.json").write_text(
-        json.dumps({"servers": [{"name": "mock", "command": sys.executable, "args": [mock_server]}]}),
+        json.dumps(
+            {"servers": [{"name": "mock", "command": sys.executable, "args": [mock_server]}]}
+        ),
         encoding="utf-8",
     )
     with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:

@@ -21,7 +21,6 @@ def test_compaction_entry_roundtrip(tmp_path):
     assert store.load_messages("s1") == []
 
 
-
 def test_compaction_entry_id_parent_and_first_kept(tmp_path):
     """压缩 entry:id 自动分配、parentId/firstKeptEntryId 落盘、返回 entry id。"""
     store = JsonFileStore(tmp_path / "sessions")
@@ -45,7 +44,6 @@ def test_compaction_entry_id_parent_and_first_kept(tmp_path):
     assert record["firstKeptEntryId"] == msgs[1].id
 
 
-
 def test_load_context_without_compaction_returns_all(tmp_path):
     store = JsonFileStore(tmp_path / "sessions")
     store.create("s1")
@@ -55,7 +53,6 @@ def test_load_context_without_compaction_returns_all(tmp_path):
     state = store.load_context("s1")
     assert state.summary is None and state.entry_id is None
     assert [m.id for m in state.messages] == [m.id for m in msgs]
-
 
 
 def test_load_context_reconstructs_summary_plus_kept(tmp_path):
@@ -76,7 +73,6 @@ def test_load_context_reconstructs_summary_plus_kept(tmp_path):
     assert len(store.load_messages("s1")) == 5
 
 
-
 def test_load_context_latest_compaction_wins(tmp_path):
     """二次压缩后只认最新边界;新消息(压缩后追加)包含在上下文中。"""
     store = JsonFileStore(tmp_path / "sessions")
@@ -89,4 +85,3 @@ def test_load_context_latest_compaction_wins(tmp_path):
     state = store.load_context("s1")
     assert state.summary == "摘要2"
     assert [m.id for m in state.messages] == [msgs[4].id, msgs[5].id]
-

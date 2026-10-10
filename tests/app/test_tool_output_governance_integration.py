@@ -87,7 +87,9 @@ async def test_tool_result_facts_survive_pipeline_and_request_budget(tmp_path) -
         "call-a",
         "call-b",
     }
-    assert all(event.metadata["output_metadata"]["completeness"] == "truncated" for event in result_events)
+    assert all(
+        event.metadata["output_metadata"]["completeness"] == "truncated" for event in result_events
+    )
 
     persisted = JsonFileStore(tmp_path / "sessions").load_messages("governance")
     persisted_tools = [message for message in persisted if message.role == "tool"]

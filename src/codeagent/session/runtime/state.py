@@ -8,6 +8,7 @@ from typing import Any
 
 from codeagent.session.runtime.context_state import SessionBudgetState
 
+
 class RunPhase(StrEnum):
     """Observable phases owned by the session runtime."""
 
@@ -156,10 +157,7 @@ class RunOutcome:
     @property
     def completed(self) -> bool:
         """Whether the model turn reached a committed completed boundary."""
-        return (
-            self.phase is RunPhase.COMPLETED
-            and self.commit_status is CommitStatus.COMMITTED
-        )
+        return self.phase is RunPhase.COMPLETED and self.commit_status is CommitStatus.COMMITTED
 
     def as_metadata(self) -> dict[str, Any]:
         """Return stable fields for the terminal session event."""
@@ -193,9 +191,7 @@ class RunState:
         if target == self.phase:
             return
         if target not in _ALLOWED_TRANSITIONS[self.phase]:
-            raise ValueError(
-                f"invalid run phase transition: {self.phase.value} -> {target.value}"
-            )
+            raise ValueError(f"invalid run phase transition: {self.phase.value} -> {target.value}")
         self.previous_phase = self.phase
         self.phase = target
 

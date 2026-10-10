@@ -164,11 +164,16 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
         if self.elapsed_ms is not None and not (
             self.output_buffer is not None and self.output_buffer.metadata.duration_ms is not None
         ):
-            elapsed = f"{self.elapsed_ms / 1000:.1f}s" if self.elapsed_ms >= 1000 else f"{self.elapsed_ms}ms"
+            elapsed = (
+                f"{self.elapsed_ms / 1000:.1f}s"
+                if self.elapsed_ms >= 1000
+                else f"{self.elapsed_ms}ms"
+            )
             diagnostics.append(elapsed)
         if self.progress_text and self.status == "pending":
             diagnostics.append(self.progress_text)
         return f" · {' · '.join(diagnostics)}" if diagnostics else ""
+
     def _edit_summary(self, path: str) -> str:
         old = str(self.args.get("old_string", "")).splitlines()
         new = str(self.args.get("new_string", "")).splitlines()
@@ -201,9 +206,12 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
                 if emitted >= 80:
                     lines.append([_seg("… 差异内容已截断", fg=DIM)])
                     return lines
-                lines.append([_seg(f"{marker} {_truncate(value, max(1, width - 2))}", fg=TEXT, bg=bg)])
+                lines.append(
+                    [_seg(f"{marker} {_truncate(value, max(1, width - 2))}", fg=TEXT, bg=bg)]
+                )
                 emitted += 1
         return lines
+
     def render(self, width: int) -> list[RichLine]:
         icon, icon_tag = {"pending": ("·", DIM), "done": ("✓", SUCCESS), "error": ("✗", ERROR)}[
             self.status
@@ -221,21 +229,30 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
                 if self.status == "error"
                 else ACCENT
             )
-        lines: list[RichLine] = [[
-            _seg("▼" if self.expanded else "▶", fg=DIM),
-            _seg(" "),
-            _seg(icon, fg=icon_tag),
-            _seg(" "),
-            _seg(summary, fg=summary_tag),
-        ]]
+        lines: list[RichLine] = [
+            [
+                _seg("▼" if self.expanded else "▶", fg=DIM),
+                _seg(" "),
+                _seg(icon, fg=icon_tag),
+                _seg(" "),
+                _seg(summary, fg=summary_tag),
+            ]
+        ]
         if self.expanded:
             if self.name in {"edit", "write"} and self.status == "done":
                 lines.extend(self._intent_diff(width))
             if self.result:
                 if self.output_buffer is not None:
-                    if self.output_buffer.truncated or self.output_buffer.metadata.total_bytes > 4000:
+                    if (
+                        self.output_buffer.truncated
+                        or self.output_buffer.metadata.total_bytes > 4000
+                    ):
                         lines.append([_seg(self.output_buffer.diagnostic, fg=DIM)])
-                    lines.extend(_wrap_rich("\n".join(self.output_buffer.current_page), width, fg=TOOL_OUTPUT))
+                    lines.extend(
+                        _wrap_rich(
+                            "\n".join(self.output_buffer.current_page), width, fg=TOOL_OUTPUT
+                        )
+                    )
                 else:
                     lines.extend(_wrap_rich(self.result, width, fg=TOOL_OUTPUT))
         return lines

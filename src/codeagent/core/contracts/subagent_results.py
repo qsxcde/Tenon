@@ -166,9 +166,7 @@ class SubagentArtifact:
         if not isinstance(self.label, str):
             raise _invalid("artifact label must be a string")
         if len(self.label) > MAX_SUBAGENT_ARTIFACT_LABEL_CHARS:
-            raise _invalid(
-                f"artifact label exceeds {MAX_SUBAGENT_ARTIFACT_LABEL_CHARS} characters"
-            )
+            raise _invalid(f"artifact label exceeds {MAX_SUBAGENT_ARTIFACT_LABEL_CHARS} characters")
 
     def to_dict(self) -> dict[str, str]:
         return {"ref": self.ref, "kind": self.kind, "label": self.label}

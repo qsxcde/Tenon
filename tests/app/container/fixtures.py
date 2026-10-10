@@ -8,6 +8,7 @@ import httpx
 import pytest
 from codeagent.ai.transport.openai_compat import OpenAICompatClient
 
+
 async def _run_config(config, prompt: str, *, history=None, emit=None):
     from codeagent.core import AgentContext, run_agent_loop
 

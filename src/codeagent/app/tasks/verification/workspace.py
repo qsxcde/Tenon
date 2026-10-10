@@ -18,7 +18,17 @@ class WorkspaceInspector:
     """通过内容快照判定实际变更，Git 状态仅作为辅助信息。"""
 
     DEFAULT_EXCLUDES = frozenset(
-        {".git", ".codeagent", ".pytest_cache", "__pycache__", ".mypy_cache", ".ruff_cache", ".venv", "venv", "node_modules"}
+        {
+            ".git",
+            ".codeagent",
+            ".pytest_cache",
+            "__pycache__",
+            ".mypy_cache",
+            ".ruff_cache",
+            ".venv",
+            "venv",
+            "node_modules",
+        }
     )
 
     def __init__(self, cwd: str | Path, *, excludes: set[str] | None = None) -> None:
@@ -31,7 +41,9 @@ class WorkspaceInspector:
             for path in self.cwd.rglob("*"):
                 if path.is_file() and not self._excluded(path):
                     try:
-                        files[path.relative_to(self.cwd).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+                        files[path.relative_to(self.cwd).as_posix()] = hashlib.sha256(
+                            path.read_bytes()
+                        ).hexdigest()
                     except OSError:
                         continue
         return WorkspaceSnapshot(files, self._git_status())
@@ -39,7 +51,9 @@ class WorkspaceInspector:
     def compare(self, before: WorkspaceSnapshot, after: WorkspaceSnapshot) -> WorkspaceDiff:
         before_keys, after_keys = set(before.files), set(after.files)
         added, deleted = after_keys - before_keys, before_keys - after_keys
-        modified = {path for path in before_keys & after_keys if before.files[path] != after.files[path]}
+        modified = {
+            path for path in before_keys & after_keys if before.files[path] != after.files[path]
+        }
         return WorkspaceDiff(
             changed_files=tuple(sorted(added | modified | deleted)),
             added=tuple(sorted(added)),
@@ -66,7 +80,11 @@ class WorkspaceInspector:
             )
         except (OSError, subprocess.TimeoutExpired):
             return ()
-        return tuple(line for line in result.stdout.splitlines() if line.strip()) if result.returncode == 0 else ()
+        return (
+            tuple(line for line in result.stdout.splitlines() if line.strip())
+            if result.returncode == 0
+            else ()
+        )
 
 
 class VerificationCommandResolver:
@@ -75,11 +93,17 @@ class VerificationCommandResolver:
     def __init__(self, cwd: str | Path) -> None:
         self.cwd = Path(cwd).expanduser().resolve()
 
-    def resolve(self, explicit: str | None = None, *, configured: str | None = None) -> VerificationCommand | None:
+    def resolve(
+        self, explicit: str | None = None, *, configured: str | None = None
+    ) -> VerificationCommand | None:
         if explicit and explicit.strip():
             return VerificationCommand(explicit.strip(), "explicit")
         configured = configured or self._from_project_config()
-        return VerificationCommand(configured.strip(), "config") if configured and configured.strip() else self._detect()
+        return (
+            VerificationCommand(configured.strip(), "config")
+            if configured and configured.strip()
+            else self._detect()
+        )
 
     def _from_project_config(self) -> str | None:
         pyproject = self.cwd / "pyproject.toml"
@@ -87,7 +111,9 @@ class VerificationCommandResolver:
             try:
                 data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
                 codeagent = data.get("tool", {}).get("codeagent", {})
-                if isinstance(codeagent, dict) and isinstance(codeagent.get("verify") or codeagent.get("test_command"), str):
+                if isinstance(codeagent, dict) and isinstance(
+                    codeagent.get("verify") or codeagent.get("test_command"), str
+                ):
                     return codeagent.get("verify") or codeagent.get("test_command")
             except (OSError, tomllib.TOMLDecodeError):
                 pass
@@ -102,7 +128,9 @@ class VerificationCommandResolver:
         return None
 
     def _detect(self) -> VerificationCommand | None:
-        if (self.cwd / "pyproject.toml").is_file() and ((self.cwd / "tests").is_dir() or (self.cwd / "test").is_dir()):
+        if (self.cwd / "pyproject.toml").is_file() and (
+            (self.cwd / "tests").is_dir() or (self.cwd / "test").is_dir()
+        ):
             command = "uv run pytest -q" if shutil.which("uv") else "python -m pytest -q"
             return VerificationCommand(command, "detect:python")
         package = self.cwd / "package.json"
@@ -126,7 +154,10 @@ class VerificationCommandResolver:
         makefile = self.cwd / "Makefile"
         if makefile.is_file():
             try:
-                if any(line.startswith("test:") for line in makefile.read_text(encoding="utf-8", errors="ignore").splitlines()):
+                if any(
+                    line.startswith("test:")
+                    for line in makefile.read_text(encoding="utf-8", errors="ignore").splitlines()
+                ):
                     return VerificationCommand("make test", "detect:make")
             except OSError:
                 pass

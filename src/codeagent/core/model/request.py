@@ -107,10 +107,7 @@ async def prepare_context(
         if config.context_preparer is not None:
             budget = await describe_context_budget(config, legacy_view)
             emit(AgentEvent(EventType.CONTEXT_BUDGET, payload=budget))
-            if (
-                budget.status == "uncertain"
-                and config.uncertain_budget_policy == "fail"
-            ):
+            if budget.status == "uncertain" and config.uncertain_budget_policy == "fail":
                 result = evaluate_context_preflight(
                     budget,
                     config.context_preflight,
@@ -191,9 +188,7 @@ async def new_model_message(
                         name=event.tool_name or "",
                         args=dict(event.arguments or {}),
                         details=(
-                            {"argument_error": event.argument_error}
-                            if event.argument_error
-                            else {}
+                            {"argument_error": event.argument_error} if event.argument_error else {}
                         ),
                     )
                 )

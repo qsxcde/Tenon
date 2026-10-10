@@ -15,8 +15,8 @@ async def test_followup_continues_history():
     sess = _session(model)
     seen: list = []
     sess.subscribe(seen.append)
-    await (sess.run("第一轮"))
-    await (sess.followup("后续"))
+    await sess.run("第一轮")
+    await sess.followup("后续")
     assert [m.role for m in sess.history] == ["user", "assistant", "user", "assistant"]
     assert [m.content for m in sess.history if m.role == "user"] == ["第一轮", "后续"]
     # 第二轮模型输入含第一轮上下文(会话即状态,不重建会话)
@@ -24,19 +24,17 @@ async def test_followup_continues_history():
     assert EventType.TURN_END in _event_types(seen)
 
 
-
 async def test_session_restores_from_store():
     """恢复:既有 session_id + store → 历史恢复,继续对话追加同一会话。"""
     store = MemoryStore()
     first = _session(FakeClient(response="第一轮"), store=store, session_id="s1")
-    await (first.run("你好"))
+    await first.run("你好")
     assert first.session_id == "s1"
 
     second = _session(FakeClient(response="第二轮"), store=store, session_id="s1")
     assert [m.role for m in second.history] == ["user", "assistant"]
-    await (second.run("继续"))
+    await second.run("继续")
     assert len(store.load_messages("s1")) == 4
-
 
 
 async def test_session_restores_latest_context_tokens_from_store():
@@ -47,7 +45,7 @@ async def test_session_restores_latest_context_tokens_from_store():
         store=store,
         session_id="s1",
     )
-    await (first.run("你好"))
+    await first.run("你好")
 
     second = _session(
         FakeClient(response="第二轮"),
@@ -55,7 +53,6 @@ async def test_session_restores_latest_context_tokens_from_store():
         session_id="s1",
     )
     assert second.context_tokens == 12_400
-
 
 
 async def test_forked_session_started_carries_previous_session_id():
@@ -69,11 +66,10 @@ async def test_forked_session_started_carries_previous_session_id():
     sess = AgentSession(config, EventBus(), previous_session_id="parent-1")
     seen: list = []
     sess.subscribe(seen.append)
-    await (sess.run("你好"))
+    await sess.run("你好")
     started = next(e for e in seen if e.type == EventType.SESSION_STARTED)
     assert started.metadata.get("previous_session_id") == "parent-1"
     assert started.payload == "你好"  # payload 语义不变
-
 
 
 async def test_normal_session_started_has_no_previous_session_id():
@@ -81,10 +77,9 @@ async def test_normal_session_started_has_no_previous_session_id():
     sess = _session(FakeClient(response="OK"))
     seen: list = []
     sess.subscribe(seen.append)
-    await (sess.run("你好"))
+    await sess.run("你好")
     started = next(e for e in seen if e.type == EventType.SESSION_STARTED)
     assert "previous_session_id" not in started.metadata
-
 
 
 async def test_session_context_transform_is_model_only_and_does_not_change_history():
@@ -98,7 +93,7 @@ async def test_session_context_transform_is_model_only_and_does_not_change_histo
         return transformed
 
     sess = AgentSession(config, EventBus(), transform_context=transform)
-    await (sess.run("hello"))
+    await sess.run("hello")
 
     assert seen
     assert any(message.content == "memory-only" for message in seen[0])
@@ -133,8 +128,7 @@ def test_agent_session_keeps_stale_index_diagnostic_after_rebuild(tmp_path):
 
     assert session.recovery_report.status == "degraded"
     assert any(
-        diagnostic.code == "index_missing"
-        for diagnostic in session.recovery_report.diagnostics
+        diagnostic.code == "index_missing" for diagnostic in session.recovery_report.diagnostics
     )
 
 

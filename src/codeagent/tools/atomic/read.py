@@ -54,10 +54,7 @@ class ReadTool(AtomicTool):
             preview = raw[: min(BINARY_PREVIEW_BYTES, self.output_max_bytes)].decode(
                 "utf-8", errors="replace"
             )
-            content = (
-                f"[二进制或非 UTF-8 文件,共 {len(raw)} 字节,仅显示可读前缀]\n"
-                f"{preview}"
-            )
+            content = f"[二进制或非 UTF-8 文件,共 {len(raw)} 字节,仅显示可读前缀]\n{preview}"
             return GovernedText(
                 content,
                 {
@@ -85,9 +82,7 @@ class ReadTool(AtomicTool):
         end = start + min(limit, total - start)
         body = "\n".join(lines[start:end])
         # 字节+行双上限(行上限与 limit 相同,已在上方切片;这里主要兜字节)
-        body, trunc = truncate_head(
-            body, max_lines=limit, max_bytes=self.output_max_bytes
-        )
+        body, trunc = truncate_head(body, max_lines=limit, max_bytes=self.output_max_bytes)
 
         parts = [f"[{start + 1}-{end}/{total} 行]" if limited else f"[{total} 行]"]
         parts.append(body)
@@ -104,7 +99,9 @@ class ReadTool(AtomicTool):
                 "total_lines": total,
                 "shown_bytes": shown_bytes,
                 "shown_lines": shown_lines,
-                "truncated_by": "tool_lines" if limited else ("tool_bytes" if trunc.truncated else None),
+                "truncated_by": "tool_lines"
+                if limited
+                else ("tool_bytes" if trunc.truncated else None),
                 "path": str(path),
                 "range_start": start,
                 "range_end": end,

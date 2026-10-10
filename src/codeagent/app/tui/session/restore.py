@@ -76,7 +76,9 @@ class SessionRestoreMixin:
             )
         self._sync_context_status()
         self._show_recovery_report(session, include_healthy=False)
-        self.model.apply(AgentEvent(EventType.RESTORE_FINISHED, metadata={"session_id": session_id}))
+        self.model.apply(
+            AgentEvent(EventType.RESTORE_FINISHED, metadata={"session_id": session_id})
+        )
 
     async def _restore_large_session(self, session: Any) -> None:
         target_id = getattr(session, "session_id", None)
@@ -100,7 +102,10 @@ class SessionRestoreMixin:
         except asyncio.CancelledError:
             return
         except Exception as exc:
-            if self._manager.current is session and getattr(session, "session_id", None) == target_id:
+            if (
+                self._manager.current is session
+                and getattr(session, "session_id", None) == target_id
+            ):
                 message = report_unexpected_error("恢复会话", exc)
                 self.model.apply(
                     AgentEvent(
@@ -116,7 +121,10 @@ class SessionRestoreMixin:
                 self.model.append_info(message)
                 self._schedule_render()
             return
-        if self._manager.current is not session or getattr(session, "session_id", None) != target_id:
+        if (
+            self._manager.current is not session
+            or getattr(session, "session_id", None) != target_id
+        ):
             return
         self.model.transcript = restored.transcript
         self.model._assistant = restored._assistant

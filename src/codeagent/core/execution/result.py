@@ -96,11 +96,7 @@ def _resolve_cleanup(value: Any, status: str) -> bool | None:
 
 
 def _default_cleanup(cleanup_confirmed: bool | None) -> str:
-    return (
-        CleanupStatus.UNCERTAIN
-        if cleanup_confirmed is False
-        else CleanupStatus.CONFIRMED
-    )
+    return CleanupStatus.UNCERTAIN if cleanup_confirmed is False else CleanupStatus.CONFIRMED
 
 
 def _output_metadata(

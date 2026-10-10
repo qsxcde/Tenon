@@ -164,9 +164,7 @@ async def test_status_timer_refreshes_without_agent_events() -> None:
     model = TuiModel(clock=clock)
     model.status.set_task_status("verifying", command="pytest")
     backend = StatusBackend()
-    coordinator = TuiRenderCoordinator(
-        model, backend, status_refresh_interval=0.001
-    )
+    coordinator = TuiRenderCoordinator(model, backend, status_refresh_interval=0.001)
 
     coordinator.flush_render()
     initial_status_count = len(backend.statuses)

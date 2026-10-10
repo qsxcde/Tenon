@@ -13,6 +13,7 @@ from codeagent.core.context.diagnostic_models import (
 )
 from codeagent.core.context.preflight import ContextPreflightResult
 
+
 @dataclass(frozen=True)
 class ContextDiagnostics:
     """Read-only, cross-layer snapshot for context budget observability."""
@@ -59,9 +60,7 @@ class ContextDiagnostics:
         if snapshot.status == "uncertain":
             certainty = "uncertain"
         elif snapshot.window_source in {"fallback", "unknown", "compaction"}:
-            certainty = (
-                "fallback" if snapshot.window_source == "fallback" else "uncertain"
-            )
+            certainty = "fallback" if snapshot.window_source == "fallback" else "uncertain"
         else:
             certainty = "known"
         return cls(
@@ -248,9 +247,7 @@ class ContextDiagnostics:
             "actual_usage": self._actual_usage_dict(),
             "preflight": preflight,
             "compaction": (
-                self.compaction.as_dict()
-                if self.compaction is not None
-                else "not_available"
+                self.compaction.as_dict() if self.compaction is not None else "not_available"
             ),
             "tool_results": [item.as_dict() for item in self.tool_results],
             "last_failure": dict(self.last_failure) if self.last_failure else None,

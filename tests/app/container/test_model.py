@@ -31,9 +31,12 @@ async def test_real_provider_runs_through_loop():
     from codeagent.core import EventType
 
     events = []
-    with patch("codeagent.app.composition.model.selection.create_llm", return_value=llm), patch(
-        "codeagent.ai.transport.openai_compat.httpx.AsyncClient",
-        return_value=mock_async_client,
+    with (
+        patch("codeagent.app.composition.model.selection.create_llm", return_value=llm),
+        patch(
+            "codeagent.ai.transport.openai_compat.httpx.AsyncClient",
+            return_value=mock_async_client,
+        ),
     ):
         config = create_agent_config()
         history = await _run_config(config, "hi", emit=events.append)
@@ -43,7 +46,6 @@ async def test_real_provider_runs_through_loop():
     assert EventType.MESSAGE_UPDATE in types
     assert history[-1].role == "assistant"
     assert history[-1].content == "ok"
-
 
 
 async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
@@ -68,7 +70,7 @@ async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
     assert any(str(tmp_path / "AGENTS.md") in s for s in sources)
     # 运行一轮:模型收到的首条消息为 system,含基础提示词 + 来源标注
     events: list = []
-    await (_run_config(ports, "你好", emit=events.append))
+    await _run_config(ports, "你好", emit=events.append)
     assert model.call_history
     first = model.call_history[0]["messages"][0]
     assert first["role"] == "system"
@@ -76,7 +78,6 @@ async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
     assert "项目级指令" in first["content"]
     assert '<project_instructions path="' in first["content"]
     assert "全局指令" in first["content"]
-
 
 
 async def test_system_prompt_only_once_and_hot_swap_stable(tmp_path, monkeypatch):
@@ -97,16 +98,17 @@ async def test_system_prompt_only_once_and_hot_swap_stable(tmp_path, monkeypatch
     import asyncio
 
     events: list = []
-    history = await (_run_config(ports, "第一问", emit=events.append))
-    await (_run_config(ports, "第二问", history=history, emit=events.append))
+    history = await _run_config(ports, "第一问", emit=events.append)
+    await _run_config(ports, "第二问", history=history, emit=events.append)
     for call in model.call_history:
         roles = [m["role"] for m in call["messages"]]
         assert roles.count("system") == 1  # 每轮恰好一条
         assert roles[0] == "system"
 
 
-
-async def test_bootstrap_is_present_once_per_model_context_for_new_and_recovered_turns(tmp_path, monkeypatch):
+async def test_bootstrap_is_present_once_per_model_context_for_new_and_recovered_turns(
+    tmp_path, monkeypatch
+):
     """Bootstrap 随每个新模型上下文出现一次，普通轮次不在历史中重复堆积。"""
     import json
 
@@ -142,14 +144,13 @@ async def test_bootstrap_is_present_once_per_model_context_for_new_and_recovered
 
     events: list = []
     history: list = []
-    history = await (_run_config(ports, "第一问", history=history, emit=events.append))
-    history = await (_run_config(ports, "第二问", history=history, emit=events.append))
+    history = await _run_config(ports, "第一问", history=history, emit=events.append)
+    history = await _run_config(ports, "第二问", history=history, emit=events.append)
     assert history
     for call in model.call_history:
         roles = [message["role"] for message in call["messages"]]
         assert roles.count("system") == 1
         assert BOOTSTRAP_TAG in call["messages"][0]["content"]
-
 
 
 async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkeypatch):
@@ -192,11 +193,10 @@ async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkey
         compact_budget=50,
     )
     for text in ("问1" * 40, "问2" * 40, "问3" * 40):
-        await (session.run(text))
-    assert await (session.compact()) is True
-    await (session.run("问4" * 40))
+        await session.run(text)
+    assert await session.compact() is True
+    await session.run("问4" * 40)
     assert BOOTSTRAP_TAG in model.call_history[-1]["messages"][0]["content"]
-
 
 
 async def test_config_inject_skills_section_and_tool(tmp_path, monkeypatch):
@@ -217,7 +217,7 @@ async def test_config_inject_skills_section_and_tool(tmp_path, monkeypatch):
     import asyncio
 
     events: list = []
-    await (_run_config(ports, "你好", emit=events.append))
+    await _run_config(ports, "你好", emit=events.append)
     first = model.call_history[0]["messages"][0]
     assert "<available_skills>" in first["content"]
     assert "- fmt: 格式化。 (来源:" in first["content"]
@@ -229,7 +229,6 @@ async def test_config_inject_skills_section_and_tool(tmp_path, monkeypatch):
     assert "技能不存在" in out.content
 
 
-
 async def test_session_with_summarizer_can_compact():
     """注入桩 Summarizer 的会话可压缩;压缩不可用(未注入)时明确报错。"""
     with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
@@ -239,13 +238,12 @@ async def test_session_with_summarizer_can_compact():
         from codeagent.app.container import create_agent_session
 
         session = create_agent_session(summarizer=_StubSummarizer())
-        assert await (session.compact()) is False  # 空历史:全保留,不压缩
+        assert await session.compact() is False  # 空历史:全保留,不压缩
         from codeagent.session import AgentSession
 
         plain = create_agent_session()
         with pytest.raises(ValueError, match="压缩不可用"):
-            await (plain.compact())
-
+            await plain.compact()
 
 
 async def test_tui_app_with_store_persists_session_and_usage():
@@ -278,7 +276,7 @@ async def test_tui_app_with_store_persists_session_and_usage():
         # _LazyConfig 首次 run 才装配模型客户端:run 必须在 mock 作用域内。
         session = app._manager.current
         assert session is not None
-        await (session.run("hi"))
+        await session.run("hi")
     # 首轮成功后会话文件才落盘。
     assert store.get(session.session_id) is not None
     # usage 落库并经会话读取
@@ -286,7 +284,6 @@ async def test_tui_app_with_store_persists_session_and_usage():
     assert total.input_tokens == 100
     assert total.output_tokens == 20
     assert total.cached_tokens == 60
-
 
 
 def test_usage_of_openai_cached_tokens():
@@ -309,7 +306,6 @@ def test_usage_of_openai_cached_tokens():
     }
 
 
-
 def test_usage_of_vendor_cached_tokens():
     """归一兼容供应商口径:prompt_cache_hit_tokens 兜底缓存命中。"""
     from codeagent.app.container import _usage_of
@@ -323,7 +319,6 @@ def test_usage_of_vendor_cached_tokens():
     )
     assert norm["cached_tokens"] == 120
     assert norm["reasoning_tokens"] == 0
-
 
 
 def test_usage_of_missing_cached_defaults_zero():

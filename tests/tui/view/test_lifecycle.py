@@ -41,7 +41,6 @@ def test_fake_backend_regression_contract_covers_top_level_interactions():
     assert backend.exited is not None
 
 
-
 async def test_submit_starts_run_and_renders():
     """提交触发会话运行,事件驱动渲染(对应 spec「对话输入与回复渲染」)。"""
     app, backend, _ = _make_app()
@@ -52,7 +51,7 @@ async def test_submit_starts_run_and_renders():
         backend.submit("你好")
         await _wait_for_conversation(app)
 
-    await (_run())
+    await _run()
     rendered_plain = ["".join(rich_to_plain(lines)) for lines in backend.renders]
     assert any("你好" in text for text in rendered_plain)
     assert "ok" in rendered_plain[-1]
@@ -60,7 +59,6 @@ async def test_submit_starts_run_and_renders():
     # 状态栏以富样式行传递(design D5)。
     assert backend.statuses and all(isinstance(s, list) for s in backend.statuses)
     assert "ready" not in "".join(s.text for s in backend.statuses[-1])
-
 
 
 async def test_submit_echoes_user_before_async_conversation_starts():
@@ -71,7 +69,7 @@ async def test_submit_echoes_user_before_async_conversation_starts():
         assert "› 即时问题" in "\n".join(app.model.transcript.all_lines(120))
         await _wait_for_conversation(app)
 
-    await (_run())
+    await _run()
 
 
 async def test_submit_renders_preparing_frame_before_session_run():
@@ -180,7 +178,6 @@ async def test_unexpected_task_failure_is_rendered_instead_of_becoming_orphaned(
     assert app.model.running is False
 
 
-
 def test_submit_during_busy_state_preserves_draft_and_explains_next_action():
     app, backend, manager = _make_app()
     app.model.running = True
@@ -192,7 +189,6 @@ def test_submit_during_busy_state_preserves_draft_and_explains_next_action():
     assert "等待" in _rendered_text(app, backend)
 
 
-
 async def test_shutdown_is_idempotent_and_emits_complete_document():
     app, backend, _ = _make_app()
     app.model.append_info("退出前保留")
@@ -201,11 +197,10 @@ async def test_shutdown_is_idempotent_and_emits_complete_document():
         await app.shutdown()
         await app.shutdown()
 
-    await (_run())
+    await _run()
 
     assert backend.exited is not None
     assert any("退出前保留" in line for line in backend.exited)
-
 
 
 async def test_shutdown_ignores_late_events_after_unsubscribe():
@@ -216,11 +211,10 @@ async def test_shutdown_ignores_late_events_after_unsubscribe():
         await app.shutdown()
         manager.current._emit(AgentEvent(EventType.TEXT_DELTA, payload="晚到"))
 
-    await (_run())
+    await _run()
 
     assert backend.exited is not None
     assert not any("晚到" in line for line in app.model.transcript.all_lines(80))
-
 
 
 def test_interrupt_running_aborts():
@@ -243,7 +237,6 @@ def test_interrupt_running_schedules_cancel_feedback_without_waiting_for_termina
     assert len(backend.renders) == before + 1
 
 
-
 def test_interrupt_idle_prompts_quit_hint():
     """空闲 Esc → 提示「按 Ctrl+C 退出」,不再直接退出(收尾补丁:退出键位拆分)。"""
     app, backend, _ = _make_app()
@@ -254,7 +247,6 @@ def test_interrupt_idle_prompts_quit_hint():
     assert backend.exited is None  # 不退出
     text = _rendered_text(app, backend)
     assert "Ctrl+C" in text
-
 
 
 def test_quit_idle_exits_with_doc():
@@ -270,7 +262,6 @@ def test_quit_idle_exits_with_doc():
     assert "回复" in doc
 
 
-
 def test_quit_running_aborts_then_exits():
     """运行中 Ctrl+C → 先中止当前轮(abort),再退出(未完成轮次不落盘)。"""
     app, backend, manager = _make_app()
@@ -278,7 +269,6 @@ def test_quit_running_aborts_then_exits():
     backend.quit()
     assert manager.current.aborted is True
     assert backend.exited is not None
-
 
 
 def test_run_cancelled_event_returns_idle():
@@ -289,7 +279,6 @@ def test_run_cancelled_event_returns_idle():
     app.model.apply(AgentEvent(EventType.RUN_CANCELLED))
     assert app.model.running is False
     assert app.model.activity_visible is False
-
 
 
 async def test_render_coalescing():
@@ -311,8 +300,7 @@ async def test_render_coalescing():
         assert len(backend.renders) - before == 1
         app._render_coordinator.stop_status_timer()
 
-    await (_run())
-
+    await _run()
 
 
 @pytest.mark.slow
@@ -332,8 +320,7 @@ async def test_render_scheduler_delays_frames_inside_target_interval():
         assert len(backend.renders) == before + 1
         app._render_coordinator.stop_status_timer()
 
-    await (scenario())
-
+    await scenario()
 
 
 async def test_activity_timer_runs_only_while_visible():
@@ -350,7 +337,7 @@ async def test_activity_timer_runs_only_while_visible():
         assert app._activity_task is None
         app._render_coordinator.stop_status_timer()
 
-    await (_run())
+    await _run()
 
 
 async def test_status_timer_does_not_block_input_and_esc_stops_it():
@@ -393,7 +380,6 @@ async def test_shutdown_stops_status_timer():
     assert app._render_coordinator.status_task is None
 
 
-
 def test_click_toggles_tool_expand():
     """点击工具行 → 切换折叠(spec「工具调用点击展开」;design D4)。"""
     app, backend, _ = _make_app()
@@ -414,7 +400,6 @@ def test_click_toggles_tool_expand():
     assert tool.expanded is False
 
 
-
 def test_wheel_scroll_up_unfollows_and_new_output_does_not_jump():
     """滚轮上滚 → 解除跟随;新输出不强制跳回底部(spec「上滚浏览历史」)。"""
     app, backend, manager = _make_app()
@@ -430,7 +415,6 @@ def test_wheel_scroll_up_unfollows_and_new_output_does_not_jump():
     assert app.model.transcript.render(60, 10)[0][0].text == first_line
 
 
-
 def test_scroll_back_to_bottom_restores_follow():
     """滚回底部 → 恢复跟随(spec「回到底部恢复跟随」)。"""
     app, backend, _ = _make_app()
@@ -440,7 +424,6 @@ def test_scroll_back_to_bottom_restores_follow():
     backend.scroll(-1000)  # 持续下滚越过底部
     app.model.transcript.render(60, 10)
     assert app.model.transcript.follow is True
-
 
 
 def test_keyboard_page_up_down_dispatches_scroll():
@@ -457,7 +440,6 @@ def test_keyboard_page_up_down_dispatches_scroll():
     assert app.model.transcript.follow is True
 
 
-
 def test_start_registers_scroll_handler():
     """start() 注册 on_scroll 回调(端口接线;design T-47)。"""
     backend = StubBackend()
@@ -465,7 +447,6 @@ def test_start_registers_scroll_handler():
     app.start()  # StubBackend.run 为 no-op,只测注册
     assert backend.scroll is not None
     assert backend.scroll(5) is None  # 处理器可调用且不抛错
-
 
 
 def test_confirm_suppresses_async_repopulate():
@@ -487,7 +468,6 @@ def test_confirm_suppresses_async_repopulate():
     # 标志只消费一次:继续编辑恢复正常建议计算。
     backend.input_changed("/to")
     assert app._suggestions == ["tools"]
-
 
 
 def test_selector_empty_arg_shows_all_candidates():

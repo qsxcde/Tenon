@@ -195,7 +195,7 @@ async def test_resize_debouncer_runs_once_after_burst() -> None:
         await asyncio.sleep(0)
         assert calls == ["resize"]
 
-    await (scenario())
+    await scenario()
 
 
 async def test_immediate_flush_cancels_already_queued_frame() -> None:

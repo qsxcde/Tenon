@@ -126,8 +126,14 @@ def test_textual_imports_are_confined_to_adapter_package() -> None:
         if path.is_relative_to(allowed_root):
             continue
         for node in ast.walk(tree):
-            if isinstance(node, ast.Import) and any(alias.name == "textual" or alias.name.startswith("textual.") for alias in node.names):
+            if isinstance(node, ast.Import) and any(
+                alias.name == "textual" or alias.name.startswith("textual.") for alias in node.names
+            ):
                 violations.append(str(path))
-            if isinstance(node, ast.ImportFrom) and node.module and (node.module == "textual" or node.module.startswith("textual.")):
+            if (
+                isinstance(node, ast.ImportFrom)
+                and node.module
+                and (node.module == "textual" or node.module.startswith("textual."))
+            ):
                 violations.append(str(path))
     assert violations == []

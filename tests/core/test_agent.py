@@ -94,7 +94,7 @@ async def test_agent_prompt_updates_context_and_notifies_subscribers() -> None:
     events = []
     unsubscribe = agent.subscribe(events.append)
 
-    await (agent.prompt("hi"))
+    await agent.prompt("hi")
     unsubscribe()
 
     assert [message.content for message in agent.context.messages] == ["hi", "hello"]
@@ -138,7 +138,7 @@ async def test_agent_continue_rejects_assistant_tail() -> None:
     agent = Agent(context, AgentLoopConfig(model=_Model(["retry"])))
 
     with pytest.raises(ValueError, match="assistant"):
-        await (agent.continue_())
+        await agent.continue_()
 
 
 async def test_agent_follow_up_waits_for_active_run_and_starts_next_turn() -> None:
@@ -160,7 +160,7 @@ async def test_agent_follow_up_waits_for_active_run_and_starts_next_turn() -> No
             "second",
         ]
 
-    await (scenario())
+    await scenario()
 
 
 async def test_agent_steer_is_injected_after_tool_batch() -> None:
@@ -187,7 +187,7 @@ async def test_agent_steer_is_injected_after_tool_batch() -> None:
         assert model.calls[1][-1].role == "user"
         assert model.calls[1][-1].content == "focus on the error"
 
-    await (scenario())
+    await scenario()
 
 
 async def test_agent_abort_cancels_run_without_committing_partial_messages() -> None:
@@ -206,7 +206,7 @@ async def test_agent_abort_cancels_run_without_committing_partial_messages() -> 
         assert any(event.type == EventType.ABORTED for event in events)
         assert agent.abort() is False
 
-    await (scenario())
+    await scenario()
 
 
 async def test_agent_discards_steer_messages_when_run_is_cancelled() -> None:
@@ -225,12 +225,10 @@ async def test_agent_discards_steer_messages_when_run_is_cancelled() -> None:
         await agent.prompt("next")
 
         assert all(
-            message.content != "stale after cancellation"
-            for message in agent.context.messages
+            message.content != "stale after cancellation" for message in agent.context.messages
         )
 
-
-    await (scenario())
+    await scenario()
 
 
 async def test_agent_steer_not_consumed_by_a_later_independent_run() -> None:
@@ -246,7 +244,7 @@ async def test_agent_steer_not_consumed_by_a_later_independent_run() -> None:
 
         assert all(message.content != "too late" for message in agent.context.messages)
 
-    await (scenario())
+    await scenario()
 
 
 async def test_cancelled_follow_up_is_removed_without_starting_a_new_turn() -> None:
@@ -265,9 +263,6 @@ async def test_cancelled_follow_up_is_removed_without_starting_a_new_turn() -> N
         await running
 
         assert len(model.calls) == 1
-        assert all(
-            message.content != "cancelled follow-up"
-            for message in agent.context.messages
-        )
+        assert all(message.content != "cancelled follow-up" for message in agent.context.messages)
 
-    await (scenario())
+    await scenario()

@@ -93,9 +93,7 @@ class SubagentFailure:
         if not isinstance(self.retryable, bool):
             raise SubagentContractError("retryable must be a bool", code="invalid_failure")
         if not isinstance(self.cleanup_uncertain, bool):
-            raise SubagentContractError(
-                "cleanup_uncertain must be a bool", code="invalid_failure"
-            )
+            raise SubagentContractError("cleanup_uncertain must be a bool", code="invalid_failure")
 
     def as_metadata(self) -> dict[str, object]:
         return {

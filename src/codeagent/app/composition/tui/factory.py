@@ -125,7 +125,9 @@ class TuiAssembler(TuiConfigMixin):
             method = getattr(self.package_manager, action)
             record = method(values[0], scope=scope)
             verb = "安装" if action == "install" else "更新"
-            return f"已{verb} Package {record.package_id}@{record.version or 'unversioned'} ({scope})"
+            return (
+                f"已{verb} Package {record.package_id}@{record.version or 'unversioned'} ({scope})"
+            )
         if action == "remove":
             if len(values) != 1:
                 raise ValueError("用法: /skills remove <package-id> [--project]")

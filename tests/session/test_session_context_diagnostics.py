@@ -35,9 +35,7 @@ def test_session_budget_state_merges_runtime_diagnostics_without_losing_estimate
             ContextPreflightConfig(warning_headroom_tokens=8_000),
         )
     )
-    state.record_actual_usage(
-        {"input_tokens": 1_700, "output_tokens": 80, "cached_tokens": 400}
-    )
+    state.record_actual_usage({"input_tokens": 1_700, "output_tokens": 80, "cached_tokens": 400})
     state.record_compaction(
         {
             "trigger": "auto",

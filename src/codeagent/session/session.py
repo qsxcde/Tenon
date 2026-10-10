@@ -23,6 +23,7 @@ from codeagent.core.contracts.messages import Message
 from codeagent.core.orchestration.config import AgentLoopConfig
 from codeagent.core.orchestration.loop import DEFAULT_RECURSION_LIMIT
 from codeagent.session.compaction import CompactionPolicyConfig
+from codeagent.session.persistence_control import SessionPersistenceMixin
 from codeagent.session.compaction.summarizer import Summarizer
 from codeagent.session.constants import (
     COMPACTION_RESERVE_TOKENS,
@@ -48,6 +49,7 @@ class AgentSession(
     SessionEventMixin,
     SessionLifecycleMixin,
     SessionCompactionMixin,
+    SessionPersistenceMixin,
     SessionSubagentMixin,
 ):
     """Public facade for one stateful agent conversation."""
@@ -74,9 +76,7 @@ class AgentSession(
         policy: ApprovalPolicy | None = None,
         lifecycle_hooks: tuple[LifecycleHook, ...] | None = None,
     ) -> None:
-        self._lifecycle_hooks = (
-            tuple(lifecycle_hooks) if lifecycle_hooks is not None else None
-        )
+        self._lifecycle_hooks = tuple(lifecycle_hooks) if lifecycle_hooks is not None else None
         if self._lifecycle_hooks is not None:
             if not is_dataclass(config):
                 getattr(config, "model")
@@ -140,7 +140,11 @@ class AgentSession(
     ) -> int:
         if context_window is None:
             model_window = getattr(getattr(config, "model", None), "context_window", None)
-            return model_window if type(model_window) is int and model_window > 0 else DEFAULT_CONTEXT_WINDOW
+            return (
+                model_window
+                if type(model_window) is int and model_window > 0
+                else DEFAULT_CONTEXT_WINDOW
+            )
         if type(context_window) is not int or context_window < 1:
             raise ValueError("context_window must be positive")
         return context_window
@@ -261,31 +265,12 @@ class AgentSession(
     ) -> None:
         return await self._run_coordinator.run(text, recursion_limit, policy)
 
-    def _link_persistence_parents(self, messages: list[Message]) -> None:
-        parent_id = self._summary_entry_id or (self._history[-1].id if self._history else None)
-        for message in messages:
-            if message.parent_id is None:
-                message.parent_id = parent_id
-            parent_id = message.id
-
-    def _ensure_persisted(self) -> None:
-        self._persistence.ensure_persisted()
-
-    def ensure_persisted(self) -> None:
-        """Persist a deferred session header before an explicit metadata edit."""
-        self._ensure_persisted()
-
-    def update_persistence_options(self, **options: Any) -> None:
-        self._persistence.update_options(**options)
-
     def _rollback(self, before_ids: set[str]) -> None:
         self._history = [message for message in self._history if message.id in before_ids]
 
     def _rollback_status(self) -> CommitStatus:
         return (
-            CommitStatus.UNCERTAIN
-            if self._runtime.cleanup_uncertain
-            else CommitStatus.ROLLED_BACK
+            CommitStatus.UNCERTAIN if self._runtime.cleanup_uncertain else CommitStatus.ROLLED_BACK
         )
 
     @staticmethod
@@ -294,6 +279,9 @@ class AgentSession(
 
 
 __all__ = [
-    "AgentSession", "COMPACTION_RESERVE_TOKENS",
-    "DEFAULT_CONTEXT_WINDOW", "SUMMARY_ID_PREFIX", "SUMMARY_PREFIX",
+    "AgentSession",
+    "COMPACTION_RESERVE_TOKENS",
+    "DEFAULT_CONTEXT_WINDOW",
+    "SUMMARY_ID_PREFIX",
+    "SUMMARY_PREFIX",
 ]

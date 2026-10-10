@@ -41,12 +41,23 @@ async def test_plan_policy_is_enforced_by_react_tool_boundary():
     from codeagent.ai.providers.fake import FakeClient
     from codeagent.app.container import ChatModelPort
     from codeagent.app.composition.tools.adapter import adapt_tools
-    from codeagent.core import AgentContext, AgentLoopConfig, EventType, ToolDecision, run_agent_loop
+    from codeagent.core import (
+        AgentContext,
+        AgentLoopConfig,
+        EventType,
+        ToolDecision,
+        run_agent_loop,
+    )
     from codeagent.tools.atomic import EditTool, ReadTool, WriteTool
 
     model = FakeClient(
         steps=[
-            {"content": "", "tool_calls": [{"name": "write", "args": {"file_path": "x.py", "content": "x"}, "id": "w1"}]},
+            {
+                "content": "",
+                "tool_calls": [
+                    {"name": "write", "args": {"file_path": "x.py", "content": "x"}, "id": "w1"}
+                ],
+            },
             {"content": "计划已完成"},
         ]
     )
@@ -67,7 +78,7 @@ async def test_plan_policy_is_enforced_by_react_tool_boundary():
         before_tool_call=before_tool_call,
     )
 
-    await (run_agent_loop(AgentContext(), config, "plan", emit=events.append))
+    await run_agent_loop(AgentContext(), config, "plan", emit=events.append)
 
     result = next(event for event in events if event.type == EventType.TOOL_EXECUTION_END)
     assert result.payload.status == "rejected"

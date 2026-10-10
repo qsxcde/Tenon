@@ -94,9 +94,9 @@ def test_bash_passes_resource_limits_to_process_request(tmp_path) -> None:
         cleanup_timeout=0.2,
     )
     with patch("codeagent.tools.atomic.bash.resolve_bash", return_value="/bin/bash"):
-        result = BashTool(
-            cwd=str(tmp_path), runner=StubRunner(), resource_limits=limits
-        ).invoke(BashTool.Args(command="echo ok"))
+        result = BashTool(cwd=str(tmp_path), runner=StubRunner(), resource_limits=limits).invoke(
+            BashTool.Args(command="echo ok")
+        )
 
     assert result
     request = captured[0]

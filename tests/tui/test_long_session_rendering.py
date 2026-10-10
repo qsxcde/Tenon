@@ -48,9 +48,7 @@ def test_reading_anchor_survives_height_change_before_viewport() -> None:
     transcript.render(80, 8)
     transcript.scroll(12)
     transcript.render(80, 8)
-    anchor = next(
-        block for row in range(8) if (block := transcript.block_at(row)) is not None
-    )
+    anchor = next(block for row in range(8) if (block := transcript.block_at(row)) is not None)
     blocks[0].resize(12)
 
     transcript.render(80, 8)

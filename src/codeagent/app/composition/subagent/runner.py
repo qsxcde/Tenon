@@ -8,27 +8,18 @@ from typing import Any
 
 from codeagent.core.contracts.events import AgentEvent
 from codeagent.core.contracts.subagents import (
-    SubagentFailurePhase,
     SubagentReasonCode,
     SubagentRequest,
     SubagentResult,
-    SubagentStatus,
+)
+from codeagent.core.subagent import (
+    SubagentSlotRegistry,
+    admit_request,
+    attribute_runner_exception,
 )
 
 from .active import ActiveDelegation
 from .budget import effective_budget
-from .runner_execution import run_active
-from .runner_support import (
-    DEFAULT_CLEANUP_TIMEOUT,
-    cancel_session,
-    close_active,
-)
-from .runner_results import (
-    cancellation_result,
-    failure_result,
-    finalize_result,
-    rejected_result,
-)
 from .context import validate_context_items
 from .event_diagnostics import (
     make_finished_event,
@@ -37,12 +28,29 @@ from .event_diagnostics import (
 )
 from .lifecycle import commit_terminal, mark_queued
 from .profiles import profile_error_message, profile_for
+from .runner_execution import run_active
+from .runner_results import (
+    attributed_result,
+    cancellation_result,
+    finalize_result,
+    rejected_result,
+)
+from .runner_support import (
+    DEFAULT_CLEANUP_TIMEOUT,
+    cancel_session,
+    close_active,
+)
 
 ChildSessionFactory = Callable[[SubagentRequest], Any]
 
 
 class SerialSubagentRunner:
-    """Run at most one isolated child Session at a time."""
+    """Run at most one isolated child Session at a time.
+
+    Admission ordering, delegation identity arbitration and terminal
+    attribution are core policy (``codeagent.core.subagent``); this class only
+    wires those decisions onto a real child Session.
+    """
 
     def __init__(
         self,
@@ -57,14 +65,14 @@ class SerialSubagentRunner:
         self._child_session_factory = child_session_factory
         self._cleanup_timeout = float(cleanup_timeout)
         self._lock = asyncio.Lock()
-        self._active: dict[str, ActiveDelegation] = {}
+        self._slots: SubagentSlotRegistry[ActiveDelegation] = SubagentSlotRegistry()
 
     @property
     def active_delegations(self) -> dict[str, str | None]:
         """Return a read-only diagnostic snapshot of active child identities."""
         return {
             delegation_id: getattr(active.session, "session_id", None)
-            for delegation_id, active in self._active.items()
+            for delegation_id, active in self._slots.items()
         }
 
     async def execute(
@@ -80,7 +88,12 @@ class SerialSubagentRunner:
         active = ActiveDelegation(request, cleanup_timeout=self._cleanup_timeout)
         active.execution_task = asyncio.current_task()
         active.budget = effective_budget(request.budget)
-        self._active[request.delegation_id] = active
+        if not self._slots.reserve(request.delegation_id, active):
+            return rejected_result(
+                request,
+                SubagentReasonCode.INVALID_REQUEST.value,
+                "委派标识已经处于活动状态",
+            )
         result: SubagentResult | None = None
         re_raise_cancelled = False
         mark_queued(active)
@@ -109,36 +122,27 @@ class SerialSubagentRunner:
             result = cancellation_result(active)
             re_raise_cancelled = externally_cancelled
         except Exception as exc:  # noqa: BLE001 - normalize runner failures
-            result = failure_result(
-                active,
-                SubagentStatus.FAILED,
-                SubagentReasonCode.EXECUTION_FAILED,
-                SubagentFailurePhase.RUNNING,
-                exc,
-            )
+            result = attributed_result(active, attribute_runner_exception(exc))
         finally:
             active.event_forwarding_closed = True
             await close_active(active, timeout=self._cleanup_timeout)
         if result is None:  # pragma: no cover - defensive terminal fallback
-            result = failure_result(
+            result = attributed_result(
                 active,
-                SubagentStatus.FAILED,
-                SubagentReasonCode.EXECUTION_FAILED,
-                SubagentFailurePhase.RUNNING,
-                RuntimeError("子 Agent 没有产生终态结果"),
+                attribute_runner_exception(RuntimeError("子 Agent 没有产生终态结果")),
             )
         result = finalize_result(result, active)
         result = commit_terminal(active, result)
         try:
             await publish_event(on_event, make_finished_event(active, result), active)
         finally:
-            self._active.pop(request.delegation_id, None)
+            self._slots.release(request.delegation_id)
         if re_raise_cancelled:
             raise asyncio.CancelledError
         return result
 
     async def cancel(self, delegation_id: str) -> bool:
-        active = self._active.get(delegation_id)
+        active = self._slots.get(delegation_id)
         if active is None:
             return False
         active.cancel_requested = True
@@ -147,47 +151,35 @@ class SerialSubagentRunner:
         return True
 
     def _validate_request(self, request: Any) -> SubagentResult | None:
+        profile_error, context_error = self._collect_application_errors(request)
+        rejection = admit_request(
+            request,
+            active_ids=self._slots.ids(),
+            profile_error=profile_error,
+            context_error=context_error,
+        )
+        if rejection is None:
+            return None
+        return rejected_result(request, rejection.reason_code.value, rejection.message)
+
+    @staticmethod
+    def _collect_application_errors(
+        request: Any,
+    ) -> tuple[str | None, str | None]:
+        """Run the application-owned checks, leaving their ordering to core."""
         if not isinstance(request, SubagentRequest):
-            return rejected_result(
-                request,
-                SubagentReasonCode.INVALID_REQUEST.value,
-                "委派请求类型无效",
-            )
+            return None, None
+        profile_error: str | None = None
         try:
             profile_for(request.profile)
         except ValueError:
-            return rejected_result(
-                request,
-                SubagentReasonCode.PERMISSION_DENIED.value,
-                profile_error_message(request.profile),
-            )
-        try:
-            effective_budget(request.budget)
-        except ValueError as exc:
-            return rejected_result(
-                request,
-                SubagentReasonCode.INVALID_REQUEST.value,
-                f"budget 无效: {exc}",
-            )
-        if request.depth > request.max_depth or request.depth > 1:
-            return rejected_result(
-                request,
-                SubagentReasonCode.DEPTH_EXCEEDED.value,
-                "子 Agent 深度超过当前 MVP 限制",
-            )
+            profile_error = profile_error_message(request.profile)
+        context_error: str | None = None
         try:
             validate_context_items(request.context)
         except ValueError as exc:
-            return rejected_result(
-                request,
-                SubagentReasonCode.INVALID_REQUEST.value,
-                str(exc),
-            )
-        if request.delegation_id in self._active:
-            return rejected_result(
-                request,
-                SubagentReasonCode.INVALID_REQUEST.value,
-                "委派标识已经处于活动状态",
-            )
-        return None
+            context_error = str(exc)
+        return profile_error, context_error
+
+
 __all__ = ["ChildSessionFactory", "SerialSubagentRunner"]

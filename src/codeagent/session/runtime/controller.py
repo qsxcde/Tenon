@@ -223,14 +223,11 @@ class SessionRuntime(RuntimeEventMixin, SessionExecutionMixin):
 
     def record_usage(self, payload: dict[str, Any]) -> None:
         self.turn_usage = UsageStats(
-            input_tokens=self.turn_usage.input_tokens
-            + int(payload.get("input_tokens", 0) or 0),
-            output_tokens=self.turn_usage.output_tokens
-            + int(payload.get("output_tokens", 0) or 0),
+            input_tokens=self.turn_usage.input_tokens + int(payload.get("input_tokens", 0) or 0),
+            output_tokens=self.turn_usage.output_tokens + int(payload.get("output_tokens", 0) or 0),
             reasoning_tokens=self.turn_usage.reasoning_tokens
             + int(payload.get("reasoning_tokens", 0) or 0),
-            cached_tokens=self.turn_usage.cached_tokens
-            + int(payload.get("cached_tokens", 0) or 0),
+            cached_tokens=self.turn_usage.cached_tokens + int(payload.get("cached_tokens", 0) or 0),
         )
 
     def abort(self) -> bool:

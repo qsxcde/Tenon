@@ -104,9 +104,7 @@ class Summarizer(Protocol):
     - 返回摘要文本;实现方在组合根(离线测试注入桩,真实实现接 LLM)。
     """
 
-    async def summarize(
-        self, messages: list[Message], prev_summary: str | None
-    ) -> str: ...
+    async def summarize(self, messages: list[Message], prev_summary: str | None) -> str: ...
 
 
 class ModelPort(Protocol):
@@ -167,4 +165,3 @@ class ToolDecision:
     @classmethod
     def block(cls, reason: str) -> "ToolDecision":
         return cls("block", reason)
-

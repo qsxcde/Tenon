@@ -16,7 +16,6 @@ def test_context_usage_properties_expose_latest_input_and_window():
     assert sess.context_tokens == 1_240
 
 
-
 async def test_successful_run_persists_usage():
     """成功轮:本轮聚合 usage(input/output/reasoning/cached)落库。"""
     store = MemoryStore()
@@ -29,13 +28,12 @@ async def test_successful_run_persists_usage():
         responses=["回复"],
     )
     sess = _session(model, store=store)
-    await (sess.run("hi"))
+    await sess.run("hi")
     total = store.load_usage(sess.session_id)
     assert total.input_tokens == 100
     assert total.output_tokens == 20
     assert total.cached_tokens == 60
     assert total.reasoning_tokens == 0
-
 
 
 async def test_usage_aggregates_across_turns():
@@ -46,12 +44,11 @@ async def test_usage_aggregates_across_turns():
         responses=["答1", "答2"],
     )
     sess = _session(model, store=store)
-    await (sess.run("问1"))
-    await (sess.run("问2"))
+    await sess.run("问1")
+    await sess.run("问2")
     total = store.load_usage(sess.session_id)
     assert total.input_tokens == 100
     assert total.output_tokens == 20
-
 
 
 async def test_failed_turn_does_not_persist_usage():
@@ -60,7 +57,7 @@ async def test_failed_turn_does_not_persist_usage():
     model = FakeClient(usage={"input_tokens": 99, "output_tokens": 1}, responses=["x"])
     sess = _session(model, store=store)
     # 强制失败:第一轮跑成功后清空 store,再用坏模型触发失败轮
-    await (sess.run("成功"))
+    await sess.run("成功")
     assert store.load_usage(sess.session_id).input_tokens == 99
 
     class BoomModel(FakeClient):
@@ -68,8 +65,7 @@ async def test_failed_turn_does_not_persist_usage():
             raise RuntimeError("boom")
 
     sess2 = _session(BoomModel(response="x"), store=store, session_id=sess.session_id)
-    await (sess2.run("触发"))
+    await sess2.run("触发")
     # 失败轮不追加:聚合仍是成功轮的值
     assert store.load_usage(sess.session_id).input_tokens == 99
     assert store.load_usage(sess.session_id).output_tokens == 1
-

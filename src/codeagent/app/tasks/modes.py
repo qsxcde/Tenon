@@ -75,9 +75,7 @@ def parse_mode_input(text: str, *, sticky: TaskMode = TaskMode.AUTO) -> ModeInpu
         try:
             selected = TaskMode(argument.lower())
         except ValueError as exc:
-            raise ModeParseError(
-                f"未知模式: {argument}；可选 ask、plan、code、auto"
-            ) from exc
+            raise ModeParseError(f"未知模式: {argument}；可选 ask、plan、code、auto") from exc
         return ModeInput(selected, "", True, selected)
     return ModeInput(sticky, text, False, sticky)
 
@@ -108,9 +106,7 @@ class _ModePolicy:
                     "deny",
                     f"{self._mode.value} 模式为只读，无法执行 {tool_name}；请切换到 /code",
                 )
-            if tool_name.lower() == "bash" and is_mutating_command(
-                str(args.get("command") or "")
-            ):
+            if tool_name.lower() == "bash" and is_mutating_command(str(args.get("command") or "")):
                 return _ModeDecision(
                     "deny",
                     f"{self._mode.value} 模式为只读，无法执行变更型命令；请切换到 /code",

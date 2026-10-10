@@ -37,7 +37,6 @@ def test_query_rebuilds_corrupt_index_before_filtering(tmp_path):
     assert [ref.id for ref in refs] == ["s1"]
 
 
-
 def test_semantically_incomplete_index_is_rebuilt(tmp_path):
     """索引字段不完整时不能命中缓存,必须从 JSONL 重建。"""
     store = _store(tmp_path)
@@ -52,7 +51,6 @@ def test_semantically_incomplete_index_is_rebuilt(tmp_path):
     assert json.loads(index_path.read_text(encoding="utf-8"))["session"]["title"] == "rebuild me"
 
 
-
 def test_stale_index_rebuilds_after_external_jsonl_append(tmp_path):
     """源 JSONL 外部追加后,指纹失效会触发索引重建。"""
     store = _store(tmp_path)
@@ -62,11 +60,8 @@ def test_stale_index_rebuilds_after_external_jsonl_append(tmp_path):
         stream.write(json.dumps({"type": "usage", "input": 9}) + "\n")
 
     assert store.load_usage("s1").input_tokens == 9
-    index = json.loads(
-        (tmp_path / "sessions" / "s1.index.json").read_text(encoding="utf-8")
-    )
+    index = json.loads((tmp_path / "sessions" / "s1.index.json").read_text(encoding="utf-8"))
     assert index["usage"]["input_tokens"] == 9
-
 
 
 def test_index_write_failure_does_not_block_jsonl_append(tmp_path, monkeypatch):
@@ -85,7 +80,6 @@ def test_index_write_failure_does_not_block_jsonl_append(tmp_path, monkeypatch):
     assert store.get("s1").title == "append despite cache…"
 
 
-
 def test_create_is_fail_open_when_index_fingerprint_fails(tmp_path, monkeypatch):
     """创建时索引初始化失败不撤销已经写入的 JSONL header。"""
     store = _store(tmp_path)
@@ -98,7 +92,6 @@ def test_create_is_fail_open_when_index_fingerprint_fails(tmp_path, monkeypatch)
 
     assert ref.id == "s1"
     assert (tmp_path / "sessions" / "s1.jsonl").exists()
-
 
 
 def test_create_index_cannot_overwrite_concurrent_append(tmp_path, monkeypatch):
@@ -138,9 +131,7 @@ def test_create_index_cannot_overwrite_concurrent_append(tmp_path, monkeypatch):
     assert initial_write_entered.wait(2)
 
     message = Message(role="user", content="concurrent append")
-    append_thread = threading.Thread(
-        target=lambda: store.append_message("s1", message)
-    )
+    append_thread = threading.Thread(target=lambda: store.append_message("s1", message))
     append_thread.start()
     append_acquired_lock.wait(0.2)
     release_initial_write.set()
@@ -149,7 +140,6 @@ def test_create_index_cannot_overwrite_concurrent_append(tmp_path, monkeypatch):
 
     assert not create_errors
     assert store.get("s1").title == "concurrent append"
-
 
 
 def test_corrupt_session_does_not_block_listing(tmp_path):
@@ -161,7 +151,6 @@ def test_corrupt_session_does_not_block_listing(tmp_path):
     assert [r.id for r in store.list()] == ["good"]
     with pytest.raises(ValueError, match="header"):
         store.get("bad")  # 按直接 id 访问给出明确错误而非「不存在」
-
 
 
 def test_session_files_private_perms(tmp_path):
@@ -179,7 +168,6 @@ def test_session_files_private_perms(tmp_path):
         assert (tmp_path / "sessions" / "s1.index.json").stat().st_mode & 0o777 == 0o600
 
 
-
 def test_concurrent_appends_do_not_lose_lines(tmp_path):
     """并发 append 串行化(路径锁):全部消息落盘,行不互相覆盖。"""
     store = _store(tmp_path)
@@ -191,7 +179,6 @@ def test_concurrent_appends_do_not_lose_lines(tmp_path):
     with ThreadPoolExecutor(max_workers=8) as pool:
         list(pool.map(append, range(50)))
     assert len(store.load_messages("s1")) == 50
-
 
 
 def test_list_sessions_sorted(tmp_path):

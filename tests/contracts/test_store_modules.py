@@ -78,9 +78,7 @@ def test_session_committer_only_writes_explicit_successful_payload() -> None:
         context_tokens=2,
     )
 
-    assert [message.content for message in store.load_messages("committed")] == [
-        "hello"
-    ]
+    assert [message.content for message in store.load_messages("committed")] == ["hello"]
     assert store.load_usage("committed").input_tokens == 2
 
 

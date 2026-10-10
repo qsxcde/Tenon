@@ -268,7 +268,9 @@ async def test_reopen_after_compaction_restores_logical_context_and_continues(
 
     request_messages = second_client.call_history[0]["messages"]
     assert sum("以下为会话历史摘要" in message["content"] for message in request_messages) == 1
-    assert not any(message.id.startswith("summary-") for message in recovery_store.load_messages("compacted"))
+    assert not any(
+        message.id.startswith("summary-") for message in recovery_store.load_messages("compacted")
+    )
     new_user = next(
         message
         for message in reversed(recovery_store.load_messages("compacted"))
@@ -430,7 +432,8 @@ async def test_compacted_fork_in_retained_window_reopens_and_continues(
 
     assert _physical_message_ids(recovery_store, "source") == source_ids
     child_user = next(
-        message for message in reversed(recovery_store.load_messages("child"))
+        message
+        for message in reversed(recovery_store.load_messages("child"))
         if message.role == "user" and message.content == "child question"
     )
     assert child_user.parent_id == entry.id
@@ -454,7 +457,13 @@ async def test_compacted_fork_before_boundary_keeps_summary_only(
     assert child.context_diagnostics == ContextDiagnostics.empty()
     await child.run("branch question")
 
-    assert sum("以下为会话历史摘要" in message["content"] for message in child_client.call_history[0]["messages"]) == 1
+    assert (
+        sum(
+            "以下为会话历史摘要" in message["content"]
+            for message in child_client.call_history[0]["messages"]
+        )
+        == 1
+    )
     assert _physical_message_ids(recovery_store, "source") == source_ids
 
 
@@ -553,5 +562,8 @@ async def test_recovered_logical_context_drives_automatic_compaction(
     assert len(records) == 2
     assert records[0]["id"] == first_entry_id
     assert records[1]["parentId"] == first_entry_id
-    assert _physical_message_ids(recovery_store, "auto-recovery")[: len(physical_before)] == physical_before
+    assert (
+        _physical_message_ids(recovery_store, "auto-recovery")[: len(physical_before)]
+        == physical_before
+    )
     assert len(restored.history) < len(_physical_message_ids(recovery_store, "auto-recovery"))

@@ -282,8 +282,7 @@ async def test_fake_client_child_turn_budget_returns_failure_and_parent_continue
     delegate_results = [
         event
         for event in seen
-        if event.type == EventType.TOOL_RESULT
-        and event.metadata.get("tool_name") == "delegate"
+        if event.type == EventType.TOOL_RESULT and event.metadata.get("tool_name") == "delegate"
     ]
     assert len(delegate_results) == 1
     assert "max_turns" in delegate_results[0].payload

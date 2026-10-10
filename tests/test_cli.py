@@ -100,9 +100,7 @@ def test_continue_flag_appends_to_recent(fake_provider_env, capsys):
     assert [m.content for m in loaded if m.role == "user"][-1] == "继续"
 
 
-def test_session_flag_reports_incompatible_recovery_and_returns_nonzero(
-    fake_provider_env, capsys
-):
+def test_session_flag_reports_incompatible_recovery_and_returns_nonzero(fake_provider_env, capsys):
     from codeagent.app.config import CONFIG_DIR
     from codeagent.session.persistence import JsonFileStore
 
@@ -119,9 +117,7 @@ def test_session_flag_reports_incompatible_recovery_and_returns_nonzero(
     assert "升级客户端" in error
 
 
-def test_session_flag_shows_degraded_recovery_before_continuing(
-    fake_provider_env, capsys
-):
+def test_session_flag_shows_degraded_recovery_before_continuing(fake_provider_env, capsys):
     from codeagent.app.config import CONFIG_DIR
     from codeagent.core.contracts.messages import Message
     from codeagent.session.persistence import JsonFileStore
@@ -165,7 +161,9 @@ def _scripted_sensitive_model(command: str = "rm -r data") -> Any:
     )
 
 
-def test_headless_denies_sensitive_command_without_hanging(fake_provider_env, capsys, tmp_path, monkeypatch):
+def test_headless_denies_sensitive_command_without_hanging(
+    fake_provider_env, capsys, tmp_path, monkeypatch
+):
     """headless 缺省 deny:敏感命令不执行、不挂起,循环正常结束(fail closed)。"""
     monkeypatch.chdir(tmp_path)  # 隔离 cwd(即使误执行也无真实文件)
     from unittest.mock import patch
@@ -178,7 +176,9 @@ def test_headless_denies_sensitive_command_without_hanging(fake_provider_env, ca
     assert "已处理" in out  # 循环在拒绝后继续并正常收尾(未挂起)
 
 
-def test_headless_yes_mode_executes_sensitive_command(fake_provider_env, capsys, tmp_path, monkeypatch):
+def test_headless_yes_mode_executes_sensitive_command(
+    fake_provider_env, capsys, tmp_path, monkeypatch
+):
     """--yes:敏感命令放行执行(显式承担风险),循环正常收尾。"""
     monkeypatch.chdir(tmp_path)  # 隔离 cwd:rm -r data 目标不存在,无副作用
     from unittest.mock import patch

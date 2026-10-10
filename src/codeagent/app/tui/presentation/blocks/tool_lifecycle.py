@@ -42,8 +42,7 @@ class ToolLifecycleMixin:
             normalized = str(status or ToolLifecycleStatus.RUNNING)
         current = self.execution_status
         can_change = current not in ToolLifecycleStatus.TERMINAL and not (
-            normalized == ToolLifecycleStatus.QUEUED
-            and getattr(self, "_lifecycle_seen", False)
+            normalized == ToolLifecycleStatus.QUEUED and getattr(self, "_lifecycle_seen", False)
         )
         if can_change:
             self.execution_status = normalized
@@ -65,7 +64,9 @@ class ToolLifecycleMixin:
             self.status = "pending"
             self.awaiting = True
         elif self.execution_status in ToolLifecycleStatus.TERMINAL:
-            self.status = "done" if self.execution_status == ToolLifecycleStatus.COMPLETED else "error"
+            self.status = (
+                "done" if self.execution_status == ToolLifecycleStatus.COMPLETED else "error"
+            )
             self.awaiting = False
         else:
             self.status = "pending"

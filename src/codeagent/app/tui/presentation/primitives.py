@@ -13,7 +13,20 @@ from typing import Callable
 
 from .theme import TEXT
 
-__all__ = ["Span", "RichLine", "_seg", "_plain", "_cell_width", "_wrap", "_wrap_rich", "rich_to_plain", "_truncate", "_truncate_spans", "_visible_user_content", "_format_token_count"]
+__all__ = [
+    "Span",
+    "RichLine",
+    "_seg",
+    "_plain",
+    "_cell_width",
+    "_wrap",
+    "_wrap_rich",
+    "rich_to_plain",
+    "_truncate",
+    "_truncate_spans",
+    "_visible_user_content",
+    "_format_token_count",
+]
 
 
 @dataclass(frozen=True)
@@ -47,7 +60,9 @@ class Component:
         listeners = getattr(self, "_touch_listeners", [])
         active: list[object] = []
         for listener_ref in listeners:
-            listener = listener_ref() if isinstance(listener_ref, weakref.ReferenceType) else listener_ref
+            listener = (
+                listener_ref() if isinstance(listener_ref, weakref.ReferenceType) else listener_ref
+            )
             if listener is None:
                 continue
             active.append(listener_ref)

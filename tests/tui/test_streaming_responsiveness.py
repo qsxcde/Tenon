@@ -71,6 +71,7 @@ def _wire_app(
     app: TuiApp, backend: TextualBackend, session: StreamingFakeSession | None = None
 ) -> None:
     """复用生产 start() 的 callback 装配,但不启动阻塞式 run。"""
+
     def record(name: str, callback):
         def wrapped(*args):
             if session is not None:
@@ -91,7 +92,9 @@ def _wire_app(
     backend.on_confirmation_response(record("confirmation", app._on_confirmation_response))
 
 
-async def _finish_stream(app: TuiApp, session: StreamingFakeSession, task: asyncio.Task[None]) -> None:
+async def _finish_stream(
+    app: TuiApp, session: StreamingFakeSession, task: asyncio.Task[None]
+) -> None:
     """结束 fake stream 并清理协作式帧任务,避免测试跨用例泄漏。"""
     if not task.done():
         session.abort()
@@ -185,7 +188,11 @@ async def test_textual_streaming_handles_scroll_and_confirmation_in_order() -> N
             assistant_index = next(
                 index for index, block in enumerate(blocks) if isinstance(block, AssistantBlock)
             )
-            tool_index = next(index for index, block in enumerate(blocks) if block.__class__.__name__ == "ToolCallBlock")
+            tool_index = next(
+                index
+                for index, block in enumerate(blocks)
+                if block.__class__.__name__ == "ToolCallBlock"
+            )
             assert assistant_index < tool_index
         finally:
             await _finish_stream(app, session, stream_task)
@@ -211,10 +218,6 @@ async def test_textual_long_history_keeps_page_navigation_and_click_mapping() ->
         await pilot.press("pagedown")
         app.model.transcript.scroll_to_bottom()
         app._flush_render_now()
-        row = next(
-            index
-            for index in range(24)
-            if app.model.transcript.block_at(index) is tool
-        )
+        row = next(index for index in range(24) if app.model.transcript.block_at(index) is tool)
         await pilot.click(backend._app.transcript, offset=(2, row))
         assert tool.expanded is True

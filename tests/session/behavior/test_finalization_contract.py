@@ -82,9 +82,7 @@ def test_json_commit_failure_does_not_restore_over_a_concurrent_append(tmp_path,
 
     assert error and isinstance(error[0], OSError)
     assert not append_error
-    assert [message.content for message in store.load_messages("concurrent")] == [
-        "other"
-    ]
+    assert [message.content for message in store.load_messages("concurrent")] == ["other"]
 
 
 @pytest.mark.parametrize("store_kind", ("memory", "jsonl"))
@@ -125,9 +123,10 @@ async def test_persistence_failure_rolls_back_messages_and_usage(tmp_path, store
     assert session.last_outcome is not None
     assert session.last_outcome.phase is RunPhase.FAILED
     assert session.last_outcome.commit_status is CommitStatus.PERSISTENCE_FAILED
-    assert next(event for event in seen if event.type == EventType.ERROR).metadata[
-        "error_code"
-    ] == "persistence_error"
+    assert (
+        next(event for event in seen if event.type == EventType.ERROR).metadata["error_code"]
+        == "persistence_error"
+    )
 
 
 @pytest.mark.parametrize("store_kind", ("memory", "jsonl"))
@@ -217,17 +216,14 @@ async def test_compaction_failure_keeps_committed_turn_and_does_not_duplicate_us
     assert session.context_diagnostics.compaction is not None
     assert session.context_diagnostics.compaction.status == "failed"
     assert any(
-        event.type == EventType.ERROR
-        and event.metadata.get("error_code") == "compaction_failed"
+        event.type == EventType.ERROR and event.metadata.get("error_code") == "compaction_failed"
         for event in seen
     )
 
 
 async def test_cancellation_during_post_commit_compaction_preserves_turn():
     store = MemoryStore()
-    model = FakeClient(
-        response="reply", usage={"input_tokens": 5, "output_tokens": 1}
-    )
+    model = FakeClient(response="reply", usage={"input_tokens": 5, "output_tokens": 1})
     session = _compact_session(
         model,
         store=store,
@@ -263,9 +259,7 @@ async def test_cancellation_during_post_commit_compaction_preserves_turn():
     model.steps = [
         {
             "content": "",
-            "tool_calls": [
-                {"name": "bash", "args": {"command": "echo ok"}, "id": "q5-tool"}
-            ],
+            "tool_calls": [{"name": "bash", "args": {"command": "echo ok"}, "id": "q5-tool"}],
         },
         {"content": "q5 done"},
     ]
@@ -381,7 +375,5 @@ async def test_core_listener_failure_does_not_fail_agent_run():
     agent.subscribe(broken_listener)
     messages = await agent.prompt("hello")
 
-    assert [message.content for message in messages if message.role == "assistant"] == [
-        "ok"
-    ]
+    assert [message.content for message in messages if message.role == "assistant"] == ["ok"]
     assert agent.listener_errors

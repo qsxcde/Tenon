@@ -31,13 +31,13 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             item.add_marker(pytest.mark.slow)
         elif path.endswith("tests/test_cli.py") or path.endswith("tests/test_main_cli_usage.py"):
             primary = "e2e"
-        elif "/tests/app/" in path or "/tests/mcp/" in path or path.endswith("tests/test_container.py"):
-            primary = "integration"
         elif (
-            "boundar" in path
-            or "contract" in path
-            or path.endswith("tests/test_decoupling.py")
+            "/tests/app/" in path
+            or "/tests/mcp/" in path
+            or path.endswith("tests/test_container.py")
         ):
+            primary = "integration"
+        elif "boundar" in path or "contract" in path or path.endswith("tests/test_decoupling.py"):
             primary = "contract"
         else:
             primary = "unit"
@@ -86,17 +86,11 @@ async def _assert_async_tasks_are_clean(request: pytest.FixtureRequest) -> None:
         return
 
     current = asyncio.current_task()
-    leaked = [
-        task
-        for task in asyncio.all_tasks()
-        if task is not current and not task.done()
-    ]
+    leaked = [task for task in asyncio.all_tasks() if task is not current and not task.done()]
     if not leaked:
         return
 
-    details = ", ".join(
-        task.get_name() or repr(task.get_coro()) for task in leaked
-    )
+    details = ", ".join(task.get_name() or repr(task.get_coro()) for task in leaked)
     for task in leaked:
         task.cancel()
     await asyncio.gather(*leaked, return_exceptions=True)

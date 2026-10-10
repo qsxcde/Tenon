@@ -70,8 +70,7 @@ def extract_child_facts(session: Any) -> ChildResultFacts:
                 excerpt=_clip(content, MAX_SUBAGENT_EVIDENCE_EXCERPT_CHARS) or None,
                 completeness=metadata.completeness,
                 continuation=(
-                    _clip(metadata.continuation, MAX_SUBAGENT_CONTINUATION_CHARS)
-                    or None
+                    _clip(metadata.continuation, MAX_SUBAGENT_CONTINUATION_CHARS) or None
                 ),
             )
         )
@@ -142,11 +141,7 @@ def _locator(metadata: ToolOutputMetadata) -> str | None:
             value = metadata.path
         return _clip(value, MAX_SUBAGENT_EVIDENCE_LOCATOR_CHARS)
     reference = metadata.artifact_ref or metadata.artifact_path
-    return (
-        _clip(reference, MAX_SUBAGENT_EVIDENCE_LOCATOR_CHARS)
-        if reference
-        else None
-    )
+    return _clip(reference, MAX_SUBAGENT_EVIDENCE_LOCATOR_CHARS) if reference else None
 
 
 def _artifact(

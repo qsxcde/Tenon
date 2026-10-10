@@ -21,7 +21,8 @@ from typing import Any, ClassVar
 from pydantic import BaseModel, ConfigDict
 
 from codeagent.tools.base import AtomicTool
-from codeagent.tools.mcp.client import McpServerClient, McpToolInfo
+from codeagent.tools.mcp.client import McpServerClient
+from codeagent.tools.mcp.content import McpToolInfo
 from codeagent.tools.shared import OutputPolicy, govern_text
 
 __all__ = ["McpArgs", "McpTool"]

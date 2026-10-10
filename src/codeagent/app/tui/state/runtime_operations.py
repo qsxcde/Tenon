@@ -38,8 +38,7 @@ def operation_finished(
 def compaction_finished(snapshot: RuntimeSnapshot, metadata: dict[str, Any]) -> RuntimeSnapshot:
     """归约压缩结果，供状态栏显示 token 前后变化。"""
     status = str(
-        metadata.get("status")
-        or ("compacted" if metadata.get("success", True) else "failed")
+        metadata.get("status") or ("compacted" if metadata.get("success", True) else "failed")
     )
     successful = status in {"compacted", "skipped"}
     values: dict[str, Any] = {
@@ -50,9 +49,7 @@ def compaction_finished(snapshot: RuntimeSnapshot, metadata: dict[str, Any]) -> 
             metadata.get("trigger") or snapshot.compaction_trigger or "manual"
         ),
         "compaction_status": status,
-        "compaction_reason": str(
-            metadata.get("reason_code") or metadata.get("error_code") or ""
-        ),
+        "compaction_reason": str(metadata.get("reason_code") or metadata.get("error_code") or ""),
         "compaction_before_tokens": int_or_none(
             metadata.get("before_input_tokens", snapshot.compaction_before_tokens)
         ),

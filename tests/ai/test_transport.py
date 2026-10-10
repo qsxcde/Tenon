@@ -91,7 +91,12 @@ def test_bound_tools_returns_isolated_client_without_mutating_source():
 
     assert bound is not c
     assert "tools" not in c._body([ChatMessage(role="user", content="source")], stream=False)
-    assert bound._body([ChatMessage(role="user", content="bound")], stream=False)["tools"][0]["function"]["name"] == "read"
+    assert (
+        bound._body([ChatMessage(role="user", content="bound")], stream=False)["tools"][0][
+            "function"
+        ]["name"]
+        == "read"
+    )
 
 
 def test_explicit_request_tools_do_not_leak_to_following_request():
@@ -142,9 +147,7 @@ async def test_concurrent_requests_keep_tool_definitions_isolated():
     await client.aclose()
 
     by_prompt = {
-        payload["messages"][0]["content"]: [
-            item["function"]["name"] for item in payload["tools"]
-        ]
+        payload["messages"][0]["content"]: [item["function"]["name"] for item in payload["tools"]]
         for payload in seen
     }
     assert by_prompt == {"read": ["read"], "write": ["write"]}
@@ -199,7 +202,10 @@ async def test_concurrent_streams_keep_tool_definitions_isolated():
 
 
 async def _collect_stream_from(client, prompt: str, tool: ToolDefinition):
-    return [event async for event in client.stream([ChatMessage(role="user", content=prompt)], tools=[tool])]
+    return [
+        event
+        async for event in client.stream([ChatMessage(role="user", content=prompt)], tools=[tool])
+    ]
 
 
 def test_message_to_api_dict_with_tool_calls():
@@ -262,10 +268,14 @@ async def test_generate_retries_on_429():
     # 第一次 429,第二次成功
     resp_429 = MagicMock()
     resp_429.status_code = 429
-    resp_429.raise_for_status = MagicMock(side_effect=_httpx.HTTPStatusError("429", request=MagicMock(), response=resp_429))
+    resp_429.raise_for_status = MagicMock(
+        side_effect=_httpx.HTTPStatusError("429", request=MagicMock(), response=resp_429)
+    )
     resp_ok = MagicMock()
     resp_ok.raise_for_status = MagicMock()
-    resp_ok.json = MagicMock(return_value={"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}]})
+    resp_ok.json = MagicMock(
+        return_value={"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}]}
+    )
 
     mock_client = MagicMock()
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -283,6 +293,7 @@ async def test_generate_retries_on_429():
 
 
 # -- SSE 帧解析异常布局(回归:#2) ------------------------------------------
+
 
 class _FakeSSEResponse:
     """模拟 ``client.stream(...)`` 返回的响应:按给定行序列产出。"""
@@ -537,6 +548,6 @@ async def test_client_reuses_connection_and_aclosable(async_resource_tracker):
     c = async_resource_tracker(_client())
     c1 = c._get_client()
     c2 = c._get_client()
-    assert c1 is c2                          # 复用同一实例
+    assert c1 is c2  # 复用同一实例
     await c.aclose()
-    assert c._client is None                 # 释放后幂等
+    assert c._client is None  # 释放后幂等

@@ -31,8 +31,7 @@ class ContextPreflightConfig:
         ratio = self.warning_headroom_ratio
         if tokens is not None and ratio is not None:
             raise ValueError(
-                "configure either warning_headroom_tokens or "
-                "warning_headroom_ratio, not both"
+                "configure either warning_headroom_tokens or warning_headroom_ratio, not both"
             )
         if tokens is not None and (type(tokens) is not int or tokens < 0):
             raise ValueError("warning_headroom_tokens must be a non-negative integer")

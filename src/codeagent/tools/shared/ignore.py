@@ -9,9 +9,7 @@ from __future__ import annotations
 __all__ = ["NOISE_DIRS", "prune_noise_dirs"]
 
 #: 默认跳过的噪声目录名(不进入递归)。
-NOISE_DIRS = frozenset(
-    {".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build"}
-)
+NOISE_DIRS = frozenset({".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build"})
 
 
 def prune_noise_dirs(dirs: list[str]) -> None:

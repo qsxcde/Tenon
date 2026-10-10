@@ -157,7 +157,10 @@ def test_tui_model_projects_subagent_events_without_touching_parent_runtime() ->
 
     assert model.runtime.phase == phase == RuntimePhase.WAITING_MODEL
     assert model.runtime.run_id == "parent-run"
-    assert not any(isinstance(block, AssistantBlock) and "有限结论" in block.body for block in model.transcript.blocks)
+    assert not any(
+        isinstance(block, AssistantBlock) and "有限结论" in block.body
+        for block in model.transcript.blocks
+    )
     assert len(model.subagent_blocks) == 1
     assert model.subagent_blocks[0].delegation_id == "delegation-1"
 

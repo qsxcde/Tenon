@@ -84,6 +84,4 @@ async def test_session_persistence_commits_through_async_boundary() -> None:
     assert not task.done()
     await task
     assert store.commit_thread_id != threading.get_ident()
-    assert [message.content for message in store.load_messages("async-session")] == [
-        "hello"
-    ]
+    assert [message.content for message in store.load_messages("async-session")] == ["hello"]

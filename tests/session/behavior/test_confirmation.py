@@ -12,20 +12,17 @@ async def test_respond_approval_approves_and_executes():
     async def scenario() -> None:
         task = asyncio.create_task(sess.run("跑"))
         await asyncio.wait_for(confirmation_ready.wait(), timeout=1.0)
-        payload = next(
-            e for e in seen if e.type == EventType.CONFIRMATION_REQUESTED
-        ).payload
+        payload = next(e for e in seen if e.type == EventType.CONFIRMATION_REQUESTED).payload
         assert payload["tool"] == "bash" and payload["reason"] == "stub:bash"
         assert payload["tool_call_id"] == "c1"
         assert not any(e.type == EventType.TOOL_RESULT for e in seen)  # 未响应前不执行
         sess.respond_approval(payload["request_id"], True)
         await task
 
-    await (scenario())
+    await scenario()
     results = [e for e in seen if e.type == EventType.TOOL_RESULT]
     assert results and results[-1].metadata["error"] is False
     assert "ok" in results[-1].payload
-
 
 
 async def test_respond_approval_rejects_and_fills_error():
@@ -37,18 +34,15 @@ async def test_respond_approval_rejects_and_fills_error():
     async def scenario() -> None:
         task = asyncio.create_task(sess.run("跑"))
         await asyncio.wait_for(confirmation_ready.wait(), timeout=1.0)
-        payload = next(
-            e for e in seen if e.type == EventType.CONFIRMATION_REQUESTED
-        ).payload
+        payload = next(e for e in seen if e.type == EventType.CONFIRMATION_REQUESTED).payload
         sess.respond_approval(payload["request_id"], False)
         await task
 
-    await (scenario())
+    await scenario()
     results = [e for e in seen if e.type == EventType.TOOL_RESULT]
     assert results and results[-1].metadata["error"] is True
     assert "用户拒绝执行" in results[-1].payload
     assert "ok" not in results[-1].payload
-
 
 
 async def test_abort_while_waiting_confirmation_cancels_without_hanging():
@@ -64,7 +58,7 @@ async def test_abort_while_waiting_confirmation_cancels_without_hanging():
         with pytest.raises(asyncio.CancelledError):
             await task
 
-    await (scenario())
+    await scenario()
     assert EventType.RUN_CANCELLED in [e.type for e in seen]
     assert not any(e.type == EventType.TOOL_RESULT for e in seen)
 

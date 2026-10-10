@@ -59,7 +59,7 @@ async def test_set_suggestions_refreshes_composer_height_in_app():
             backend.set_suggestions([])
             assert backend._app.composer.styles.height.value == 3
 
-    await (_run())
+    await _run()
 
 
 async def test_transcript_wheel_notifies_scroll():
@@ -78,7 +78,7 @@ async def test_transcript_wheel_notifies_scroll():
             assert scrolls == [3, -3]
             assert up._stop_propagation and down._stop_propagation  # 不冒泡给其它滚动祖先
 
-    await (_run())
+    await _run()
 
 
 async def test_page_keys_always_scroll_viewport():
@@ -102,7 +102,7 @@ async def test_page_keys_always_scroll_viewport():
             app.action_page_up()
             assert scrolls == [page, -page, page]
 
-    await (_run())
+    await _run()
 
 
 # -- 确认交互(security-permissions)-------------------------------------------
@@ -128,7 +128,7 @@ async def test_set_confirmation_shows_bar_and_activates_keys():
             assert backend._app.composer.confirmation.styles.height.value == 0
             assert backend._app.composer.styles.height.value == 3
 
-    await (_run())
+    await _run()
 
 
 async def test_confirmation_keys_intercept_only_when_active():
@@ -160,7 +160,7 @@ async def test_confirmation_keys_intercept_only_when_active():
             assert y._stop_propagation and n._stop_propagation
             assert not other._stop_propagation
 
-    await (_run())
+    await _run()
 
 
 async def test_confirmation_response_port_wired():
@@ -175,7 +175,7 @@ async def test_confirmation_response_port_wired():
         backend._notify_confirmation_response(False)
         assert calls == [True, False]
 
-    await (_run())
+    await _run()
 
 
 # -- 键位拆分(收尾补丁:Esc 仅中断 / Ctrl+C 退出)-----------------------------
@@ -196,7 +196,7 @@ async def test_escape_only_interrupts_not_quits():
             app.action_interrupt()
             assert interrupts == ["i"] and quits == []
 
-    await (_run())
+    await _run()
 
 
 async def test_ctrl_j_inserts_newline_fallback():
@@ -215,7 +215,7 @@ async def test_ctrl_j_inserts_newline_fallback():
             assert app.composer.input.text == "第一行\n第二行"
             assert app.composer.styles.height.value == 3 + 1  # 两行输入 + 分隔线
 
-    await (_run())
+    await _run()
 
 
 async def test_soft_wrap_grows_composer_height():
@@ -233,7 +233,7 @@ async def test_soft_wrap_grows_composer_height():
             await pilot.pause()
             assert app.composer.styles.height.value == 3
 
-    await (_run())
+    await _run()
 
 
 async def test_ctrl_c_and_ctrl_q_quit():
@@ -253,7 +253,7 @@ async def test_ctrl_c_and_ctrl_q_quit():
             assert any(b.action == "quit" for b in keymap)
             assert not any(b.action == "help_quit" for b in keymap)
 
-    await (_run())
+    await _run()
 
 
 # -- 终端背景融合(spec「终端背景融合」)----------------------------------------
@@ -305,7 +305,7 @@ async def test_on_mount_installs_background_blending():
             assert app.transcript.styles.background == ansi_default
             assert app.composer.input.styles.background == ansi_default
 
-    await (_run())
+    await _run()
 
 
 # -- 登录掩码输入(tui-login-command) ----------------------------------------
@@ -353,7 +353,7 @@ async def test_input_mask_switches_composer_components():
             # 退出掩码:普通输入提示还原,密码输入内容清空
             assert composer.input.placeholder == "输入消息..."
 
-    await (_run())
+    await _run()
 
 
 async def test_key_input_submits_plaintext_and_clears():
@@ -376,7 +376,7 @@ async def test_key_input_submits_plaintext_and_clears():
             assert submits == ["sk-secret-123"]  # 提交的是原文
             assert key_input.value == ""  # 提交后清空
 
-    await (_run())
+    await _run()
 
 
 def test_key_input_does_not_consume_escape():
@@ -400,4 +400,4 @@ async def test_key_input_empty_submit_ignored():
             key_input.action_submit()
             assert submits == []
 
-    await (_run())
+    await _run()

@@ -50,9 +50,7 @@ async def test_session_lifecycle_hooks_observe_tool_scope_without_mutating_event
                 steps=[
                     {
                         "content": "",
-                        "tool_calls": [
-                            {"name": "echo", "args": {"value": "ok"}, "id": "call-1"}
-                        ],
+                        "tool_calls": [{"name": "echo", "args": {"value": "ok"}, "id": "call-1"}],
                     },
                     {"content": "done"},
                 ]

@@ -61,9 +61,7 @@ async def _respond(
     try:
         while True:
             event_task = asyncio.create_task(queue.get())
-            done, _ = await asyncio.wait(
-                {event_task, task}, return_when=asyncio.FIRST_COMPLETED
-            )
+            done, _ = await asyncio.wait({event_task, task}, return_when=asyncio.FIRST_COMPLETED)
             if task in done:
                 if event_task in done:
                     consume(event_task.result())

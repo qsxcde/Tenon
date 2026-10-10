@@ -21,7 +21,7 @@ DANGEROUS_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r">\s*/dev/(?:sda|sdb|nvme)"),
 ]
 
-_DYNAMIC_TARGET_CHARS = set("$`\\\"*?[]{}")
+_DYNAMIC_TARGET_CHARS = set('$`\\"*?[]{}')
 _INTERPRETER_WRAPPERS = (
     "bash",
     "sh",
@@ -105,9 +105,7 @@ def _strip_substitution(token: str) -> str | None:
     return None
 
 
-def _substitution_danger(
-    segment: list[str], cwd: str | None, depth: int
-) -> str | None:
+def _substitution_danger(segment: list[str], cwd: str | None, depth: int) -> str | None:
     index = 0
     while index < len(segment):
         token = segment[index]
@@ -186,9 +184,7 @@ def _rm_segment_danger(segment: list[str], cwd: str | None) -> str | None:
                 resolved = (base_cwd / Path(target).expanduser()).resolve()
         except OSError:
             return f"删除目标无法解析,保守拒绝: {target}"
-        if resolved == Path("/") or (
-            resolved.anchor and resolved == Path(resolved.anchor)
-        ):
+        if resolved == Path("/") or (resolved.anchor and resolved == Path(resolved.anchor)):
             return f"删除目标为文件系统根目录: {target}"
         if resolved == base_cwd:
             return f"删除目标为当前工作目录: {target}"
@@ -197,9 +193,7 @@ def _rm_segment_danger(segment: list[str], cwd: str | None) -> str | None:
     return None
 
 
-def _dangerous_intent(
-    command: str, cwd: str | None = None, _depth: int = 0
-) -> str | None:
+def _dangerous_intent(command: str, cwd: str | None = None, _depth: int = 0) -> str | None:
     if _depth > _MAX_NESTING_DEPTH:
         return "嵌套层数过深,保守拒绝"
     hit = _backtick_danger(command, cwd, _depth)
@@ -219,11 +213,7 @@ def _dangerous_intent(
             continue
         first = segment[index]
         inline_flag = next(
-            (
-                flag
-                for flag in ("-c", "-e", "--eval")
-                if flag in segment[index:]
-            ),
+            (flag for flag in ("-c", "-e", "--eval") if flag in segment[index:]),
             None,
         )
         if first in _INTERPRETER_WRAPPERS and inline_flag is not None:

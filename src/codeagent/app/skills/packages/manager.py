@@ -77,7 +77,9 @@ class PackageManager:
         store.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="codeagent-package-") as temp_name:
             checkout = self._stage_source(str(source), Path(temp_name))
-            return self._commit_install(checkout, str(source), scope, store, registry_path, lock_path)
+            return self._commit_install(
+                checkout, str(source), scope, store, registry_path, lock_path
+            )
 
     def _stage_source(self, source_text: str, staging_parent: Path) -> Path:
         is_git = source_text.startswith("git:") or source_text.startswith(
@@ -108,7 +110,9 @@ class PackageManager:
                 f"Git Package 下载超时({PACKAGE_GIT_TIMEOUT_S}s): {git_source}"
             ) from exc
         if result.returncode != 0:
-            raise PackageValidationError(f"Git Package 下载失败: {result.stderr.strip() or git_source}")
+            raise PackageValidationError(
+                f"Git Package 下载失败: {result.stderr.strip() or git_source}"
+            )
         return checkout
 
     def _commit_install(
@@ -137,7 +141,11 @@ class PackageManager:
             record = PackageRecord(
                 installed.package_id,
                 installed.name,
-                source_text if source_text.startswith(("git:", "https://", "http://", "ssh://", "git@", "file://")) else f"local:{Path(source_text).expanduser().resolve()}",
+                source_text
+                if source_text.startswith(
+                    ("git:", "https://", "http://", "ssh://", "git@", "file://")
+                )
+                else f"local:{Path(source_text).expanduser().resolve()}",
                 scope,
                 installed.version,
                 revision,
@@ -146,7 +154,9 @@ class PackageManager:
                 bootstrap=installed.bootstrap,
                 tool_mapping=installed.tool_mapping,
             )
-            records = [item for item in self._records(scope) if item.package_id != record.package_id]
+            records = [
+                item for item in self._records(scope) if item.package_id != record.package_id
+            ]
             records.append(record)
             PackageRegistry(registry_path).save(records)
             PackageRegistry(lock_path).save(records)
@@ -174,7 +184,9 @@ class PackageManager:
         return result.stdout.strip() if result.returncode == 0 else ""
 
     def update(self, package_id: str, *, scope: str = "user") -> PackageRecord:
-        current = next((item for item in self._records(scope) if item.package_id == package_id), None)
+        current = next(
+            (item for item in self._records(scope) if item.package_id == package_id), None
+        )
         if current is None:
             raise KeyError(f"Package 不存在: {package_id}")
         source = current.source[6:] if current.source.startswith("local:") else current.source

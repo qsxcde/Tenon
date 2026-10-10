@@ -9,6 +9,7 @@ from codeagent.core.contracts.events import AgentEvent, EventType
 from ..primitives import Component, RichLine, _seg, _truncate, _wrap_rich
 from ..subagent_result_stats import render_result_stats
 from ..theme import ACCENT, DIM, ERROR, SUCCESS, TEXT, WARNING
+from .subagent_glyphs import TERMINAL_STATES, elapsed_label, status_icon
 
 _MAX_LABEL_CHARS = 96
 _MAX_SUMMARY_CHARS = 96
@@ -29,7 +30,7 @@ _STATUS_LABELS = {
     "rejected": "已拒绝",
     "abandoned": "已中断",
 }
-_TERMINAL = frozenset({"completed", "failed", "timed_out", "cancelled", "rejected", "abandoned"})
+_TERMINAL = TERMINAL_STATES
 _PHASE_LABELS = {
     "starting": "启动中",
     "model_wait": "等待模型",
@@ -143,7 +144,11 @@ class SubagentBlock(Component):
         sequence = _int_or_none(metadata.get("parent_sequence"))
         if sequence is None:
             sequence = _int_or_none(metadata.get("child_sequence"))
-        if sequence is not None and self._last_sequence is not None and sequence < self._last_sequence:
+        if (
+            sequence is not None
+            and self._last_sequence is not None
+            and sequence < self._last_sequence
+        ):
             return False
 
         payload = _payload_dict(event)
@@ -176,7 +181,9 @@ class SubagentBlock(Component):
         if elapsed is not None:
             self.elapsed_ms = elapsed
         failure = payload.get("failure") if isinstance(payload.get("failure"), dict) else {}
-        reason = metadata.get("reason_code") or metadata.get("error_code") or failure.get("reason_code")
+        reason = (
+            metadata.get("reason_code") or metadata.get("error_code") or failure.get("reason_code")
+        )
         if reason:
             self.reason_code = _safe_text(reason, 96)
         reason_detail = metadata.get("reason") or payload.get("reason")
@@ -187,14 +194,18 @@ class SubagentBlock(Component):
             self.summary = _safe_text(summary, _MAX_SUMMARY_CHARS)
         diagnostics = payload.get("diagnostics")
         if isinstance(diagnostics, (list, tuple)):
-            self.diagnostics = _safe_text("; ".join(str(item) for item in diagnostics), _MAX_DIAGNOSTIC_CHARS)
+            self.diagnostics = _safe_text(
+                "; ".join(str(item) for item in diagnostics), _MAX_DIAGNOSTIC_CHARS
+            )
         elif diagnostics:
             self.diagnostics = _safe_text(diagnostics, _MAX_DIAGNOSTIC_CHARS)
         elif failure.get("message"):
             self.diagnostics = _safe_text(failure["message"], _MAX_DIAGNOSTIC_CHARS)
         self.result_stats = render_result_stats(payload)
         self.cleanup_uncertain = self.cleanup_uncertain or bool(
-            metadata.get("cleanup_uncertain") or payload.get("cleanup_uncertain") or failure.get("cleanup_uncertain")
+            metadata.get("cleanup_uncertain")
+            or payload.get("cleanup_uncertain")
+            or failure.get("cleanup_uncertain")
         )
 
     def render(self, width: int) -> list[RichLine]:
@@ -258,12 +269,16 @@ class SubagentBlock(Component):
             if len(lines) >= _MAX_DETAIL_LINES:
                 lines.append([_seg("… 委派详情已截断", fg=DIM)])
                 break
-            lines.extend(_wrap_rich(_truncate(detail, _MAX_DIAGNOSTIC_CHARS), max(1, width - 2), fg=TEXT))
+            lines.extend(
+                _wrap_rich(_truncate(detail, _MAX_DIAGNOSTIC_CHARS), max(1, width - 2), fg=TEXT)
+            )
         return lines[:_MAX_DETAIL_LINES]
 
 
 def _status_value(event: AgentEvent, metadata: dict[str, Any], payload: dict[str, Any]) -> str:
-    value = metadata.get("subagent_status") or metadata.get("status") or payload.get("subagent_status")
+    value = (
+        metadata.get("subagent_status") or metadata.get("status") or payload.get("subagent_status")
+    )
     if value:
         return _safe_text(value, 48)
     return {
@@ -274,18 +289,8 @@ def _status_value(event: AgentEvent, metadata: dict[str, Any], payload: dict[str
     }.get(event.type, "created")
 
 
-def _status_icon(status: str) -> tuple[str, str]:
-    if status == "completed":
-        return "✓", SUCCESS
-    if status in _TERMINAL:
-        return "✗", ERROR
-    if status in {"waiting_confirmation", "cancelling"}:
-        return "!", WARNING
-    return "·", DIM
-
-
-def _elapsed(value: int) -> str:
-    return f"{value / 1000:.1f}s" if value >= 1000 else f"{value}ms"
+_status_icon = status_icon
+_elapsed = elapsed_label
 
 
 __all__ = ["SubagentBlock"]

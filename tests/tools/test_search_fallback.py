@@ -24,9 +24,7 @@ def test_grep_uses_rg_json_result_without_changing_context_format(tmp_path) -> N
     with patch(
         "codeagent.tools.execution.search.run_optional_search", return_value=external
     ) as run:
-        result = GrepTool(cwd=str(tmp_path)).invoke(
-            GrepTool.Args(pattern="needle", context=1)
-        )
+        result = GrepTool(cwd=str(tmp_path)).invoke(GrepTool.Args(pattern="needle", context=1))
 
     assert "src/main.py-1- before" in result
     assert "src/main.py:2: needle" in result
@@ -42,9 +40,7 @@ def test_grep_falls_back_when_rg_is_unavailable(tmp_path) -> None:
 
     (tmp_path / "main.py").write_text("needle\n", encoding="utf-8")
     with patch("codeagent.tools.execution.search.run_optional_search", return_value=None):
-        result = GrepTool(cwd=str(tmp_path)).invoke(
-            GrepTool.Args(pattern="needle")
-        )
+        result = GrepTool(cwd=str(tmp_path)).invoke(GrepTool.Args(pattern="needle"))
 
     assert "main.py:1: needle" in result
 
@@ -59,9 +55,7 @@ def test_find_uses_fd_paths_then_reapplies_glob_and_relative_path(tmp_path) -> N
         truncated=False,
     )
     with patch("codeagent.tools.atomic.find.run_optional_search", return_value=external) as run:
-        result = FindTool(cwd=str(tmp_path)).invoke(
-            FindTool.Args(pattern="**/*.py")
-        )
+        result = FindTool(cwd=str(tmp_path)).invoke(FindTool.Args(pattern="**/*.py"))
 
     assert "src/main.py" in result
     assert "main.txt" not in result

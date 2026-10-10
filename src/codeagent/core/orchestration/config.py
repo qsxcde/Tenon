@@ -41,9 +41,7 @@ class AgentLoopConfig:
     #: Maximum wait for each request-local context extension invocation.
     context_transform_timeout: float | None = None
     context_budget: ContextBudgetPort | None = None
-    context_preflight: ContextPreflightConfig = field(
-        default_factory=ContextPreflightConfig
-    )
+    context_preflight: ContextPreflightConfig = field(default_factory=ContextPreflightConfig)
     #: Explicit policy for a fallback/uncertain context window. ``allow``
     #: keeps legacy model adapters usable; ``fail`` makes the boundary hard.
     uncertain_budget_policy: str = "allow"
@@ -69,10 +67,6 @@ class AgentLoopConfig:
             raise ValueError("uncertain_budget_policy must be 'allow' or 'fail'")
         timeout = self.context_transform_timeout
         if timeout is not None and (
-            type(timeout) not in (int, float)
-            or not math.isfinite(timeout)
-            or timeout <= 0
+            type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout <= 0
         ):
-            raise ValueError(
-                "context_transform_timeout must be a finite positive number"
-            )
+            raise ValueError("context_transform_timeout must be a finite positive number")

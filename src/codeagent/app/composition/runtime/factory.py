@@ -28,6 +28,7 @@ from ..tools.factory import resolve_tool_resource_limits
 from codeagent.tools.shared import ToolResourceLimits
 from .tool_assembly import assemble_runtime_tools
 
+
 class AgentRuntime:
     """一个模型/工具端口集合的资源所有者。"""
 
@@ -181,9 +182,7 @@ def create_agent_config(
     resolved_limits = resolve_tool_resource_limits(cfg, resource_limits)
     runtime_extensions = normalize_runtime_extensions(extensions, lifecycle_hooks)
     preflight_config = (
-        context_preflight
-        if context_preflight is not None
-        else ContextPreflightConfig()
+        context_preflight if context_preflight is not None else ContextPreflightConfig()
     )
     client = model_selection.create_llm(
         cfg=cfg,
@@ -202,12 +201,8 @@ def create_agent_config(
         allowed_tool_names,
         subagent_runner,
     )
-    tool_runtime = ToolExecutionRuntime(
-        max_concurrency=resolved_limits.max_concurrency
-    )
-    budget_metadata = _resolve_context_budget_metadata(
-        registry, cfg, provider, model
-    )
+    tool_runtime = ToolExecutionRuntime(max_concurrency=resolved_limits.max_concurrency)
+    budget_metadata = _resolve_context_budget_metadata(registry, cfg, provider, model)
     config = AgentLoopConfig(
         model=ChatModelPort(
             client,
@@ -282,9 +277,7 @@ class _LazySummarizer:
         self._factory = factory
         self._real: Any = None
 
-    async def summarize(
-        self, messages: list[Any], prev_summary: str | None
-    ) -> str:
+    async def summarize(self, messages: list[Any], prev_summary: str | None) -> str:
         if self._real is None:
             self._real = self._factory()
         return await self._real.summarize(messages, prev_summary)

@@ -49,7 +49,10 @@ def _imports(path: Path, modules: set[str]) -> set[str]:
 def test_app_import_graph_is_acyclic() -> None:
     paths = sorted(APP_ROOT.rglob("*.py"))
     modules = {_module_name(path) for path in paths}
-    graph = {module: _imports(path, modules) for path, module in ((path, _module_name(path)) for path in paths)}
+    graph = {
+        module: _imports(path, modules)
+        for path, module in ((path, _module_name(path)) for path in paths)
+    }
     visiting: set[str] = set()
     visited: set[str] = set()
 
@@ -78,15 +81,10 @@ def test_runtime_ownership_is_not_a_global_mutable_registry() -> None:
         if isinstance(node, (ast.Assign, ast.AnnAssign))
         and any(
             target.id == "_RUNTIMES_BY_CONFIG"
-            for target in (
-                node.targets if isinstance(node, ast.Assign) else [node.target]
-            )
+            for target in (node.targets if isinstance(node, ast.Assign) else [node.target])
             if isinstance(target, ast.Name)
         )
     ]
-    assert not any(
-        isinstance(node.value, (ast.Dict, ast.List, ast.Set))
-        for node in assignments
-    )
+    assert not any(isinstance(node.value, (ast.Dict, ast.List, ast.Set)) for node in assignments)
     source = path.read_text(encoding="utf-8")
     assert "_runtime_owner" in source

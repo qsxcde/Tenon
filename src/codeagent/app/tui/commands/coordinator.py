@@ -60,7 +60,9 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
             self.model.append_info("MCP: (未配置 server)")
             return
         lines = ["MCP server:"]
-        lines.extend(f"  {server}: {', '.join(sorted(tools))}" for server, tools in sorted(grouped.items()))
+        lines.extend(
+            f"  {server}: {', '.join(sorted(tools))}" for server, tools in sorted(grouped.items())
+        )
         if not grouped:
             lines.append("  (无已连接 server)")
         if self._mcp_diagnostics:
@@ -69,7 +71,11 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
 
     def _cmd_tools(self, cmd: Command) -> None:
         names = [getattr(tool, "name", "") for tool in self._manager.tools]
-        self.model.append_info("可用工具: " + ", ".join(name for name in names if name) if any(names) else "可用工具: (无)")
+        self.model.append_info(
+            "可用工具: " + ", ".join(name for name in names if name)
+            if any(names)
+            else "可用工具: (无)"
+        )
 
     def _cmd_provider(self, cmd: Command) -> None:
         self._select_or_apply_config(cmd, "provider")
@@ -104,7 +110,9 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
         self._login_pending, self._suggestions = provider, []
         self._backend.set_suggestions([])
         self._backend.set_input_mask(True)
-        self._backend.set_input_placeholder(f"输入 {provider.upper()}_API_KEY,Enter 保存 / Esc 取消")
+        self._backend.set_input_placeholder(
+            f"输入 {provider.upper()}_API_KEY,Enter 保存 / Esc 取消"
+        )
         self.model.append_info(f"/login {provider}:请输入 API key(输入将隐藏)")
         self._schedule_render()
 
@@ -112,7 +120,9 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
         self._login_pending = None
         self._backend.set_input_mask(False)
 
-    def _apply_config(self, *, provider: str | None = None, model: str | None = None, effort: str | None = None) -> bool:
+    def _apply_config(
+        self, *, provider: str | None = None, model: str | None = None, effort: str | None = None
+    ) -> bool:
         if self._rebuild_ports is None:
             self.model.append_info("当前环境不支持热切换(未注入端口重建器)")
             return False
@@ -120,7 +130,9 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
             self._pending_provider = provider if provider is not None else self._provider
             result = (self._rebuild_ports_async or self._rebuild_ports)(provider, model, effort)
             if inspect.isawaitable(result):
-                self._track_task(asyncio.get_running_loop().create_task(self._finish_async_config(result)))
+                self._track_task(
+                    asyncio.get_running_loop().create_task(self._finish_async_config(result))
+                )
                 self.model.append_info("正在等待当前运行收尾并切换配置...")
                 self._schedule_render()
                 return True
@@ -146,9 +158,7 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
         self._refresh_skills()
         self.model.append_info("已切换配置")
 
-    def _refresh_model_capabilities(
-        self, provider: str | None, model: str, effort: str
-    ) -> None:
+    def _refresh_model_capabilities(self, provider: str | None, model: str, effort: str) -> None:
         resolver = getattr(self, "_resolve_model_capabilities", None)
         if callable(resolver):
             self.model.status.model_capabilities = resolver(provider, model, effort)

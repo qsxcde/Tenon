@@ -22,16 +22,10 @@ class SessionCommandsMixin:
             return
         if not cmd.args:
             title = next(
-                (
-                    ref.title
-                    for ref in self._manager.list()
-                    if ref.id == current.session_id
-                ),
+                (ref.title for ref in self._manager.list() if ref.id == current.session_id),
                 "",
             )
-            self.model.append_info(
-                f"当前会话标题: {title or '(无标题)'}\n用法: /name <title>"
-            )
+            self.model.append_info(f"当前会话标题: {title or '(无标题)'}\n用法: /name <title>")
             return
         try:
             title = self._manager.rename(current.session_id, " ".join(cmd.args))
@@ -100,9 +94,7 @@ class SessionCommandsMixin:
     def _cmd_session_delete(self, cmd: Command) -> None:
         session_ids = list(cmd.args[1:])
         if not session_ids or session_ids[-1].casefold() != "confirm":
-            self.model.append_info(
-                "删除失败: 需要确认; 用法: /sessions delete <id...> confirm"
-            )
+            self.model.append_info("删除失败: 需要确认; 用法: /sessions delete <id...> confirm")
             return
         session_ids.pop()
         try:
@@ -170,9 +162,7 @@ class SessionCommandsMixin:
             key, separator, value = part.partition("=")
             key = key.casefold()
             if not separator or key not in allowed or not value:
-                raise ValueError(
-                    "筛选项必须是 title/model/status/after/before=值"
-                )
+                raise ValueError("筛选项必须是 title/model/status/after/before=值")
             if key in values:
                 raise ValueError(f"筛选项重复: {key}")
             values[key] = value

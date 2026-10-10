@@ -18,7 +18,6 @@ def test_create_and_header(tmp_path):
     assert first["type"] == "session" and first["version"] == CURRENT_VERSION
 
 
-
 def test_append_never_rewrites_history(tmp_path):
     store = _store(tmp_path)
     store.create("s1")
@@ -26,7 +25,6 @@ def test_append_never_rewrites_history(tmp_path):
     store.append_message("s1", Message(role="assistant", content="b"))
     lines = (tmp_path / "sessions" / "s1.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(lines) == 3  # header + 2 条消息,历史不被重写
-
 
 
 def test_load_messages_roundtrip_with_parent_chain(tmp_path):
@@ -140,7 +138,6 @@ def test_legacy_tool_message_has_no_false_complete_metadata(tmp_path):
     assert loaded.tool_output is None
 
 
-
 def test_version_mismatch_rejected(tmp_path):
     store = _store(tmp_path)
     store.create("s1")
@@ -151,7 +148,6 @@ def test_version_mismatch_rejected(tmp_path):
     )
     with pytest.raises(ValueError, match="版本不兼容"):
         store.load_messages("s1")
-
 
 
 def test_corrupt_line_skipped_not_fatal(tmp_path):
@@ -172,7 +168,6 @@ def test_corrupt_line_skipped_not_fatal(tmp_path):
     )
     assert [m.id for m in store.load_messages("s1")] == ["m1", "m2"]  # 坏行跳过,前后都保留
     assert store.get("s1") is not None  # 扫描路径同样容错
-
 
 
 def test_jsonl_reads_do_not_materialize_file_with_read_text(tmp_path, monkeypatch):
@@ -198,18 +193,17 @@ def test_jsonl_reads_do_not_materialize_file_with_read_text(tmp_path, monkeypatc
     assert store.load_usage("s1").input_tokens == 3
 
 
-
 def test_legacy_file_without_model_effort(tmp_path):
     """旧格式文件(无 model/effort 键)向后兼容:读侧默认空(design D7)。"""
     store = _store(tmp_path)
     path = tmp_path / "sessions" / "s1.jsonl"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(
-            {"type": "session", "version": 1, "id": "s1", "timestamp": "t", "cwd": "/w"}
-        )
+        json.dumps({"type": "session", "version": 1, "id": "s1", "timestamp": "t", "cwd": "/w"})
         + "\n"
-        + json.dumps({"type": "message", "id": "m1", "parentId": None, "role": "user", "content": "hi"})
+        + json.dumps(
+            {"type": "message", "id": "m1", "parentId": None, "role": "user", "content": "hi"}
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -265,7 +259,6 @@ def test_message_activity_timestamp_survives_reopen(tmp_path, monkeypatch):
     (tmp_path / "sessions" / "s1.index.json").unlink()
     reopened = JsonFileStore(tmp_path / "sessions")
     assert reopened.get("s1").last_activity_at == "2026-08-27T00:00:01.000"
-
 
 
 def test_unknown_entry_types_ignored(tmp_path):

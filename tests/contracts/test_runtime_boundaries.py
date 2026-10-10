@@ -58,7 +58,7 @@ async def test_confirmation_waits_for_matching_request_id() -> None:
         coordinator.respond("wanted", False)
         assert await waiter is False
 
-    await (scenario())
+    await scenario()
 
 
 def test_event_mapper_preserves_tool_start_mapping() -> None:

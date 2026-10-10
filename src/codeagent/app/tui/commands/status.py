@@ -137,7 +137,10 @@ class TuiStatusCommandCoordinator:
         for skill in self._skills:
             lines.append(f"  {skill.name} — {skill.description}")
             if skill.package_id:
-                version, scope = skill.package_version or "unversioned", skill.package_scope or "unknown"
+                version, scope = (
+                    skill.package_version or "unversioned",
+                    skill.package_scope or "unknown",
+                )
                 lines.append(f"    Package: {skill.package_id}@{version} ({scope})")
 
     @staticmethod
@@ -154,4 +157,6 @@ class TuiStatusCommandCoordinator:
             if usage.input_tokens > 0 and cached > 0
             else ""
         )
-        return f"输入 {usage.input_tokens} · 输出 {usage.output_tokens + usage.reasoning_tokens}{hit}"
+        return (
+            f"输入 {usage.input_tokens} · 输出 {usage.output_tokens + usage.reasoning_tokens}{hit}"
+        )

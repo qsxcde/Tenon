@@ -49,7 +49,9 @@ def test_bootstrap_prompt_contains_only_bootstrap_body_and_tool_mapping():
 
 
 def test_bootstrap_absent_does_not_change_base_prompt():
-    assert build_bootstrap_prompt("基础", [Skill("fmt", "格式化", "/fmt/SKILL.md", "正文")]) == "基础"
+    assert (
+        build_bootstrap_prompt("基础", [Skill("fmt", "格式化", "/fmt/SKILL.md", "正文")]) == "基础"
+    )
 
 
 def test_runtime_state_injects_once_until_context_resets():

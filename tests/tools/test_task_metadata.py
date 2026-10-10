@@ -40,10 +40,8 @@ async def test_tool_runtime_propagates_bash_metadata():
                 output_truncated=True,
             )
 
-    result = await (
-        ToolExecutionRuntime().execute(
-            AgentToolAdapter(FakeTool()), ToolCall("c1", "bash", {})
-        )
+    result = await ToolExecutionRuntime().execute(
+        AgentToolAdapter(FakeTool()), ToolCall("c1", "bash", {})
     )
 
     assert result.status == "failed"
@@ -53,9 +51,7 @@ async def test_tool_runtime_propagates_bash_metadata():
 
 
 async def test_bash_async_result_marks_nonzero_exit_as_failed():
-    result = await (
-        BashTool().ainvoke(BashArgs(command="python -c \"import sys; sys.exit(2)\""))
-    )
+    result = await BashTool().ainvoke(BashArgs(command='python -c "import sys; sys.exit(2)"'))
 
     assert result.status == "failed"
     assert result.exit_code == 2

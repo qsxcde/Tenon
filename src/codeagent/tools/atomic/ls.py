@@ -57,9 +57,7 @@ class LsTool(AtomicTool):
             suffix = "/" if self._ops.is_dir(dir_path / name) else ""
             lines.append(name + suffix)
         body = "\n".join(lines) if lines else "(空目录)"
-        body, trunc = truncate_head(
-            body, max_lines=limit, max_bytes=self.output_max_bytes
-        )
+        body, trunc = truncate_head(body, max_lines=limit, max_bytes=self.output_max_bytes)
 
         parts = [body]
         if count > limit:
@@ -75,7 +73,9 @@ class LsTool(AtomicTool):
                 "total_lines": count,
                 "shown_bytes": len("\n".join(shown).encode("utf-8")),
                 "shown_lines": len(shown),
-                "truncated_by": "tool_limit" if count > limit else ("tool_bytes" if trunc.truncated else None),
+                "truncated_by": "tool_limit"
+                if count > limit
+                else ("tool_bytes" if trunc.truncated else None),
                 "path": str(dir_path),
                 "continuation": f"limit={limit}" if count > limit else None,
                 "source": "tool",

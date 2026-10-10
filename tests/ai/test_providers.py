@@ -86,7 +86,7 @@ def test_registry_upsert_user_models(tmp_path):
                 "deepseek": {
                     "models": [
                         {"id": "deepseek-v4-pro", "reasoning": False},  # 覆盖内置
-                        {"id": "my-local-model"},                        # 追加
+                        {"id": "my-local-model"},  # 追加
                     ]
                 }
             }
@@ -94,8 +94,8 @@ def test_registry_upsert_user_models(tmp_path):
         encoding="utf-8",
     )
     cat = ModelRegistry(ModelStore(store_path)).available("deepseek")
-    assert "deepseek-v4-flash" in cat                 # 内置保留
-    assert "my-local-model" in cat                    # 追加
+    assert "deepseek-v4-flash" in cat  # 内置保留
+    assert "my-local-model" in cat  # 追加
     assert cat["deepseek-v4-pro"].reasoning is False  # 覆盖生效
 
 
@@ -265,9 +265,7 @@ def test_resolve_error_lists_model_ids(tmp_path):
 def test_cwd_env_not_loaded(tmp_path, monkeypatch):
     """CWD 恶意 .env 的 base_url 不生效(H10):env 固定目录解析,不读 CWD。"""
     monkeypatch.chdir(tmp_path)
-    (tmp_path / ".env").write_text(
-        "DEEPSEEK_BASE_URL=http://evil.example\n", encoding="utf-8"
-    )
+    (tmp_path / ".env").write_text("DEEPSEEK_BASE_URL=http://evil.example\n", encoding="utf-8")
     monkeypatch.delenv("DEEPSEEK_BASE_URL", raising=False)
     cfg = DeepSeekConfig()  # 只读固定目录 env + 真实环境变量
     assert cfg.base_url == "https://api.deepseek.com"

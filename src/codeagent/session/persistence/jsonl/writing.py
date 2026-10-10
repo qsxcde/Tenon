@@ -233,7 +233,9 @@ class JsonlWritingMixin:
         if index is not None:
             try:
                 usage = index["usage"]
-                return UsageStats(**{key: int(usage.get(key, 0) or 0) for key in UsageStats.__dataclass_fields__})
+                return UsageStats(
+                    **{key: int(usage.get(key, 0) or 0) for key in UsageStats.__dataclass_fields__}
+                )
             except (AttributeError, TypeError, ValueError):
                 pass
         return _sum_usage(self._iter_entries(path))

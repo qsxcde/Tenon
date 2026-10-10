@@ -20,7 +20,10 @@ def test_session_public_ports_do_not_use_any() -> None:
 
     for hints, names in (
         (session_hints, ("store", "summarizer", "runtime_closer", "transform_context", "policy")),
-        (manager_hints, ("config", "summarizer", "runtime_closer", "policy", "session_config_factory")),
+        (
+            manager_hints,
+            ("config", "summarizer", "runtime_closer", "policy", "session_config_factory"),
+        ),
         (runtime_hints, ("policy", "transform_context")),
         (compaction_hints, ("summarizer",)),
     ):

@@ -5,7 +5,10 @@ from pathlib import Path
 
 from codeagent.app.tasks.verification.models import TaskStatus, VerificationResult
 from codeagent.app.tasks.verification.runner import VerificationRunner
-from codeagent.app.tasks.verification.workspace import VerificationCommandResolver, WorkspaceInspector
+from codeagent.app.tasks.verification.workspace import (
+    VerificationCommandResolver,
+    WorkspaceInspector,
+)
 
 
 def test_workspace_inspector_detects_content_change(tmp_path: Path):
@@ -47,7 +50,7 @@ async def test_verification_runner_returns_structured_failure(tmp_path: Path):
         }
 
     runner = VerificationRunner(tmp_path, execute=execute)
-    result = await (runner.run("python -m pytest"))
+    result = await runner.run("python -m pytest")
 
     assert isinstance(result, VerificationResult)
     assert result.status is TaskStatus.FAILED
@@ -71,6 +74,6 @@ async def test_verification_runner_reports_cancellation(tmp_path: Path, task_tra
         task.cancel()
         return await task
 
-    result = await (scenario())
+    result = await scenario()
     assert result.status is TaskStatus.CANCELLED
     assert result.cancelled is True

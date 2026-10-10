@@ -37,7 +37,9 @@ class SessionRunCoordinator:
         self._pending_outcome = None
         outcome: RunOutcome | None = None
         try:
-            outcome = await self._run_body(text, run_id, history, before_ids, recursion_limit, policy)
+            outcome = await self._run_body(
+                text, run_id, history, before_ids, recursion_limit, policy
+            )
         except asyncio.CancelledError:
             outcome = self._pending_outcome or RunOutcome(
                 run_id=run_id,
@@ -96,7 +98,13 @@ class SessionRunCoordinator:
             raise
         except Exception as exc:
             owner._rollback(before_ids)
-            return self._failure(text, run_id, exc, owner._runtime.state.previous_phase or owner._runtime.phase, owner._rollback_status())
+            return self._failure(
+                text,
+                run_id,
+                exc,
+                owner._runtime.state.previous_phase or owner._runtime.phase,
+                owner._rollback_status(),
+            )
 
         owner._runtime.begin_finalization()
         try:
@@ -148,7 +156,11 @@ class SessionRunCoordinator:
         before_ids: set[str],
     ) -> None:
         owner = self._owner
-        kept_history = [message for message in [*history, *new_messages] if not message.id.startswith(SUMMARY_ID_PREFIX)]
+        kept_history = [
+            message
+            for message in [*history, *new_messages]
+            if not message.id.startswith(SUMMARY_ID_PREFIX)
+        ]
         owner._link_persistence_parents(new_messages)
         if owner._summary_entry_id:
             for message in kept_history:
@@ -181,8 +193,13 @@ class SessionRunCoordinator:
         )
         owner._runtime.set_failure(failure)
         owner._runtime.last_failure = {**failure.as_metadata(), "prompt": text}
-        owner._emit(AgentEvent(EventType.ERROR, payload=failure.message, metadata=failure.as_metadata()), run_id)
-        return RunOutcome(run_id=run_id, phase=RunPhase.FAILED, failure=failure, commit_status=commit_status)
+        owner._emit(
+            AgentEvent(EventType.ERROR, payload=failure.message, metadata=failure.as_metadata()),
+            run_id,
+        )
+        return RunOutcome(
+            run_id=run_id, phase=RunPhase.FAILED, failure=failure, commit_status=commit_status
+        )
 
     def _cancelled(
         self,
@@ -222,7 +239,9 @@ class SessionRunCoordinator:
         owner = self._owner
         if outcome is None:
             owner._rollback(before_ids)
-            outcome = RunOutcome(run_id=run_id, phase=RunPhase.FAILED, commit_status=CommitStatus.ROLLED_BACK)
+            outcome = RunOutcome(
+                run_id=run_id, phase=RunPhase.FAILED, commit_status=CommitStatus.ROLLED_BACK
+            )
         owner._runtime.finish_run(outcome)
         if owner._runtime.state.terminal_emitted:
             return
@@ -243,7 +262,9 @@ class SessionRunCoordinator:
                     "error_code": (
                         failure.get("error_code")
                         if isinstance(failure, dict)
-                        else failure.code if failure is not None else None
+                        else failure.code
+                        if failure is not None
+                        else None
                     ),
                 },
             ),

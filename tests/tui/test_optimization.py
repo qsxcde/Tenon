@@ -115,6 +115,7 @@ def test_streaming_markdown_parses_only_newly_stable_lines():
 
 def test_collapsed_large_tool_result_uses_metadata_without_scanning_body():
     """折叠大结果只读取摘要 metadata,不在渲染路径扫描完整正文。"""
+
     class _NoScan(str):
         def splitlines(self, *args, **kwargs):
             raise AssertionError("collapsed summary scanned the full result")
@@ -154,9 +155,7 @@ def test_restore_cost_counts_large_content_even_when_message_count_is_small():
     from codeagent.app.tui.session.coordinator import TuiSessionCoordinator
     from codeagent.core.contracts.messages import Message
 
-    cost = TuiSessionCoordinator._restore_cost(
-        [Message(role="assistant", content="x" * 200_000)]
-    )
+    cost = TuiSessionCoordinator._restore_cost([Message(role="assistant", content="x" * 200_000)])
     assert cost.message_count == 1
     assert cost.text_chars == 200_000
     assert cost.requires_background is True

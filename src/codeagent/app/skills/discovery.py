@@ -39,7 +39,11 @@ def discover_skills_in(
                 relative = skill_file.resolve().relative_to(directory.resolve())
             except ValueError:
                 diagnostics.append(
-                    SkillDiagnostic("package_path_escape", f"Package Skill 路径越界: {skill_file}", str(skill_file))
+                    SkillDiagnostic(
+                        "package_path_escape",
+                        f"Package Skill 路径越界: {skill_file}",
+                        str(skill_file),
+                    )
                 )
                 continue
             if any(part.startswith(".") for part in relative.parts):
@@ -48,7 +52,9 @@ def discover_skills_in(
             skill_file,
             skill_file.parent.name,
             package=package,
-            bootstrap=bool(package and getattr(package, "bootstrap", None) == skill_file.parent.name),
+            bootstrap=bool(
+                package and getattr(package, "bootstrap", None) == skill_file.parent.name
+            ),
         )
         if skill is not None:
             found.append(skill)
@@ -74,10 +80,16 @@ def parse_skill_file(
     name = frontmatter.get("name")
     name = name.strip() if isinstance(name, str) and name.strip() else directory_name
     description = frontmatter.get("description")
-    description = description.strip() if isinstance(description, str) and description.strip() else first_paragraph(body)
+    description = (
+        description.strip()
+        if isinstance(description, str) and description.strip()
+        else first_paragraph(body)
+    )
     if not description:
         return None, [
-            SkillDiagnostic("invalid_metadata", f"缺少可用描述(无 description 且正文为空): {path}", str(path))
+            SkillDiagnostic(
+                "invalid_metadata", f"缺少可用描述(无 description 且正文为空): {path}", str(path)
+            )
         ]
     return Skill(
         name=name,
@@ -148,7 +160,11 @@ def package_records(
             records.append(record)
         except (ValueError, OSError) as exc:
             diagnostics.append(
-                SkillDiagnostic("package_invalid", f"Package 记录无效: {exc}", str(value.get("root") or registry_path))
+                SkillDiagnostic(
+                    "package_invalid",
+                    f"Package 记录无效: {exc}",
+                    str(value.get("root") or registry_path),
+                )
             )
     return sorted(records, key=lambda item: item.package_id)
 

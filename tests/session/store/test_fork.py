@@ -16,7 +16,6 @@ def test_fork_copies_history_before_target(tmp_path):
     assert forked[1].parent_id == msgs[0].id  # parentId 链保持
 
 
-
 def test_fork_streams_with_bounded_entry_lifetime(tmp_path, monkeypatch):
     """文件分叉不会同时持有完整源历史的 entry 对象。"""
     store = JsonFileStore(tmp_path)
@@ -71,7 +70,6 @@ def test_fork_streams_with_bounded_entry_lifetime(tmp_path, monkeypatch):
     assert GuardedEntry.peak < 20
 
 
-
 def test_fork_keeps_original_file_untouched(tmp_path):
     """原会话文件零修改(append-only 承诺不破)。"""
     store = JsonFileStore(tmp_path)
@@ -99,7 +97,6 @@ def test_fork_keeps_title_metadata_and_parent_relation(tmp_path):
     assert source.read_text(encoding="utf-8").splitlines() == before
 
 
-
 def test_fork_validation_errors(tmp_path):
     """分叉点校验:非 user 消息 / 不存在 / 目标已存在 → 明确错误,不产生会话。"""
     store = JsonFileStore(tmp_path)
@@ -117,7 +114,6 @@ def test_fork_validation_errors(tmp_path):
     assert len(store.list()) == 2
 
 
-
 def test_fork_first_message_yields_empty_history(tmp_path):
     """分叉点是首条 user 消息:新会话仅 header(空历史,对齐 Pi 无 parent 分支)。"""
     store = JsonFileStore(tmp_path)
@@ -125,7 +121,6 @@ def test_fork_first_message_yields_empty_history(tmp_path):
     ref = store.fork("s1", msgs[0].id, "s2")
     assert ref.parent_session == "s1"
     assert store.load_messages("s2") == []
-
 
 
 def test_fork_carries_compaction_summary(tmp_path):
@@ -143,7 +138,6 @@ def test_fork_carries_compaction_summary(tmp_path):
     assert [m.id for m in state.messages] == [msgs[2].id, msgs[3].id]
     # 父会话不受影响
     assert len(store.load_messages("s1")) == 5
-
 
 
 def test_fork_before_compaction_boundary_keeps_summary_only(tmp_path):

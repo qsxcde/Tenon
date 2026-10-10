@@ -110,8 +110,7 @@ class CompactionService:
         summary = await self._summarizer.summarize(window, previous_summary)
         candidate = await self._estimate_candidate(summary, kept)
         if candidate is not None and (
-            candidate.headroom < 0
-            or (self._enforce_target and candidate.input_tokens > target)
+            candidate.headroom < 0 or (self._enforce_target and candidate.input_tokens > target)
         ):
             return CompactionResult(
                 status="skipped",
@@ -153,9 +152,7 @@ class CompactionService:
                 dict.fromkeys(previous_details.get("readFiles", []) + fresh["readFiles"])
             ),
             "modifiedFiles": list(
-                dict.fromkeys(
-                    previous_details.get("modifiedFiles", []) + fresh["modifiedFiles"]
-                )
+                dict.fromkeys(previous_details.get("modifiedFiles", []) + fresh["modifiedFiles"])
             ),
         }
         parent_id = previous_summary_entry_id or last_history_id

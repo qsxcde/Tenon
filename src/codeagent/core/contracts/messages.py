@@ -177,9 +177,7 @@ class ToolResult:
             self.shown_lines = int(marker.group(2))
             self.total_lines = int(marker.group(3))
             self.truncated_by = self.truncated_by or "tool"
-        item_marker = re.search(
-            r"仅显示前\s*(\d+)\s*条.*?共\s*(\d+)\s*条", self.content
-        )
+        item_marker = re.search(r"仅显示前\s*(\d+)\s*条.*?共\s*(\d+)\s*条", self.content)
         if item_marker is not None:
             self.shown_lines = int(item_marker.group(1))
             self.total_lines = int(item_marker.group(2))
@@ -208,13 +206,21 @@ class ToolResult:
 
     def _apply_output_metadata(self, metadata: ToolOutputMetadata) -> None:
         """Mirror structured facts to legacy flat fields for old consumers."""
-        self.total_bytes = metadata.total_bytes if metadata.total_bytes is not None else self.total_bytes
-        self.total_lines = metadata.total_lines if metadata.total_lines is not None else self.total_lines
-        self.shown_lines = metadata.shown_lines if metadata.shown_lines is not None else self.shown_lines
+        self.total_bytes = (
+            metadata.total_bytes if metadata.total_bytes is not None else self.total_bytes
+        )
+        self.total_lines = (
+            metadata.total_lines if metadata.total_lines is not None else self.total_lines
+        )
+        self.shown_lines = (
+            metadata.shown_lines if metadata.shown_lines is not None else self.shown_lines
+        )
         self.truncated_by = metadata.truncated_by
         self.artifact_path = metadata.artifact_path or self.artifact_path
         self.exit_code = metadata.exit_code if metadata.exit_code is not None else self.exit_code
-        self.duration_ms = metadata.duration_ms if metadata.duration_ms is not None else self.duration_ms
+        self.duration_ms = (
+            metadata.duration_ms if metadata.duration_ms is not None else self.duration_ms
+        )
         self.output_truncated = metadata.is_truncated
         if metadata.semantic_success is not None:
             self.semantic_success = metadata.semantic_success

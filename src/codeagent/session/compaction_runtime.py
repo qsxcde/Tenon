@@ -42,9 +42,7 @@ class SessionCompactionMixin(SessionCompactionBudgetMixin, SessionCompactionEven
             if target is None:
                 return False
             target_budget, reason = target
-            return await self._execute_compaction(
-                trigger, snapshot, target_budget, reason
-            )
+            return await self._execute_compaction(trigger, snapshot, target_budget, reason)
 
     def _compaction_target(
         self,
@@ -114,9 +112,7 @@ class SessionCompactionMixin(SessionCompactionBudgetMixin, SessionCompactionEven
         except asyncio.CancelledError:
             uncertain = self._handle_compaction_cancelled(metadata, persistence_started)
             if uncertain:
-                raise PersistenceCancellationUncertainError(
-                    "压缩记录持久化结果不确定"
-                )
+                raise PersistenceCancellationUncertainError("压缩记录持久化结果不确定")
             raise
         except Exception as exc:
             self._handle_compaction_error(trigger, snapshot, metadata, exc)
@@ -135,9 +131,7 @@ class SessionCompactionMixin(SessionCompactionBudgetMixin, SessionCompactionEven
             append_compaction,
             min_recent_turns=self._compaction_policy.min_recent_turns,
             candidate_budget=self._estimate_compaction_candidate,
-            enforce_target=(
-                trigger == "auto" or self._compaction_policy.compact_budget is None
-            ),
+            enforce_target=(trigger == "auto" or self._compaction_policy.compact_budget is None),
         )
         return await service.compact(
             self._history,
@@ -229,9 +223,7 @@ class SessionCompactionMixin(SessionCompactionBudgetMixin, SessionCompactionEven
                 **metadata,
                 "success": False,
                 "status": (
-                    "persistence_uncertain"
-                    if error_code == "persistence_uncertain"
-                    else "failed"
+                    "persistence_uncertain" if error_code == "persistence_uncertain" else "failed"
                 ),
                 "error_code": error_code,
                 "reason_code": error_code,

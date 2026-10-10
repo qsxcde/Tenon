@@ -137,9 +137,7 @@ async def test_hook_failures_are_structured_and_do_not_affect_agent_run() -> Non
 
     assert [message.content for message in agent.context.messages] == ["hello", "reply"]
     assert ("turn_start", "started") in observed
-    diagnostics = [
-        item for item in agent.hook_diagnostics if item.event_type == "turn_start"
-    ]
+    diagnostics = [item for item in agent.hook_diagnostics if item.event_type == "turn_start"]
     assert len(diagnostics) == 2
     assert all(isinstance(item, HookDiagnostic) for item in diagnostics)
     assert {item.stage for item in diagnostics} == {"invoke", "await"}
@@ -219,9 +217,13 @@ async def test_model_request_boundaries_are_emitted_once(model, expected_status)
 
     if expected_status == "failed":
         with pytest.raises(RuntimeError, match="model unavailable"):
-            await run_agent_loop(AgentContext(), AgentLoopConfig(model=model), "hello", emit=events.append)
+            await run_agent_loop(
+                AgentContext(), AgentLoopConfig(model=model), "hello", emit=events.append
+            )
     else:
-        await run_agent_loop(AgentContext(), AgentLoopConfig(model=model), "hello", emit=events.append)
+        await run_agent_loop(
+            AgentContext(), AgentLoopConfig(model=model), "hello", emit=events.append
+        )
 
     started = [event for event in events if event.type == "model_request_started"]
     finished = [event for event in events if event.type == "model_request_finished"]

@@ -100,9 +100,7 @@ class OpenAICompatStreamingMixin:
                 )
                 if yielded or not classified.retryable or attempt == self._max_retries:
                     raise classified from exc
-                await asyncio.sleep(
-                    retry_delay(attempt, retry_after=classified.retry_after)
-                )
+                await asyncio.sleep(retry_delay(attempt, retry_after=classified.retry_after))
 
     async def _stream_attempt(
         self,

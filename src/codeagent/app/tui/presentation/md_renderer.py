@@ -133,9 +133,7 @@ def _render_code_line(line: str, width: int, bg: str | None) -> list[RichLine]:
     return [[_seg(part, fg=TEXT, bg=bg)] for part in _wrap(line, width)]
 
 
-def md_renderer(
-    text: str, width: int, max_len: int = MAX_MD_RENDER_LEN
-) -> list[RichLine]:
+def md_renderer(text: str, width: int, max_len: int = MAX_MD_RENDER_LEN) -> list[RichLine]:
     """把 Agent 正文渲染为受控样式行(单遍线性扫描;宽容 + 超长退化)。
 
     - 代码块以「完整块才上背景」为界:闭合围栏出现后才给块内行上 ``CODE_BG``,

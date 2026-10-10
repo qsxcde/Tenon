@@ -48,7 +48,9 @@ class SubagentRunRecord:
 
     def __post_init__(self) -> None:
         for name in ("delegation_id", "parent_run_id"):
-            object.__setattr__(self, name, _required(getattr(self, name), name, MAX_RECORD_ID_CHARS))
+            object.__setattr__(
+                self, name, _required(getattr(self, name), name, MAX_RECORD_ID_CHARS)
+            )
         status = _text(self.status, 48)
         if status not in _KNOWN_STATUSES:
             raise ValueError(f"unknown Subagent record status: {status}")
@@ -58,7 +60,9 @@ class SubagentRunRecord:
         object.__setattr__(self, "profile", _single_line(self.profile, MAX_PROFILE_CHARS))
         for name in ("child_run_id", "attempt_id"):
             value = getattr(self, name)
-            object.__setattr__(self, name, _single_line(value, MAX_RECORD_ID_CHARS) if value else None)
+            object.__setattr__(
+                self, name, _single_line(value, MAX_RECORD_ID_CHARS) if value else None
+            )
         object.__setattr__(self, "summary", _text(self.summary, MAX_SUMMARY_CHARS))
         object.__setattr__(self, "reason_code", _single_line(self.reason_code, 96))
         object.__setattr__(self, "diagnostics", _diagnostics(self.diagnostics))
@@ -145,7 +149,10 @@ def _diagnostics(value: Any) -> tuple[str, ...]:
 
 
 def _now() -> str:
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()) + f".{int(time.time() * 1000) % 1000:03d}"
+    return (
+        time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+        + f".{int(time.time() * 1000) % 1000:03d}"
+    )
 
 
 __all__ = [

@@ -113,7 +113,11 @@ class TranscriptLayoutMixin:
         if anchored is not None:
             start = anchored
         else:
-            start = max(0, total - height) if self.follow else min(self._scroll_top, max(0, total - height))
+            start = (
+                max(0, total - height)
+                if self.follow
+                else min(self._scroll_top, max(0, total - height))
+            )
         self._scroll_top = start
         return persistent_total, total, start
 

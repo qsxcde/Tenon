@@ -51,7 +51,9 @@ class ModelStore:
                 if not isinstance(m, dict) or not isinstance(m.get("id"), str):
                     logger.warning(
                         "模型目录 %s 的 provider %r 第 %d 条模型记录缺少字符串 id(已跳过)",
-                        self.path, provider, index,
+                        self.path,
+                        provider,
+                        index,
                     )
                     continue
                 spec = _parse_record(m)
@@ -73,9 +75,7 @@ def _parse_record(m: dict) -> ModelSpec | None:
     elif "max_tokens" in m and m["max_tokens"] != max_tokens:
         logger.warning("模型 %s 同时给出 maxTokens 与 max_tokens,采用 maxTokens", mid)
     # 用 type(...) is int 而非 isinstance(True 是 int 子类,会混过校验把 true 送进请求体)
-    if max_tokens is not None and (
-        type(max_tokens) is not int or max_tokens < 1
-    ):
+    if max_tokens is not None and (type(max_tokens) is not int or max_tokens < 1):
         logger.warning(
             "模型 %s 的 maxTokens 非法(应为正整数,得到 %r),跳过",
             mid,
@@ -93,9 +93,7 @@ def _parse_record(m: dict) -> ModelSpec | None:
             "模型 %s 同时给出 contextWindow 与 context_window,采用 contextWindow",
             mid,
         )
-    if context_window is not None and (
-        type(context_window) is not int or context_window < 1
-    ):
+    if context_window is not None and (type(context_window) is not int or context_window < 1):
         logger.warning(
             "模型 %s 的 contextWindow 非法(应为正整数,得到 %r),跳过",
             mid,

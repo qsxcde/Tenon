@@ -51,10 +51,7 @@ class ProcessRequest:
             type(self.max_memory_bytes) is not int or self.max_memory_bytes <= 0
         ):
             raise ValueError("max_memory_bytes must be a positive integer")
-        if (
-            type(self.cleanup_timeout) not in (int, float)
-            or self.cleanup_timeout <= 0
-        ):
+        if type(self.cleanup_timeout) not in (int, float) or self.cleanup_timeout <= 0:
             raise ValueError("cleanup_timeout must be positive")
 
 
@@ -181,17 +178,13 @@ class ProcessRunner:
                 timed_out = True
                 cleanup_confirmed = self._backend.kill_tree(proc.pid)
                 try:
-                    await asyncio.wait_for(
-                        proc.wait(), timeout=request.cleanup_timeout
-                    )
+                    await asyncio.wait_for(proc.wait(), timeout=request.cleanup_timeout)
                 except (asyncio.TimeoutError, ProcessLookupError):
                     cleanup_confirmed = False
             except asyncio.CancelledError:
                 cleanup_confirmed = self._backend.kill_tree(proc.pid)
                 try:
-                    await asyncio.wait_for(
-                        proc.wait(), timeout=request.cleanup_timeout
-                    )
+                    await asyncio.wait_for(proc.wait(), timeout=request.cleanup_timeout)
                 except (asyncio.TimeoutError, ProcessLookupError):
                     cleanup_confirmed = False
                 raise

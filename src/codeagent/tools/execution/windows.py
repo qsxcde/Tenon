@@ -15,8 +15,7 @@ class WindowsProcessBackend:
         return {
             "cwd": cwd,
             "env": env,
-            "creationflags": subprocess.CREATE_NEW_PROCESS_GROUP
-            | subprocess.CREATE_NO_WINDOW,
+            "creationflags": subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW,
         }
 
     def async_spawn_kwargs(self, cwd: str, env: dict[str, str]) -> dict[str, Any]:

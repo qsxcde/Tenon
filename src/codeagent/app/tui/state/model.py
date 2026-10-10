@@ -9,7 +9,12 @@ from dataclasses import replace
 from typing import Any
 
 from ..presentation.blocks import (
-    ActivityBlock, AssistantBlock, CancelledBlock, ErrorBlock, ToolCallBlock, UserBlock,
+    ActivityBlock,
+    AssistantBlock,
+    CancelledBlock,
+    ErrorBlock,
+    ToolCallBlock,
+    UserBlock,
 )
 from .model_events import ModelEventMixin
 from .model_history import ModelHistoryMixin
@@ -204,7 +209,9 @@ class TuiModel(ModelHistoryMixin, ModelEventMixin):
         if not candidates:
             return False
         block = candidates[-1]
-        changed = block.output_buffer.next_page() if delta > 0 else block.output_buffer.previous_page()
+        changed = (
+            block.output_buffer.next_page() if delta > 0 else block.output_buffer.previous_page()
+        )
         if changed:
             block.touch()
         return changed

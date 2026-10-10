@@ -195,7 +195,9 @@ class BashTool(AtomicTool):
         truncated = bool(stdout_stats[4] or stderr_stats[4])
         reason = _truncation_reason(stdout_stats, stderr_stats)
         output_metadata = {
-            "completeness": "incomplete" if result.timed_out else ("truncated" if truncated else "complete"),
+            "completeness": "incomplete"
+            if result.timed_out
+            else ("truncated" if truncated else "complete"),
             "total_bytes": stdout_stats[0] + stderr_stats[0],
             "total_lines": stdout_stats[1] + stderr_stats[1],
             "shown_bytes": stdout_stats[2] + stderr_stats[2],
@@ -204,7 +206,9 @@ class BashTool(AtomicTool):
             "exit_code": result.returncode,
             "duration_ms": round(elapsed * 1000),
             "stderr_summary": redact_metadata_text(stderr[:1000]) if stderr else None,
-            "semantic_success": None if result.timed_out else _semantically_ok(result.returncode, command),
+            "semantic_success": None
+            if result.timed_out
+            else _semantically_ok(result.returncode, command),
             "source": "tool",
         }
         stdout = stdout + TRUNCATION_MARKER if stdout_stats[4] else stdout

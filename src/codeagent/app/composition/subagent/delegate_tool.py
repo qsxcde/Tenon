@@ -49,9 +49,7 @@ class DelegateTool:
     """Expose one bound Subagent runner as a normal core AgentTool."""
 
     name = "delegate"
-    description = (
-        "将一个边界明确的只读任务交给独立的子 Agent，并返回有限的执行摘要。"
-    )
+    description = "将一个边界明确的只读任务交给独立的子 Agent，并返回有限的执行摘要。"
     parameters = {
         "type": "object",
         "properties": {

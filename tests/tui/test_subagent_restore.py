@@ -42,7 +42,9 @@ def test_hydrate_history_restores_subagent_as_separate_collapsed_block():
     assert block.summary == "子结果"
     assert block.expanded is False
     assert not model.status.subagent_counts
-    assert all(not isinstance(item, SubagentBlock) or item is block for item in model.transcript.blocks)
+    assert all(
+        not isinstance(item, SubagentBlock) or item is block for item in model.transcript.blocks
+    )
 
 
 def test_hydrate_history_marks_restarted_record_non_active():

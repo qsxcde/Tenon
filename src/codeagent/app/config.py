@@ -160,9 +160,7 @@ def _quote_env_value(value: str) -> str:
     return value
 
 
-def write_env_key(
-    provider: str, key: str, env_file: Path | None = None
-) -> Path:
+def write_env_key(provider: str, key: str, env_file: Path | None = None) -> Path:
     """写入/替换 ``<PROVIDER>_API_KEY`` 到 env 文件(行级,保留注释与其它行)。
 
     - 键名约定 ``{provider.upper()}_API_KEY``(与 provider Config 的 env_prefix

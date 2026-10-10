@@ -77,7 +77,9 @@ class JsonlReadingMixin:
         if latest is None:
             return CompactionState(None, None, None, {}, self.load_messages(session_id))
         cut = str(latest.get("firstKeptEntryId") or "")
-        kept = self.load_messages(session_id) if not cut else self._load_messages_from_cut(path, cut)
+        kept = (
+            self.load_messages(session_id) if not cut else self._load_messages_from_cut(path, cut)
+        )
         if cut and isinstance(kept, tuple):
             messages, found = kept
             kept = messages if found else self.load_messages(session_id)

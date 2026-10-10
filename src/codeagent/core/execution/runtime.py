@@ -94,8 +94,10 @@ class ToolExecutionRuntime:
     ) -> ToolResult:
         try:
             invocation = self._invoke(tool, call, on_update=on_update)
-            content = await invocation if timeout is None else await asyncio.wait_for(
-                invocation, timeout=timeout
+            content = (
+                await invocation
+                if timeout is None
+                else await asyncio.wait_for(invocation, timeout=timeout)
             )
         except asyncio.TimeoutError:
             return await self._timeout_result(tool, call, operation)

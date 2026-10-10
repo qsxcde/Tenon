@@ -52,7 +52,7 @@ async def test_agent_loop_config_accepts_tools_and_context_hooks() -> None:
     )
 
     assert isinstance(config.tools[0], AgentTool)
-    assert await (config.transform_context([])) == []
+    assert await config.transform_context([]) == []
     assert (await config.before_tool_call(None, None)).action == "allow"
 
 

@@ -69,7 +69,7 @@ def test_parse_frontmatter_yaml_error():
 def test_parse_frontmatter_block_scalar():
     """生态文件常见块标量 description(|)能正确解析(复制即用)。"""
     parsed = parse_skill_frontmatter(
-        '---\ndescription: |\n  第一行说明。\n  第二行说明。\nname: fmt\n---\n正文'
+        "---\ndescription: |\n  第一行说明。\n  第二行说明。\nname: fmt\n---\n正文"
     )
     assert parsed is not None
     frontmatter, body = parsed
@@ -80,7 +80,9 @@ def test_parse_frontmatter_block_scalar():
 def test_discover_name_defaults_to_dirname(tmp_path):
     """name 缺省取目录名;description 缺省取正文第一段(不产生诊断)。"""
     config_dir, cwd, builtin = _tree(tmp_path)
-    _write_skill(tmp_path / "proj" / ".codeagent" / "skills" / "my-skill", body="第一段说明。\n其余正文")
+    _write_skill(
+        tmp_path / "proj" / ".codeagent" / "skills" / "my-skill", body="第一段说明。\n其余正文"
+    )
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert not diagnostics
     assert len(skills) == 1
@@ -91,10 +93,13 @@ def test_discover_name_defaults_to_dirname(tmp_path):
 def test_parse_failure_skipped_with_diagnostic(tmp_path):
     """frontmatter 解析失败 → 诊断 + 跳过,其它技能照常。"""
     config_dir, cwd, builtin = _tree(tmp_path)
-    _write_skill(tmp_path / "proj" / ".codeagent" / "skills" / "broken",
-                 frontmatter="name: [unclosed\n")
-    _write_skill(tmp_path / "proj" / ".codeagent" / "skills" / "good",
-                 frontmatter="description: 好的技能。\n")
+    _write_skill(
+        tmp_path / "proj" / ".codeagent" / "skills" / "broken", frontmatter="name: [unclosed\n"
+    )
+    _write_skill(
+        tmp_path / "proj" / ".codeagent" / "skills" / "good",
+        frontmatter="description: 好的技能。\n",
+    )
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert [s.name for s in skills] == ["good"]
     assert any(d.code == "parse_failed" for d in diagnostics)
@@ -211,11 +216,15 @@ def test_skill_source_priority_is_direct_then_package_then_project(tmp_path):
     """个人直接目录 > 个人 Package > 项目直接目录 > 项目 Package。"""
     config_dir, cwd, builtin = _tree(tmp_path)
     _write_skill(config_dir / "skills" / "shared", frontmatter="description: 用户直接。\n")
-    _write_skill(cwd / ".codeagent" / "skills" / "project-only", frontmatter="description: 项目直接。\n")
+    _write_skill(
+        cwd / ".codeagent" / "skills" / "project-only", frontmatter="description: 项目直接。\n"
+    )
 
     package_root = tmp_path / "package-source"
     _write_skill(package_root / "skills" / "shared", frontmatter="description: 用户包。\n")
-    _write_skill(package_root / "skills" / "package-only", frontmatter="description: 用户包独有。\n")
+    _write_skill(
+        package_root / "skills" / "package-only", frontmatter="description: 用户包独有。\n"
+    )
     (package_root / "codeagent-package.json").write_text(
         '{"id":"demo","version":"1.0.0","skills":"skills"}', encoding="utf-8"
     )

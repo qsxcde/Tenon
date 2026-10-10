@@ -15,7 +15,7 @@ def _msgs(*contents: str) -> list[ChatMessage]:
 
 async def test_fake_returns_fixed_response():
     model = FakeClient(response="你好")
-    resp = await (model.generate(_msgs("你是谁")))
+    resp = await model.generate(_msgs("你是谁"))
     assert resp.content == "你好"
 
 
@@ -38,7 +38,7 @@ async def test_fake_can_emit_tool_calls():
             }
         ]
     )
-    resp = await (model.generate(_msgs("读文件")))
+    resp = await model.generate(_msgs("读文件"))
     assert resp.tool_calls and resp.tool_calls[0].name == "read_file"
     assert resp.finish_reason == "tool_calls"
 

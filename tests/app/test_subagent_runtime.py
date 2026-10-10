@@ -128,14 +128,14 @@ async def test_delegate_tool_exposes_structured_result_details_as_json_safe_valu
         artifact=SubagentArtifact(ref="artifact-1", kind="tool_output", label="report"),
     )
 
-    mapped = await DelegateTool(_RecordingRunner(result)).bind_parent_run_id(
-        "parent-run-1"
-    ).execute("call-1", {"task": "inspect files"})
+    mapped = (
+        await DelegateTool(_RecordingRunner(result))
+        .bind_parent_run_id("parent-run-1")
+        .execute("call-1", {"task": "inspect files"})
+    )
 
     assert mapped.details["summary"] == "child summary"
-    assert mapped.details["findings"] == [
-        {"summary": "finding", "evidence_ids": ["evidence-1"]}
-    ]
+    assert mapped.details["findings"] == [{"summary": "finding", "evidence_ids": ["evidence-1"]}]
     assert mapped.details["evidence"] == [evidence.to_dict()]
     assert mapped.details["usage"] == {
         "input_tokens": 10,
@@ -154,15 +154,19 @@ async def test_delegate_tool_exposes_structured_result_details_as_json_safe_valu
 async def test_delegate_tool_keeps_empty_structured_details_for_legacy_result():
     from codeagent.app.composition.subagent.delegate_tool import DelegateTool
 
-    result = await DelegateTool(
-        _RecordingRunner(
-            SubagentResult(
-                delegation_id="delegation-1",
-                status=SubagentStatus.COMPLETED,
-                summary="legacy",
+    result = (
+        await DelegateTool(
+            _RecordingRunner(
+                SubagentResult(
+                    delegation_id="delegation-1",
+                    status=SubagentStatus.COMPLETED,
+                    summary="legacy",
+                )
             )
         )
-    ).bind_parent_run_id("parent-run-1").execute("call-1", {"task": "inspect"})
+        .bind_parent_run_id("parent-run-1")
+        .execute("call-1", {"task": "inspect"})
+    )
 
     assert result.details["findings"] == []
     assert result.details["evidence"] == []
@@ -183,9 +187,7 @@ async def test_delegate_tool_rejects_invalid_arguments_without_starting_child():
     tool = DelegateTool(runner).bind_parent_run_id("parent-run")
 
     empty = await tool.execute("call-1", {"task": "   "})
-    write_profile = await tool.execute(
-        "call-2", {"task": "write files", "profile": "write"}
-    )
+    write_profile = await tool.execute("call-2", {"task": "write files", "profile": "write"})
     unbound = await DelegateTool(runner).execute("call-3", {"task": "inspect"})
 
     assert empty.error and empty.details["reason_code"] == "invalid_request"
@@ -197,10 +199,16 @@ async def test_delegate_tool_rejects_invalid_arguments_without_starting_child():
 async def test_delegate_tool_normalizes_unexpected_runner_failure():
     from codeagent.app.composition.subagent.delegate_tool import DelegateTool
 
-    result = await DelegateTool(_RaisingRunner(SubagentResult(
-        delegation_id="unused", status=SubagentStatus.COMPLETED, summary="unused"
-    ))).bind_parent_run_id("parent-run").execute(
-        "call-1", {"task": "inspect"}
+    result = (
+        await DelegateTool(
+            _RaisingRunner(
+                SubagentResult(
+                    delegation_id="unused", status=SubagentStatus.COMPLETED, summary="unused"
+                )
+            )
+        )
+        .bind_parent_run_id("parent-run")
+        .execute("call-1", {"task": "inspect"})
     )
 
     assert result.error is True
@@ -272,7 +280,9 @@ async def test_serial_runner_queues_second_child_and_closes_each_session():
     children: list[_FakeChildSession] = []
 
     def factory(request: SubagentRequest):
-        child = _FakeChildSession(request.delegation_id, request.task, release if not children else None)
+        child = _FakeChildSession(
+            request.delegation_id, request.task, release if not children else None
+        )
         children.append(child)
         return child
 
@@ -366,9 +376,7 @@ async def test_real_parent_delegate_runs_isolated_child_and_returns_only_result(
         "ls",
         "skill",
     }
-    child_contents = "\n".join(
-        item["content"] for item in child_client.call_history[0]["messages"]
-    )
+    child_contents = "\n".join(item["content"] for item in child_client.call_history[0]["messages"])
     assert "inspect child-only context" in child_contents
     assert all("父上下文秘密" not in content for content in child_contents)
     assert any(item.content == "子 Agent 的只读结论" for item in session.history)

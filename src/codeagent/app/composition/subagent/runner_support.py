@@ -7,9 +7,14 @@ import inspect
 import time
 from typing import Any
 
-_MAX_DIAGNOSTIC_CHARS = 2_000
-_MAX_DIAGNOSTICS = 8
-DEFAULT_CLEANUP_TIMEOUT = 10.0
+from codeagent.core.subagent.policy import (
+    DEFAULT_CLEANUP_TIMEOUT_SECONDS,
+    DIAGNOSTIC_LIMITS,
+)
+
+_MAX_DIAGNOSTIC_CHARS = DIAGNOSTIC_LIMITS.max_chars
+_MAX_DIAGNOSTICS = DIAGNOSTIC_LIMITS.max_items
+DEFAULT_CLEANUP_TIMEOUT = DEFAULT_CLEANUP_TIMEOUT_SECONDS
 
 
 async def observe_event(result: Any, active: Any) -> None:
@@ -79,9 +84,7 @@ async def close_active(active: Any, *, timeout: float | None = None) -> None:
             mark_cleanup_uncertain(active, "取消子事件订阅", exc)
     if active.event_tasks:
         try:
-            await _bounded(
-                asyncio.gather(*active.event_tasks, return_exceptions=True), deadline
-            )
+            await _bounded(asyncio.gather(*active.event_tasks, return_exceptions=True), deadline)
         except asyncio.TimeoutError as exc:
             mark_cleanup_uncertain(active, "等待子事件观察任务", exc)
             for task in active.event_tasks:

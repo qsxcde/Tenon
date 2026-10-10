@@ -16,7 +16,8 @@ import pytest
 
 from codeagent.tools.mcp.adapter import McpArgs, McpTool
 from codeagent.tools.mcp.budget import apply_budget, truncate_description
-from codeagent.tools.mcp.client import McpServerClient, McpToolInfo
+from codeagent.tools.mcp.client import McpServerClient
+from codeagent.tools.mcp.content import McpToolInfo
 from codeagent.tools.mcp.config import McpServerSpec, parse_mcp_config
 from codeagent.tools.mcp.loader import close_mcp_tools, load_mcp_tools
 
@@ -71,15 +72,17 @@ def test_parse_mcp_config_bad_json(tmp_path):
 def test_parse_mcp_config_invalid_entries(tmp_path):
     """非法条目逐条诊断 + 跳过,合法条目照常。"""
     (tmp_path / "mcp.json").write_text(
-        json.dumps({
-            "servers": [
-                {"name": "ok", "command": "echo"},
-                {"name": "no-cmd"},
-                {"command": "no-name"},
-                {"name": "bad-args", "command": "x", "args": "nope"},
-                "not-object",
-            ]
-        }),
+        json.dumps(
+            {
+                "servers": [
+                    {"name": "ok", "command": "echo"},
+                    {"name": "no-cmd"},
+                    {"command": "no-name"},
+                    {"name": "bad-args", "command": "x", "args": "nope"},
+                    "not-object",
+                ]
+            }
+        ),
         encoding="utf-8",
     )
     servers, diags = parse_mcp_config(tmp_path)
@@ -110,7 +113,9 @@ def test_client_error_tool_raises():
 
 def test_client_start_timeout():
     """启动超时(无响应 server)→ TimeoutError,装配方可诊断跳过。"""
-    spec = McpServerSpec(name="stuck", command=sys.executable, args=("-c", "import time; time.sleep(30)"))
+    spec = McpServerSpec(
+        name="stuck", command=sys.executable, args=("-c", "import time; time.sleep(30)")
+    )
     client = McpServerClient("stuck", spec)
     with pytest.raises(TimeoutError):
         client.start(timeout=0.5)
@@ -144,14 +149,14 @@ def test_mcp_tool_marks_truncated_output():
 
 
 def test_mcp_non_text_content_is_explicitly_reported():
-    from codeagent.tools.mcp.client import _extract_result
+    from codeagent.tools.mcp.content import extract_result
 
     class ImageBlock:
         type = "image"
         uri = "resource://image-1"
         mimeType = "image/png"
 
-    extracted = _extract_result(type("Result", (), {"content": [ImageBlock()]})())
+    extracted = extract_result(type("Result", (), {"content": [ImageBlock()]})())
 
     assert "不支持直接显示" in extracted.text
     assert extracted.metadata["completeness"] == "unsupported"
@@ -196,7 +201,7 @@ async def test_mcp_tool_async_cancellation_releases_call():
             await task
         return client
 
-    client = await (scenario())
+    client = await scenario()
     assert client.cancelled is True
 
 
@@ -271,7 +276,9 @@ def test_load_mcp_tools_no_config(tmp_path):
 def test_load_mcp_tools_success(tmp_path):
     """合法配置 → 工具列表 + 可调用。"""
     (tmp_path / "mcp.json").write_text(
-        json.dumps({"servers": [{"name": "mock", "command": sys.executable, "args": [MOCK_SERVER]}]}),
+        json.dumps(
+            {"servers": [{"name": "mock", "command": sys.executable, "args": [MOCK_SERVER]}]}
+        ),
         encoding="utf-8",
     )
     tools, diags = load_mcp_tools(tmp_path)
@@ -285,12 +292,14 @@ def test_load_mcp_tools_success(tmp_path):
 def test_load_mcp_tools_start_failure_skipped(tmp_path):
     """server 启动失败 → 诊断 + 跳过,其余 server 照常。"""
     (tmp_path / "mcp.json").write_text(
-        json.dumps({
-            "servers": [
-                {"name": "bad", "command": sys.executable, "args": ["-c", "exit(1)"]},
-                {"name": "mock", "command": sys.executable, "args": [MOCK_SERVER]},
-            ]
-        }),
+        json.dumps(
+            {
+                "servers": [
+                    {"name": "bad", "command": sys.executable, "args": ["-c", "exit(1)"]},
+                    {"name": "mock", "command": sys.executable, "args": [MOCK_SERVER]},
+                ]
+            }
+        ),
         encoding="utf-8",
     )
     tools, diags = load_mcp_tools(tmp_path)
@@ -305,13 +314,15 @@ def test_load_mcp_tools_start_failure_skipped(tmp_path):
 def test_permissions_parse_from_config(tmp_path):
     """mcp.json permissions 段 → 三级规则;缺省/非法 → 空规则。"""
     (tmp_path / "mcp.json").write_text(
-        json.dumps({
-            "permissions": {
-                "deny": ["mcp__db"],
-                "ask": ["mcp__github", "mcp__github__delete_*"],
-                "allow": ["mcp__github__read_issue"],
+        json.dumps(
+            {
+                "permissions": {
+                    "deny": ["mcp__db"],
+                    "ask": ["mcp__github", "mcp__github__delete_*"],
+                    "allow": ["mcp__github__read_issue"],
+                }
             }
-        }),
+        ),
         encoding="utf-8",
     )
     from codeagent.tools.mcp.config import parse_mcp_permissions

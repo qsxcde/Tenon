@@ -4,9 +4,15 @@ from codeagent.session.navigation import SessionNode, build_tree
 from codeagent.session.persistence import SessionRef
 
 
-def _ref(session_id: str, parent: str | None = None, timestamp: str = "t", title: str = "") -> SessionRef:
+def _ref(
+    session_id: str, parent: str | None = None, timestamp: str = "t", title: str = ""
+) -> SessionRef:
     return SessionRef(
-        id=session_id, timestamp=timestamp, cwd="/", parent_session=parent, title=title or session_id
+        id=session_id,
+        timestamp=timestamp,
+        cwd="/",
+        parent_session=parent,
+        title=title or session_id,
     )
 
 

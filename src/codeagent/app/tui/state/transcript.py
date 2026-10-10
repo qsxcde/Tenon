@@ -76,9 +76,7 @@ class Transcript(ProgressiveTranscriptMixin, TranscriptLayoutMixin, Component):
         token = self._layout_index.token_for(block)
         if self._anchor is not None and self._anchor[0] == token:
             neighbors = self._blocks[removed_index:] + self._blocks[:removed_index]
-            replacement = next(
-                (self._layout_index.token_for(item) for item in neighbors), None
-            )
+            replacement = next((self._layout_index.token_for(item) for item in neighbors), None)
             self._anchor = (replacement, 0) if replacement is not None else None
             self._restore_anchor = self._anchor is not None and not self.follow
         self._layout_index.unregister(block)

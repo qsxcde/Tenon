@@ -79,9 +79,13 @@ async def test_delegate_rejects_removed_read_only_before_running_child() -> None
             return False
 
     runner = Runner()
-    result = await DelegateTool(runner).bind_parent_run_id("parent-run").execute(
-        "call-1",
-        {"task": "inspect", "profile": "read_only"},
+    result = (
+        await DelegateTool(runner)
+        .bind_parent_run_id("parent-run")
+        .execute(
+            "call-1",
+            {"task": "inspect", "profile": "read_only"},
+        )
     )
 
     assert result.error is True

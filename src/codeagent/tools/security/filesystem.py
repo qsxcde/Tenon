@@ -60,9 +60,7 @@ def within_workspace(path: str | Path, workspace: str | Path) -> str:
     return "outside"
 
 
-def classify_file(
-    tool_name: str, path: str | Path, workspace: str | Path
-) -> SecurityDecision:
+def classify_file(tool_name: str, path: str | Path, workspace: str | Path) -> SecurityDecision:
     """读越界放行并警告；写/编辑越界需确认；敏感路径硬拒绝。"""
     raw_path = Path(path).expanduser()
     try:

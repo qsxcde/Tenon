@@ -65,9 +65,7 @@ class OpenAICompatClient(OpenAICompatStreamingMixin):
             raise ValueError("base_url 必须是带主机名的 http/https URL")
         if parsed_url.query or parsed_url.fragment:
             raise ValueError("base_url 不得包含 query 或 fragment")
-        if max_tokens is not None and (
-            type(max_tokens) is not int or max_tokens < 1
-        ):
+        if max_tokens is not None and (type(max_tokens) is not int or max_tokens < 1):
             raise ValueError("max_tokens 必须是正整数")
         if reasoning_effort is not None and reasoning_effort not in {
             "low",
@@ -89,12 +87,8 @@ class OpenAICompatClient(OpenAICompatStreamingMixin):
         # 非流式请求必须有有限的 read timeout；流式请求另行允许较长的
         # 首 token 等待，避免服务端 accept 后永远不返回导致 TUI 假死。
         if timeout is None:
-            self._timeout = httpx.Timeout(
-                connect=10.0, read=120.0, write=30.0, pool=10.0
-            )
-            self._stream_timeout = httpx.Timeout(
-                connect=10.0, read=None, write=30.0, pool=10.0
-            )
+            self._timeout = httpx.Timeout(connect=10.0, read=120.0, write=30.0, pool=10.0)
+            self._stream_timeout = httpx.Timeout(connect=10.0, read=None, write=30.0, pool=10.0)
         elif isinstance(timeout, httpx.Timeout):
             self._timeout = timeout
             self._stream_timeout = timeout
@@ -224,9 +218,7 @@ class OpenAICompatClient(OpenAICompatStreamingMixin):
                 )
                 if attempt == self._max_retries or not classified.retryable:
                     raise classified from exc
-                await asyncio.sleep(
-                    retry_delay(attempt, retry_after=classified.retry_after)
-                )
+                await asyncio.sleep(retry_delay(attempt, retry_after=classified.retry_after))
 
         tool_calls: list[ToolCall] = []
         choice = (data.get("choices") or [{}])[0]

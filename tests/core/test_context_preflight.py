@@ -250,11 +250,7 @@ async def test_react_requests_recompute_preflight_for_each_final_context():
         emit=events.append,
     )
 
-    preflights = [
-        event.payload
-        for event in events
-        if event.type == EventType.CONTEXT_PREFLIGHT
-    ]
+    preflights = [event.payload for event in events if event.type == EventType.CONTEXT_PREFLIGHT]
     assert len(preflights) == 2
     assert [item.snapshot.headroom for item in preflights] == [5_000, 4_000]
     assert model.describe_calls == 2

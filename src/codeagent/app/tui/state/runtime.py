@@ -68,7 +68,9 @@ class RuntimeReducer:
         if target.phase != snapshot.phase:
             target = replace(target, phase_started_at=now, elapsed_ms=0)
         elif target.phase_started_at is not None:
-            target = replace(target, elapsed_ms=max(0, round((now - target.phase_started_at) * 1000)))
+            target = replace(
+                target, elapsed_ms=max(0, round((now - target.phase_started_at) * 1000))
+            )
         return replace(target, last_event_at=now)
 
     def _belongs_to_snapshot(

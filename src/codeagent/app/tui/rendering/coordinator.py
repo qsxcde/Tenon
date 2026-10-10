@@ -92,9 +92,7 @@ class TuiRenderCoordinator:
         if not self.frame_scheduler.request(now):
             last = self.frame_scheduler.last_completed_at
             delay = (
-                max(0.0, self.frame_scheduler.interval - (now - last))
-                if last is not None
-                else 0.0
+                max(0.0, self.frame_scheduler.interval - (now - last)) if last is not None else 0.0
             )
             self.render_pending = True
             self._render_handle = loop.call_later(delay, self._start_render)

@@ -24,9 +24,7 @@ def normalize_title(value: object) -> str:
     if value is None:
         return ""
     text = "".join(
-        " "
-        if character.isspace()
-        else character
+        " " if character.isspace() else character
         for character in str(value)
         if character.isspace() or not unicodedata.category(character).startswith("C")
     )
@@ -36,7 +34,10 @@ def normalize_title(value: object) -> str:
 
 def _now() -> str:
     """ISO 本地时间(毫秒精度,保证同秒创建的会话列表排序稳定)。"""
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()) + f".{int(time.time() * 1000) % 1000:03d}"
+    return (
+        time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+        + f".{int(time.time() * 1000) % 1000:03d}"
+    )
 
 
 def _derive_title(name: str, first_user_content: str) -> str:
@@ -57,9 +58,7 @@ def _message_to_dict(m: Message) -> dict[str, Any]:
         "content": m.content,
     }
     if m.tool_calls:
-        d["tool_calls"] = [
-            {"id": c.id, "name": c.name, "args": c.args} for c in m.tool_calls
-        ]
+        d["tool_calls"] = [{"id": c.id, "name": c.name, "args": c.args} for c in m.tool_calls]
     if m.tool_call_id:
         d["tool_call_id"] = m.tool_call_id
     if m.tool_output is not None:
@@ -78,11 +77,7 @@ def _dict_to_message(d: dict[str, Any]) -> Message:
         tool_call_id=d.get("tool_call_id", ""),
         id=d.get("id", ""),
         parent_id=d.get("parentId"),
-        tool_output=(
-            _restored_tool_metadata(d["tool_output"])
-            if "tool_output" in d
-            else None
-        ),
+        tool_output=(_restored_tool_metadata(d["tool_output"]) if "tool_output" in d else None),
     )
 
 
@@ -106,6 +101,4 @@ def _validate_header(entry: dict[str, Any], path: Path) -> None:
         raise ValueError(f"会话文件缺少 header: {path}")
     version = entry.get("version")
     if version != CURRENT_VERSION:
-        raise ValueError(
-            f"会话文件版本不兼容 {path}: version={version}, 期望 {CURRENT_VERSION}"
-        )
+        raise ValueError(f"会话文件版本不兼容 {path}: version={version}, 期望 {CURRENT_VERSION}")

@@ -56,11 +56,7 @@ class EventMapper:
             tool_call_id=mapped.tool_call_id or source.tool_call_id,
             operation_id=mapped.operation_id or source.operation_id,
             phase=mapped.phase or source.phase,
-            elapsed_ms=(
-                mapped.elapsed_ms
-                if mapped.elapsed_ms is not None
-                else source.elapsed_ms
-            ),
+            elapsed_ms=(mapped.elapsed_ms if mapped.elapsed_ms is not None else source.elapsed_ms),
             error_code=mapped.error_code or source.error_code,
             retryable=(mapped.retryable if mapped.retryable is not None else source.retryable),
             cleanup_uncertain=(
@@ -150,7 +146,11 @@ class EventMapper:
 
     @staticmethod
     def _map_tool_update(event: AgentEvent) -> list[AgentEvent]:
-        return [EventMapper._inherit(event, AgentEvent(EventType.TOOL_PROGRESS, event.payload, event.metadata))]
+        return [
+            EventMapper._inherit(
+                event, AgentEvent(EventType.TOOL_PROGRESS, event.payload, event.metadata)
+            )
+        ]
 
     @staticmethod
     def _map_tool_end(event: AgentEvent) -> list[AgentEvent]:

@@ -51,9 +51,7 @@ class Agent(LifecycleHookObservationMixin):
         self._recursion_limit = recursion_limit
         self._run_id = run_id
         self._listeners: list[EventListener] = []
-        self._lifecycle_hooks: tuple[LifecycleHook, ...] = tuple(
-            config.lifecycle_hooks
-        )
+        self._lifecycle_hooks: tuple[LifecycleHook, ...] = tuple(config.lifecycle_hooks)
         self._listener_errors: list[tuple[AgentEvent, Exception]] = []
         self._hook_diagnostics = []
         self._listener_tasks: set[asyncio.Future[Any]] = set()
@@ -125,9 +123,7 @@ class Agent(LifecycleHookObservationMixin):
         if self.is_running:
             raise AgentRuntimeError("agent is already running")
 
-        async def run_once(
-            run_prompt: str | None, run_continue: bool
-        ) -> list[Message]:
+        async def run_once(run_prompt: str | None, run_continue: bool) -> list[Message]:
             if run_continue:
                 return await run_agent_loop_continue(
                     self._context,

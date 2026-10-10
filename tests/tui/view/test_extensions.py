@@ -51,7 +51,6 @@ async def test_package_action_runs_off_the_tui_event_loop():
     assert "安装完成" in "\n".join(app.model.transcript.all_lines(120))
 
 
-
 def test_submit_is_gated_during_restore_and_compaction():
     app, backend, manager = _make_app()
     app.model.apply(AgentEvent(EventType.RESTORE_STARTED))
@@ -61,7 +60,6 @@ def test_submit_is_gated_during_restore_and_compaction():
     app.model.apply(AgentEvent(EventType.COMPACTION_STARTED))
     backend.submit("另一条消息")
     assert manager.current.run_texts == []
-
 
 
 async def test_large_restore_never_hydrates_live_model_in_worker(monkeypatch):
@@ -79,13 +77,12 @@ async def test_large_restore_never_hydrates_live_model_in_worker(monkeypatch):
     async def scenario() -> None:
         await app._restore_large_session(session)
 
-    await (scenario())
+    await scenario()
 
     assert calls
     assert all(getattr(fn, "__self__", None) is not app.model for fn in calls)
     app._render_coordinator.cancel_pending_render()
     await asyncio.sleep(0)
-
 
 
 def test_config_commands_use_rebuild_ports():
@@ -112,7 +109,6 @@ def test_config_commands_use_rebuild_ports():
     assert calls[-1] == (None, None, "low")
 
 
-
 def test_config_command_invalid_provider_shows_error():
     """/provider 未知值 → 回调 ValueError 就地提示(NFR-U7 容错)。"""
     backend = StubBackend()
@@ -127,7 +123,6 @@ def test_config_command_invalid_provider_shows_error():
     assert "未知的 provider" in text
 
 
-
 def test_input_changed_shows_command_suggestions():
     """/ + 前缀 → 浮层展示模糊匹配的命令建议。"""
     app, backend, _ = _make_app()
@@ -139,14 +134,12 @@ def test_input_changed_shows_command_suggestions():
     assert lines and "/status" in lines[0][1].text
 
 
-
 def test_input_changed_plain_text_hides_suggestions():
     """普通文本输入 → 无建议、浮层隐藏。"""
     app, backend, _ = _make_app()
     backend.input_changed("你好")
     assert app._suggestions == []
     assert backend.suggestion_lines[-1] == []
-
 
 
 def test_suggestion_navigate_cycles_and_confirm_fills():
@@ -167,7 +160,6 @@ def test_suggestion_navigate_cycles_and_confirm_fills():
     assert backend.suggestion_lines[-1] == []
 
 
-
 def test_provider_selector_candidates_injected():
     """选择器候选经组合根注入:/provider 空格后按候选模糊匹配。"""
     app, backend, _ = _make_app()
@@ -180,7 +172,6 @@ def test_provider_selector_candidates_injected():
     # 非选择器命令不触发候选
     backend.input_changed("/clear x")
     assert app._suggestions == []
-
 
 
 def test_suggestion_window_fixed_height_and_scrolls():
@@ -223,7 +214,6 @@ def test_suggestion_window_fixed_height_and_scrolls():
     assert names[-1] in last_text and "›" in last_text
 
 
-
 async def test_compact_command_dispatches_and_feedback():
     """/compact → 会话 compact 异步执行,完成后反馈压缩结果。"""
     backend = StubBackend()
@@ -258,8 +248,7 @@ async def test_compact_command_dispatches_and_feedback():
         await asyncio.wait_for(compact_done.wait(), timeout=1.0)
         await asyncio.wait_for(feedback_rendered.wait(), timeout=1.0)
 
-    await (_run())
-
+    await _run()
 
 
 def test_compact_command_unavailable_inline():
@@ -268,7 +257,6 @@ def test_compact_command_unavailable_inline():
     backend.submit("/compact")
     text = _rendered_text(app, backend)
     assert "不可用" in text
-
 
 
 def test_bare_model_command_opens_inline_strip_scoped_to_provider():
@@ -282,7 +270,6 @@ def test_bare_model_command_opens_inline_strip_scoped_to_provider():
     rows = _strip_rows(backend)
     assert any("✓" in r and "m-a" in r for r in rows)
     assert rows[0].startswith("› ")
-
 
 
 def test_inline_picker_filter_and_navigate_cycles():
@@ -300,7 +287,6 @@ def test_inline_picker_filter_and_navigate_cycles():
     assert app._suggestion_index == 0
 
 
-
 def test_inline_picker_confirm_applies_and_closes():
     """Enter → rebuild_ports 生效(provider 锁定当前值)、浮层收起、输入清空、状态栏更新。"""
     app, backend, calls = _make_picker_app()
@@ -314,7 +300,6 @@ def test_inline_picker_confirm_applies_and_closes():
     assert app.model.status.model == "m-new"
 
 
-
 def test_inline_picker_esc_dismisses_without_apply():
     """Esc → 浮层收起、输入清空,不触发热切换。"""
     app, backend, calls = _make_picker_app()
@@ -324,7 +309,6 @@ def test_inline_picker_esc_dismisses_without_apply():
     assert backend.suggestion_lines[-1] == []
     assert backend.input_texts[-1] == ""
     assert calls == []
-
 
 
 def test_inline_picker_provider_confirm_updates_provider():
@@ -349,7 +333,6 @@ def test_inline_picker_provider_confirm_updates_provider():
     assert app._suggestions == ["m-x"]
 
 
-
 def test_suggestion_confirm_opens_inline_picker_for_picker_command():
     """命令建议确认:picker 命令(/mod → model)进入内联选择,条目含描述列。"""
     app, backend, _ = _make_picker_app()
@@ -364,14 +347,12 @@ def test_suggestion_confirm_opens_inline_picker_for_picker_command():
     assert app._suggestions == ["m-a", "m-b"]
 
 
-
 def test_suggestion_confirm_non_picker_still_fills_input():
     """非 picker 命令(/clear)建议确认 → 保持填入输入框原行为。"""
     app, backend, _ = _make_picker_app()
     backend.input_changed("/cle")
     backend.suggestion_confirm()
     assert backend.input_texts[-1] == "/clear"
-
 
 
 def test_login_without_args_opens_picker():
@@ -383,7 +364,6 @@ def test_login_without_args_opens_picker():
     assert app._suggestions == ["deepseek", "glm", "fake"]
 
 
-
 def test_login_with_provider_enters_mask_mode():
     """带参 /login deepseek → 掩码输入态:提示文案 + 掩码开启。"""
     app, backend, _ = _make_login_app()
@@ -391,7 +371,6 @@ def test_login_with_provider_enters_mask_mode():
     assert app._login_pending == "deepseek"
     assert backend.mask_calls == [True]
     assert backend.placeholders[-1] == "输入 DEEPSEEK_API_KEY,Enter 保存 / Esc 取消"
-
 
 
 def test_login_fake_skips_input():
@@ -402,14 +381,12 @@ def test_login_fake_skips_input():
     assert backend.mask_calls == []
 
 
-
 def test_login_unknown_provider_rejected():
     """/login <未知> → 就地提示,不进入输入态。"""
     app, backend, _ = _make_login_app()
     backend.submit("/login nosuch")
     assert app._login_pending is None
     assert backend.mask_calls == []
-
 
 
 def test_login_picker_value_confirm_enters_mask():
@@ -422,7 +399,6 @@ def test_login_picker_value_confirm_enters_mask():
     assert backend.mask_calls == [True]
 
 
-
 def test_login_picker_marks_configured_providers():
     """登录选择器:已配置 key 的 provider 打 ✓(组合根注入 configured_providers)。"""
     app, backend, _ = _make_login_app(configured=["glm"])
@@ -431,7 +407,6 @@ def test_login_picker_marks_configured_providers():
     rows = _strip_rows(backend)
     assert any("✓" in r and "glm" in r for r in rows)
     assert not any("✓" in r and "deepseek" in r for r in rows)
-
 
 
 def test_login_empty_key_stays_in_input():
@@ -444,7 +419,6 @@ def test_login_empty_key_stays_in_input():
     assert saved == []
 
 
-
 def test_login_esc_cancels_without_saving():
     """登录态 Esc → 取消输入,掩码解除,不保存任何内容。"""
     app, backend, saved = _make_login_app()
@@ -453,7 +427,6 @@ def test_login_esc_cancels_without_saving():
     assert app._login_pending is None
     assert backend.mask_calls == [True, False]
     assert saved == []
-
 
 
 def test_login_save_success_switches_provider():
@@ -470,9 +443,9 @@ def test_login_save_success_switches_provider():
     assert "glm" not in app._configured_providers
 
 
-
 def test_login_save_value_error_feedback():
     """保存抛 ValueError(未知 provider 等)→ 提示错误并退出输入态。"""
+
     def boom(provider: str, key: str) -> tuple[str, str]:
         raise ValueError(f"未知的 provider: {provider!r}")
 
@@ -484,9 +457,9 @@ def test_login_save_value_error_feedback():
     assert saved == [("deepseek", "sk-x")]  # 回调确被调用
 
 
-
 def test_login_save_os_error_feedback():
     """保存抛 OSError(磁盘不可写等)→ 提示保存失败并退出输入态。"""
+
     def boom(provider: str, key: str) -> tuple[str, str]:
         raise OSError("disk full")
 
@@ -497,7 +470,6 @@ def test_login_save_os_error_feedback():
     assert backend.mask_calls == [True, False]
 
 
-
 def test_login_disables_suggestions():
     """登录态建议浮层禁用:输入变化不弹任何候选。"""
     app, backend, _ = _make_login_app()
@@ -505,7 +477,6 @@ def test_login_disables_suggestions():
     backend.input_changed("/pro")
     assert app._suggestions == []
     assert backend.suggestion_lines[-1] == []
-
 
 
 def test_skills_command_lists_skills():
@@ -523,7 +494,6 @@ def test_skills_command_lists_skills():
     assert manager_run_texts(app) == []
 
 
-
 def test_skills_info_shows_full_metadata_for_one_skill():
     """/skills info <name> → 详情页展示完整路径、Package 和版本。"""
     app, backend, _ = _make_skills_app(_sample_skills())
@@ -536,13 +506,11 @@ def test_skills_info_shows_full_metadata_for_one_skill():
     assert "Package: superpowers@6.3.0 (user)" in text
 
 
-
 def test_skills_command_without_skills():
     """/skills 无技能 → 明确说明。"""
     app, backend, _ = _make_skills_app([])
     backend.submit("/skills")
     assert "技能: (无)" in _rendered_text(app, backend)
-
 
 
 async def test_skills_command_loads_skill():
@@ -553,14 +521,13 @@ async def test_skills_command_loads_skill():
         backend.submit("/skills fmt")
         await asyncio.sleep(0)
 
-    await (_run())
+    await _run()
     session = manager.current
     assert len(session.run_texts) == 1
     text = session.run_texts[0]
     assert "[用户手动加载技能: fmt]" in text
     assert '<skill name="fmt" location="/skills/fmt/SKILL.md">' in text
     assert "格式化正文" in text
-
 
 
 def test_skills_command_unknown_skill():
@@ -573,7 +540,6 @@ def test_skills_command_unknown_skill():
     assert manager.current.run_texts == []
 
 
-
 def test_skills_suggestion_candidates():
     """/skills ␣ → 技能名模糊候选(输入框补全)。"""
     app, backend, _ = _make_skills_app(_sample_skills())
@@ -583,7 +549,6 @@ def test_skills_suggestion_candidates():
     assert set(app._suggestions) == {"fmt", "brainstorming"}
 
 
-
 async def test_skills_suggestion_confirm_fills_command():
     """技能候选确认 → 填入 /skills <name>,再次 Enter 即加载。"""
     app, backend, _ = _make_skills_app(_sample_skills())
@@ -591,14 +556,14 @@ async def test_skills_suggestion_confirm_fills_command():
     backend.suggestion_confirm()
     assert backend.input_texts[-1] == "/skills brainstorming"
     assert app._suggestions == []
+
     # 再次提交 → 执行手动加载
     async def _run() -> None:
         backend.submit("/skills brainstorming")
         await asyncio.sleep(0)
 
-    await (_run())
+    await _run()
     assert "[用户手动加载技能: brainstorming]" in app._manager.current.run_texts[0]
-
 
 
 def test_mcp_command_groups_tools_by_server():
@@ -617,7 +582,6 @@ def test_mcp_command_groups_tools_by_server():
     assert "github: list_issues, push" in text
     assert "db: query" in text
     assert "start_failed" in text
-
 
 
 def test_mcp_command_without_servers():

@@ -115,30 +115,20 @@ def estimate_context_budget(request: ContextBudgetInput) -> ContextBudgetSnapsho
 
     system_prompt_tokens = _estimate_text_tokens(request.system_prompt)
     tool_definitions_tokens = sum(
-        _estimate_tool_definition_tokens(definition)
-        for definition in request.tool_definitions
+        _estimate_tool_definition_tokens(definition) for definition in request.tool_definitions
     )
     conversation_tokens = sum(
-        _estimate_message_tokens(message)
-        for message in request.messages
-        if message.role != "tool"
+        _estimate_message_tokens(message) for message in request.messages if message.role != "tool"
     )
     tool_result_tokens = sum(
-        _estimate_message_tokens(message)
-        for message in request.messages
-        if message.role == "tool"
+        _estimate_message_tokens(message) for message in request.messages if message.role == "tool"
     )
     input_tokens = (
-        system_prompt_tokens
-        + tool_definitions_tokens
-        + conversation_tokens
-        + tool_result_tokens
+        system_prompt_tokens + tool_definitions_tokens + conversation_tokens + tool_result_tokens
     )
     input_budget = request.context_window - request.output_reserve - request.reserve_tokens
     status: BudgetStatus = (
-        "estimate"
-        if request.window_source in {"catalog", "override", "provider"}
-        else "uncertain"
+        "estimate" if request.window_source in {"catalog", "override", "provider"} else "uncertain"
     )
     return ContextBudgetSnapshot(
         context_window=request.context_window,
@@ -156,9 +146,7 @@ def estimate_context_budget(request: ContextBudgetInput) -> ContextBudgetSnapsho
     )
 
 
-def govern_tool_messages(
-    messages: list[Message], budget: ContextBudgetSnapshot
-) -> list[Message]:
+def govern_tool_messages(messages: list[Message], budget: ContextBudgetSnapshot) -> list[Message]:
     """Return a detached message view whose tool results fit this request.
 
     The operation is deterministic and request-local.  It never mutates the
@@ -183,10 +171,7 @@ def govern_tool_messages(
         replacements[message.id] = replacement
         remaining = max(0, remaining - _estimate_message_tokens(replacement))
         remaining_tools -= 1
-    return [
-        replacements.get(message.id, _clone_message(message))
-        for message in messages
-    ]
+    return [replacements.get(message.id, _clone_message(message)) for message in messages]
 
 
 def _crop_tool_message(message: Message, allocation: int) -> Message:

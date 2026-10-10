@@ -262,7 +262,7 @@ async def test_create_persists_header_after_successful_first_turn():
     store = MemoryStore()
     mgr = _manager(store=store, model="deepseek-v4-flash", effort="high")
     a = mgr.create()
-    await (a.run("你好"))
+    await a.run("你好")
 
     assert len(store.list()) == 1
     ref = store.get(a.session_id)
@@ -279,7 +279,7 @@ async def test_failed_first_turn_does_not_persist_empty_session():
     store = MemoryStore()
     mgr = _manager(BoomModel(response="不会返回"), store=store)
     session = mgr.create()
-    await (session.run("失败的首轮"))
+    await session.run("失败的首轮")
 
     assert session.history == []
     assert store.list() == []
@@ -291,7 +291,7 @@ async def test_switch_restores_history():
     store = MemoryStore()
     mgr = _manager(store=store)
     a = mgr.create()
-    await (a.run("第一轮"))
+    await a.run("第一轮")
     b = mgr.create()
     assert mgr.current is b
     a2 = mgr.switch(a.session_id)
@@ -357,18 +357,18 @@ async def test_subscribe_follows_current_across_switch():
     seen: list = []
     mgr.subscribe(seen.append)
     a = mgr.create()
-    await (a.run("hi"))
+    await a.run("hi")
     assert EventType.SESSION_STARTED in _event_types(seen)
 
     b = mgr.create()
     seen.clear()
-    await (b.run("hi2"))
+    await b.run("hi2")
     assert EventType.SESSION_STARTED in _event_types(seen)  # 跟随到新会话
 
     mgr.switch(a.session_id)
     seen.clear()
     a2 = mgr.switch(a.session_id)
-    await (a2.run("hi3"))
+    await a2.run("hi3")
     assert EventType.SESSION_STARTED in _event_types(seen)  # 跟随回旧会话(重建壳)
 
 
@@ -377,7 +377,7 @@ async def test_dispose_keeps_file_and_allows_reswitch():
     store = MemoryStore()
     mgr = _manager(store=store)
     a = mgr.create()
-    await (a.run("hi"))
+    await a.run("hi")
     mgr.dispose(a.session_id)
     assert mgr.current is None
     assert store.get(a.session_id) is not None  # 文件保留
@@ -403,9 +403,9 @@ async def test_continue_recent_returns_latest(monkeypatch):
     store = MemoryStore()
     mgr = _manager(store=store)
     a = mgr.create()
-    await (a.run("第一轮"))
+    await a.run("第一轮")
     b = mgr.create()
-    await (b.run("第二轮"))
+    await b.run("第二轮")
     assert mgr.continue_recent().session_id == b.session_id
 
 
@@ -414,13 +414,13 @@ async def test_replace_config_switches_model_and_persists():
     store = MemoryStore()
     mgr = _manager(store=store, model="a", effort="low")
     session = mgr.create()
-    await (session.run("首轮"))
+    await session.run("首轮")
     new_config = AgentLoopConfig(model=ChatModelPort(FakeClient(response="新配置回复")), tools=[])
     mgr.replace_config(new_config, model="b", effort="high")
     ref = store.list()[-1]
     assert ref.model == "b" and ref.effort == "high"
     # 既有会话继续对话使用新端口(历史不丢、回复来自新模型)
-    await (mgr.current.run("继续"))
+    await mgr.current.run("继续")
     assistant = [m.content for m in mgr.current.history if m.role == "assistant"]
     assert assistant[-1] == "新配置回复"
 
@@ -440,7 +440,7 @@ async def test_replace_config_halt_running():
         assert task.cancelled()  # halt 中止了运行中任务
         assert mgr._config is new_config
 
-    await (_scenario())
+    await _scenario()
 
 
 def test_continue_recent_without_sessions_creates_new():
@@ -481,7 +481,7 @@ async def test_create_with_parent_session():
     mgr = _manager(store=store)
     a = mgr.create()
     b = mgr.create(parent_session=a.session_id)
-    await (b.run("分支首轮"))
+    await b.run("分支首轮")
     assert store.get(b.session_id).parent_session == a.session_id
 
 
@@ -515,7 +515,7 @@ async def test_single_active_run_halted_on_switch():
         with pytest.raises(asyncio.CancelledError):
             await task
 
-    await (scenario())
+    await scenario()
     assert EventType.RUN_CANCELLED in _event_types(a_seen)
     assert a.history == []  # 取消回滚
 

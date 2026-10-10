@@ -72,7 +72,7 @@ class _GovernedTool(_LegacyTool):
 async def test_agent_tool_adapter_exposes_schema_and_async_execute() -> None:
     adapter = AgentToolAdapter(_LegacyTool())
 
-    result = await (adapter.execute("c1", {"text": "hello"}))
+    result = await adapter.execute("c1", {"text": "hello"})
 
     assert adapter.name == "echo"
     assert adapter.parameters["type"] == "object"
@@ -87,7 +87,7 @@ async def test_agent_tool_adapter_logs_unexpected_execution_failure(caplog) -> N
     adapter = AgentToolAdapter(_FailingTool())
 
     with caplog.at_level(logging.ERROR, logger="codeagent.app"):
-        result = await (adapter.execute("c1", {"text": "hello"}))
+        result = await adapter.execute("c1", {"text": "hello"})
 
     assert result.error is True
     assert "[工具执行出错]" in result.content
@@ -102,9 +102,7 @@ async def test_agent_tool_adapter_forwards_optional_runtime_hooks() -> None:
     signal = object()
     on_update = object()
 
-    result = await adapter.execute(
-        "c1", {"text": "hello"}, signal=signal, on_update=on_update
-    )
+    result = await adapter.execute("c1", {"text": "hello"}, signal=signal, on_update=on_update)
 
     assert result.content == "hello"
     assert tool.received == (signal, on_update)

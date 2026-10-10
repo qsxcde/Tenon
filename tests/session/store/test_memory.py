@@ -16,7 +16,6 @@ def test_memory_store_semantics():
         store.load_messages("ghost")
 
 
-
 def test_memory_store_model_change():
     """MemoryStore 与文件后端同语义:model_change 后写覆盖 create 值。"""
     store = MemoryStore()
@@ -31,12 +30,13 @@ def test_memory_store_model_change():
         store.append_model_change("ghost", model="x")
 
 
-
 def test_memory_store_meta_and_title():
     """MemoryStore 与文件后端同语义:meta 后写覆盖 + 标题派生。"""
     store = MemoryStore()
     store.create("m1")
-    store.append_message("m1", Message(role="user", content="一条非常长的用户消息用来测试标题的截断行为"))
+    store.append_message(
+        "m1", Message(role="user", content="一条非常长的用户消息用来测试标题的截断行为")
+    )
     assert store.get("m1").title.endswith("…")
     store.set_meta("m1", "name", "命名会话")
     assert store.get("m1").title == "命名会话"
@@ -54,7 +54,6 @@ def test_memory_store_normalizes_explicit_title():
     assert store.get("m1").title == "手动 标题 用于测试"
 
 
-
 def test_memory_store_fork_semantics():
     """MemoryStore 与文件后端同语义:切片复制 + parentSession + 校验。"""
     store = MemoryStore()
@@ -67,7 +66,6 @@ def test_memory_store_fork_semantics():
         store.fork("m1", msgs[1].id, "m3")
     with pytest.raises(ValueError, match="消息不存在"):
         store.fork("m1", "ghost", "m3")
-
 
 
 def test_memory_store_load_context_semantics():
@@ -85,7 +83,6 @@ def test_memory_store_load_context_semantics():
         store.load_context("ghost")
 
 
-
 def test_memory_store_fork_carries_compaction():
     """MemoryStore 与文件后端同语义:fork 携带摘要。"""
     store = MemoryStore()
@@ -98,7 +95,6 @@ def test_memory_store_fork_carries_compaction():
     state = store.load_context("m2")
     assert state.summary == "摘要"
     assert [m.id for m in state.messages] == [msgs[2].id]
-
 
 
 def test_memory_store_usage_aggregate_consistent():

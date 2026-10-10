@@ -20,6 +20,7 @@ from codeagent.session.persistence.models import (
 )
 from codeagent.session.persistence.subagent_records import fold_records
 
+
 class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
     """内存后端(测试 / 一次性 headless 用),零文件系统依赖。"""
 
@@ -30,6 +31,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
         self._meta: dict[str, dict[str, Any]] = {}
         self._usage: dict[str, UsageStats] = {}
         self._subagent_records: dict[str, list[SubagentRunRecord]] = {}
+
     def create(
         self,
         session_id: str,
@@ -55,10 +57,12 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
         self._messages[session_id] = []
         self._subagent_records[session_id] = []
         return ref
+
     def get(self, session_id: str) -> SessionRef | None:
         if session_id not in self._sessions:
             return None
         return self._ref_with_title(session_id)
+
     def list(self, query: SessionQuery | None = None) -> list[SessionRef]:
         refs = [self._ref_with_title(sid) for sid in self._sessions]
         refs.sort(key=lambda r: (r.last_activity_at or r.timestamp, r.id))
@@ -80,9 +84,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
         self._meta.pop(session_id, None)
         self._usage.pop(session_id, None)
         self._subagent_records.pop(session_id, None)
-        self._compactions = [
-            (sid, entry) for sid, entry in self._compactions if sid != session_id
-        ]
+        self._compactions = [(sid, entry) for sid, entry in self._compactions if sid != session_id]
 
     def load_messages(self, session_id: str) -> list[Message]:
         if session_id not in self._sessions:
@@ -185,21 +187,16 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
         self._compactions.append((session_id, entry))
         return entry.id
 
-    def append_usage(
-        self, session_id: str, usage: dict[str, int]
-    ) -> None:
+    def append_usage(self, session_id: str, usage: dict[str, int]) -> None:
         """追加一轮用量记录(cost-transparency):内存累加,与文件后端同语义。"""
         if session_id not in self._sessions:
             raise ValueError(f"会话不存在: {session_id}")
         current = self._usage.get(session_id, UsageStats())
         self._usage[session_id] = UsageStats(
             input_tokens=current.input_tokens + int(usage.get("input_tokens", 0) or 0),
-            output_tokens=current.output_tokens
-            + int(usage.get("output_tokens", 0) or 0),
-            reasoning_tokens=current.reasoning_tokens
-            + int(usage.get("reasoning_tokens", 0) or 0),
-            cached_tokens=current.cached_tokens
-            + int(usage.get("cached_tokens", 0) or 0),
+            output_tokens=current.output_tokens + int(usage.get("output_tokens", 0) or 0),
+            reasoning_tokens=current.reasoning_tokens + int(usage.get("reasoning_tokens", 0) or 0),
+            cached_tokens=current.cached_tokens + int(usage.get("cached_tokens", 0) or 0),
         )
 
     def load_usage(self, session_id: str) -> UsageStats:
@@ -219,18 +216,14 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
             raise ValueError(f"会话不存在: {session_id}")
         return fold_records(self._subagent_records.get(session_id, ()))
 
-    def fork(
-        self, session_id: str, target_message_id: str, new_session_id: str
-    ) -> SessionRef:
+    def fork(self, session_id: str, target_message_id: str, new_session_id: str) -> SessionRef:
         """分叉实现(内存后端):新 dict + 保留窗口消息切片 + 压缩状态复制。"""
         if session_id not in self._sessions:
             raise ValueError(f"会话不存在: {session_id}")
         if new_session_id in self._sessions:
             raise ValueError(f"会话已存在: {new_session_id}")
         messages = self._messages[session_id]
-        index = next(
-            (i for i, m in enumerate(messages) if m.id == target_message_id), None
-        )
+        index = next((i for i, m in enumerate(messages) if m.id == target_message_id), None)
         if index is None:
             raise ValueError(f"消息不存在: {target_message_id}")
         if messages[index].role != "user":
@@ -248,9 +241,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
         )
         self._sessions[new_session_id] = ref
         # 压缩状态复制:切点前的窗口消息已被摘要,只复制切点起、分叉点前的消息。
-        latest = next(
-            (e for sid, e in reversed(self._compactions) if sid == session_id), None
-        )
+        latest = next((e for sid, e in reversed(self._compactions) if sid == session_id), None)
         copied = list(messages[:index])
         if latest is not None and latest.first_kept_entry_id:
             first_kept_index = next(
@@ -258,11 +249,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
                 None,
             )
             if first_kept_index is not None:
-                copied = (
-                    list(messages[first_kept_index:index])
-                    if first_kept_index <= index
-                    else []
-                )
+                copied = list(messages[first_kept_index:index]) if first_kept_index <= index else []
             self._compactions.append(
                 (
                     new_session_id,

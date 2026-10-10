@@ -158,7 +158,9 @@ class FindTool(AtomicTool):
         if trunc.truncated:
             parts.append("[输出已截断]")
         content = "\n".join(parts)
-        reason = "tool_limit" if len(results) >= limit else ("tool_bytes" if trunc.truncated else None)
+        reason = (
+            "tool_limit" if len(results) >= limit else ("tool_bytes" if trunc.truncated else None)
+        )
         return GovernedText(
             content,
             {

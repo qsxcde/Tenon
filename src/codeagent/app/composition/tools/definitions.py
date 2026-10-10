@@ -21,7 +21,9 @@ def tool_definition_for(tool: Any) -> ToolDefinition:
     try:
         parameters = schema_factory()
     except Exception as exc:  # noqa: BLE001 - retain the tool/schema diagnostic
-        raise ToolDefinitionConversionError(f"工具 {name or '<unknown>'} 的 schema 无法转换: {exc}") from exc
+        raise ToolDefinitionConversionError(
+            f"工具 {name or '<unknown>'} 的 schema 无法转换: {exc}"
+        ) from exc
     if not isinstance(parameters, dict):
         raise ToolDefinitionConversionError(f"工具 {name or '<unknown>'} 的 schema 必须是对象")
     return ToolDefinition(name=name, description=description, parameters=parameters)

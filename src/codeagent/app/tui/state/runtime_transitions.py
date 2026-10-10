@@ -47,11 +47,11 @@ def transition(
     if event_type == EventType.COMPACTION_FINISHED:
         return compaction_finished(snapshot, metadata)
     if event_type == EventType.RESTORE_STARTED:
-        return replace(snapshot, phase=RuntimePhase.RESTORING, current_operation="恢复会话", context_stale=True)
-    if event_type == EventType.RESTORE_FINISHED:
-        return operation_finished(
-            snapshot, metadata, "restore_failed", "恢复失败", "会话恢复失败"
+        return replace(
+            snapshot, phase=RuntimePhase.RESTORING, current_operation="恢复会话", context_stale=True
         )
+    if event_type == EventType.RESTORE_FINISHED:
+        return operation_finished(snapshot, metadata, "restore_failed", "恢复失败", "会话恢复失败")
     if event_type == EventType.CANCELLING:
         return _simple_phase(snapshot, RuntimePhase.CANCELLING, "取消当前运行")
     if event_type == EventType.RUN_CANCELLED:
@@ -122,11 +122,9 @@ def _tool_progress(
 ) -> RuntimeSnapshot:
     event_type = event.type
     operation = str(
-        metadata.get("tool_name")
-        or (event.payload or {}).get("name")
+        metadata.get("tool_name") or (event.payload or {}).get("name")
         if isinstance(event.payload, dict)
-        else metadata.get("operation")
-        or "工具执行"
+        else metadata.get("operation") or "工具执行"
     )
     call_id = str(metadata.get("tool_call_id") or "")
     if event_type == EventType.TOOL_QUEUED:
@@ -189,9 +187,11 @@ def _tool_finished(
     )
     if changed and tool_call_id and is_terminal(status):
         completed_tool_ids.add(tool_call_id)
-    cleanup_uncertain = snapshot.cleanup_uncertain or bool(
-        metadata.get("cleanup_uncertain")
-    ) or metadata.get("cleanup_status") in {"failed", "uncertain", "unsupported"}
+    cleanup_uncertain = (
+        snapshot.cleanup_uncertain
+        or bool(metadata.get("cleanup_uncertain"))
+        or metadata.get("cleanup_status") in {"failed", "uncertain", "unsupported"}
+    )
     side_effect_state = snapshot.side_effect_state
     if status in {
         ToolLifecycleStatus.TIMED_OUT,
@@ -237,7 +237,9 @@ def _cancel_active_tools(
     return updated_counts, updated_states
 
 
-def _error(snapshot: RuntimeSnapshot, event: AgentEvent, metadata: dict[str, Any]) -> RuntimeSnapshot:
+def _error(
+    snapshot: RuntimeSnapshot, event: AgentEvent, metadata: dict[str, Any]
+) -> RuntimeSnapshot:
     return replace(
         snapshot,
         phase=RuntimePhase.ERROR,
@@ -253,11 +255,17 @@ def _error(snapshot: RuntimeSnapshot, event: AgentEvent, metadata: dict[str, Any
 
 def _turn_end(snapshot: RuntimeSnapshot, metadata: dict[str, Any]) -> RuntimeSnapshot:
     if metadata.get("terminal_phase") == RuntimePhase.ERROR or snapshot.phase == RuntimePhase.ERROR:
-        return replace(snapshot, phase=RuntimePhase.ERROR, current_operation=snapshot.current_operation)
-    return replace(snapshot, phase=RuntimePhase.IDLE, current_operation="", pending_confirmation=None)
+        return replace(
+            snapshot, phase=RuntimePhase.ERROR, current_operation=snapshot.current_operation
+        )
+    return replace(
+        snapshot, phase=RuntimePhase.IDLE, current_operation="", pending_confirmation=None
+    )
 
 
-def _usage(snapshot: RuntimeSnapshot, event: AgentEvent, metadata: dict[str, Any]) -> RuntimeSnapshot:
+def _usage(
+    snapshot: RuntimeSnapshot, event: AgentEvent, metadata: dict[str, Any]
+) -> RuntimeSnapshot:
     usage = event.payload or {}
     context_window = snapshot.context_window
     if "context_window" in metadata:

@@ -80,9 +80,7 @@ class JsonlIndexingMixin:
             timestamp=header.get("timestamp", ""),
             cwd=header.get("cwd", ""),
             last_activity_at=(
-                last_activity_at
-                or header.get("lastActivityAt")
-                or header.get("timestamp", "")
+                last_activity_at or header.get("lastActivityAt") or header.get("timestamp", "")
             ),
             parent_session=header.get("parentSession"),
             model=model,

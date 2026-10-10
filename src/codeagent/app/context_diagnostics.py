@@ -15,10 +15,7 @@ def format_context_diagnostics(diagnostics: Any | None) -> list[str]:
     lines.append(_budget_line(diagnostics))
     if diagnostics.components:
         lines.append("预算组成:")
-        lines.extend(
-            f"  {name}: {_token(value)}"
-            for name, value in diagnostics.components.items()
-        )
+        lines.extend(f"  {name}: {_token(value)}" for name, value in diagnostics.components.items())
     else:
         lines.append("预算组成: (未知)")
     lines.append(_actual_usage_line(diagnostics))

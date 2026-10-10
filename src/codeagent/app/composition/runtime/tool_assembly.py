@@ -30,9 +30,9 @@ def assemble_runtime_tools(
         mcp_diagnostics.extend(mcp_diags)
     if mcp_tools:
         atexit.register(close_mcp_tools, mcp_tools)
-    raw_tools = create_tools(
-        cfg, skills=rendered_skills, resource_limits=resource_limits
-    ) + mcp_tools
+    raw_tools = (
+        create_tools(cfg, skills=rendered_skills, resource_limits=resource_limits) + mcp_tools
+    )
     tools = adapt_tools(raw_tools)
     if allowed_tool_names is not None:
         allowed = frozenset(allowed_tool_names)

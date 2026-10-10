@@ -32,9 +32,7 @@ def test_skill_cli_dispatches_package_lifecycle(monkeypatch, capsys):
 
 def test_usage_line_with_cache_hit():
     """有缓存命中:输入/输出/命中率(约,含原始计数)。"""
-    line = _format_usage_line(
-        {"input_tokens": 2000, "output_tokens": 80, "cached_tokens": 800}
-    )
+    line = _format_usage_line({"input_tokens": 2000, "output_tokens": 80, "cached_tokens": 800})
     assert line == "用量: 输入 2000 · 输出 80 · 缓存命中约 40.0% (800/2000)"
 
 

@@ -19,7 +19,15 @@ def bounded_result(value: Any) -> dict[str, Any]:
         return {}
     result = {
         key: _result_value(key, value[key])
-        for key in ("summary", "failure", "findings", "evidence", "usage", "artifact", "cleanup_uncertain")
+        for key in (
+            "summary",
+            "failure",
+            "findings",
+            "evidence",
+            "usage",
+            "artifact",
+            "cleanup_uncertain",
+        )
         if key in value and key not in _DROP_RESULT_KEYS
     }
     while _json_size(result) > MAX_RESULT_BYTES:
@@ -80,8 +88,13 @@ def _evidence(value: Any) -> dict[str, Any]:
         return {}
     result: dict[str, Any] = {}
     for key, limit in (
-        ("evidence_id", 128), ("source", 512), ("summary", 2_000),
-        ("locator", 512), ("excerpt", 1_200), ("completeness", 32), ("continuation", 512),
+        ("evidence_id", 128),
+        ("source", 512),
+        ("summary", 2_000),
+        ("locator", 512),
+        ("excerpt", 1_200),
+        ("completeness", 32),
+        ("continuation", 512),
     ):
         if value.get(key) is not None:
             result[key] = _text(value[key], limit)

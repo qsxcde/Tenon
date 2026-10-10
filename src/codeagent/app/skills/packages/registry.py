@@ -69,7 +69,13 @@ class PackageRecord:
     def from_dict(cls, value: dict[str, Any]) -> "PackageRecord":
         package_id = str(value.get("id") or "").strip()
         root_text, skills_text = value.get("root"), value.get("skills")
-        if not package_id or not isinstance(root_text, str) or not root_text.strip() or not isinstance(skills_text, str) or not skills_text.strip():
+        if (
+            not package_id
+            or not isinstance(root_text, str)
+            or not root_text.strip()
+            or not isinstance(skills_text, str)
+            or not skills_text.strip()
+        ):
             raise PackageValidationError("Package 注册记录缺少 id、root 或 skills")
         root, skills_dir = Path(root_text).expanduser(), Path(skills_text).expanduser()
         if not PACKAGE_ID_RE.fullmatch(package_id):
@@ -144,10 +150,17 @@ def parse_package_manifest(root: str | Path) -> PackageManifest:
     skills_dir = (package_root / skills_value).resolve()
     if not inside(package_root, skills_dir) or not skills_dir.is_dir():
         raise PackageValidationError(f"Skill 根目录不存在或越界: {skills_dir}")
-    bootstrap, tool_mapping = optional_string(raw.get("bootstrap")), optional_string(raw.get("toolMapping"))
-    if tool_mapping is not None and not inside(package_root, (package_root / tool_mapping).resolve()):
+    bootstrap, tool_mapping = (
+        optional_string(raw.get("bootstrap")),
+        optional_string(raw.get("toolMapping")),
+    )
+    if tool_mapping is not None and not inside(
+        package_root, (package_root / tool_mapping).resolve()
+    ):
         raise PackageValidationError(f"工具映射路径越界: {(package_root / tool_mapping).resolve()}")
-    return PackageManifest(package_id, name, version, package_root, skills_dir, bootstrap, tool_mapping)
+    return PackageManifest(
+        package_id, name, version, package_root, skills_dir, bootstrap, tool_mapping
+    )
 
 
 class PackageRegistry:
@@ -162,15 +175,27 @@ class PackageRegistry:
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError):
-            return [], [PackageDiagnostic("registry_parse_failed", f"Package 注册表解析失败: {self.path}", str(self.path))]
+            return [], [
+                PackageDiagnostic(
+                    "registry_parse_failed", f"Package 注册表解析失败: {self.path}", str(self.path)
+                )
+            ]
         if not isinstance(raw, list):
-            return [], [PackageDiagnostic("registry_invalid", f"Package 注册表必须是数组: {self.path}", str(self.path))]
+            return [], [
+                PackageDiagnostic(
+                    "registry_invalid", f"Package 注册表必须是数组: {self.path}", str(self.path)
+                )
+            ]
         records: list[dict[str, Any]] = []
         diagnostics: list[PackageDiagnostic] = []
         seen_ids: set[str] = set()
         for index, item in enumerate(raw):
             if not isinstance(item, dict):
-                diagnostics.append(PackageDiagnostic("registry_invalid", f"第 {index + 1} 条 Package 记录无效", str(self.path)))
+                diagnostics.append(
+                    PackageDiagnostic(
+                        "registry_invalid", f"第 {index + 1} 条 Package 记录无效", str(self.path)
+                    )
+                )
                 continue
             try:
                 record = PackageRecord.from_dict(item)
@@ -178,15 +203,26 @@ class PackageRegistry:
                 diagnostics.append(PackageDiagnostic("registry_invalid", str(exc), str(self.path)))
                 continue
             if record.package_id in seen_ids:
-                diagnostics.append(PackageDiagnostic("duplicate_id", f"重复 Package id: {record.package_id}", str(self.path)))
+                diagnostics.append(
+                    PackageDiagnostic(
+                        "duplicate_id", f"重复 Package id: {record.package_id}", str(self.path)
+                    )
+                )
                 continue
             seen_ids.add(record.package_id)
             records.append(record.to_dict())
         return records, diagnostics
 
     def save(self, records: Iterable[PackageRecord | dict[str, Any]]) -> None:
-        normalized = [item.to_dict() if isinstance(item, PackageRecord) else PackageRecord.from_dict(item).to_dict() for item in records]
+        normalized = [
+            item.to_dict()
+            if isinstance(item, PackageRecord)
+            else PackageRecord.from_dict(item).to_dict()
+            for item in records
+        ]
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.path.with_suffix(self.path.suffix + ".tmp")
-        temporary.write_text(json.dumps(normalized, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temporary.write_text(
+            json.dumps(normalized, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         temporary.replace(self.path)

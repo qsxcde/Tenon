@@ -113,7 +113,9 @@ def _resolve_context_budget_metadata(
     if not effective_model:
         from codeagent.app.config import Settings
 
-        resolved_provider = provider or getattr(cfg, "llm_provider", None) or Settings().llm_provider
+        resolved_provider = (
+            provider or getattr(cfg, "llm_provider", None) or Settings().llm_provider
+        )
         defaults = _provider_config(resolved_provider)
         effective_model = getattr(defaults, "model", None)
     return _model_budget.resolve_context_budget_metadata(

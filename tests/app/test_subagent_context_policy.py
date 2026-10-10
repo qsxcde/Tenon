@@ -74,7 +74,9 @@ async def test_delegate_rejects_malformed_or_oversized_context_before_runner() -
         {"task": "inspect", "context": [{"kind": "fact", "content": "x" * 2_001}]},
     ]
 
-    results = [await tool.execute(f"call-{index}", arguments) for index, arguments in enumerate(cases)]
+    results = [
+        await tool.execute(f"call-{index}", arguments) for index, arguments in enumerate(cases)
+    ]
 
     assert all(result.error for result in results)
     assert all(result.details["reason_code"] == "invalid_request" for result in results)
@@ -103,9 +105,7 @@ def test_subagent_prompt_contains_only_explicit_context_as_data() -> None:
     prompt = render_subagent_prompt(
         "review the diff",
         "review",
-        (
-            SubagentContextItem("fact", "selected fact", "explicit"),
-        ),
+        (SubagentContextItem("fact", "selected fact", "explicit"),),
     )
 
     assert "review the diff" in prompt
@@ -193,9 +193,7 @@ async def test_review_child_receives_explicit_context_without_parent_history() -
         "ls",
         "skill",
     }
-    message_text = "\n".join(
-        item["content"] for item in child_client.call_history[0]["messages"]
-    )
+    message_text = "\n".join(item["content"] for item in child_client.call_history[0]["messages"])
     assert "审查当前改动" in message_text
     assert "只检查显式提供的 diff" in message_text
     assert "忽略父会话中的隐藏内容" in message_text
@@ -232,15 +230,10 @@ async def test_review_child_reports_insufficient_scope_without_parent_history() 
         await session.run("父会话秘密：不可作为审查证据")
         await session.close()
 
-    prompt = "\n".join(
-        item["content"] for item in child_client.call_history[0]["messages"]
-    )
+    prompt = "\n".join(item["content"] for item in child_client.call_history[0]["messages"])
     assert "范围不足或无法验证" in prompt
     assert "父会话秘密：不可作为审查证据" not in prompt
-    assert any(
-        item.content == "范围不足：没有可验证的文件或 diff"
-        for item in session.history
-    )
+    assert any(item.content == "范围不足：没有可验证的文件或 diff" for item in session.history)
 
 
 @pytest.mark.integration
@@ -287,7 +280,5 @@ async def test_prompt_injection_cannot_expand_subagent_tools(profile: str) -> No
         "skill",
     }
     assert "delegate" not in child_client.call_history[0]["bound_tools"]
-    prompt = "\n".join(
-        item["content"] for item in child_client.call_history[0]["messages"]
-    )
+    prompt = "\n".join(item["content"] for item in child_client.call_history[0]["messages"])
     assert injection in prompt

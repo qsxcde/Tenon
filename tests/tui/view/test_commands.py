@@ -17,7 +17,6 @@ def test_retry_command_requires_safe_failure_and_continue_starts_new_prompt():
     assert manager.current.run_texts == ["new plan"]
 
 
-
 def test_quit_command_dispatches_and_exits():
     """/quit 命令 → 等同 Ctrl+C 退出(空闲态打印完整文档)。"""
     app, backend, manager = _make_app()
@@ -32,7 +31,6 @@ def test_quit_command_dispatches_and_exits():
     assert "回复" in doc
 
 
-
 def test_quit_command_running_is_ignored():
     """/quit 命令运行中 → 输入框提交被忽略(与其他命令一致,不退出)。"""
     app, backend, manager = _make_app()
@@ -41,7 +39,6 @@ def test_quit_command_running_is_ignored():
     backend.submit("/quit")
     assert backend.exited is None
     assert manager.current.aborted is False
-
 
 
 def test_submit_command_help_renders_without_run():
@@ -55,7 +52,6 @@ def test_submit_command_help_renders_without_run():
     assert "/skills" in text
 
 
-
 def test_submit_unknown_command_shows_error():
     """未知命令 → 可操作提示,不发送不执行(NFR-U7)。"""
     app, backend, _ = _make_app()
@@ -65,14 +61,12 @@ def test_submit_unknown_command_shows_error():
     assert "会话列表" not in text
 
 
-
 def test_task_mode_command_updates_sticky_mode():
     app, backend, _ = _make_app()
     backend.submit("/mode plan")
 
     assert app.model.status.mode == "plan"
     assert "已切换到 plan 模式" in "\n".join(app.model.transcript.all_lines(120))
-
 
 
 async def test_submit_double_slash_sends_literal():
@@ -85,10 +79,9 @@ async def test_submit_double_slash_sends_literal():
         backend.submit("//hi")
         await _wait_for_conversation(app)
 
-    await (_run())
+    await _run()
     text = _rendered_text(app, backend)
     assert "/hi" in text  # SESSION_STARTED payload 为转义后的字面量
-
 
 
 def test_clear_command_resets_transcript():
@@ -103,7 +96,6 @@ def test_clear_command_resets_transcript():
     assert app.model.transcript.follow is True
 
 
-
 def test_tools_command_lists_tool_names():
     """/tools → 列出可用工具。"""
     app, backend, manager = _make_app()
@@ -111,7 +103,6 @@ def test_tools_command_lists_tool_names():
     backend.submit("/tools")
     text = _rendered_text(app, backend)
     assert "bash" in text and "read" in text
-
 
 
 def test_submit_after_confirm_executes_command():
@@ -122,7 +113,6 @@ def test_submit_after_confirm_executes_command():
     backend.input_changed("/tools")  # 异步变更通知(被抑制)
     backend.submit("/tools")
     assert "可用工具" in _rendered_text(app, backend)
-
 
 
 def test_bare_slash_shows_all_commands():

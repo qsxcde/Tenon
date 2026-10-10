@@ -69,7 +69,11 @@ class VerificationRunner:
         if self.execute is not None:
             value = self.execute(command, timeout)
             return await value if inspect.isawaitable(value) else value
-        argv = ["cmd.exe", "/d", "/s", "/c", command] if os.name == "nt" else ["/bin/sh", "-lc", command]
+        argv = (
+            ["cmd.exe", "/d", "/s", "/c", command]
+            if os.name == "nt"
+            else ["/bin/sh", "-lc", command]
+        )
         process = await asyncio.create_subprocess_exec(
             *argv,
             cwd=self.cwd,
@@ -114,7 +118,9 @@ class VerificationRunner:
             exit_code = getattr(raw, "exit_code", None)
             status = str(getattr(raw, "status", "") or "")
             duration_ms = int(getattr(raw, "duration_ms", 0) or 0)
-            truncated = bool(getattr(raw, "output_truncated", False) or getattr(raw, "truncated_by", None))
+            truncated = bool(
+                getattr(raw, "output_truncated", False) or getattr(raw, "truncated_by", None)
+            )
             cleanup = bool(getattr(raw, "cleanup_uncertain", False))
         if not duration_ms:
             duration_ms = round((time.monotonic() - started) * 1000)
@@ -127,8 +133,10 @@ class VerificationRunner:
                 numeric_code = int(exit_code) if exit_code is not None else None
             except (TypeError, ValueError):
                 numeric_code = None
-            task_status = TaskStatus.UNVERIFIED if numeric_code is None else (
-                TaskStatus.VERIFIED if numeric_code == 0 else TaskStatus.FAILED
+            task_status = (
+                TaskStatus.UNVERIFIED
+                if numeric_code is None
+                else (TaskStatus.VERIFIED if numeric_code == 0 else TaskStatus.FAILED)
             )
             timed_out = False
             exit_code = numeric_code

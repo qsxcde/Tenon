@@ -96,9 +96,7 @@ def test_context_budget_has_zero_tool_definition_cost_without_tools():
     )
 
     assert snapshot.tool_definitions_tokens == 0
-    assert snapshot.input_tokens == (
-        snapshot.system_prompt_tokens + snapshot.conversation_tokens
-    )
+    assert snapshot.input_tokens == (snapshot.system_prompt_tokens + snapshot.conversation_tokens)
 
 
 def test_context_budget_repeated_estimation_is_stable():
@@ -518,9 +516,10 @@ async def test_context_preparer_timeout_uses_same_contract():
     assert raised.value.code == "context_transform_timeout"
     assert raised.value.extension == "context_preparer"
     assert model.received == []
-    assert next(event for event in events if event.type == "error").metadata[
-        "extension"
-    ] == "context_preparer"
+    assert (
+        next(event for event in events if event.type == "error").metadata["extension"]
+        == "context_preparer"
+    )
 
 
 @pytest.mark.asyncio

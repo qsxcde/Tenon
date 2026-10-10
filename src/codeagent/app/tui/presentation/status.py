@@ -7,7 +7,11 @@ from collections.abc import Callable
 from dataclasses import replace
 
 from .primitives import (
-    Component, RichLine, _cell_width, _seg, _truncate_spans,
+    Component,
+    RichLine,
+    _cell_width,
+    _seg,
+    _truncate_spans,
 )
 from ..state.runtime import RuntimePhase, RuntimeSnapshot, phase_label
 from .theme import ACCENT, DIM, STATUS_MODEL, STATUS_PATH, WARNING
@@ -16,6 +20,7 @@ from .status_context import render_context_spans
 from .status_footer import FooterInfo
 from .status_subagents import render_subagent_counts
 from .status_tool_counts import render_tool_counts
+from .status_zones import zone_widths
 
 
 class StatusBar(Component):
@@ -98,6 +103,7 @@ class StatusBar(Component):
         self.task_attempt = attempt
         self.task_max_attempts = max_attempts
         self.task_message = message
+
     def apply_snapshot(self, snapshot: RuntimeSnapshot, now: float | None = None) -> None:
         """同步运行快照，并把阶段耗时更新为当前显示时刻。"""
         elapsed_ms = snapshot.elapsed(now)
@@ -105,15 +111,18 @@ class StatusBar(Component):
         self.runtime = replace(snapshot, elapsed_ms=elapsed_ms)
         self.context_tokens = snapshot.context_tokens
         self.context_window = snapshot.context_window
+
     def refresh_runtime(self, now: float | None = None) -> None:
         """只刷新阶段计时，不改变其它状态。"""
         self.apply_snapshot(self.runtime, now)
+
     @property
     def status_clock_active(self) -> bool:
         """Return whether a visible elapsed value still changes over time."""
         task_active = self._task_clock.is_active
         runtime_active = self.runtime_visible and self.runtime.phase in self._ACTIVE_RUNTIME_PHASES
         return task_active or runtime_active
+
     def refresh_status_clock(self, now: float | None = None) -> bool:
         """Refresh independent task/runtime elapsed values and return active state."""
         current = self._clock() if now is None else now
@@ -135,9 +144,7 @@ class StatusBar(Component):
         if context_width:
             line.append(_seg(self._ZONE_DIVIDER, fg=DIM))
             line.extend(
-                self._fit_zone(
-                    self._context_spans(context_width), context_width, align="right"
-                )
+                self._fit_zone(self._context_spans(context_width), context_width, align="right")
             )
 
         # Defensive padding keeps the backend contract one terminal row wide even
@@ -151,30 +158,12 @@ class StatusBar(Component):
 
     def _zone_widths(self, width: int) -> tuple[int, int, int]:
         """Return stable session/runtime/context budgets for one terminal width."""
-        width = max(1, width)
-        if width >= 120:
-            session_width = self._WIDE_SESSION_ZONE_WIDTH
-            context_width = self._CONTEXT_ZONE_WIDTH
-        elif width >= 88:
-            session_width, context_width = self._SESSION_ZONE_WIDTH, self._CONTEXT_ZONE_WIDTH
-        elif width >= 64:
-            session_width, context_width = 14, 24
-        elif width >= 56:
-            session_width, context_width = 12, 20
-        elif width >= 40:
-            session_width, context_width = 0, 16
-        elif width >= 20:
-            session_width, context_width = 0, 12
-        else:
-            session_width, context_width = 0, min(12, max(0, width // 3))
-
-        separators = (1 if session_width else 0) + (1 if context_width else 0)
-        runtime_width = max(0, width - session_width - context_width - separators)
-        if runtime_width == 0 and context_width:
-            context_width = max(0, context_width - 1)
-            separators = (1 if session_width else 0) + (1 if context_width else 0)
-            runtime_width = max(0, width - session_width - context_width - separators)
-        return session_width, runtime_width, context_width
+        return zone_widths(
+            width,
+            session_zone=self._SESSION_ZONE_WIDTH,
+            wide_session_zone=self._WIDE_SESSION_ZONE_WIDTH,
+            context_zone=self._CONTEXT_ZONE_WIDTH,
+        )
 
     def _fit_zone(
         self,
@@ -222,14 +211,22 @@ class StatusBar(Component):
             "cancelled": "已取消",
             "no_changes": "无变更",
         }
-        phase = task_labels.get(self.task_phase, self.task_phase) if self.task_phase else (
-            phase_label(runtime.phase) if self.runtime_visible else "空闲"
+        phase = (
+            task_labels.get(self.task_phase, self.task_phase)
+            if self.task_phase
+            else (phase_label(runtime.phase) if self.runtime_visible else "空闲")
         )
-        phase_color = WARNING if self.task_phase or runtime.phase in {
-            RuntimePhase.ERROR,
-            RuntimePhase.CANCELLING,
-            RuntimePhase.AWAITING_CONFIRMATION,
-        } else ACCENT
+        phase_color = (
+            WARNING
+            if self.task_phase
+            or runtime.phase
+            in {
+                RuntimePhase.ERROR,
+                RuntimePhase.CANCELLING,
+                RuntimePhase.AWAITING_CONFIRMATION,
+            }
+            else ACCENT
+        )
         spans: RichLine = [_seg(phase, fg=phase_color)]
         details: list[str] = []
         if self.mode:

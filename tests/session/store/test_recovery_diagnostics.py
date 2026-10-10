@@ -124,7 +124,9 @@ def test_json_store_reports_invalid_subagent_records_without_breaking_history(tm
     assert store.load_subagent_records("s1") == []
 
 
-def test_json_store_reports_missing_compaction_cut_and_falls_back_to_valid_history(tmp_path) -> None:
+def test_json_store_reports_missing_compaction_cut_and_falls_back_to_valid_history(
+    tmp_path,
+) -> None:
     store = JsonFileStore(tmp_path / "sessions")
     store.create("s1")
     message = Message(role="user", content="有效历史")

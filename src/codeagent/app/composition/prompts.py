@@ -29,9 +29,7 @@ def _build_system_prompt(cfg: Any = None, skills: list[Any] | None = None) -> st
         read_base_prompt,
     )
 
-    base = build_system_prompt(
-        read_base_prompt(), load_agents_files(_workspace(cfg), CONFIG_DIR)
-    )
+    base = build_system_prompt(read_base_prompt(), load_agents_files(_workspace(cfg), CONFIG_DIR))
     if skills is None:
         skills, _ = _load_skills(cfg)
     from codeagent.app.skills.runtime import build_bootstrap_prompt

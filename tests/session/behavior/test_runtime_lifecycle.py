@@ -31,9 +31,7 @@ def test_session_runtime_exposes_phase_and_run_correlation() -> None:
     run_id = runtime.start_run()
 
     assert runtime.phase is RunPhase.STARTING
-    runtime.observe_event(
-        AgentEvent(EventType.MESSAGE_START, run_id=run_id)
-    )
+    runtime.observe_event(AgentEvent(EventType.MESSAGE_START, run_id=run_id))
 
     assert runtime.phase is RunPhase.MODEL_WAIT
     assert runtime.state.run_id == run_id
@@ -84,9 +82,7 @@ def test_runtime_failure_classifies_recursion_limit_with_stable_fields() -> None
         ("compaction", "compaction_failed"),
     ],
 )
-def test_runtime_failure_classifies_non_model_phases(
-    phase: str, expected_code: str
-) -> None:
+def test_runtime_failure_classifies_non_model_phases(phase: str, expected_code: str) -> None:
     from codeagent.session.runtime.error_policy import classify_error
 
     failure = classify_error(RuntimeError("boom"), phase=phase)

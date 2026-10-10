@@ -14,6 +14,7 @@ from codeagent.core.contracts.messages import Message
 from codeagent.session.persistence import SessionQuery, UsageStats
 from tests.fixtures.tui import FakeBackend as StubBackend
 
+
 class FakeSession:
     """假会话:订阅回调可按需触发事件;abort 记录调用;run 记录文本。"""
 
@@ -119,9 +120,7 @@ class FakeManager:
     def _set_archived(self, session_ids, archived):
         results = {}
         for session_id in session_ids:
-            session = next(
-                (item for item in self.sessions if item.session_id == session_id), None
-            )
+            session = next((item for item in self.sessions if item.session_id == session_id), None)
             if session is None:
                 raise ValueError(f"会话不存在: {session_id}")
             session.archived = archived

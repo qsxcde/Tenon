@@ -63,9 +63,7 @@ def _run_stream(
         _render_frame(fixture, recorder)
         if not first_token_seen and chunk:
             recorder.mark("first_token_visible")
-            recorder.record_latency(
-                "first_token_latency_ms", "submit", "first_token_visible"
-            )
+            recorder.record_latency("first_token_latency_ms", "submit", "first_token_visible")
             first_token_seen = True
     with recorder.measure("markdown_render_ms"):
         md_renderer(fixture.stream_text, max(1, config.width - 2))

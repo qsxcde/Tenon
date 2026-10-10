@@ -187,11 +187,9 @@ def _child_run_id(
     child_event: AgentEvent | None,
     result: SubagentResult | None,
 ) -> str | None:
-    value = (
-        getattr(child_event, "run_id", None)
-        if child_event is not None
-        else None
-    ) or getattr(result, "child_run_id", None)
+    value = (getattr(child_event, "run_id", None) if child_event is not None else None) or getattr(
+        result, "child_run_id", None
+    )
     return str(value) if value else getattr(active, "child_run_id", None)
 
 

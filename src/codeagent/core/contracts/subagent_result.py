@@ -63,9 +63,7 @@ class SubagentResult:
             )
         for name in ("child_run_id", "attempt_id"):
             value = getattr(self, name)
-            if value is not None and (
-                not isinstance(value, str) or not value.strip()
-            ):
+            if value is not None and (not isinstance(value, str) or not value.strip()):
                 raise SubagentContractError(
                     f"{name} must be a non-empty string", code="invalid_result"
                 )
@@ -77,9 +75,7 @@ class SubagentResult:
                 code="invalid_result",
             )
         diagnostics = (
-            self.diagnostics
-            if isinstance(self.diagnostics, tuple)
-            else tuple(self.diagnostics)
+            self.diagnostics if isinstance(self.diagnostics, tuple) else tuple(self.diagnostics)
         )
         if not all(isinstance(item, str) for item in diagnostics):
             raise SubagentContractError(
@@ -87,15 +83,9 @@ class SubagentResult:
                 code="invalid_result",
             )
         if not isinstance(self.cleanup_uncertain, bool):
-            raise SubagentContractError(
-                "cleanup_uncertain must be a bool", code="invalid_result"
-            )
-        findings = _result_tuple(
-            self.findings, "findings", SubagentFinding, MAX_SUBAGENT_FINDINGS
-        )
-        evidence = _result_tuple(
-            self.evidence, "evidence", SubagentEvidence, MAX_SUBAGENT_EVIDENCE
-        )
+            raise SubagentContractError("cleanup_uncertain must be a bool", code="invalid_result")
+        findings = _result_tuple(self.findings, "findings", SubagentFinding, MAX_SUBAGENT_FINDINGS)
+        evidence = _result_tuple(self.evidence, "evidence", SubagentEvidence, MAX_SUBAGENT_EVIDENCE)
         evidence_ids = {item.evidence_id for item in evidence}
         if len(evidence_ids) != len(evidence):
             raise SubagentContractError("evidence ids must be unique", code="invalid_result")

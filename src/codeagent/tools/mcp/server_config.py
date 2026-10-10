@@ -50,8 +50,7 @@ def parse_mcp_config(config_dir: str | Path) -> tuple[list[McpServerSpec], list[
             diagnostics.append(f"invalid_metadata: MCP server '{name}' 的 args 非法")
             continue
         if not isinstance(env, dict) or not all(
-            isinstance(key, str) and isinstance(value, str)
-            for key, value in env.items()
+            isinstance(key, str) and isinstance(value, str) for key, value in env.items()
         ):
             diagnostics.append(f"invalid_metadata: MCP server '{name}' 的 env 非法")
             continue

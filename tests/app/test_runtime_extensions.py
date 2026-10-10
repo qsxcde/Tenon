@@ -163,9 +163,7 @@ async def test_session_runtime_runs_injected_before_tool_hook() -> None:
 
     runtime = SessionRuntime(
         lambda event, run_id: None,
-        agent_factory=lambda context, config, limit: (
-            captured.append(config) or StubAgent()
-        ),
+        agent_factory=lambda context, config, limit: captured.append(config) or StubAgent(),
     )
     runtime.start_run()
     await runtime.execute(

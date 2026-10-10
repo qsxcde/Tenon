@@ -6,7 +6,11 @@ import json
 from typing import Any, AsyncIterator
 
 from codeagent.ai.model.types import ChatMessage, ToolCall as AiToolCall, ToolDefinition
-from codeagent.core.context.budget import ContextBudgetInput, ContextBudgetSnapshot, estimate_context_budget
+from codeagent.core.context.budget import (
+    ContextBudgetInput,
+    ContextBudgetSnapshot,
+    estimate_context_budget,
+)
 from codeagent.core.contracts.messages import Message, ToolCall
 from codeagent.core.contracts.ports import AgentTool, ModelResponse, StreamEvent
 
@@ -154,10 +158,7 @@ class ChatModelPort:
                     )
                 )
                 continue
-            raise TypeError(
-                "模型工具必须是 AgentTool；"
-                "请在组合根先调用 adapt_tools"
-            )
+            raise TypeError("模型工具必须是 AgentTool；请在组合根先调用 adapt_tools")
         return definitions
 
     def describe_context_budget(

@@ -20,7 +20,5 @@ _LABELS = {
 def render_tool_counts(counts: Mapping[str, int]) -> str:
     """Render non-zero tool states without widening the status-bar zones."""
     return " ".join(
-        f"{_LABELS.get(status, status[:1])}{count}"
-        for status, count in counts.items()
-        if count > 0
+        f"{_LABELS.get(status, status[:1])}{count}" for status, count in counts.items() if count > 0
     )

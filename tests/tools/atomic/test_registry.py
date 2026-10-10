@@ -14,14 +14,11 @@ def test_make_tools_returns_all_atomic_tools():
     assert all(isinstance(t, AtomicTool) for t in tools)
 
 
-
 def test_make_tools_offline(tmp_path):
     """无网络/无密钥副作用。"""
     tools = create_tools()
     assert tools  # 仅断言可装配
 
 
-
 def test_dangerous_patterns_nonempty():
     assert DANGEROUS_PATTERNS
-

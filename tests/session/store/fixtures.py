@@ -16,6 +16,7 @@ from codeagent.session.persistence import (
     SessionRef,
 )
 
+
 def _store(tmp_path):
     return JsonFileStore(tmp_path / "sessions")
 

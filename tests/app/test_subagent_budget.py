@@ -112,10 +112,7 @@ async def test_delegate_enforces_four_accepted_children_per_parent_run() -> None
     tool = DelegateTool(runner).bind_parent_run_id("parent-run")
 
     results = await asyncio.gather(
-        *[
-            tool.execute(f"call-{index}", {"task": f"inspect {index}"})
-            for index in range(5)
-        ]
+        *[tool.execute(f"call-{index}", {"task": f"inspect {index}"}) for index in range(5)]
     )
 
     assert [result.error for result in results[:4]] == [False] * 4

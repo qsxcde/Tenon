@@ -5,9 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 
-def append_model_capability_lines(
-    lines: list[str], capabilities: Any, session: Any | None
-) -> None:
+def append_model_capability_lines(lines: list[str], capabilities: Any, session: Any | None) -> None:
     """追加当前模型的静态能力与运行期缓存观测。"""
     if capabilities is None:
         return

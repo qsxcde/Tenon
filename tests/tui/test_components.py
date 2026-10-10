@@ -423,9 +423,7 @@ def test_tool_call_summary_includes_structured_change_and_range_facts():
 
 
 def test_edit_tool_expand_shows_intent_diff_with_colored_rows():
-    block = ToolCallBlock(
-        "edit", {"file_path": "a.py", "old_string": "old", "new_string": "new"}
-    )
+    block = ToolCallBlock("edit", {"file_path": "a.py", "old_string": "old", "new_string": "new"})
     block.set_result("已替换 1 处: a.py")
     block.toggle_expand()
     lines = block.render(60)
@@ -714,7 +712,7 @@ def test_block_at_maps_after_scroll():
     for b in blocks:
         transcript.append(b)
     transcript.render(60, 10)  # follow:start=10,视口显示行 10..19
-    transcript.scroll(5)      # 上滚 5 行
+    transcript.scroll(5)  # 上滚 5 行
     transcript.render(60, 10)  # start=5,视口显示行 5..14
     assert transcript.block_at(0) is blocks[12]
     assert transcript.block_at(2) is blocks[13]
@@ -762,10 +760,15 @@ def test_model_activity_lifecycle_and_out_of_order_tool_results():
     assert model.activity_visible is True
     model.apply(AgentEvent(EventType.THINKING_DELTA, payload="secret"))
     assert "secret" not in "\n".join(model.transcript.all_lines(60))
-    model.apply(AgentEvent(EventType.TOOL_CALL, payload=[
-        {"name": "read", "args": {"file_path": "a.py"}, "id": "a"},
-        {"name": "read", "args": {"file_path": "b.py"}, "id": "b"},
-    ]))
+    model.apply(
+        AgentEvent(
+            EventType.TOOL_CALL,
+            payload=[
+                {"name": "read", "args": {"file_path": "a.py"}, "id": "a"},
+                {"name": "read", "args": {"file_path": "b.py"}, "id": "b"},
+            ],
+        )
+    )
     assert model.activity_visible is False
 
 
@@ -922,7 +925,9 @@ def test_model_cancellation_closes_active_tool_without_result() -> None:
     assert block.execution_status == "cancelled"
     assert block.cleanup_status == "uncertain"
     assert model._pending_tools == []
-    model.apply(AgentEvent(EventType.TOOL_RESULT, payload="result-b", metadata={"tool_call_id": "b"}))
+    model.apply(
+        AgentEvent(EventType.TOOL_RESULT, payload="result-b", metadata={"tool_call_id": "b"})
+    )
     tools = [block for block in model.transcript.blocks if isinstance(block, ToolCallBlock)]
     assert tools[0].result == "" and tools[1].result == "result-b"
     assert model.activity_visible is True

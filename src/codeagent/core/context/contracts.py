@@ -50,9 +50,7 @@ TransformContext = ContextTransformer
 ContextPreparer = Callable[
     ["ContextPreparationRequest"], Awaitable[Iterable[Message]] | Iterable[Message]
 ]
-BeforeToolCall = Callable[
-    [ToolCall, Any], Awaitable[ToolDecision | None] | ToolDecision | None
-]
+BeforeToolCall = Callable[[ToolCall, Any], Awaitable[ToolDecision | None] | ToolDecision | None]
 AfterToolCall = Callable[
     [ToolCall, ToolResult, Any],
     Awaitable[ToolResult | None] | ToolResult | None,

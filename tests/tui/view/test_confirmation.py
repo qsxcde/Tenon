@@ -17,7 +17,6 @@ def test_confirmation_event_shows_bar():
     assert app._pending_confirmation is not None
 
 
-
 def test_confirmation_yes_forwards_approval():
     """y 响应 → 会话 respond_approval(request_id, True),确认条收起。"""
     app, backend, manager = _make_app()
@@ -28,14 +27,12 @@ def test_confirmation_yes_forwards_approval():
     assert app._pending_confirmation is None
 
 
-
 def test_confirmation_no_forwards_rejection():
     """n 响应 → 会话 respond_approval(request_id, False),确认条收起。"""
     app, backend, manager = _make_app()
     manager.current._emit(_confirm_event())
     backend.confirmation_response(False)
     assert manager.current.approvals == [("cf-r1", False)]
-
 
 
 def test_esc_while_confirmation_aborts_run():
@@ -50,7 +47,6 @@ def test_esc_while_confirmation_aborts_run():
     assert backend.confirmation_lines[-1] == []
 
 
-
 def test_terminal_event_clears_confirmation_bar():
     """终态事件(TURN_END)→ 确认条收起(不再悬挂)。"""
     app, backend, manager = _make_app()
@@ -58,7 +54,6 @@ def test_terminal_event_clears_confirmation_bar():
     manager.current._emit(AgentEvent(EventType.TURN_END))
     assert app._pending_confirmation is None
     assert backend.confirmation_lines[-1] == []
-
 
 
 def test_rejected_tool_result_marks_block():
@@ -85,7 +80,6 @@ def test_rejected_tool_result_marks_block():
     assert "Rejected bash" in "".join(s.text for s in header)
 
 
-
 def test_start_registers_confirmation_handler():
     """start() 注册确认响应回调(端口接线)。"""
     backend = StubBackend()
@@ -93,4 +87,3 @@ def test_start_registers_confirmation_handler():
     app.start()
     assert backend.confirmation_response is not None
     backend.confirmation_response(True)  # 无 pending 时安全忽略
-

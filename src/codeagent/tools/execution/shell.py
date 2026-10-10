@@ -48,14 +48,10 @@ def is_wsl_shim(path: str) -> bool:
     if os.name != "nt":
         return False
     system_root = os.environ.get("SystemRoot") or r"C:\Windows"
-    local_appdata = os.environ.get("LOCALAPPDATA") or str(
-        Path.home() / "AppData" / "Local"
-    )
+    local_appdata = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
     shims = {
         os.path.normcase(os.path.join(system_root, "System32", "bash.exe")),
-        os.path.normcase(
-            os.path.join(local_appdata, "Microsoft", "WindowsApps", "bash.exe")
-        ),
+        os.path.normcase(os.path.join(local_appdata, "Microsoft", "WindowsApps", "bash.exe")),
     }
     return os.path.normcase(path) in shims
 
@@ -64,11 +60,9 @@ def all_which(name: str) -> list[str]:
     """返回 PATH 中全部候选，允许调用方跳过 WSL shim。"""
     exts = [""]
     if os.name == "nt":
-        exts = [
-            ext
-            for ext in os.environ.get("PATHEXT", "").lower().split(os.pathsep)
-            if ext
-        ] or [".exe"]
+        exts = [ext for ext in os.environ.get("PATHEXT", "").lower().split(os.pathsep) if ext] or [
+            ".exe"
+        ]
     found: list[str] = []
     for directory in os.environ.get("PATH", "").split(os.pathsep):
         if not directory:
@@ -87,9 +81,7 @@ def resolve_bash() -> str:
     if _bash_executable is not None:
         return _bash_executable
 
-    candidates: list[str | None] = [
-        path for path in all_which("bash") if not is_wsl_shim(path)
-    ]
+    candidates: list[str | None] = [path for path in all_which("bash") if not is_wsl_shim(path)]
     for var in ("PROGRAMFILES", "PROGRAMFILES(X86)"):
         program_files = os.environ.get(var)
         if program_files:
@@ -111,11 +103,7 @@ def resolve_bash() -> str:
 
 def bash_env() -> dict[str, str]:
     """构造不泄漏用户密钥的 Bash 子进程环境。"""
-    env = {
-        key: value
-        for key, value in os.environ.items()
-        if key in _BASH_ENV_ALLOWLIST
-    }
+    env = {key: value for key, value in os.environ.items() if key in _BASH_ENV_ALLOWLIST}
     env["LANG"] = "en_US.UTF-8"
     env["NO_COLOR"] = "1"
     return env

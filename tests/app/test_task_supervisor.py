@@ -35,9 +35,7 @@ class FakeRunner:
         return self.results.pop(0)
 
 
-async def test_supervisor_captures_baseline_off_the_event_loop(
-    tmp_path: Path, monkeypatch
-):
+async def test_supervisor_captures_baseline_off_the_event_loop(tmp_path: Path, monkeypatch):
     main_thread = threading.get_ident()
     capture_threads: list[int] = []
     original_capture = WorkspaceInspector.capture
@@ -49,22 +47,20 @@ async def test_supervisor_captures_baseline_off_the_event_loop(
     monkeypatch.setattr(WorkspaceInspector, "capture", capture)
     supervisor = TaskSupervisor(FakeSession(), cwd=tmp_path)
 
-    await (supervisor.run("explain", mode=TaskMode.CODE))
+    await supervisor.run("explain", mode=TaskMode.CODE)
 
     assert capture_threads
     assert capture_threads[0] != main_thread
 
 
-async def test_supervisor_skips_workspace_scan_for_read_only_mode(
-    tmp_path: Path, monkeypatch
-):
+async def test_supervisor_skips_workspace_scan_for_read_only_mode(tmp_path: Path, monkeypatch):
     def fail_capture(_inspector: WorkspaceInspector):
         raise AssertionError("read-only mode should not capture a workspace baseline")
 
     monkeypatch.setattr(WorkspaceInspector, "capture", fail_capture)
     supervisor = TaskSupervisor(FakeSession(), cwd=tmp_path)
 
-    result = await (supervisor.run("explain", mode=TaskMode.ASK))
+    result = await supervisor.run("explain", mode=TaskMode.ASK)
 
     assert result.status is TaskStatus.NO_CHANGES
 
@@ -78,7 +74,7 @@ async def test_supervisor_does_not_verify_without_workspace_changes(tmp_path: Pa
         verify_command="python -m pytest",
     )
 
-    result = await (supervisor.run("explain", mode=TaskMode.ASK))
+    result = await supervisor.run("explain", mode=TaskMode.ASK)
 
     assert result.status is TaskStatus.NO_CHANGES
     assert runner.calls == []
@@ -100,7 +96,7 @@ async def test_supervisor_verifies_after_change_and_reports_result(tmp_path: Pat
         verify_command="python -m pytest",
     )
 
-    result = await (supervisor.run("fix", mode=TaskMode.CODE))
+    result = await supervisor.run("fix", mode=TaskMode.CODE)
 
     assert result.status is TaskStatus.VERIFIED
     assert result.changed_files == ("app.py",)
@@ -131,7 +127,7 @@ async def test_supervisor_repairs_once_after_verification_failure(tmp_path: Path
         FakeSession(edit), cwd=tmp_path, runner=runner, verify_command="pytest"
     )
 
-    result = await (supervisor.run("fix", mode=TaskMode.CODE))
+    result = await supervisor.run("fix", mode=TaskMode.CODE)
 
     assert result.status is TaskStatus.VERIFIED
     assert result.repair_attempts == 1
@@ -152,7 +148,7 @@ async def test_supervisor_stops_on_repeated_failure_fingerprint(tmp_path: Path):
         FakeSession(edit), cwd=tmp_path, runner=runner, verify_command="pytest", max_repairs=3
     )
 
-    result = await (supervisor.run("fix", mode=TaskMode.CODE))
+    result = await supervisor.run("fix", mode=TaskMode.CODE)
 
     assert result.status is TaskStatus.FAILED
     assert result.repair_attempts == 1
@@ -167,7 +163,7 @@ async def test_supervisor_reports_unverified_without_command(tmp_path: Path):
         runner=FakeRunner([]),
     )
 
-    result = await (supervisor.run("edit", mode=TaskMode.CODE))
+    result = await supervisor.run("edit", mode=TaskMode.CODE)
 
     assert result.status is TaskStatus.UNVERIFIED
 
@@ -188,5 +184,5 @@ async def test_supervisor_cancel_stops_active_agent_task(tmp_path: Path, task_tr
         supervisor.cancel()
         return await task
 
-    result = await (scenario())
+    result = await scenario()
     assert result.status is TaskStatus.CANCELLED

@@ -125,12 +125,12 @@ async def test_session_initial_window_follows_model_metadata_without_override():
 async def test_switching_model_window_only_changes_future_budget():
     store = MemoryStore()
     session = _session(
-            ChatModelPort(
-                FakeClient(response="first"),
-                context_window=1_000,
-                output_reserve=100,
-                reserve_tokens=50,
-                window_source="catalog",
+        ChatModelPort(
+            FakeClient(response="first"),
+            context_window=1_000,
+            output_reserve=100,
+            reserve_tokens=50,
+            window_source="catalog",
         ),
         store,
     )

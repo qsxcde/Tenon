@@ -8,9 +8,7 @@ from codeagent.core.contracts.messages import Message
 
 
 class Summarizer(Protocol):
-    async def summarize(
-        self, messages: list[Message], previous_summary: str | None
-    ) -> str: ...
+    async def summarize(self, messages: list[Message], previous_summary: str | None) -> str: ...
 
 
 __all__ = ["Summarizer"]

@@ -46,7 +46,9 @@ def _payload(event: Any) -> dict[str, Any]:
 
 
 def _status(event: Any, metadata: dict[str, Any], payload: dict[str, Any]) -> str:
-    value = metadata.get("subagent_status") or metadata.get("status") or payload.get("subagent_status")
+    value = (
+        metadata.get("subagent_status") or metadata.get("status") or payload.get("subagent_status")
+    )
     if value:
         return _bounded(value, _MAX_FIELD_CHARS)
     return {
@@ -58,15 +60,15 @@ def _status(event: Any, metadata: dict[str, Any], payload: dict[str, Any]) -> st
 
 
 def _phase(metadata: dict[str, Any], payload: dict[str, Any]) -> str:
-    return _bounded(metadata.get("child_phase") or metadata.get("phase") or payload.get("child_phase"), 48)
+    return _bounded(
+        metadata.get("child_phase") or metadata.get("phase") or payload.get("child_phase"), 48
+    )
 
 
 def _reason(metadata: dict[str, Any], payload: dict[str, Any]) -> str:
     failure = payload.get("failure") if isinstance(payload.get("failure"), dict) else {}
     return _bounded(
-        metadata.get("reason_code")
-        or metadata.get("error_code")
-        or failure.get("reason_code"),
+        metadata.get("reason_code") or metadata.get("error_code") or failure.get("reason_code"),
         _MAX_FIELD_CHARS,
     )
 
@@ -99,8 +101,12 @@ class SubagentLineProjector:
         phase = _phase(metadata, payload)
         elapsed_ms = _elapsed(metadata, payload)
         reason = _reason(metadata, payload)
-        cleanup_uncertain = bool(metadata.get("cleanup_uncertain") or payload.get("cleanup_uncertain"))
-        summary = _bounded(payload.get("summary"), _MAX_SUMMARY_CHARS) if status in _TERMINAL else ""
+        cleanup_uncertain = bool(
+            metadata.get("cleanup_uncertain") or payload.get("cleanup_uncertain")
+        )
+        summary = (
+            _bounded(payload.get("summary"), _MAX_SUMMARY_CHARS) if status in _TERMINAL else ""
+        )
         state = (status, phase, elapsed_ms, reason, cleanup_uncertain, summary)
         if self._last_state.get(delegation_id) == state:
             return None
@@ -113,7 +119,9 @@ class SubagentLineProjector:
             fields.append(f"phase={phase}")
         if elapsed_ms is not None:
             fields.append(f"elapsed_ms={elapsed_ms}")
-        tool_name = _bounded(metadata.get("tool_name") or payload.get("tool_name"), _MAX_FIELD_CHARS)
+        tool_name = _bounded(
+            metadata.get("tool_name") or payload.get("tool_name"), _MAX_FIELD_CHARS
+        )
         if tool_name:
             fields.append(f"tool={tool_name}")
         if reason:

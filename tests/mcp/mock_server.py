@@ -63,30 +63,42 @@ def main() -> None:
             continue  # notification(如 notifications/initialized)
         if method == "initialize":
             version = params.get("protocolVersion", "2024-11-05")
-            _reply(request, {
-                "protocolVersion": version,
-                "capabilities": {"tools": {}},
-                "serverInfo": {"name": "mock", "version": "1.0"},
-            })
+            _reply(
+                request,
+                {
+                    "protocolVersion": version,
+                    "capabilities": {"tools": {}},
+                    "serverInfo": {"name": "mock", "version": "1.0"},
+                },
+            )
         elif method == "tools/list":
             _reply(request, {"tools": TOOLS})
         elif method == "tools/call":
             name = params.get("name")
             arguments = params.get("arguments") or {}
             if name == "echo":
-                _reply(request, {
-                    "content": [{"type": "text", "text": f"echo:{arguments.get('text', '')}"}],
-                })
+                _reply(
+                    request,
+                    {
+                        "content": [{"type": "text", "text": f"echo:{arguments.get('text', '')}"}],
+                    },
+                )
             elif name == "fail":
-                _reply(request, {
-                    "content": [{"type": "text", "text": "boom"}],
-                    "isError": True,
-                })
+                _reply(
+                    request,
+                    {
+                        "content": [{"type": "text", "text": "boom"}],
+                        "isError": True,
+                    },
+                )
             else:
-                _reply(request, {
-                    "content": [{"type": "text", "text": f"未知工具: {name}"}],
-                    "isError": True,
-                })
+                _reply(
+                    request,
+                    {
+                        "content": [{"type": "text", "text": f"未知工具: {name}"}],
+                        "isError": True,
+                    },
+                )
         elif method == "ping":
             _reply(request, {})
         else:

@@ -24,10 +24,7 @@ class FrameScheduler:
         current = time.monotonic() if now is None else now
         if self.pending:
             return False
-        if (
-            self.last_completed_at is not None
-            and current - self.last_completed_at < self.interval
-        ):
+        if self.last_completed_at is not None and current - self.last_completed_at < self.interval:
             return False
         self.pending = True
         return True
@@ -60,4 +57,3 @@ class ResizeDebouncer:
     def _fire(self) -> None:
         self._handle = None
         self._callback()
-

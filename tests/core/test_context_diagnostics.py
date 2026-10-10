@@ -50,9 +50,7 @@ def test_diagnostics_snapshot_exposes_budget_components_and_preflight() -> None:
 
 
 def test_diagnostics_preserves_uncertain_window_without_fake_ratio() -> None:
-    diagnostics = ContextDiagnostics.from_budget(
-        _snapshot(status="uncertain", source="fallback")
-    )
+    diagnostics = ContextDiagnostics.from_budget(_snapshot(status="uncertain", source="fallback"))
 
     assert diagnostics.window_certainty == "uncertain"
     assert diagnostics.window_source == "fallback"

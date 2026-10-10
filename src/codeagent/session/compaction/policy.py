@@ -39,8 +39,7 @@ class CompactionPolicyConfig:
         if self.target_ratio >= self.trigger_ratio:
             raise ValueError("target_ratio must be lower than trigger_ratio")
         if self.trigger_headroom_tokens is not None and (
-            type(self.trigger_headroom_tokens) is not int
-            or self.trigger_headroom_tokens < 0
+            type(self.trigger_headroom_tokens) is not int or self.trigger_headroom_tokens < 0
         ):
             raise ValueError("trigger_headroom_tokens must be a non-negative integer")
         if type(self.min_recent_turns) is not int or self.min_recent_turns < 1:
@@ -53,9 +52,7 @@ class CompactionPolicyConfig:
             raise ValueError("compact_budget must be a positive integer")
 
 
-CompactionReasonCode = Literal[
-    "disabled", "threshold", "below_threshold", "budget_unavailable"
-]
+CompactionReasonCode = Literal["disabled", "threshold", "below_threshold", "budget_unavailable"]
 
 
 @dataclass(frozen=True)
@@ -69,9 +66,7 @@ class AutoCompactionDecision:
     reason: str
 
 
-CompactionPlanReasonCode = Literal[
-    "ready", "no_op", "no_safe_boundary", "oversized_turn"
-]
+CompactionPlanReasonCode = Literal["ready", "no_op", "no_safe_boundary", "oversized_turn"]
 
 
 @dataclass(frozen=True)
@@ -201,9 +196,7 @@ def estimate_tokens(message: Message) -> int:
     return max(1, chars // 4)
 
 
-def find_cut_point(
-    messages: list[Message], budget: int = DEFAULT_BUDGET_TOKENS
-) -> int:
+def find_cut_point(messages: list[Message], budget: int = DEFAULT_BUDGET_TOKENS) -> int:
     """Return the first retained message index at a complete-turn boundary."""
     budget = max(1, budget)
     index = len(messages)

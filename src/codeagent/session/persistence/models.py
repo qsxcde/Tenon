@@ -74,6 +74,7 @@ class SessionRecoveryReport:
             "skipped_record_count": self.skipped_record_count,
         }
 
+
 @dataclass(frozen=True)
 class UsageStats:
     """会话级用量聚合(读侧累计;cost-transparency)。
@@ -263,9 +264,7 @@ class SessionStore(Protocol):
 
     def get_meta(self, session_id: str, key: str) -> Any | None: ...
 
-    def append_usage(
-        self, session_id: str, usage: dict[str, int]
-    ) -> None:
+    def append_usage(self, session_id: str, usage: dict[str, int]) -> None:
         """追加一轮用量记录(append-only usage entry;cost-transparency)。
 
         ``usage`` 为归一形状 ``{input_tokens, output_tokens, reasoning_tokens,
@@ -275,15 +274,11 @@ class SessionStore(Protocol):
     def load_usage(self, session_id: str) -> UsageStats:
         """返回会话累计用量(所有 usage entry 之和;无记录返回全零)。"""
 
-    def append_subagent_record(
-        self, session_id: str, record: SubagentRunRecord
-    ) -> None: ...
+    def append_subagent_record(self, session_id: str, record: SubagentRunRecord) -> None: ...
 
     def load_subagent_records(self, session_id: str) -> list[SubagentRunRecord]: ...
 
-    def fork(
-        self, session_id: str, target_message_id: str, new_session_id: str
-    ) -> SessionRef:
+    def fork(self, session_id: str, target_message_id: str, new_session_id: str) -> SessionRef:
         """从既有会话分叉新会话(session-fork,对齐 Pi createBranchedSession)。
 
         - 分叉点 = target user 消息**之前**(复制到它之前,不含该消息);

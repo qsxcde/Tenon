@@ -136,9 +136,7 @@ def test_benchmark_fixture_builds_history_and_streaming_inputs() -> None:
 
 
 def test_benchmark_fixture_can_prepare_restore_history() -> None:
-    fixture = build_fixture(
-        BenchmarkConfig(scenario="restore", history_blocks=3, stream_chars=0)
-    )
+    fixture = build_fixture(BenchmarkConfig(scenario="restore", history_blocks=3, stream_chars=0))
 
     assert len(fixture.restore_history) == 3
     assert [message.role for message in fixture.restore_history] == [
@@ -175,9 +173,7 @@ def test_benchmark_command_writes_json_result(tmp_path) -> None:
 
 
 def test_run_benchmark_reports_render_metrics() -> None:
-    result = run_benchmark(
-        BenchmarkConfig(scenario="history", history_blocks=3, iterations=1)
-    )
+    result = run_benchmark(BenchmarkConfig(scenario="history", history_blocks=3, iterations=1))
 
     assert "model_render_ms" in result.metrics
     assert result.counters["block_count"] == 3
@@ -189,9 +185,7 @@ def test_run_benchmark_reports_render_metrics() -> None:
 
 
 def test_benchmark_reports_content_free_streaming_counters() -> None:
-    result = run_benchmark(
-        BenchmarkConfig(scenario="stream", stream_chars=2_000, iterations=1)
-    )
+    result = run_benchmark(BenchmarkConfig(scenario="stream", stream_chars=2_000, iterations=1))
 
     assert result.counters["event_buffer_flushes"] > 0
     assert result.counters["max_pending_chars"] <= 4096
@@ -203,9 +197,7 @@ def test_benchmark_reports_content_free_streaming_counters() -> None:
 
 
 def test_benchmark_marks_non_stream_latency_metrics_not_applicable() -> None:
-    result = run_benchmark(
-        BenchmarkConfig(scenario="history", history_blocks=3, iterations=1)
-    )
+    result = run_benchmark(BenchmarkConfig(scenario="history", history_blocks=3, iterations=1))
 
     assert result.required_metrics == ("frame_total_ms",)
     assert result.unavailable_metrics == {
@@ -228,9 +220,7 @@ def test_benchmark_uses_coordinator_frame_diagnostics(monkeypatch) -> None:
 
     monkeypatch.setattr(TuiRenderCoordinator, "performance_snapshot", snapshot_with_diagnostics)
 
-    result = run_benchmark(
-        BenchmarkConfig(scenario="history", history_blocks=3, iterations=1)
-    )
+    result = run_benchmark(BenchmarkConfig(scenario="history", history_blocks=3, iterations=1))
 
     assert result.counters["dropped_frames"] == 3
     assert result.counters["over_budget_frames"] == 2
@@ -247,9 +237,7 @@ def test_benchmark_fixture_rendering_is_deterministic() -> None:
 
 
 def test_long_history_only_materializes_a_bounded_view() -> None:
-    result = run_benchmark(
-        BenchmarkConfig(scenario="history", history_blocks=1_000, iterations=1)
-    )
+    result = run_benchmark(BenchmarkConfig(scenario="history", history_blocks=1_000, iterations=1))
 
     assert result.counters["block_count"] == 1_000
     assert result.counters["cache_entries"] < result.counters["block_count"]

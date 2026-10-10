@@ -28,9 +28,7 @@ def _record(**overrides):
 
 
 @pytest.mark.parametrize("backend", ["jsonl", "memory"])
-def test_subagent_records_roundtrip_without_activity_or_title_side_effect(
-    tmp_path, backend
-):
+def test_subagent_records_roundtrip_without_activity_or_title_side_effect(tmp_path, backend):
     from codeagent.session.persistence import JsonFileStore, MemoryStore
 
     store = JsonFileStore(tmp_path / "sessions") if backend == "jsonl" else MemoryStore()

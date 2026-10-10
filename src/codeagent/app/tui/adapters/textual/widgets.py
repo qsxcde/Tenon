@@ -123,20 +123,40 @@ class _Composer(VerticalGroup):
         super().__init__()
         self._backend = backend
         self.styles.height = 3
-        self.top_rule, self.bottom_rule = Rule(id="composer-top-rule"), Rule(id="composer-bottom-rule")
+        self.top_rule, self.bottom_rule = (
+            Rule(id="composer-top-rule"),
+            Rule(id="composer-bottom-rule"),
+        )
         for rule in (self.top_rule, self.bottom_rule):
             rule.styles.margin, rule.styles.color = 0, _COMPOSER_RULE
-        self.confirmation, self.suggestions = Static("", id="confirmation"), Static("", id="suggestions")
+        self.confirmation, self.suggestions = (
+            Static("", id="confirmation"),
+            Static("", id="suggestions"),
+        )
         self.confirmation.styles.height = self.suggestions.styles.height = 0
-        self.input_row, self.prompt = HorizontalGroup(id="composer-input-row"), Label("›", id="prompt")
+        self.input_row, self.prompt = (
+            HorizontalGroup(id="composer-input-row"),
+            Label("›", id="prompt"),
+        )
         self.prompt.styles.width, self.prompt.styles.color = 2, "#8a8a8a"
         self.login_label = Label("KEY", id="login-label")
-        self.login_label.styles.width, self.login_label.styles.color, self.login_label.display = 6, _LOGIN_ACCENT, False
+        self.login_label.styles.width, self.login_label.styles.color, self.login_label.display = (
+            6,
+            _LOGIN_ACCENT,
+            False,
+        )
         self.input = _InputArea(backend, placeholder=placeholder)
-        self.input.soft_wrap, self.input.show_line_numbers, self.input.styles.height = True, False, 1
+        self.input.soft_wrap, self.input.show_line_numbers, self.input.styles.height = (
+            True,
+            False,
+            1,
+        )
         self.key_input = _KeyInput()
         self.key_input.styles.height, self.key_input.styles.background = 1, _LOGIN_SURFACE
-        self.key_input.styles.border, self.key_input.styles.padding = ("none", _LOGIN_SURFACE), (0, 1)
+        self.key_input.styles.border, self.key_input.styles.padding = (
+            ("none", _LOGIN_SURFACE),
+            (0, 1),
+        )
         self.key_input.styles.color, self.key_input.display = "#f1f5f9", False
         self.login_hint = Static(_LOGIN_HINT, id="login-hint")
         self.login_hint.styles.height, self.login_hint.display = 0, False
@@ -163,7 +183,11 @@ class _Composer(VerticalGroup):
             self.top_rule.styles.color = self.bottom_rule.styles.color = _LOGIN_ACCENT
             self.key_input.focus()
         else:
-            self.input.display, self.key_input.display, self.login_label.display = True, False, False
+            self.input.display, self.key_input.display, self.login_label.display = (
+                True,
+                False,
+                False,
+            )
             self.login_hint.display, self.login_hint.styles.height = False, 0
             self.top_rule.styles.color = self.bottom_rule.styles.color = _COMPOSER_RULE
             self.input.placeholder = self._normal_placeholder
@@ -173,9 +197,13 @@ class _Composer(VerticalGroup):
     def _refresh_height(self) -> None:
         lines = min(self.MAX_HEIGHT, max(1, self._input_lines, self.input.virtual_size.height))
         self.input.styles.height = lines
-        self.styles.height = lines + 2 + sum(
-            int(widget.styles.height.value)
-            for widget in (self.confirmation, self.suggestions, self.login_hint)
+        self.styles.height = (
+            lines
+            + 2
+            + sum(
+                int(widget.styles.height.value)
+                for widget in (self.confirmation, self.suggestions, self.login_hint)
+            )
         )
 
     def on_text_area_changed(self, event: TextArea.Changed) -> None:

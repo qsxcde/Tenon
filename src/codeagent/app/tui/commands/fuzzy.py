@@ -65,8 +65,8 @@ def _levenshtein(a: str, b: str) -> int:
         for j, cb in enumerate(b, start=1):
             current.append(
                 min(
-                    current[-1] + 1,      # 删除
-                    previous[j] + 1,      # 插入
+                    current[-1] + 1,  # 删除
+                    previous[j] + 1,  # 插入
                     previous[j - 1] + (ca != cb),  # 替换
                 )
             )

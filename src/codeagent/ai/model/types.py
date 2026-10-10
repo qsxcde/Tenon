@@ -69,9 +69,7 @@ class ToolDefinition:
 
     name: str
     description: str = ""
-    parameters: dict[str, Any] = field(
-        default_factory=lambda: {"type": "object", "properties": {}}
-    )
+    parameters: dict[str, Any] = field(default_factory=lambda: {"type": "object", "properties": {}})
 
     def to_api_dict(self) -> dict[str, Any]:
         """转成 OpenAI function calling 的工具定义。"""

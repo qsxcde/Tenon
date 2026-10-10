@@ -68,9 +68,7 @@ async def test_chat_model_port_converts_runtime_tools_before_model_call():
     client = FakeClient(response="ok")
     port = ChatModelPort(client)
 
-    await port.generate(
-        [Message(role="user", content="读取")], adapt_tools([_Tool()])
-    )
+    await port.generate([Message(role="user", content="读取")], adapt_tools([_Tool()]))
 
     assert client.bound_tools == ["read"]
     assert client.call_history[0]["bound_tools"] == ["read"]
@@ -78,20 +76,14 @@ async def test_chat_model_port_converts_runtime_tools_before_model_call():
 
 async def test_chat_model_port_agent_stream_emits_parsed_tool_calls() -> None:
     client = FakeClient(
-        steps=[
-            {
-                "tool_calls": [
-                    {"id": "c1", "name": "read", "args": {"path": "a.py"}}
-                ]
-            }
-        ]
+        steps=[{"tool_calls": [{"id": "c1", "name": "read", "args": {"path": "a.py"}}]}]
     )
     port = ChatModelPort(client)
 
     async def collect():
         return [event async for event in port.stream_agent([Message(role="user", content="read")])]
 
-    events = await (collect())
+    events = await collect()
     tool = next(event for event in events if event.type == "tool_call")
 
     assert tool.tool_name == "read"
@@ -108,7 +100,7 @@ async def test_chat_model_port_agent_stream_reports_invalid_tool_arguments() -> 
     async def collect():
         return [event async for event in port.stream_agent([Message(role="user", content="read")])]
 
-    events = await (collect())
+    events = await collect()
     tool = next(event for event in events if event.type == "tool_call")
 
     assert tool.arguments == {}
@@ -119,7 +111,7 @@ async def test_chat_model_port_injects_system_prompt_at_adapter_boundary() -> No
     client = FakeClient(response="ok")
     port = ChatModelPort(client, system_prompt="you are concise")
 
-    await (port.generate([Message(role="user", content="hello")]))
+    await port.generate([Message(role="user", content="hello")])
 
     assert client.call_history[0]["messages"][0] == {
         "role": "system",

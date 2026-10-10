@@ -31,6 +31,4 @@ class AgentContext:
         if not self.messages:
             raise AgentContinueError("cannot continue: context has no messages")
         if self.messages[-1].role == "assistant":
-            raise AgentContinueError(
-                "cannot continue from message role: assistant"
-            )
+            raise AgentContinueError("cannot continue from message role: assistant")

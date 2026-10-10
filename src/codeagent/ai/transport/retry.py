@@ -13,9 +13,7 @@ MAX_RETRY_DELAY = 10.0
 def validate_max_retries(value: Any) -> int:
     """Validate the finite retry budget accepted by model clients."""
     if type(value) is not int or not 0 <= value <= MAX_RETRIES:
-        raise ValueError(
-            f"max_retries must be an integer between 0 and {MAX_RETRIES}"
-        )
+        raise ValueError(f"max_retries must be an integer between 0 and {MAX_RETRIES}")
     return value
 
 

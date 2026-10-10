@@ -13,6 +13,14 @@ from codeagent.session.persistence.models import (
     SessionRecoveryReport,
 )
 from codeagent.session.persistence.subagent_records import record_from_entry
+from codeagent.session.persistence.jsonl.recovery_diagnostics import (
+    diagnostic as _diagnostic,
+    header_diagnostic as _header_diagnostic,
+    invalid_session_id as _invalid_session_id,
+    message_is_invalid as _message_is_invalid,
+    unavailable as _unavailable,
+    valid_compaction as _valid_compaction,
+)
 
 
 @dataclass(frozen=True)
@@ -157,7 +165,14 @@ class JsonlRecoveryMixin:
     def _index_diagnostics(self, path: Path) -> list[RecoveryDiagnostic]:
         index_path = self._index_path(path)
         if not index_path.exists():
-            return [_diagnostic("index_missing", "会话索引不存在", "索引将从 JSONL 重建", "无需手工修改，可继续使用")]
+            return [
+                _diagnostic(
+                    "index_missing",
+                    "会话索引不存在",
+                    "索引将从 JSONL 重建",
+                    "无需手工修改，可继续使用",
+                )
+            ]
         try:
             data = json.loads(index_path.read_text(encoding="utf-8"))
             expected = self._source_fingerprint(path)
@@ -180,33 +195,14 @@ class JsonlRecoveryMixin:
                 return []
             return [_diagnostic(code, "派生会话索引不可用", impact, "系统会自动重建索引")]
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
-            return [_diagnostic("index_corrupt", "派生会话索引无法解析", "索引将从 JSONL 重建", "系统会自动重建索引")]
-
-
-def _invalid_session_id(session_id: object) -> RecoveryDiagnostic | None:
-    if not isinstance(session_id, str) or not session_id or session_id in {".", ".."}:
-        return _diagnostic("invalid_session_id", "会话 id 格式无效", "未读取任何会话数据", "请使用列表中的单组件会话 id")
-    if "/" in session_id or "\\" in session_id:
-        return _diagnostic("invalid_session_id", "会话 id 不得包含路径分隔符", "未读取目标目录之外的文件", "请使用列表中的单组件会话 id")
-    return None
-
-
-def _header_diagnostic(entry: dict[str, Any]) -> RecoveryDiagnostic | None:
-    if entry.get("type") != "session":
-        return _diagnostic("missing_header", "首条有效记录不是 session header", "无法确认会话格式和身份", "请先备份文件并升级/迁移，或新建会话")
-    if entry.get("version") != CURRENT_VERSION:
-        return _diagnostic("incompatible_version", f"会话版本不兼容: {entry.get('version')}", "无法安全解释会话记录", "请升级客户端或备份后迁移该会话")
-    if not isinstance(entry.get("id"), str) or not entry.get("id"):
-        return _diagnostic("invalid_header", "session header 缺少有效 id", "无法确认会话身份", "请先备份文件并手工迁移，或新建会话")
-    return None
-
-
-def _message_is_invalid(entry: dict[str, Any]) -> bool:
-    try:
-        _dict_to_message(entry)
-    except (KeyError, TypeError, ValueError):
-        return True
-    return False
+            return [
+                _diagnostic(
+                    "index_corrupt",
+                    "派生会话索引无法解析",
+                    "索引将从 JSONL 重建",
+                    "系统会自动重建索引",
+                )
+            ]
 
 
 def _scan_entry(
@@ -257,23 +253,6 @@ def _scan_entry(
             )
             return _EntryScan(skipped_record_count=1)
     return _EntryScan()
-
-
-def _valid_compaction(entry: dict[str, Any]) -> bool:
-    return (
-        isinstance(entry.get("id"), str)
-        and isinstance(entry.get("firstKeptEntryId"), str)
-        and isinstance(entry.get("summary"), str)
-        and isinstance(entry.get("details"), dict)
-    )
-
-
-def _diagnostic(code: str, message: str, impact: str, action: str) -> RecoveryDiagnostic:
-    return RecoveryDiagnostic(code, message, impact, action)
-
-
-def _unavailable(session_id: object, diagnostic: RecoveryDiagnostic) -> SessionRecoveryReport:
-    return SessionRecoveryReport(str(session_id), "unavailable", (diagnostic,))
 
 
 __all__ = ["JsonlRecoveryMixin"]

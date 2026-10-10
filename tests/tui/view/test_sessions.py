@@ -2,7 +2,11 @@
 
 from tests.tui.view.fixtures import *  # noqa: F401,F403
 
-from codeagent.session.persistence import RecoveryDiagnostic, SessionRecoveryError, SessionRecoveryReport
+from codeagent.session.persistence import (
+    RecoveryDiagnostic,
+    SessionRecoveryError,
+    SessionRecoveryReport,
+)
 from codeagent.app.tui.presentation.blocks import SubagentBlock
 
 
@@ -14,17 +18,20 @@ def test_session_switch_refreshes_skill_registry_and_diagnostics():
 
     def refresh_skills():
         refreshed.append(True)
-        return ([
-            SimpleNamespace(
-                name="using-superpowers",
-                description="bootstrap",
-                path="/pkg/using-superpowers/SKILL.md",
-                package_id="superpowers",
-                package_version="6.3.0",
-                package_scope="user",
-                bootstrap=True,
-            )
-        ], ["package_reload: ok"])
+        return (
+            [
+                SimpleNamespace(
+                    name="using-superpowers",
+                    description="bootstrap",
+                    path="/pkg/using-superpowers/SKILL.md",
+                    package_id="superpowers",
+                    package_version="6.3.0",
+                    package_scope="user",
+                    bootstrap=True,
+                )
+            ],
+            ["package_reload: ok"],
+        )
 
     app = TuiApp(
         manager,
@@ -38,7 +45,6 @@ def test_session_switch_refreshes_skill_registry_and_diagnostics():
     assert refreshed
     assert app._skills_by_name["using-superpowers"].package_id == "superpowers"
     assert app._skill_diagnostics == ["package_reload: ok"]
-
 
 
 async def test_large_restore_drops_result_after_session_switch(monkeypatch):
@@ -60,7 +66,7 @@ async def test_large_restore_drops_result_after_session_switch(monkeypatch):
     async def scenario() -> None:
         await app._restore_large_session(session)
 
-    await (scenario())
+    await scenario()
 
     assert not any("old-" in line for line in app.model.transcript.all_lines(80))
 
@@ -114,7 +120,6 @@ async def test_restore_failure_keeps_current_tui_usable(monkeypatch):
     assert manager.current.run_texts == ["继续输入"]
 
 
-
 def test_fork_command_dispatches_and_feedback():
     """/fork → manager.fork(缺省最近用户消息),反馈含新会话 id 与原会话保留提示。"""
     app, backend, manager = _make_app()
@@ -127,14 +132,12 @@ def test_fork_command_dispatches_and_feedback():
     assert "文件保持当前状态" in text
 
 
-
 def test_fork_command_with_message_id():
     """/fork <message-id> → 显式分叉点传给 manager。"""
     app, backend, manager = _make_app()
     before_id = manager.current.session_id
     backend.submit("/fork msg-123")
     assert manager.fork_calls == [(before_id, "msg-123")]
-
 
 
 def test_fork_command_error_shown_inline():
@@ -150,7 +153,6 @@ def test_fork_command_error_shown_inline():
     backend.submit("/fork msg-x")
     text = _rendered_text(app, backend)
     assert "分叉点必须是 user 消息" in text
-
 
 
 def test_status_command_shows_session_info():
@@ -216,7 +218,6 @@ def test_name_command_reports_missing_current_session():
     assert "无法设置会话标题: 当前没有会话" in _rendered_text(app, backend)
 
 
-
 def test_sessions_list_switch_and_new():
     """/sessions:列表 / <id> 切换 / new 新建 / recent 恢复最近。"""
     app, backend, manager = _make_app()
@@ -267,9 +268,7 @@ def test_sessions_filter_supports_quoted_combined_conditions():
     other.status = "idle"
     before = list(manager.current.run_texts)
 
-    backend.submit(
-        '/sessions filter title="Auth module" model=deepseek status=completed'
-    )
+    backend.submit('/sessions filter title="Auth module" model=deepseek status=completed')
 
     text = _rendered_text(app, backend)
     assert "筛选结果 (1)" in text
@@ -415,9 +414,7 @@ def test_sessions_delete_requires_confirmation_and_supports_batch():
     assert "confirm" in _rendered_text(app, backend)
     assert len(manager.sessions) == 3
 
-    backend.submit(
-        f"/sessions delete {first.session_id} {second.session_id} confirm"
-    )
+    backend.submit(f"/sessions delete {first.session_id} {second.session_id} confirm")
     text = _rendered_text(app, backend)
     assert "已删除" in text
     assert first.session_id not in [item.session_id for item in manager.sessions]
@@ -426,16 +423,21 @@ def test_sessions_delete_requires_confirmation_and_supports_batch():
     assert manager.current.run_texts == before
 
 
-
 def test_switching_session_hydrates_transcript_and_context_status():
     """切换会话会替换 transcript,并同步目标会话的上下文占用。"""
     app, backend, manager = _make_app()
     first = manager.current
-    first.history = [Message(role="user", content="之前的问题"), Message(role="assistant", content="之前的回答")]
+    first.history = [
+        Message(role="user", content="之前的问题"),
+        Message(role="assistant", content="之前的回答"),
+    ]
     first.context_tokens = 12_400
     first.context_window = 128_000
     other = manager.create()
-    other.history = [Message(role="user", content="另一个问题"), Message(role="assistant", content="另一个回答")]
+    other.history = [
+        Message(role="user", content="另一个问题"),
+        Message(role="assistant", content="另一个回答"),
+    ]
     other.context_tokens = 2_000
     other.context_window = 32_000
 
@@ -444,7 +446,6 @@ def test_switching_session_hydrates_transcript_and_context_status():
     assert "另一个问题" in text and "之前的问题" not in text
     assert app.model.status.context_tokens == 2_000
     assert app.model.status.context_window == 32_000
-
 
 
 def test_sessions_recent_restores_last_session():
@@ -460,7 +461,6 @@ def test_sessions_recent_restores_last_session():
     assert "已恢复最近会话" in text
 
 
-
 def test_sessions_no_args_opens_inline_picker():
     """/sessions 无参 → 交互式选择器(命令名确认后弹会话候选浮层)。"""
     app, backend, manager = _make_app()
@@ -471,7 +471,6 @@ def test_sessions_no_args_opens_inline_picker():
     backend.input_changed("/sessions ")
     assert app._suggestion_kind == "value"
     assert manager.current.session_id in app._suggestions
-
 
 
 def test_sessions_picker_confirm_switches_session():
@@ -491,7 +490,6 @@ def test_sessions_picker_confirm_switches_session():
     assert "已切换到会话" in text
 
 
-
 def test_sessions_picker_empty_state():
     """/sessions 无会话时选择器显示空态提示(不切换)。"""
     app, backend, manager = _make_app()
@@ -500,7 +498,6 @@ def test_sessions_picker_empty_state():
     backend.submit("/sessions")
     text = _rendered_text(app, backend)
     assert "暂无历史会话" in text
-
 
 
 def test_tree_command_shows_fork_chain():
@@ -517,7 +514,6 @@ def test_tree_command_shows_fork_chain():
     assert branch.title in text
 
 
-
 def test_tree_command_switches_session():
     """/tree <id> → 切换到指定会话(订阅跟随既有)。"""
     app, backend, manager = _make_forked_manager()
@@ -527,7 +523,6 @@ def test_tree_command_switches_session():
     assert manager.current.session_id == branch_id
     backend.submit(f"/tree {root_id}")
     assert manager.current.session_id == root_id
-
 
 
 def test_tree_command_unknown_session():
@@ -540,7 +535,6 @@ def test_tree_command_unknown_session():
     assert manager.current is before
 
 
-
 def test_tree_command_empty_state():
     """/tree 无会话 → 空态提示。"""
     app, backend, manager = _make_app()
@@ -549,7 +543,6 @@ def test_tree_command_empty_state():
     backend.submit("/tree")
     text = _rendered_text(app, backend)
     assert "(暂无会话)" in text
-
 
 
 def test_sessions_list_shows_tree_indentation():

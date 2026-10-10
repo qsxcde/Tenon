@@ -43,6 +43,7 @@ def make_child_session_factory(
     compaction_policy: CompactionPolicyConfig | None,
 ) -> Callable[[SubagentRequest], Any]:
     """Build a no-recursion, profile-filtered temporary Session factory."""
+
     def create_child(request: SubagentRequest) -> Any:
         budget = effective_budget(request.budget)
         child_recursion_limit = min(

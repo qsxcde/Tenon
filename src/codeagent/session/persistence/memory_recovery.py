@@ -9,7 +9,12 @@ class MemoryRecoveryMixin:
     """Expose the same recovery contract as the JSONL backend."""
 
     def recovery_report(self, session_id: str) -> SessionRecoveryReport:
-        if not isinstance(session_id, str) or not session_id or "/" in session_id or "\\" in session_id:
+        if (
+            not isinstance(session_id, str)
+            or not session_id
+            or "/" in session_id
+            or "\\" in session_id
+        ):
             return SessionRecoveryReport(
                 str(session_id),
                 "unavailable",

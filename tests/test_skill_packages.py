@@ -125,10 +125,20 @@ def test_package_manager_remove_unknown_is_explicit(tmp_path):
 def test_registry_reports_duplicate_package_ids(tmp_path):
     registry_path = tmp_path / "registry.json"
     registry_path.write_text(
-        json.dumps([
-            {"id": "same", "root": str(tmp_path / "a"), "skills": str(tmp_path / "a" / "skills")},
-            {"id": "same", "root": str(tmp_path / "b"), "skills": str(tmp_path / "b" / "skills")},
-        ]),
+        json.dumps(
+            [
+                {
+                    "id": "same",
+                    "root": str(tmp_path / "a"),
+                    "skills": str(tmp_path / "a" / "skills"),
+                },
+                {
+                    "id": "same",
+                    "root": str(tmp_path / "b"),
+                    "skills": str(tmp_path / "b" / "skills"),
+                },
+            ]
+        ),
         encoding="utf-8",
     )
 
@@ -159,10 +169,14 @@ def test_package_manager_git_source_records_revision_and_repository_name(tmp_pat
         "---\ndescription: bootstrap\n---\n正文", encoding="utf-8"
     )
     subprocess.run(["git", "init", str(source)], check=True, capture_output=True)
-    subprocess.run(["git", "-C", str(source), "config", "user.email", "test@example.com"], check=True)
+    subprocess.run(
+        ["git", "-C", str(source), "config", "user.email", "test@example.com"], check=True
+    )
     subprocess.run(["git", "-C", str(source), "config", "user.name", "Test"], check=True)
     subprocess.run(["git", "-C", str(source), "add", "."], check=True)
-    subprocess.run(["git", "-C", str(source), "commit", "-m", "initial"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(source), "commit", "-m", "initial"], check=True, capture_output=True
+    )
     expected_revision = subprocess.run(
         ["git", "-C", str(source), "rev-parse", "HEAD"],
         check=True,

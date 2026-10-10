@@ -76,9 +76,7 @@ def materialize_context_messages(
         None,
     )
     if invalid is not None:
-        raise TypeError(
-            f"{extension} returned {type(invalid).__name__}; expected Message"
-        )
+        raise TypeError(f"{extension} returned {type(invalid).__name__}; expected Message")
     return messages
 
 

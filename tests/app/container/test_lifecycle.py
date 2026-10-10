@@ -16,7 +16,6 @@ def test_create_agent_config_injects_shared_tool_runtime():
         assert isinstance(config.tool_runtime, ToolExecutionRuntime)
 
 
-
 async def test_agent_runtime_close_is_idempotent():
     """Composition-root runtime closes model resources exactly once."""
     from codeagent.app.container import AgentRuntime
@@ -34,8 +33,8 @@ async def test_agent_runtime_close_is_idempotent():
     client = Closable()
     config = AgentLoopConfig(model=client, tools=[])
     runtime = AgentRuntime(config, None, client, [])
-    await (runtime.close())
-    await (runtime.close())
+    await runtime.close()
+    await runtime.close()
     assert client.closed == 1
 
 
@@ -126,7 +125,6 @@ async def test_agent_runtime_closes_model_after_active_tool_is_cancelled():
         await tool_task
 
 
-
 async def test_agent_runtime_is_removed_from_registry_after_close():
     from codeagent.app.container import AgentRuntime, runtime_for_config
     from codeagent.core.orchestration.config import AgentLoopConfig
@@ -141,9 +139,8 @@ async def test_agent_runtime_is_removed_from_registry_after_close():
     from codeagent.app.composition.runtime.factory import _RUNTIMES_BY_CONFIG
 
     _RUNTIMES_BY_CONFIG[id(config)] = runtime
-    await (runtime.close())
+    await runtime.close()
     assert runtime_for_config(config) is None
-
 
 
 def test_rebuild_config_closes_realized_previous_runtime():
@@ -198,9 +195,7 @@ async def test_tui_rebuild_rebinds_policy_for_existing_session():
         _ = app._manager.tools
         await app._rebuild_ports_async("fake", "fake-model:high", None)
 
-        decision = app._manager.current.policy.decide(
-            "bash", {"command": "git push"}
-        )
+        decision = app._manager.current.policy.decide("bash", {"command": "git push"})
 
     assert decision.action == "ask"
     assert len(clients) == 2

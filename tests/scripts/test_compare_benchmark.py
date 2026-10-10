@@ -40,7 +40,9 @@ def _payload(*, p95_ms: float = 10.0, peak_memory_bytes: int = 100) -> dict:
     }
 
 
-def _run_compare(tmp_path: Path, current: dict, baseline: dict, *extra: str) -> subprocess.CompletedProcess[str]:
+def _run_compare(
+    tmp_path: Path, current: dict, baseline: dict, *extra: str
+) -> subprocess.CompletedProcess[str]:
     current_path = tmp_path / "current.json"
     baseline_path = tmp_path / "baseline.json"
     current_path.write_text(json.dumps(current), encoding="utf-8")

@@ -19,7 +19,6 @@ def test_valid_index_serves_metadata_without_scanning_jsonl(tmp_path, monkeypatc
     assert store.load_usage("s1").input_tokens == 4
 
 
-
 def test_header_model_effort_roundtrip(tmp_path):
     """header 可选字段 model/effort:创建时写入,读侧透传(design D4)。"""
     store = _store(tmp_path)
@@ -31,7 +30,6 @@ def test_header_model_effort_roundtrip(tmp_path):
         (tmp_path / "sessions" / "s1.jsonl").read_text(encoding="utf-8").splitlines()[0]
     )
     assert first["model"] == "deepseek-v4-flash" and first["effort"] == "high"
-
 
 
 def test_meta_entry_last_write_wins(tmp_path):
@@ -48,17 +46,17 @@ def test_meta_entry_last_write_wins(tmp_path):
     assert len(lines) == 3  # header + 2 条 meta
 
 
-
 def test_title_derived_from_first_user_message(tmp_path):
     """默认派生:首条用户消息截断 20 字符(design D3)。"""
     store = _store(tmp_path)
     store.create("s1")
-    store.append_message("s1", Message(role="user", content="我们来重构一下那个核心解析模块让性能更好吧"))
+    store.append_message(
+        "s1", Message(role="user", content="我们来重构一下那个核心解析模块让性能更好吧")
+    )
     store.append_message("s1", Message(role="assistant", content="好的"))
     title = store.get("s1").title
     assert title.startswith("我们来重构一下那个核心解析模块让性能") and title.endswith("…")
     assert len(title) == 21  # 20 字符 + 省略号
-
 
 
 def test_title_prefers_explicit_name(tmp_path):
@@ -101,7 +99,6 @@ def test_explicit_title_survives_restart_and_index_rebuild(tmp_path):
     assert source.read_text(encoding="utf-8").splitlines() == before
 
 
-
 def test_model_change_entry_overrides_header(tmp_path):
     """model_change entry 追加式写入,读侧后写覆盖 header(热切换持久化)。"""
     store = _store(tmp_path)
@@ -118,7 +115,6 @@ def test_model_change_entry_overrides_header(tmp_path):
     assert len(lines) == 3  # header + 2 次 model_change
 
 
-
 def test_model_change_legacy_file_without_header_config(tmp_path):
     """旧文件(header 无 model/effort)+ model_change:读侧取 entry 值。"""
     store = _store(tmp_path)
@@ -128,13 +124,14 @@ def test_model_change_legacy_file_without_header_config(tmp_path):
     assert ref.model == "b" and ref.effort == "high"
 
 
-
 def test_json_store_usage_append_and_aggregate(tmp_path):
     """文件后端:usage entry 追加 + 读侧累计聚合(逐次相加)。"""
     store = _store(tmp_path)
     store.create("s1")
     store.append_usage("s1", _usage_dict(input_tokens=100, output_tokens=20, cached_tokens=60))
-    store.append_usage("s1", _usage_dict(input_tokens=50, output_tokens=10, reasoning_tokens=5, cached_tokens=0))
+    store.append_usage(
+        "s1", _usage_dict(input_tokens=50, output_tokens=10, reasoning_tokens=5, cached_tokens=0)
+    )
     total = store.load_usage("s1")
     assert total.input_tokens == 150
     assert total.output_tokens == 30
@@ -144,7 +141,6 @@ def test_json_store_usage_append_and_aggregate(tmp_path):
     lines = (tmp_path / "sessions" / "s1.jsonl").read_text(encoding="utf-8").splitlines()
     usage_entries = [l for l in lines if json.loads(l).get("type") == "usage"]
     assert len(usage_entries) == 2
-
 
 
 def test_json_store_usage_empty_and_legacy_compat(tmp_path):
@@ -159,7 +155,6 @@ def test_json_store_usage_empty_and_legacy_compat(tmp_path):
     assert total.cached_tokens == 0
     with pytest.raises(ValueError, match="不存在"):
         store.load_usage("nope")
-
 
 
 def test_json_store_usage_missing_fields_tolerated(tmp_path):

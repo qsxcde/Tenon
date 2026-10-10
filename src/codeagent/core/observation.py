@@ -52,9 +52,7 @@ class LifecycleHookObservationMixin:
                 task = asyncio.ensure_future(result)
                 self._listener_tasks.add(task)
                 task.add_done_callback(
-                    lambda completed: self._finish_lifecycle_hook(
-                        completed, event, lifecycle, hook
-                    )
+                    lambda completed: self._finish_lifecycle_hook(completed, event, lifecycle, hook)
                 )
 
     def _finish_lifecycle_hook(

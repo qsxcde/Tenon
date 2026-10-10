@@ -66,7 +66,7 @@ async def test_footer_rich_line_seeded_and_passed():
         backend.resize()
         await asyncio.sleep(0)
 
-    await (_run())
+    await _run()
     assert backend.statuses, "状态栏未渲染"
     plain = "".join(s.text for s in backend.statuses[-1])
     assert plain.startswith("  qwen3.8-m")
@@ -74,7 +74,6 @@ async def test_footer_rich_line_seeded_and_passed():
     # 状态栏注入模型名与工作目录(回归:此前 status.model 无注入点)
     assert app.model.status.model == "qwen3.8-max"
     assert app.model.status.cwd == "/workspace"
-
 
 
 def test_context_usage_is_synced_to_footer_status():
@@ -92,7 +91,6 @@ def test_context_usage_is_synced_to_footer_status():
     assert "▱" in plain
     assert app.model.status.context_tokens == 12_400
     assert app.model.status.context_window == 128_000
-
 
 
 def test_status_command_includes_runtime_and_render_diagnostics():
@@ -163,7 +161,6 @@ def test_status_separates_cache_capability_from_observed_usage():
     assert "用量: 输入 1000" in text
 
 
-
 def test_status_shows_usage_line_with_cache_hit():
     """/status → 用量行:输入/输出(含推理)/缓存命中率(约,含原始计数)。"""
     app, backend, manager = _make_app()
@@ -175,7 +172,6 @@ def test_status_shows_usage_line_with_cache_hit():
     assert "用量: 输入 1000 · 输出 50 · 缓存命中约 40.0% (400/1000)" in text
 
 
-
 def test_status_shows_usage_empty_state():
     """/status → 无用量记录时显示空态,不展示误导性数值。"""
     app, backend, manager = _make_app()
@@ -185,7 +181,6 @@ def test_status_shows_usage_empty_state():
     assert "缓存命中" not in text
 
 
-
 def test_status_usage_cache_ratio_clamped():
     """/status → 缓存命中率钳制:命中 > 输入时显示 100%(不超界误导)。"""
     app, backend, manager = _make_app()
@@ -193,7 +188,6 @@ def test_status_usage_cache_ratio_clamped():
     backend.submit("/status")
     text = _rendered_text(app, backend)
     assert "缓存命中约 100.0% (300/100)" in text
-
 
 
 def test_config_command_without_args_shows_usage():
@@ -212,7 +206,6 @@ def test_config_command_without_args_shows_usage():
     assert calls == []
 
 
-
 def test_status_shows_agents_sources_when_injected():
     """/status:注入来源列表 → 展示上下文文件(加载结果可见)。"""
     backend = StubBackend()
@@ -229,7 +222,6 @@ def test_status_shows_agents_sources_when_injected():
     assert "/proj/AGENTS.md" in text
 
 
-
 def test_status_without_sources_shows_none():
     """/status:未注入来源 → 明确显示 (无)。"""
     app, backend, _ = _make_app()
@@ -238,14 +230,12 @@ def test_status_without_sources_shows_none():
     assert "上下文文件: (无)" in text
 
 
-
 def test_picker_fallback_usage_hint_without_rebuild_ports():
     """候选缺失 / 未注入热切换 → 回退用法提示,不填输入框。"""
     app, backend, _ = _make_app()  # 无 rebuild_ports、无候选
     backend.submit("/model")
     assert backend.input_texts == []
     assert "/model <model" in _rendered_text(app, backend)
-
 
 
 def test_status_shows_skills_and_diagnostics():
@@ -258,7 +248,6 @@ def test_status_shows_skills_and_diagnostics():
     assert "fmt — 格式化代码。" in text
     assert "技能诊断:" in text
     assert "shadowed" in text and "parse_failed" in text
-
 
 
 def test_status_shows_package_and_bootstrap_metadata():
@@ -282,7 +271,6 @@ def test_status_shows_package_and_bootstrap_metadata():
     assert "Package: superpowers@6.3.0 (user)" in text
 
 
-
 def test_status_shows_mcp_diagnostics():
     """/status → MCP 装配诊断可见(mcp-client:加载结果可见可断言)。"""
     app, backend, _ = _make_skills_app([], [])
@@ -302,7 +290,9 @@ def test_status_shows_tool_capability_diagnostics():
         platform="linux",
         items=(
             ToolCapability("platform", True, "platform_detected", "当前平台 linux"),
-            ToolCapability("shell", False, "shell_missing", "未找到 Bash", "请安装 Git for Windows"),
+            ToolCapability(
+                "shell", False, "shell_missing", "未找到 Bash", "请安装 Git for Windows"
+            ),
         ),
     )
 
@@ -314,7 +304,6 @@ def test_status_shows_tool_capability_diagnostics():
     assert "Shell: 不可用" in text
     assert "shell_missing" in text
     assert "用量:" in text
-
 
 
 def test_status_without_mcp_diagnostics():

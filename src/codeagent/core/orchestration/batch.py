@@ -55,8 +55,7 @@ async def execute_tool_batch(
         completed: Any
         if config.tool_execution == "parallel":
             pending = [
-                asyncio.create_task(run_tool(index, call))
-                for index, call in enumerate(calls)
+                asyncio.create_task(run_tool(index, call)) for index, call in enumerate(calls)
             ]
             completed = asyncio.as_completed(pending)
         else:
@@ -177,9 +176,7 @@ def _cancelled_result(
         if cleanup_required
         else CleanupStatus.NOT_REQUIRED
     )
-    cleanup_uncertain = bool(
-        cleanup_required and getattr(runtime, "cleanup_uncertain", False)
-    )
+    cleanup_uncertain = bool(cleanup_required and getattr(runtime, "cleanup_uncertain", False))
     cleanup_confirmed = (
         False
         if cleanup_uncertain

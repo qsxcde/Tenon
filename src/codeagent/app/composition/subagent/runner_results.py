@@ -12,8 +12,27 @@ from codeagent.core.contracts.subagents import (
     SubagentResult,
     SubagentStatus,
 )
+from codeagent.core.subagent.admission import TerminalAttribution, attribute_cancel_reason
 
 from .runner_support import bounded
+
+
+def attributed_result(active: Any, attribution: TerminalAttribution) -> SubagentResult:
+    """Build one failed child result from a core terminal attribution."""
+    failure = SubagentFailure(
+        reason_code=attribution.reason_code.value,
+        message=bounded(attribution.message),
+        phase=attribution.phase.value,
+    )
+    return SubagentResult(
+        delegation_id=active.request.delegation_id,
+        status=attribution.status,
+        child_run_id=active.child_run_id,
+        attempt_id=active.attempt_id,
+        failure=failure,
+        diagnostics=tuple(active.diagnostics),
+        cleanup_uncertain=bool(getattr(active, "cleanup_uncertain", False)),
+    )
 
 
 def failure_result(
@@ -53,43 +72,35 @@ def rejected_result(request: Any, reason: str, message: str) -> SubagentResult:
 
 
 def cancelled_result(active: Any) -> SubagentResult:
-    return failure_result(
-        active,
-        SubagentStatus.CANCELLED,
-        SubagentReasonCode.PARENT_CANCELLED,
-        SubagentFailurePhase.CANCELLING,
-        RuntimeError("父 Agent 已取消子运行"),
-    )
+    return attributed_result(active, attribute_cancel_reason(None))
 
 
 def timed_out_result(active: Any) -> SubagentResult:
-    return failure_result(
+    return attributed_result(
         active,
-        SubagentStatus.TIMED_OUT,
-        SubagentReasonCode.TIMEOUT,
-        SubagentFailurePhase.CANCELLING,
-        RuntimeError("子 Agent 达到墙钟时间预算"),
+        attribute_cancel_reason(SubagentReasonCode.TIMEOUT),
     )
 
 
 def budget_exceeded_result(active: Any) -> SubagentResult:
-    detail = getattr(active, "budget_detail", None) or "子 Agent 达到执行预算"
-    return failure_result(
+    return attributed_result(
         active,
-        SubagentStatus.FAILED,
-        SubagentReasonCode.BUDGET_EXCEEDED,
-        SubagentFailurePhase.CANCELLING,
-        RuntimeError(detail),
+        attribute_cancel_reason(
+            SubagentReasonCode.BUDGET_EXCEEDED,
+            budget_detail=getattr(active, "budget_detail", None),
+        ),
     )
 
 
 def cancellation_result(active: Any) -> SubagentResult:
     """Map an active cancellation reason to its terminal Subagent result."""
-    if getattr(active, "cancel_reason", None) is SubagentReasonCode.TIMEOUT:
-        return timed_out_result(active)
-    if getattr(active, "cancel_reason", None) is SubagentReasonCode.BUDGET_EXCEEDED:
-        return budget_exceeded_result(active)
-    return cancelled_result(active)
+    return attributed_result(
+        active,
+        attribute_cancel_reason(
+            getattr(active, "cancel_reason", None),
+            budget_detail=getattr(active, "budget_detail", None),
+        ),
+    )
 
 
 def finalize_result(result: SubagentResult, active: Any) -> SubagentResult:
@@ -109,6 +120,7 @@ def finalize_result(result: SubagentResult, active: Any) -> SubagentResult:
 
 
 __all__ = [
+    "attributed_result",
     "budget_exceeded_result",
     "cancellation_result",
     "cancelled_result",

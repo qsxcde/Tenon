@@ -13,9 +13,7 @@ async def test_chat_client_generation_and_usage_contract():
     client = FakeClient(response="reply", usage={"input_tokens": 4, "output_tokens": 2})
     tool = ToolDefinition(name="echo", description="echo", parameters={"type": "object"})
 
-    response = await client.generate(
-        [ChatMessage(role="user", content="hello")], tools=[tool]
-    )
+    response = await client.generate([ChatMessage(role="user", content="hello")], tools=[tool])
 
     assert response.content == "reply"
     assert response.usage == {"input_tokens": 4, "output_tokens": 2}

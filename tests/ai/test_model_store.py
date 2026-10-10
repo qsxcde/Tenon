@@ -70,8 +70,8 @@ def test_bool_max_tokens_rejected(tmp_path):
     )
     data = s.load()
     ids = [m.id for m in data["deepseek"]["models"]]
-    assert "m" not in ids   # bool 被跳过
-    assert "ok" in ids      # 正常 int 保留
+    assert "m" not in ids  # bool 被跳过
+    assert "ok" in ids  # 正常 int 保留
 
 
 def test_non_positive_max_tokens_and_non_boolean_reasoning_are_rejected(tmp_path):

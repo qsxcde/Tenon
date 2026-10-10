@@ -37,9 +37,7 @@ def test_plain_text_single_span():
 
 def test_bold_gets_bold_tag():
     lines = md_renderer("a **加粗** b", 60)
-    assert lines == [
-        [Span("a ", fg=TEXT), Span("加粗", fg=BOLD), Span(" b", fg=TEXT)]
-    ]
+    assert lines == [[Span("a ", fg=TEXT), Span("加粗", fg=BOLD), Span(" b", fg=TEXT)]]
 
 
 def test_inline_code_gets_code_background():

@@ -20,6 +20,7 @@ from codeagent.tools.atomic import (
     WriteTool,
 )
 
+
 def _session(model: FakeClient, store=None, session_id: str | None = None) -> AgentSession:
     config = AgentLoopConfig(
         model=ChatModelPort(model),
@@ -78,7 +79,12 @@ def _ask_model() -> FakeClient:
             {
                 "content": "",
                 "tool_calls": [
-                    {"name": "bash", "args": {"command": "echo ok"}, "id": "c1", "type": "tool_call"}
+                    {
+                        "name": "bash",
+                        "args": {"command": "echo ok"},
+                        "id": "c1",
+                        "type": "tool_call",
+                    }
                 ],
             },
             {"content": "完成"},

@@ -71,9 +71,7 @@ def load_mcp_tools(
             diagnostics.append(f"start_failed: MCP server '{spec.name}' 启动失败: {exc}")
             client.close()
             continue
-        tools = [
-            McpTool(client, info, timeout=tool_timeout) for info in client.tools
-        ]
+        tools = [McpTool(client, info, timeout=tool_timeout) for info in client.tools]
         tools_by_server[spec.name] = tools
     kept, budget_diags = apply_budget(tools_by_server)
     diagnostics.extend(budget_diags)

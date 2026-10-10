@@ -22,10 +22,7 @@ class McpPermissionRules:
     def decide(self, qualified_name: str) -> str | None:
         normalized = _normalize(qualified_name)
         for action in ("deny", "ask", "allow"):
-            if any(
-                _match_rule(normalized, _normalize(rule))
-                for rule in getattr(self, action)
-            ):
+            if any(_match_rule(normalized, _normalize(rule)) for rule in getattr(self, action)):
                 return action
         return None
 

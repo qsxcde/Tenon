@@ -66,7 +66,9 @@ class SubagentEventMixin:
             block.parent_run_id = metadata["parent_run_id"] or None
             self._subagent_blocks_by_id[delegation_id] = block
             self.transcript.append(block)
-            block.apply_event(AgentEvent(EventType.SUBAGENT_FINISHED, payload=payload, metadata=metadata))
+            block.apply_event(
+                AgentEvent(EventType.SUBAGENT_FINISHED, payload=payload, metadata=metadata)
+            )
             self._trim_subagent_blocks()
         self._sync_subagent_counts()
 

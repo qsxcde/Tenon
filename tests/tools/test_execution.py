@@ -62,7 +62,7 @@ async def test_process_runner_async_uses_same_result_contract(tmp_path):
     except ValueError:
         pytest.skip("当前平台没有 bash")
     request = ProcessRequest(executable, "printf async", str(tmp_path), bash_env(), 5)
-    result = await (ProcessRunner().arun(request))
+    result = await ProcessRunner().arun(request)
     assert (result.returncode, result.stdout, result.stderr) == (0, "async", "")
 
 

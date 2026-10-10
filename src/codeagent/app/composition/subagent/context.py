@@ -38,18 +38,14 @@ def parse_context(value: Any) -> tuple[SubagentContextItem, ...]:
             raise ValueError(f"context[{index}].content 必须是非空文本")
         content = content.strip()
         if len(content) > MAX_CONTEXT_ITEM_CHARS:
-            raise ValueError(
-                f"context[{index}].content 超过 {MAX_CONTEXT_ITEM_CHARS} 字符"
-            )
+            raise ValueError(f"context[{index}].content 超过 {MAX_CONTEXT_ITEM_CHARS} 字符")
         source = raw_item.get("source")
         if source is not None:
             if not isinstance(source, str) or not source.strip():
                 raise ValueError(f"context[{index}].source 必须是非空文本")
             source = source.strip()
             if len(source) > MAX_CONTEXT_SOURCE_CHARS:
-                raise ValueError(
-                    f"context[{index}].source 超过 {MAX_CONTEXT_SOURCE_CHARS} 字符"
-                )
+                raise ValueError(f"context[{index}].source 超过 {MAX_CONTEXT_SOURCE_CHARS} 字符")
         total_chars += len(content) + len(source or "")
         if total_chars > MAX_CONTEXT_TOTAL_CHARS:
             raise ValueError(f"context 总字符数超过 {MAX_CONTEXT_TOTAL_CHARS}")
@@ -90,13 +86,9 @@ def validate_context_items(items: Iterable[SubagentContextItem]) -> tuple[Subage
         if item.kind not in _CONTEXT_KINDS:
             raise ValueError(f"context[{index}].kind 无效")
         if len(item.content) > MAX_CONTEXT_ITEM_CHARS:
-            raise ValueError(
-                f"context[{index}].content 超过 {MAX_CONTEXT_ITEM_CHARS} 字符"
-            )
+            raise ValueError(f"context[{index}].content 超过 {MAX_CONTEXT_ITEM_CHARS} 字符")
         if item.source is not None and len(item.source) > MAX_CONTEXT_SOURCE_CHARS:
-            raise ValueError(
-                f"context[{index}].source 超过 {MAX_CONTEXT_SOURCE_CHARS} 字符"
-            )
+            raise ValueError(f"context[{index}].source 超过 {MAX_CONTEXT_SOURCE_CHARS} 字符")
         total_chars += len(item.content) + len(item.source or "")
     if total_chars > MAX_CONTEXT_TOTAL_CHARS:
         raise ValueError(f"context 总字符数超过 {MAX_CONTEXT_TOTAL_CHARS}")

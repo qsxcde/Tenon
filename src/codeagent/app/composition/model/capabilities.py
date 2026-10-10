@@ -51,11 +51,7 @@ def resolve_model_capabilities(
     """从当前选择解析模型能力,不访问网络或执行模型请求。"""
     from codeagent.app.config import Settings
 
-    resolved_provider = (
-        provider
-        or getattr(cfg, "llm_provider", None)
-        or Settings().llm_provider
-    )
+    resolved_provider = provider or getattr(cfg, "llm_provider", None) or Settings().llm_provider
     effective_model = model
     if not effective_model:
         defaults = _provider_config(resolved_provider)

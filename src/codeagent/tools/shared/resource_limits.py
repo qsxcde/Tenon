@@ -69,9 +69,7 @@ class ToolResourceLimits:
             max_output_bytes=read("tool_max_output_bytes", DEFAULT_MAX_BYTES),
             max_output_lines=read("tool_max_output_lines", DEFAULT_MAX_LINES),
             max_memory_bytes=read("tool_max_memory_bytes", DEFAULT_TOOL_MEMORY_BYTES),
-            cleanup_timeout=read(
-                "tool_cleanup_timeout", DEFAULT_TOOL_CLEANUP_TIMEOUT
-            ),
+            cleanup_timeout=read("tool_cleanup_timeout", DEFAULT_TOOL_CLEANUP_TIMEOUT),
         )
 
     def as_dict(self) -> dict[str, Any]:

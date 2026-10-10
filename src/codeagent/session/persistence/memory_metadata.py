@@ -12,9 +12,7 @@ from codeagent.session.persistence.models import SessionRef
 class MemoryMetadataMixin:
     """Keep title, model and metadata projections outside the store facade."""
 
-    def append_model_change(
-        self, session_id: str, *, model: str = "", effort: str = ""
-    ) -> None:
+    def append_model_change(self, session_id: str, *, model: str = "", effort: str = "") -> None:
         if session_id not in self._sessions:
             raise ValueError(f"会话不存在: {session_id}")
         ref = self._sessions[session_id]

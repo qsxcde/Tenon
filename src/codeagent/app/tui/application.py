@@ -32,6 +32,7 @@ from codeagent.app.tasks.supervisor import TaskSupervisor
 #: 退出文档的兜底宽度(视口尺寸不可用时)。
 _DEFAULT_EXIT_WIDTH = 120
 
+
 class TuiApp(
     TuiConversationCoordinator,
     TuiSessionCoordinator,
@@ -124,6 +125,7 @@ class TuiApp(
         self._hydrate_current_session()
         self._sync_context_status()
         self._unsubscribe = self._manager.subscribe(self._on_event)
+
     # -- 生命周期 ----------------------------------------------------------
     def start(self) -> None:
         """注册后端回调并进入事件循环(阻塞直到退出)。"""
@@ -248,9 +250,7 @@ class TuiApp(
             task.cancel()
         if tasks:
             try:
-                await asyncio.wait_for(
-                    asyncio.gather(*tasks, return_exceptions=True), timeout=1.0
-                )
+                await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=1.0)
             except asyncio.TimeoutError:
                 pass
 

@@ -39,9 +39,7 @@ _ALLOWED_TRANSITIONS: dict[SubagentStatus, frozenset[SubagentStatus]] = {
     SubagentStatus.WAITING_CONFIRMATION: frozenset(
         {SubagentStatus.RUNNING, SubagentStatus.CANCELLING}
     ),
-    SubagentStatus.CANCELLING: frozenset(
-        {SubagentStatus.CANCELLED, SubagentStatus.TIMED_OUT}
-    ),
+    SubagentStatus.CANCELLING: frozenset({SubagentStatus.CANCELLED, SubagentStatus.TIMED_OUT}),
     SubagentStatus.COMPLETED: frozenset(),
     SubagentStatus.FAILED: frozenset(),
     SubagentStatus.TIMED_OUT: frozenset(),

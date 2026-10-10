@@ -11,7 +11,10 @@ def test_composition_factory_preserves_lifecycle_hooks() -> None:
     from codeagent.app.composition.runtime.factory import create_agent_config
 
     hook = lambda event: None
-    with patch("codeagent.app.composition.model.selection.create_llm", return_value=FakeClient(response="ok")):
+    with patch(
+        "codeagent.app.composition.model.selection.create_llm",
+        return_value=FakeClient(response="ok"),
+    ):
         config = create_agent_config(provider="fake", lifecycle_hooks=[hook])
 
     assert config.lifecycle_hooks == (hook,)

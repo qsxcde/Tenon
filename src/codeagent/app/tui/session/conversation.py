@@ -50,7 +50,6 @@ class TuiConversationCoordinator:
         self._pending_confirmation = None
         self._backend.set_confirmation(None)
 
-
     def _interrupt(self) -> None:
         """Esc:登录态取消 → 浮层收起 → 运行中打断 → 空闲提示退出方式。
 
@@ -84,7 +83,6 @@ class TuiConversationCoordinator:
         else:
             self.model.append_info("按 Ctrl+C 退出")
 
-
     def _cmd_quit(self, cmd: Command) -> None:
         """/quit:退出 TUI(等同 Ctrl+C——运行中先中止当前轮,再打印完整文档)。"""
         self._quit()
@@ -101,7 +99,6 @@ class TuiConversationCoordinator:
             if session is not None:
                 session.abort()
         self._exit()
-
 
     def _on_task_event(self, event: TaskEvent) -> None:
         """把任务级状态写入状态栏；完整诊断仍由监督器结果负责。"""
@@ -122,7 +119,6 @@ class TuiConversationCoordinator:
             self._task_active = False
         self._render_coordinator.sync_status_timer()
         self._schedule_render()
-
 
     def _run_conversation(self, text: str, *, mode: TaskMode | None = None) -> None:
         """在当前会话发起一轮任务；验证只由工作区变更触发。"""

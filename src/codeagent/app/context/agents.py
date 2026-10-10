@@ -93,15 +93,18 @@ def build_system_prompt(base: str, agents_files: list[tuple[str, str]]) -> str:
     """
     if not agents_files:
         return base
-    sections = [f"<project_instructions path=\"{path}\">\n{content}\n</project_instructions>"
-                for path, content in agents_files]
-    context = "<project_context>\nProject-specific instructions and guidelines:\n\n" \
-        + "\n\n".join(sections) + "\n</project_context>"
+    sections = [
+        f'<project_instructions path="{path}">\n{content}\n</project_instructions>'
+        for path, content in agents_files
+    ]
+    context = (
+        "<project_context>\nProject-specific instructions and guidelines:\n\n"
+        + "\n\n".join(sections)
+        + "\n</project_context>"
+    )
     return f"{base}\n\n{context}"
 
 
 def read_base_prompt() -> str:
     """读取包内基础系统提示词(``resources/prompts/system.md``)。"""
-    return files("codeagent.resources").joinpath("prompts", "system.md").read_text(
-        encoding="utf-8"
-    )
+    return files("codeagent.resources").joinpath("prompts", "system.md").read_text(encoding="utf-8")

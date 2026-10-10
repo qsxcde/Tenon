@@ -95,9 +95,7 @@ def default_registry() -> dict[str, CommandSpec]:
         "ask": CommandSpec("ask", "以只读问答模式发送消息", args=("text...",)),
         "plan": CommandSpec("plan", "以只读规划模式发送消息", args=("text...",)),
         "code": CommandSpec("code", "以代码模式发送消息", args=("text...",)),
-        "mode": CommandSpec(
-            "mode", "设置粘性模式(ask/plan/code/auto)", args=("mode",)
-        ),
+        "mode": CommandSpec("mode", "设置粘性模式(ask/plan/code/auto)", args=("mode",)),
         "clear": CommandSpec("clear", "清空聊天区"),
         "status": CommandSpec("status", "显示会话状态"),
         "name": CommandSpec("name", "设置或查看当前会话标题", args=("title...",)),
@@ -114,16 +112,14 @@ def default_registry() -> dict[str, CommandSpec]:
         "login": CommandSpec(
             "login", "配置 provider 的 API key 并切换", args=("provider",), picker=True
         ),
-        "model": CommandSpec(
-            "model", "切换模型(支持 model:effort)", args=("model",), picker=True
-        ),
+        "model": CommandSpec("model", "切换模型(支持 model:effort)", args=("model",), picker=True),
         "effort": CommandSpec("effort", "切换思考强度", args=("level",), picker=True),
-        "fork": CommandSpec(
-            "fork", "从指定消息分叉会话(缺省最近用户消息)", args=("message-id",)
-        ),
+        "fork": CommandSpec("fork", "从指定消息分叉会话(缺省最近用户消息)", args=("message-id",)),
         "compact": CommandSpec("compact", "压缩当前会话上下文"),
         "output": CommandSpec(
-            "output", "浏览或导出最近工具输出", args=("action", "args..."),
+            "output",
+            "浏览或导出最近工具输出",
+            args=("action", "args..."),
         ),
         "retry": CommandSpec("retry", "安全重试最近一次模型失败"),
         "continue": CommandSpec("continue", "在失败回合后继续新的消息", args=("text...",)),

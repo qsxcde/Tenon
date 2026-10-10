@@ -24,9 +24,7 @@ class TuiConfigMixin:
         if getattr(self, "subagent_runner", None) is None:
             from ..subagent.factory import create_serial_subagent_runner
 
-            self.subagent_runner = create_serial_subagent_runner(
-                self._create_child_session
-            )
+            self.subagent_runner = create_serial_subagent_runner(self._create_child_session)
         return self.subagent_runner
 
     def _create_child_session(self, request: Any) -> Any:
@@ -141,9 +139,7 @@ class TuiConfigMixin:
         ]
         return owners[0] if len(owners) == 1 else None
 
-    def _new_config(
-        self, provider: str | None, model: str | None, effort: str | None
-    ) -> Any:
+    def _new_config(self, provider: str | None, model: str | None, effort: str | None) -> Any:
         return create_agent_config(
             self.cfg,
             registry=self.registry,
@@ -183,7 +179,9 @@ class TuiConfigMixin:
             model=model_id,
             effort=effort,
             policy=policy_for_config(config),
-            context_window=_resolve_context_window(self.registry, self.cfg, provider, new_model or model_id),
+            context_window=_resolve_context_window(
+                self.registry, self.cfg, provider, new_model or model_id
+            ),
         )
         self.refresh_skills()
         return model_id, effort
@@ -208,7 +206,9 @@ class TuiConfigMixin:
             model=model_id,
             effort=effort,
             policy=policy_for_config(config),
-            context_window=_resolve_context_window(self.registry, self.cfg, provider, new_model or model_id),
+            context_window=_resolve_context_window(
+                self.registry, self.cfg, provider, new_model or model_id
+            ),
         )
         self.refresh_skills()
         return model_id, effort

@@ -26,9 +26,7 @@ async def test_runtime_executes_agent_tool_protocol_and_preserves_operation_id()
     tool = _AgentTool()
     call = ToolCall("c1", "echo", {"text": "hello"})
 
-    result = await (
-        ToolExecutionRuntime().execute(tool, call, operation_id="op-1")
-    )
+    result = await ToolExecutionRuntime().execute(tool, call, operation_id="op-1")
 
     assert result.content == "hello"
     assert result.operation_id == "op-1"
@@ -50,9 +48,7 @@ async def test_runtime_rejects_unadapted_legacy_tool_without_invoking_it() -> No
             return "must not run"
 
     tool = LegacyTool()
-    result = await ToolExecutionRuntime().execute(
-        tool, ToolCall("legacy-1", "legacy", {})
-    )
+    result = await ToolExecutionRuntime().execute(tool, ToolCall("legacy-1", "legacy", {}))
 
     assert result.error is True
     assert result.status == ToolExecutionStatus.FAILED

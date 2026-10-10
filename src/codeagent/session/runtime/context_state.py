@@ -72,8 +72,7 @@ class SessionBudgetState:
         self.diagnostics = self.diagnostics.with_actual_usage(
             input_tokens=self.latest_actual_usage.input_tokens,
             output_tokens=(
-                self.latest_actual_usage.output_tokens
-                + self.latest_actual_usage.reasoning_tokens
+                self.latest_actual_usage.output_tokens + self.latest_actual_usage.reasoning_tokens
             ),
             cached_tokens=self.latest_actual_usage.cached_tokens,
         )
@@ -83,9 +82,7 @@ class SessionBudgetState:
         self.diagnostics = self.diagnostics.with_compaction(
             trigger=str(metadata.get("trigger") or "unknown"),
             status=str(metadata.get("status") or "unknown"),
-            reason_code=_optional_text(
-                metadata.get("reason_code") or metadata.get("error_code")
-            ),
+            reason_code=_optional_text(metadata.get("reason_code") or metadata.get("error_code")),
             reason=_optional_text(metadata.get("reason") or metadata.get("error_message")),
             before_input_tokens=_optional_int(
                 metadata.get("before_input_tokens", metadata.get("input_tokens"))
@@ -112,13 +109,9 @@ class SessionBudgetState:
             else None
         )
         self.diagnostics = self.diagnostics.with_tool_result(
-            tool_call_id=_optional_text(
-                metadata.get("tool_call_id") or fields.get("tool_call_id")
-            ),
+            tool_call_id=_optional_text(metadata.get("tool_call_id") or fields.get("tool_call_id")),
             status=str(metadata.get("status") or "unknown"),
-            original_bytes=_optional_int(
-                fields.get("total_bytes", fields.get("original_bytes"))
-            ),
+            original_bytes=_optional_int(fields.get("total_bytes", fields.get("original_bytes"))),
             shown_bytes=_optional_int(fields.get("shown_bytes")),
             action=str(fields.get("truncated_by") or fields.get("action") or "none"),
             reason=_optional_text(fields.get("truncated_by") or fields.get("reason")),
@@ -128,9 +121,9 @@ class SessionBudgetState:
     def record_failure(self, metadata: dict[str, Any]) -> None:
         """Record a failed request without treating it as committed usage."""
         code = _optional_text(metadata.get("error_code")) or "runtime_error"
-        message = _optional_text(
-            metadata.get("error_message") or metadata.get("error")
-        ) or "发生错误"
+        message = (
+            _optional_text(metadata.get("error_message") or metadata.get("error")) or "发生错误"
+        )
         phase = _optional_text(metadata.get("phase")) or "unknown"
         self.diagnostics = self.diagnostics.with_failure(
             code=code,

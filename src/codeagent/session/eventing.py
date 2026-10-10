@@ -45,9 +45,7 @@ class SessionEventMixin:
             elapsed_ms=event.elapsed_ms or metadata.get("elapsed_ms"),
             error_code=event.error_code or metadata.get("error_code"),
             retryable=(
-                event.retryable
-                if event.retryable is not None
-                else metadata.get("retryable")
+                event.retryable if event.retryable is not None else metadata.get("retryable")
             ),
             cleanup_uncertain=(
                 event.cleanup_uncertain
@@ -106,9 +104,7 @@ class SessionEventMixin:
                 task = asyncio.ensure_future(result)
                 self._lifecycle_hook_tasks.add(task)
                 task.add_done_callback(
-                    lambda completed: self._finish_lifecycle_hook(
-                        completed, event, lifecycle, hook
-                    )
+                    lambda completed: self._finish_lifecycle_hook(completed, event, lifecycle, hook)
                 )
 
     def _finish_lifecycle_hook(

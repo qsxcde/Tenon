@@ -145,9 +145,7 @@ class TuiInteractionCoordinator(TuiCommandDispatcher):
         # _suggestion_index 仍指向全量候选列表(确认逻辑不受影响)。
         total = len(self._suggestions)
         window = min(_SUGGESTION_WINDOW, total)
-        start = min(
-            max(0, self._suggestion_index - window // 2), max(0, total - window)
-        )
+        start = min(max(0, self._suggestion_index - window // 2), max(0, total - window))
         lines: list[list[Span]] = []
         for index in range(start, start + window):
             name = self._suggestions[index]
@@ -256,12 +254,11 @@ class TuiInteractionCoordinator(TuiCommandDispatcher):
         if isinstance(parsed, Literal):
             self._run_conversation(parsed.text, mode=self._task_mode)
         elif isinstance(parsed, UnknownCommand):
-            self.model.append_info(
-                f"未知命令: /{parsed.name}(输入 /help 查看可用命令)"
-            )
+            self.model.append_info(f"未知命令: /{parsed.name}(输入 /help 查看可用命令)")
             self._schedule_render()
         else:
             self._dispatch_command(parsed)
+
     def _submit_login_key(self, key: str) -> None:
         """登录态提交:经组合根注入的保存器写 .env + 热切换;空值提示停留。"""
         provider = self._login_pending
@@ -294,7 +291,5 @@ class TuiInteractionCoordinator(TuiCommandDispatcher):
         self._refresh_model_capabilities(provider, new_model, new_effort)
         self._provider = provider
         self._configured_providers.add(provider)
-        self.model.append_info(
-            f"已保存 {provider.upper()}_API_KEY 并切换到 {provider}"
-        )
+        self.model.append_info(f"已保存 {provider.upper()}_API_KEY 并切换到 {provider}")
         self._schedule_render()

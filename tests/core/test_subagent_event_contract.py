@@ -148,7 +148,7 @@ async def test_core_tool_bridge_forwards_structured_subagent_events_directly() -
         EventTool(),
         ToolCall("call-1", "delegate", {}),
         AgentContext(),
-            AgentLoopConfig(model=object(), tools=[], tool_runtime=ToolExecutionRuntime()),
+        AgentLoopConfig(model=object(), tools=[], tool_runtime=ToolExecutionRuntime()),
         events.append,
         operation_id="operation-1",
     )

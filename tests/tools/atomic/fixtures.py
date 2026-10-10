@@ -19,6 +19,7 @@ from codeagent.tools.atomic.bash import DANGEROUS_PATTERNS, _semantically_ok
 from codeagent.tools.base import AtomicTool
 from codeagent.core import ToolCall, ToolExecutionRuntime
 
+
 def _invoke(tool: AtomicTool, **kwargs: object) -> str:
     return tool.invoke(tool.Args(**kwargs))
 

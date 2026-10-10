@@ -26,7 +26,9 @@ def record_from_event(
         return None
     status = _value(event, metadata, "subagent_status") or _value(event, metadata, "status")
     status = str(
-        getattr(status, "value", status or ("queued" if event.type == "subagent_queued" else "running"))
+        getattr(
+            status, "value", status or ("queued" if event.type == "subagent_queued" else "running")
+        )
     )
     payload = event.payload if isinstance(event.payload, dict) else {}
     failure = payload.get("failure") if isinstance(payload.get("failure"), dict) else {}
@@ -50,9 +52,7 @@ def record_from_event(
         task_label=str(_value(event, metadata, "task_label") or ""),
         status=status,
         phase=str(
-            _value(event, metadata, "child_phase")
-            or _value(event, metadata, "phase")
-            or status
+            _value(event, metadata, "child_phase") or _value(event, metadata, "phase") or status
         ),
         summary=str(payload.get("summary") or ""),
         reason_code=reason_code,
@@ -72,8 +72,7 @@ def record_from_entry(entry: dict[str, Any]) -> SubagentRunRecord:
     parent_run_id = entry.get("parentRunId", entry.get("parent_run_id"))
     status = entry.get("status")
     if not all(
-        isinstance(value, str) and value.strip()
-        for value in (delegation_id, parent_run_id, status)
+        isinstance(value, str) and value.strip() for value in (delegation_id, parent_run_id, status)
     ):
         raise ValueError("subagent entry is missing required fields")
     diagnostics = entry.get("diagnostics", ())
@@ -144,7 +143,14 @@ def _entry_value(entry: dict[str, Any], *names: str) -> str | None:
 def _progress_result(payload: dict[str, Any]) -> dict[str, Any]:
     return {
         key: str(payload[key])[:512]
-        for key in ("tool_name", "child_event_type", "child_phase", "reason", "diagnostic", "elapsed_ms")
+        for key in (
+            "tool_name",
+            "child_event_type",
+            "child_phase",
+            "reason",
+            "diagnostic",
+            "elapsed_ms",
+        )
         if payload.get(key) is not None
     }
 

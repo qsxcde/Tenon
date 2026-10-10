@@ -36,8 +36,7 @@ class AgentToolAdapter:
         if declared is not None:
             return bool(declared)
         return any(
-            callable(getattr(self._tool, name, None))
-            for name in ("ainvoke", "invoke_async")
+            callable(getattr(self._tool, name, None)) for name in ("ainvoke", "invoke_async")
         )
 
     async def execute(
@@ -144,9 +143,7 @@ def _metadata_from_value(value: Any, semantic_success: bool | None) -> ToolOutpu
     truncated_by = getattr(value, "truncated_by", None)
     truncated = bool(getattr(value, "output_truncated", False) or truncated_by)
     return ToolOutputMetadata(
-        completeness=(
-            OutputCompleteness.TRUNCATED if truncated else OutputCompleteness.UNKNOWN
-        ),
+        completeness=(OutputCompleteness.TRUNCATED if truncated else OutputCompleteness.UNKNOWN),
         total_bytes=int(getattr(value, "total_bytes", 0) or size),
         total_lines=int(getattr(value, "total_lines", 0) or lines),
         shown_bytes=int(getattr(value, "shown_bytes", 0) or size),
@@ -174,8 +171,7 @@ def _call_with_hooks(method: Any, args: Any, signal: Any, on_update: Any) -> Any
     except (TypeError, ValueError):
         parameters = {}
     accepts_kwargs = any(
-        parameter.kind is inspect.Parameter.VAR_KEYWORD
-        for parameter in parameters.values()
+        parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in parameters.values()
     )
     kwargs = {}
     if signal is not None and (accepts_kwargs or "signal" in parameters):

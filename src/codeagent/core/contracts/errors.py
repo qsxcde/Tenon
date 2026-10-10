@@ -66,9 +66,7 @@ class ContextTransformTimeoutError(ContextPreparationError):
         self.extension = extension
         self.timeout = timeout
         super().__init__(
-            TimeoutError(
-                f"{extension} exceeded context transform timeout of {timeout}s"
-            )
+            TimeoutError(f"{extension} exceeded context transform timeout of {timeout}s")
         )
 
 

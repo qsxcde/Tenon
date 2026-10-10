@@ -96,16 +96,10 @@ def run_benchmark(
         counters["control_event_p95_ms"] = control.p95_ms
     required_metrics = SCENARIO_REQUIRED_METRICS[config.scenario]
     unavailable_metrics = {
-        name: "not_applicable"
-        for name in STREAM_ONLY_METRICS
-        if name not in required_metrics
+        name: "not_applicable" for name in STREAM_ONLY_METRICS if name not in required_metrics
     }
     unavailable_metrics.update(
-        {
-            name: "not_measured"
-            for name in required_metrics
-            if name not in metrics
-        }
+        {name: "not_measured" for name in required_metrics if name not in metrics}
     )
     return BenchmarkResult(
         scenario=config.scenario,

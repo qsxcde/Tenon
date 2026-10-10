@@ -54,7 +54,9 @@ async def test_parent_events_are_persisted_in_order_and_drained(session_factory,
     assert records[0].child_run_id == "child-run"
     entries = [
         json.loads(line)
-        for line in (tmp_path / "sessions" / "parent.jsonl").read_text(encoding="utf-8").splitlines()
+        for line in (tmp_path / "sessions" / "parent.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
     ]
     assert [entry["status"] for entry in entries[1:]] == ["queued", "running", "completed"]
 
@@ -65,7 +67,9 @@ async def test_wrong_parent_event_is_not_persisted(session_factory, tmp_path):
 
     store = JsonFileStore(tmp_path / "sessions")
     session = session_factory(store=store, session_id="parent")
-    session._emit(_event(EventType.SUBAGENT_QUEUED, status="queued", parent_run_id="other"), "parent-run")
+    session._emit(
+        _event(EventType.SUBAGENT_QUEUED, status="queued", parent_run_id="other"), "parent-run"
+    )
     await session._persistence.drain_subagent_records()
     assert store.load_subagent_records("parent") == []
 
@@ -86,4 +90,7 @@ async def test_record_write_failure_is_isolated_from_parent_event(session_factor
 
     assert session.subagent_records[0].status == "queued"
     assert store.load_subagent_records("parent") == []
-    assert any("record disk unavailable" in item for item in session._persistence.subagent_record_diagnostics)
+    assert any(
+        "record disk unavailable" in item
+        for item in session._persistence.subagent_record_diagnostics
+    )
