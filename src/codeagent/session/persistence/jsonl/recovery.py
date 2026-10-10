@@ -12,6 +12,7 @@ from codeagent.session.persistence.models import (
     SessionRecoveryReport,
 )
 from codeagent.session.persistence.subagent_records import record_from_entry
+from codeagent.session.persistence.jsonl.host import JsonlStoreHost
 from codeagent.session.persistence.jsonl.recovery_diagnostics import (
     diagnostic as _diagnostic,
     header_diagnostic as _header_diagnostic,
@@ -43,7 +44,7 @@ class _EntryScan:
     latest_cut: str | None = None
 
 
-class JsonlRecoveryMixin:
+class JsonlRecoveryMixin(JsonlStoreHost):
     """Inspect a JSONL source without rewriting its authoritative history."""
 
     def recovery_report(self, session_id: str) -> SessionRecoveryReport:

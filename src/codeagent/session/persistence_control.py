@@ -9,11 +9,12 @@ from __future__ import annotations
 from typing import Any
 
 from codeagent.core.contracts.messages import Message
+from codeagent.session.host import AgentSessionHost
 
 __all__ = ["SessionPersistenceMixin"]
 
 
-class SessionPersistenceMixin:
+class SessionPersistenceMixin(AgentSessionHost):
     """Persistence control shared by one stateful session facade."""
 
     _summary_entry_id: str | None

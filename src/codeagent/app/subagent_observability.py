@@ -66,7 +66,8 @@ def _phase(metadata: dict[str, Any], payload: dict[str, Any]) -> str:
 
 
 def _reason(metadata: dict[str, Any], payload: dict[str, Any]) -> str:
-    failure = payload.get("failure") if isinstance(payload.get("failure"), dict) else {}
+    raw_failure = payload.get("failure")
+    failure = raw_failure if isinstance(raw_failure, dict) else {}
     return _bounded(
         metadata.get("reason_code") or metadata.get("error_code") or failure.get("reason_code"),
         _MAX_FIELD_CHARS,

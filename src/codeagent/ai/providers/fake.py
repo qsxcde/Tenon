@@ -152,6 +152,10 @@ class FakeClient(ChatClient):
             yield StreamEvent(type="usage", usage=resp.usage)
         yield StreamEvent(type="finish", finish_reason=resp.finish_reason)
 
+    async def aclose(self) -> None:
+        """无外部资源可释放;补齐 ``ChatClient`` 协议面,空实现无副作用。"""
+        return None
+
 
 PROVIDER_NAME = "fake"
 

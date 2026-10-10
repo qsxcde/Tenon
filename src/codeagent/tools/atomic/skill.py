@@ -26,9 +26,9 @@ class SkillArgs(BaseModel):
     name: str = Field(description="技能名称(来自 system 提示词的技能列表)")
 
 
-class SkillTool(AtomicTool):
-    name: ClassVar[str] = "skill"
-    description: ClassVar[str] = "获取技能正文:按名称返回已加载技能的完整内容与使用说明。"
+class SkillTool(AtomicTool[SkillArgs]):
+    name = "skill"
+    description = "获取技能正文:按名称返回已加载技能的完整内容与使用说明。"
     Args: ClassVar[type[BaseModel]] = SkillArgs
 
     def __init__(

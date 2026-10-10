@@ -8,10 +8,11 @@ import threading
 from pathlib import Path
 from typing import Any
 
+from codeagent.session.persistence.jsonl.host import JsonlStoreHost
 from codeagent.session.persistence.models import CURRENT_VERSION, SessionRef
 
 
-class JsonlForkingMixin:
+class JsonlForkingMixin(JsonlStoreHost):
     """Copy a valid prefix into a new session without modifying the source."""
 
     def fork(self, session_id: str, target_message_id: str, new_session_id: str) -> SessionRef:

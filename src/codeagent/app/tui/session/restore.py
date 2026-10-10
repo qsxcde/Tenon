@@ -8,6 +8,7 @@ from typing import Any
 
 from codeagent.app.errors.reporting import report_unexpected_error
 from codeagent.app.session_recovery import format_recovery_report
+from ..commands.host import TuiAppHost
 from ..state.model import TuiModel
 from codeagent.core.contracts.events import AgentEvent, EventType
 from codeagent.core.context.diagnostics import ContextDiagnostics
@@ -28,7 +29,7 @@ class RestoreCost:
         )
 
 
-class SessionRestoreMixin:
+class SessionRestoreMixin(TuiAppHost):
     @staticmethod
     def _restore_cost(history: list[Any]) -> RestoreCost:
         text_chars = 0

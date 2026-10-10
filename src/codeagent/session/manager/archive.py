@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from codeagent.session.manager.host import SessionManagerHost
+from codeagent.session.persistence.models import SessionStore
 
-class SessionManagerArchiveOperations:
+
+class SessionManagerArchiveOperations(SessionManagerHost):
     """Validate and apply reversible archive or protected deletion actions."""
 
     def archive(self, session_id: str) -> str:
@@ -24,14 +27,14 @@ class SessionManagerArchiveOperations:
         *,
         archived: bool,
     ) -> dict[str, str]:
-        self._require_store()
+        store = self._require_store()
         ids = self._normalize_session_ids(session_ids)
         self._preflight_targets(ids)
         result: dict[str, str] = {}
         operation = "archived" if archived else "unarchived"
         for session_id in ids:
             try:
-                self._store.archive(session_id, archived=archived)
+                store.archive(session_id, archived=archived)
             except (OSError, TypeError, ValueError) as exc:
                 result[session_id] = f"failed: {exc}"
             else:
@@ -49,13 +52,13 @@ class SessionManagerArchiveOperations:
     ) -> dict[str, str]:
         if not confirmed:
             raise ValueError("删除需要显式确认: 使用 confirm")
-        self._require_store()
+        store = self._require_store()
         ids = self._normalize_session_ids(session_ids)
         self._preflight_targets(ids, protect_delete=True)
         result: dict[str, str] = {}
         for session_id in ids:
             try:
-                self._store.delete(session_id)
+                store.delete(session_id)
             except (OSError, TypeError, ValueError) as exc:
                 result[session_id] = f"failed: {exc}"
                 continue
@@ -64,9 +67,10 @@ class SessionManagerArchiveOperations:
             self._session_access.pop(session_id, None)
         return result
 
-    def _require_store(self) -> None:
+    def _require_store(self) -> SessionStore:
         if self._store is None:
             raise ValueError("会话整理需要持久化会话")
+        return self._store
 
     @staticmethod
     def _normalize_session_ids(session_ids: list[str]) -> list[str]:
@@ -89,8 +93,9 @@ class SessionManagerArchiveOperations:
         *,
         protect_delete: bool = False,
     ) -> None:
+        store = self._require_store()
         for session_id in session_ids:
-            ref = self._store.get(session_id)
+            ref = store.get(session_id)
             if ref is None:
                 raise ValueError(f"会话不存在: {session_id}")
             session = self._sessions.get(session_id)

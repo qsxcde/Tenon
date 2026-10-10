@@ -93,6 +93,7 @@ class ToolExecutionRuntimePort(Protocol):
         timeout: float | None = None,
         operation_id: str | None = None,
         on_update: Callable[[Any], Awaitable[None] | None] | None = None,
+        on_start: Callable[[Any], Awaitable[None] | None] | None = None,
     ) -> ToolResult: ...
 
 

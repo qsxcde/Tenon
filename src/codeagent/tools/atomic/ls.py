@@ -26,7 +26,7 @@ class LsArgs(BaseModel):
     limit: int | None = Field(None, description="最多返回的条目数,缺省 500")
 
 
-class LsTool(AtomicTool):
+class LsTool(AtomicTool[LsArgs]):
     name = "ls"
     description = "列出目录内容;目录条目带 / 后缀,大小写不敏感排序,默认不显示隐藏条目。"
     Args = LsArgs

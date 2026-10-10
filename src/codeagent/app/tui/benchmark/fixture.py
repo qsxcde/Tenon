@@ -150,8 +150,8 @@ def _append_history_fixture_block(model: TuiModel, index: int) -> None:
     elif index % 17 == 0:
         model.transcript.append(AssistantBlock())
     elif index % 11 == 0:
-        block = ToolCallBlock("fixture", {}, call_id=f"history-{index}")
-        block.set_result(
+        tool_block = ToolCallBlock("fixture", {}, call_id=f"history-{index}")
+        tool_block.set_result(
             f"tool line {index}\nsecond line",
             output_metadata={
                 "source": "structured",
@@ -162,7 +162,7 @@ def _append_history_fixture_block(model: TuiModel, index: int) -> None:
                 "exit_code": 0,
             },
         )
-        model.transcript.append(block)
+        model.transcript.append(tool_block)
     elif index % 5 == 0:
         model.transcript.append(UserBlock(f"history user {index}\nsecond line"))
     elif index % 3 == 0:

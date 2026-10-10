@@ -14,12 +14,11 @@ from ..runtime.factory import (
     create_agent_config,
     policy_for_config,
 )
-from ..runtime.extensions import RuntimeExtensions
 from ..session.factory import create_agent_session, create_session_manager
-from codeagent.tools.shared import ToolResourceLimits
+from .host import TuiAssemblerHost
 
 
-class TuiConfigMixin:
+class TuiConfigMixin(TuiAssemblerHost):
     def _ensure_subagent_runner(self) -> Any:
         if getattr(self, "subagent_runner", None) is None:
             from ..subagent.factory import create_serial_subagent_runner

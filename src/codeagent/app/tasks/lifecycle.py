@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import asyncio
 
+from .host import TaskSupervisorHost
 from .modes import TaskMode
-from .verification.models import TaskStatus, WorkspaceDiff
+from .verification.models import TaskStatus, WorkspaceDiff, WorkspaceSnapshot
 
 from .results import TaskEvent, TaskPhase, TaskResult
 
 
-class TaskLifecycleMixin:
+class TaskLifecycleMixin(TaskSupervisorHost):
     async def run(
         self,
         text: str,
@@ -50,7 +51,7 @@ class TaskLifecycleMixin:
 
     async def _verify_changes(
         self,
-        baseline: object,
+        baseline: WorkspaceSnapshot,
         diff: WorkspaceDiff,
         mode: TaskMode,
         verify_command: str | None,

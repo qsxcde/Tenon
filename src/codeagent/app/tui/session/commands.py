@@ -6,12 +6,13 @@ import shlex
 
 from codeagent.app.session_recovery import format_recovery_report
 from codeagent.session.persistence.errors import SessionRecoveryError
+from ..commands.host import TuiAppHost
 from ..commands.parser import Command
 from codeagent.session.navigation.tree import SessionNode, build_tree
 from codeagent.session.persistence import SessionQuery
 
 
-class SessionCommandsMixin:
+class SessionCommandsMixin(TuiAppHost):
     def _cmd_name(self, cmd: Command) -> None:
         current = self._manager.current
         if current is None:

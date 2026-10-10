@@ -6,6 +6,7 @@ from typing import Any
 
 from codeagent.core.contracts.events import AgentEvent, EventType
 
+from .host import TuiModelHost
 from ..presentation.blocks import SubagentBlock
 
 _MAX_SUBAGENT_BLOCKS = 64
@@ -14,7 +15,7 @@ _ACTIVE_STATUSES = frozenset(
 )
 
 
-class SubagentEventMixin:
+class SubagentEventMixin(TuiModelHost):
     """把父级 Subagent 事件映射为独立块，不触碰父 runtime。"""
 
     @property

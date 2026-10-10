@@ -133,7 +133,8 @@ def _emit_tool_end(
     *,
     synthetic_cancelled: bool = False,
 ) -> None:
-    output_metadata = result.output_metadata.to_dict()
+    metadata = result.output_metadata
+    output_metadata = metadata.to_dict() if metadata is not None else {}
     emit(
         AgentEvent(
             EventType.TOOL_EXECUTION_END,

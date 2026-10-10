@@ -20,6 +20,9 @@ from .subagent_results import (
 
 __all__ = ["SubagentResult"]
 
+#: 校验函数按 ``item_type`` 窄化返回元素类型,供调用方直接访问字段。
+ResultItemT = TypeVar("ResultItemT")
+
 
 @dataclass(frozen=True)
 class SubagentResult:
@@ -130,9 +133,9 @@ class SubagentResult:
 def _result_tuple(
     value: object,
     name: str,
-    item_type: type[object],
+    item_type: type[ResultItemT],
     max_items: int | None,
-) -> tuple[object, ...]:
+) -> tuple[ResultItemT, ...]:
     if not isinstance(value, (list, tuple)):
         raise SubagentContractError(f"{name} must be a list or tuple", code="invalid_result")
     if max_items is not None and len(value) > max_items:

@@ -124,7 +124,7 @@ def _parse_record(m: dict) -> ModelSpec | None:
         context_window=context_window,
         tool_calling=tool_calling,
         prompt_cache=prompt_cache,
-        aliases=aliases,
+        aliases=tuple(aliases),
     )
 
 

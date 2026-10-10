@@ -233,7 +233,7 @@ class SessionStore(Protocol):
 
     def delete(self, session_id: str) -> None: ...
 
-    def load_messages(self, session_id: str) -> list[Message]: ...
+    def load_messages(self, session_id: str) -> builtins.list[Message]: ...
 
     def load_context(self, session_id: str) -> CompactionState:
         """重构压缩后的上下文状态:最新摘要 + 保留消息(无压缩 = 全量)。"""
@@ -243,7 +243,7 @@ class SessionStore(Protocol):
     def commit_turn(
         self,
         session_id: str,
-        messages: list[Message],
+        messages: builtins.list[Message],
         usage: UsageStats,
         *,
         context_tokens: int | None,
@@ -277,7 +277,7 @@ class SessionStore(Protocol):
 
     def append_subagent_record(self, session_id: str, record: SubagentRunRecord) -> None: ...
 
-    def load_subagent_records(self, session_id: str) -> list[SubagentRunRecord]: ...
+    def load_subagent_records(self, session_id: str) -> builtins.list[SubagentRunRecord]: ...
 
     def fork(self, session_id: str, target_message_id: str, new_session_id: str) -> SessionRef:
         """从既有会话分叉新会话(session-fork,对齐 Pi createBranchedSession)。

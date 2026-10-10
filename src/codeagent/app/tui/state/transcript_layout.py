@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
-from ..presentation.primitives import RichLine
+from .transcript_host import TranscriptHost
+from ..presentation.primitives import Component, RichLine
 
 
-class TranscriptLayoutMixin:
+class TranscriptLayoutMixin(TranscriptHost):
     """将块布局、缓存和可见窗口算法从 Transcript 容器中分离。"""
+
+    @property
+    def cache_rows(self) -> int:
+        """Return the number of cached RichLine rows without exposing content."""
+        return sum(len(lines) for lines in self._layout_cache.values())
 
     def _cache_key(self, block, width: int) -> tuple[int, int, int]:
         token = self._layout_index.token_for(block)
@@ -133,7 +139,7 @@ class TranscriptLayoutMixin:
     ) -> list[RichLine]:
         visible_end = start + height
         entries = self._layout_index.entries_from(width, start, visible_end)
-        visible_pairs: list[tuple[int, RichLine, object | None]] = []
+        visible_pairs: list[tuple[int, RichLine, Component | None]] = []
         self.layout_index = []
         self._range_starts = []
         for record, block_start, block_end, has_separator in entries:
@@ -168,7 +174,7 @@ class TranscriptLayoutMixin:
         self._capture_anchor(width)
         return visible
 
-    def render(self, width: int, height: int, transient=None) -> list[RichLine]:
+    def render(self, width: int, height: int = 0, transient=None) -> list[RichLine]:
         """只物化视口及 overscan 范围内的块，维护行到块映射。"""
         height = max(0, height)
         width = max(1, width)

@@ -198,7 +198,7 @@ class SessionRuntime(RuntimeEventMixin, SessionExecutionMixin):
             return self.last_outcome
         if isinstance(outcome, RunOutcome):
             resolved = outcome
-            target = outcome.phase
+            target: RunPhase | None = outcome.phase
         else:
             target = outcome
             resolved = RunOutcome(

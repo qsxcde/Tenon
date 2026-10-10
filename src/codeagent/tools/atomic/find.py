@@ -129,7 +129,7 @@ def find_files(
     return results
 
 
-class FindTool(AtomicTool):
+class FindTool(AtomicTool[FindArgs]):
     name = "find"
     description = "按 glob 模式查找文件;支持 ** 递归,返回相对路径,自动跳过噪声目录。"
     Args = FindArgs

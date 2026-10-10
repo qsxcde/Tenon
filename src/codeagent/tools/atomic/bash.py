@@ -77,7 +77,7 @@ def _semantically_ok(exit_code: int, command: str) -> bool:
     return _last_segment_first_token(command) in SEMANTIC_OK_PREFIXES
 
 
-class BashTool(AtomicTool):
+class BashTool(AtomicTool[BashArgs]):
     name = "bash"
     description = (
         "执行 shell 命令并返回输出与退出码;默认超时 120s;"
@@ -114,7 +114,8 @@ class BashTool(AtomicTool):
         command = args.command.strip()
         if not command:
             raise ValueError("命令为空")
-        hit = _dangerous_hit(command) or _dangerous_intent(command, self._cwd)
+        cwd = os.fspath(self._cwd) if self._cwd is not None else None
+        hit = _dangerous_hit(command) or _dangerous_intent(command, cwd)
         if hit is not None:
             raise ValueError(f"命令命中危险模式,已拒绝执行: {hit}\n命令: {command}")
         return command, self._timeout(args)

@@ -59,12 +59,12 @@ class PackageManager:
                 continue
         return records
 
-    def list(self, scope: str | None = None) -> list[PackageRecord]:
+    def list(self, scope: str | None = None) -> builtins.list[PackageRecord]:
         scopes = [scope] if scope else ["user", "project"]
         records = [record for selected in scopes for record in self._records(selected)]
         return sorted(records, key=lambda item: (item.scope, item.package_id))
 
-    def diagnostics(self, scope: str | None = None) -> list[PackageDiagnostic]:
+    def diagnostics(self, scope: str | None = None) -> builtins.list[PackageDiagnostic]:
         scopes = [scope] if scope else ["user", "project"]
         diagnostics: list[PackageDiagnostic] = []
         for selected in scopes:
@@ -222,5 +222,5 @@ class PackageManager:
         if backup.exists():
             _remove_path(backup)
 
-    def reload(self) -> list[PackageRecord]:
+    def reload(self) -> builtins.list[PackageRecord]:
         return self.list()

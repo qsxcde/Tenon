@@ -8,10 +8,11 @@ import inspect
 from codeagent.app.errors.reporting import report_unexpected_error
 from codeagent.app.skills.models import Skill
 from codeagent.app.skills.prompt import format_skill_invocation
+from .host import TuiAppHost
 from .parser import Command
 
 
-class TuiSkillCommandCoordinator:
+class TuiSkillCommandCoordinator(TuiAppHost):
     def _cmd_skills(self, cmd: Command) -> None:
         if not cmd.args:
             self.model.append_info(self._compact_skills_text() if self._skills else "技能: (无)")
@@ -118,8 +119,11 @@ class TuiSkillCommandCoordinator:
         )
 
     async def _run_package_action(self, action: str, args: tuple[str, ...]) -> None:
+        package_action = self._package_action
+        if package_action is None:
+            return
         try:
-            result = await asyncio.to_thread(self._package_action, action, args)
+            result = await asyncio.to_thread(package_action, action, args)
             result = await result if inspect.isawaitable(result) else result
         except Exception as exc:
             self.model.append_info(report_unexpected_error("Package 操作", exc))
@@ -128,8 +132,11 @@ class TuiSkillCommandCoordinator:
         self._schedule_render()
 
     def _apply_package_action(self, action: str, args: tuple[str, ...]) -> None:
+        package_action = self._package_action
+        if package_action is None:
+            return
         try:
-            message = self._package_action(action, args)
+            message = package_action(action, args)
         except Exception as exc:
             self.model.append_info(report_unexpected_error("Package 操作", exc))
             return

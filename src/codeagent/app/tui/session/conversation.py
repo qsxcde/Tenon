@@ -8,13 +8,14 @@ from typing import Any
 from codeagent.app.errors.reporting import report_unexpected_error
 from codeagent.app.tasks.modes import TaskMode
 from codeagent.app.tasks.supervisor import TaskEvent, TaskPhase, TaskSupervisor
+from ..commands.host import TuiAppHost
 from ..commands.parser import Command
 from ..presentation.primitives import Span
 from ..presentation.theme import ACCENT, DIM, ERROR, WARNING
 from codeagent.core.contracts.events import AgentEvent, EventType
 
 
-class TuiConversationCoordinator:
+class TuiConversationCoordinator(TuiAppHost):
     def _on_confirmation_response(self, approved: bool) -> None:
         """确认条 y/n 响应:反馈会话确认队列并收起确认条。
 

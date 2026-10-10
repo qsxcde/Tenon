@@ -8,11 +8,12 @@ from codeagent.core.contracts.messages import CleanupStatus, ToolOutputMetadata
 from codeagent.core.contracts.tool_status import ToolLifecycleStatus
 
 from ..output import OutputBuffer, OutputMetadata
+from .host import ToolBlockHost
 
 __all__ = ["ToolLifecycleMixin"]
 
 
-class ToolLifecycleMixin:
+class ToolLifecycleMixin(ToolBlockHost):
     """为工具展示块提供单向、幂等的生命周期状态迁移。"""
 
     def _set_cleanup_status(self, value: Any, uncertain: bool = False) -> None:

@@ -8,7 +8,8 @@ from typing import Any, Iterator
 
 from codeagent.core.contracts.messages import Message
 from codeagent.session.persistence.codec import _dict_to_message, _validate_header
-from codeagent.session.persistence.models import CompactionState, SessionRef
+from codeagent.session.persistence.jsonl.host import JsonlStoreHost
+from codeagent.session.persistence.models import CompactionState
 from codeagent.session.persistence.subagent_records import (
     SubagentRunRecord,
     fold_records,
@@ -16,7 +17,7 @@ from codeagent.session.persistence.subagent_records import (
 )
 
 
-class JsonlReadingMixin:
+class JsonlReadingMixin(JsonlStoreHost):
     """Stream messages and derived state from a JSONL session file."""
 
     def _iter_entries(self, path: Path) -> Iterator[dict[str, Any]]:
@@ -80,7 +81,7 @@ class JsonlReadingMixin:
         kept = (
             self.load_messages(session_id) if not cut else self._load_messages_from_cut(path, cut)
         )
-        if cut and isinstance(kept, tuple):
+        if isinstance(kept, tuple):
             messages, found = kept
             kept = messages if found else self.load_messages(session_id)
         return CompactionState(

@@ -5,10 +5,11 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 
+from .transcript_host import TranscriptHost
 from ..presentation.primitives import RichLine
 
 
-class ProgressiveTranscriptMixin:
+class ProgressiveTranscriptMixin(TranscriptHost):
     """在可见窗口准备期间把控制权让回事件循环。"""
 
     async def render_progressive(

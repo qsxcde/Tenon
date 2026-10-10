@@ -7,11 +7,14 @@ import os
 import threading
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from codeagent.session.persistence.codec import _derive_title
 from codeagent.session.persistence.index_validation import validate_index
 from codeagent.session.persistence.models import SessionRef
+
+if TYPE_CHECKING:
+    from codeagent.session.persistence.locking import PathLock
 
 _INDEX_VERSION = 1
 
@@ -23,7 +26,7 @@ class SessionIndex:
         self,
         directory: Path,
         entry_iter: Callable[[Path], Iterator[dict[str, Any]]],
-        lock_for: Callable[[str | Path], threading.RLock],
+        lock_for: Callable[[str | Path], PathLock],
         chmod_private: Callable[[Path], None],
         private_dir: Callable[[], None],
     ) -> None:

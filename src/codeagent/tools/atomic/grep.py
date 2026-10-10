@@ -51,7 +51,9 @@ def _glob_match(glob: str | None, name: str, rel: str | None = None) -> bool:
         return True
     if fnmatch.fnmatch(name, glob):
         return True
-    return bool(rel) and fnmatch.fnmatch(rel, glob)
+    if not rel:
+        return False
+    return fnmatch.fnmatch(rel, glob)
 
 
 def _iter_target_files(ops, target, glob: str | None):
@@ -204,11 +206,11 @@ def grep_files(
             lines_out.extend(file_lines)
         return lines_out, total_matches >= limit
     else:
-        matcher = re.compile(re.escape(pattern) if literal else pattern, flags)
-        return _grep_str(ops, target, matcher, glob, context, limit)
+        str_matcher = re.compile(re.escape(pattern) if literal else pattern, flags)
+        return _grep_str(ops, target, str_matcher, glob, context, limit)
 
 
-class GrepTool(AtomicTool):
+class GrepTool(AtomicTool[GrepArgs]):
     name = "grep"
     description = "在目录/文件中按正则或字面量搜索;返回 路径:行号: 内容,支持上下文行,自动跳过噪声目录与二进制文件。"
     Args = GrepArgs

@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from .host import TuiModelHost
 from ..presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
 from ..presentation.primitives import _visible_user_content
 
 
-class ModelHistoryMixin:
+class ModelHistoryMixin(TuiModelHost):
     """把持久化消息转换成当前模型的可见块。"""
 
     def hydrate_history(
@@ -60,12 +61,12 @@ class ModelHistoryMixin:
         self._assistant = None
         for call in getattr(message, "tool_calls", None) or []:
             name, args, call_id = self._tool_call_fields(call)
-            block = ToolCallBlock(name, args, call_id=call_id)
-            self.transcript.append(block)
-            self._pending_tools.append(block)
-            if block.call_id:
-                self._pending_tools_by_id[block.call_id] = block
-                self._tool_blocks_by_id[block.call_id] = block
+            tool_block = ToolCallBlock(name, args, call_id=call_id)
+            self.transcript.append(tool_block)
+            self._pending_tools.append(tool_block)
+            if tool_block.call_id:
+                self._pending_tools_by_id[tool_block.call_id] = tool_block
+                self._tool_blocks_by_id[tool_block.call_id] = tool_block
 
     @staticmethod
     def _tool_call_fields(call: Any) -> tuple[str, dict[str, Any], str | None]:

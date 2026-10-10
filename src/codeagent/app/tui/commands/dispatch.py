@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from codeagent.app.errors.reporting import report_unexpected_error
+from .host import TuiAppHost
 from .parser import Command
 
 
-class TuiCommandDispatcher:
+class TuiCommandDispatcher(TuiAppHost):
     def _dispatch_command(self, cmd: Command) -> None:
         handler = {
             "help": self._cmd_help,

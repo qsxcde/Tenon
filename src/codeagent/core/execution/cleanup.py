@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import inspect
+from collections.abc import Awaitable
 from dataclasses import dataclass
+from typing import cast
+
 from codeagent.core.contracts.messages import CleanupStatus
 from codeagent.core.execution.state import ToolOperation
 from codeagent.core.contracts.ports import AgentTool, ToolCleanupPort
@@ -58,7 +61,12 @@ class CleanupTracker:
         operation.cleanup_status = CleanupStatus.PENDING
         if isinstance(tool, ToolCleanupPort):
             try:
-                value = tool.cleanup(operation.operation_id)
+                # ``ToolCleanupPort`` 声明为 async,但 ``runtime_checkable`` 判定
+                # 只看方法存在,同步实现也会进来;按历史运行时契约同时接受两种形态。
+                value = cast(
+                    "Awaitable[bool | None] | bool | None",
+                    tool.cleanup(operation.operation_id),
+                )
                 if inspect.isawaitable(value):
                     value = await value
                 if value is False:

@@ -37,7 +37,7 @@ class McpArgs(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class McpTool(AtomicTool):
+class McpTool(AtomicTool[McpArgs]):
     """把 MCP server 的工具适配为原子工具(同步桥)。"""
 
     Args: ClassVar[type[BaseModel]] = McpArgs

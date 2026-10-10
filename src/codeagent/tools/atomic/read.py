@@ -28,7 +28,7 @@ class ReadArgs(BaseModel):
     limit: int | None = Field(None, description="最多读取的行数,缺省 2000")
 
 
-class ReadTool(AtomicTool):
+class ReadTool(AtomicTool[ReadArgs]):
     name = "read"
     description = "读取文件内容;支持 offset/limit 分页,大文件自动截断并标记。"
     Args = ReadArgs

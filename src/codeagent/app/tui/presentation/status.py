@@ -52,7 +52,7 @@ class StatusBar(Component):
         self.effort = ""
         self.cwd = ""
         #: 组合根提供的模型能力声明;None/字段 None 均表示未知,不等价于不可用。
-        self.model_capabilities = None
+        self.model_capabilities: object | None = None
         #: 最近一次请求的输入 token;None = 尚未收到 provider usage。
         self.context_tokens: int | None = None
         #: 上下文窗口上限;None = 装配层尚未提供上下文元数据。

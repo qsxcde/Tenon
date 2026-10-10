@@ -7,12 +7,13 @@ from typing import Any
 from codeagent.app.context_diagnostics import format_context_diagnostics
 from codeagent.core.context.diagnostics import ContextDiagnostics
 
+from .host import TuiAppHost
 from .parser import Command
 from .model_capabilities import append_model_capability_lines
 from ..state.runtime import phase_label
 
 
-class TuiStatusCommandCoordinator:
+class TuiStatusCommandCoordinator(TuiAppHost):
     """只负责把应用状态投影为 `/status` 文本。"""
 
     def _cmd_status(self, cmd: Command) -> None:

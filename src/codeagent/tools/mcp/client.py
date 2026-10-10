@@ -37,7 +37,7 @@ DEFAULT_CALL_TIMEOUT = 60.0
 class McpServerClient:
     """一个 MCP server 的客户端壳(后台线程 + SDK 会话)。"""
 
-    def __init__(self, server_name: str, params: StdioServerParameters) -> None:
+    def __init__(self, server_name: str, params: StdioServerParameters | McpServerSpec) -> None:
         self._name = server_name
         self._params = params
         self._loop: asyncio.AbstractEventLoop | None = None

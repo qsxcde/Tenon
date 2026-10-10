@@ -21,7 +21,7 @@ class WriteArgs(BaseModel):
     content: str = Field(description="写入的完整内容(覆盖已有文件)")
 
 
-class WriteTool(AtomicTool):
+class WriteTool(AtomicTool[WriteArgs]):
     name = "write"
     description = "创建新文件或完整覆盖已有文件;父目录不存在时自动创建;统一 LF 换行。"
     Args = WriteArgs

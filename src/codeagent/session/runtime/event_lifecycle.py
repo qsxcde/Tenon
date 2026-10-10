@@ -10,10 +10,11 @@ from codeagent.core.contracts.events import (
     EventType,
 )
 from codeagent.session.runtime.event_mapper import EventMapper
+from codeagent.session.runtime.host import SessionRuntimeHost
 from codeagent.session.runtime.state import RunPhase
 
 
-class RuntimeEventMixin:
+class RuntimeEventMixin(SessionRuntimeHost):
     """Translate core events and advance the runtime state machine."""
 
     def _handle_event(self, event: AgentEvent, run_id: str) -> None:

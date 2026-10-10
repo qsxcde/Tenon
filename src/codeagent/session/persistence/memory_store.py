@@ -87,7 +87,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
         self._subagent_records.pop(session_id, None)
         self._compactions = [(sid, entry) for sid, entry in self._compactions if sid != session_id]
 
-    def load_messages(self, session_id: str) -> list[Message]:
+    def load_messages(self, session_id: str) -> builtins.list[Message]:
         if session_id not in self._sessions:
             raise ValueError(f"会话不存在: {session_id}")
         return list(self._messages[session_id])
@@ -128,7 +128,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
     def commit_turn(
         self,
         session_id: str,
-        messages: list[Message],
+        messages: builtins.list[Message],
         usage: UsageStats,
         *,
         context_tokens: int | None,
@@ -212,7 +212,7 @@ class MemoryStore(MemoryRecoveryMixin, MemoryMetadataMixin):
             raise TypeError("record must be a SubagentRunRecord")
         self._subagent_records.setdefault(session_id, []).append(record)
 
-    def load_subagent_records(self, session_id: str) -> list[SubagentRunRecord]:
+    def load_subagent_records(self, session_id: str) -> builtins.list[SubagentRunRecord]:
         if session_id not in self._sessions:
             raise ValueError(f"会话不存在: {session_id}")
         return fold_records(self._subagent_records.get(session_id, ()))

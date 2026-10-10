@@ -133,7 +133,7 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
                 if output is not None and output.source != "legacy" and output.exit_code is not None
                 else _summarize_result(self.name, self.result)
             )
-            if self.output_buffer is not None:
+            if output is not None:
                 if output.exit_code is not None:
                     duration = (
                         f" · {output.duration_ms / 1000:.1f}s"

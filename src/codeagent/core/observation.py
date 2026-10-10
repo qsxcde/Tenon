@@ -18,9 +18,10 @@ from codeagent.core.contracts.hooks import (
     core_event_scope_phase,
     make_hook_diagnostic,
 )
+from codeagent.core.host import AgentHost
 
 
-class LifecycleHookObservationMixin:
+class LifecycleHookObservationMixin(AgentHost):
     """Dispatch core lifecycle Hooks without coupling them to Agent control."""
 
     @property
@@ -71,7 +72,9 @@ class LifecycleHookObservationMixin:
         if exception is not None:
             self._record_hook_failure(
                 event,
-                exception,
+                # ``Future.exception()`` 静态上是 ``BaseException``;历史行为就按
+                # ``Exception`` 记录诊断,cancelled 路径已在上面短路,此处仅对齐类型。
+                cast(Exception, exception),
                 stage="await",
                 hook=hook,
                 lifecycle=lifecycle,
@@ -85,8 +88,8 @@ class LifecycleHookObservationMixin:
         stage: HookFailureStage,
         hook: LifecycleHook | None = None,
         lifecycle: LifecycleHookEvent | None = None,
-        scope: str | None = None,
-        phase: str | None = None,
+        scope: HookScope | None = None,
+        phase: HookPhase | None = None,
     ) -> None:
         self._hook_diagnostics.append(
             make_hook_diagnostic(

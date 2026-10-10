@@ -4,19 +4,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.session.constants import DEFAULT_CONTEXT_WINDOW
-from codeagent.session.compaction import CompactionPolicyConfig
 from codeagent.session.events.bus import EventBus
-from codeagent.session.persistence.models import SessionRef
+from codeagent.session.manager.host import SessionManagerHost
 from codeagent.session.session import AgentSession
 
 
-class SessionManagerRegistry:
+class SessionManagerRegistry(SessionManagerHost):
     """Adopt session shells and enforce the resident-session bound."""
 
     def _last_user_message_id(self, session_id: str) -> str:
-        messages = self._store.load_messages(session_id)
+        store = self._store
+        if store is None:
+            raise ValueError("分叉需要持久化会话(当前无会话存储)")
+        messages = store.load_messages(session_id)
         for message in reversed(messages):
             if message.role == "user":
                 return message.id

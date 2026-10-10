@@ -139,11 +139,6 @@ class Transcript(ProgressiveTranscriptMixin, TranscriptLayoutMixin, Component):
         return len(self._layout_cache)
 
     @property
-    def cache_rows(self) -> int:
-        """Return the number of cached RichLine rows without exposing content."""
-        return sum(len(lines) for lines in self._layout_cache.values())
-
-    @property
     def cache_line_capacity(self) -> int:
         """Return the approximate row budget used for RichLine eviction."""
         return self._cache_line_capacity

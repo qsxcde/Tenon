@@ -19,23 +19,27 @@ from pydantic import BaseModel
 
 from codeagent.tools.shared import FsOps, LocalFsOps, ToolResourceLimits
 
-__all__ = ["AtomicTool"]
+__all__ = ["AtomicTool", "AtomicToolArgs"]
+
+#: 工具输入参数模型类型;``AtomicTool`` 据此把 ``_invoke`` 的参数标注到具体 schema,
+#: 避免子类收窄 ``_invoke`` 参数类型时违反 Liskov 覆盖契约。
+AtomicToolArgs = TypeVar("AtomicToolArgs", bound=BaseModel)
 
 
-class AtomicTool:
+class AtomicTool(Generic[AtomicToolArgs]):
     """无状态原子工具的基类(由组合根适配后进入 Agent Runtime)。
 
     子类需要:
-    - 定义 ``name`` / ``description`` 类属性;
+    - 定义 ``name`` / ``description`` 类属性(也可按实例装配,如 MCP 工具);
     - 定义 ``Args``:``pydantic.BaseModel`` 子类作为输入 schema;
     - 实现 ``_invoke(args) -> str``:纯函数式执行,返回要回填给模型的结果文本;
     - ``_invoke`` 内经 ``self._cwd`` / ``self._ops`` 访问注入的依赖。
     """
 
-    #: 工具名(供模型调用的唯一标识)
-    name: ClassVar[str] = ""
-    #: 工具描述(注入模型提示词,保持精简)
-    description: ClassVar[str] = ""
+    #: 工具名(供模型调用的唯一标识;非 ClassVar,允许实例级装配)
+    name: str = ""
+    #: 工具描述(注入模型提示词,保持精简;非 ClassVar,允许实例级装配)
+    description: str = ""
     #: 输入参数 schema(pydantic 模型,转换为 JSON Schema 给模型)
     Args: ClassVar[type[BaseModel]] = BaseModel
 
@@ -74,9 +78,9 @@ class AtomicTool:
         """输入参数 schema(模型端口据此生成 function schema)。"""
         return self.Args
 
-    def invoke(self, args: BaseModel) -> str:
+    def invoke(self, args: AtomicToolArgs) -> str:
         """校验后的执行入口;子类应实现 ``_invoke``。"""
         return self._invoke(args)
 
-    def _invoke(self, args: BaseModel) -> str:  # pragma: no cover - 抽象方法
+    def _invoke(self, args: AtomicToolArgs) -> str:  # pragma: no cover - 抽象方法
         raise NotImplementedError(f"{type(self).__name__} 未实现 _invoke")

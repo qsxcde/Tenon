@@ -9,11 +9,11 @@ from collections.abc import Awaitable
 from codeagent.core.contracts.events import AgentEvent, EventType
 from codeagent.core.contracts.ports import ApprovalPolicy
 from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.session.contracts import SessionCloser
+from codeagent.session.host import AgentSessionHost
 from codeagent.session.persistence.models import UsageStats
 
 
-class SessionLifecycleMixin:
+class SessionLifecycleMixin(AgentSessionHost):
     """Keep cancellation, shutdown and configuration changes together."""
 
     async def retry(self) -> None:

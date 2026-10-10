@@ -82,7 +82,7 @@ def _error_code(exc: BaseException, phase: str) -> str:
     try:
         import httpx
     except ImportError:  # pragma: no cover - project dependency
-        httpx = None
+        httpx = cast(Any, None)
     if httpx is not None and isinstance(exc, httpx.HTTPStatusError):
         return {
             401: "model_auth",
@@ -112,7 +112,7 @@ def _provider_retryable(exc: BaseException) -> bool | None:
     return value if isinstance(value, bool) else False
 
 
-def _budget_metadata(exc: BaseException) -> dict[str, object]:
+def _budget_metadata(exc: BaseException) -> dict[str, Any]:
     default = {
         "phase": None,
         "cause_type": type(exc).__name__,

@@ -12,10 +12,14 @@ class WindowsProcessBackend:
     """为非交互式 Git Bash 创建进程组并尽力清理整棵进程树。"""
 
     def spawn_kwargs(self, cwd: str, env: dict[str, str]) -> dict[str, Any]:
+        # creationflags 是 Windows 专有常量,typeshed 按运行平台裁剪导致非 Windows
+        # 上静态不可见;cast 只影响静态视图,运行时行为不变。
+        win_subprocess = cast("Any", subprocess)
         return {
             "cwd": cwd,
             "env": env,
-            "creationflags": subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW,
+            "creationflags": win_subprocess.CREATE_NEW_PROCESS_GROUP
+            | win_subprocess.CREATE_NO_WINDOW,
         }
 
     def async_spawn_kwargs(self, cwd: str, env: dict[str, str]) -> dict[str, Any]:

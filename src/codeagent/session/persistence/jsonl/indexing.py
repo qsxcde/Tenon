@@ -6,10 +6,11 @@ from pathlib import Path
 from typing import Any
 
 from codeagent.session.persistence.codec import _derive_title
+from codeagent.session.persistence.jsonl.host import JsonlStoreHost
 from codeagent.session.persistence.models import SessionQuery, SessionRef
 
 
-class JsonlIndexingMixin:
+class JsonlIndexingMixin(JsonlStoreHost):
     """Connect the store to its rebuildable metadata index."""
 
     def _index_path(self, path: Path) -> Path:

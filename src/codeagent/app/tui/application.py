@@ -61,7 +61,7 @@ class TuiApp(
         configured_providers: set[str] | None = None,
         refresh_skills: Callable[[], tuple[list[Skill], list[str]]] | None = None,
         package_action: Callable[[str, tuple[str, ...]], str] | None = None,
-        close_runtime: Callable[[], None] | None = None,
+        close_runtime: Callable[[], Any] | None = None,
         resolve_model_capabilities: Callable[[str | None, str | None, str | None], Any]
         | None = None,
     ) -> None:

@@ -6,10 +6,11 @@ from dataclasses import replace
 from typing import Any
 
 from codeagent.session.persistence.codec import _derive_title
+from codeagent.session.persistence.memory_host import MemoryStoreHost
 from codeagent.session.persistence.models import SessionRef
 
 
-class MemoryMetadataMixin:
+class MemoryMetadataMixin(MemoryStoreHost):
     """Keep title, model and metadata projections outside the store facade."""
 
     def append_model_change(self, session_id: str, *, model: str = "", effort: str = "") -> None:

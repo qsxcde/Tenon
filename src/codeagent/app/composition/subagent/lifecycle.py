@@ -117,6 +117,8 @@ def _remember_child_sequence(active: Any, event: AgentEvent) -> None:
     value = event.child_sequence
     if value is None:
         value = metadata.get("child_sequence", metadata.get("sequence"))
+    if value is None:
+        return
     try:
         sequence = int(value)
     except (TypeError, ValueError):

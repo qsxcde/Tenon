@@ -9,6 +9,7 @@ from typing import Any
 
 from codeagent.core.contracts.messages import Message
 from codeagent.session.persistence.codec import _message_to_dict
+from codeagent.session.persistence.jsonl.host import JsonlStoreHost
 from codeagent.session.persistence.models import (
     CURRENT_VERSION,
     CompactionEntry,
@@ -19,7 +20,7 @@ from codeagent.session.persistence.models import (
 from codeagent.session.persistence.subagent_records import record_to_entry
 
 
-class JsonlWritingMixin:
+class JsonlWritingMixin(JsonlStoreHost):
     """Append records while preserving file and index consistency."""
 
     def create(

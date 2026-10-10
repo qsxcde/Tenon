@@ -18,9 +18,10 @@ from codeagent.core.contracts.hooks import (
     make_hook_diagnostic,
     session_event_phase,
 )
+from codeagent.session.host import AgentSessionHost
 
 
-class SessionEventMixin:
+class SessionEventMixin(AgentSessionHost):
     """Add session/run correlation before publishing an event."""
 
     def _on_run_event(self, event: AgentEvent, run_id: str) -> None:

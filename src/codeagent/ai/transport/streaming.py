@@ -17,9 +17,10 @@ from codeagent.ai.model.types import (
 )
 from codeagent.ai.transport.sse import SSEParser
 from codeagent.ai.transport.retry import retry_delay
+from codeagent.ai.transport.host import OpenAICompatClientHost
 
 
-class OpenAICompatStreamingMixin:
+class OpenAICompatStreamingMixin(OpenAICompatClientHost):
     """为兼容客户端提供流式请求、重试和响应聚合能力。"""
 
     async def _generate_streaming(

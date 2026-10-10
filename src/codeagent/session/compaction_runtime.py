@@ -16,13 +16,16 @@ from codeagent.session.compaction_runtime_events import (
     CompactionTrigger,
     SessionCompactionEventsMixin,
 )
+from codeagent.session.host import AgentSessionHost
 from codeagent.session.persistence.errors import (
     PersistenceCancellationUncertainError,
     PersistenceUncertainError,
 )
 
 
-class SessionCompactionMixin(SessionCompactionBudgetMixin, SessionCompactionEventsMixin):
+class SessionCompactionMixin(
+    SessionCompactionBudgetMixin, SessionCompactionEventsMixin, AgentSessionHost
+):
     """Coordinate compaction without owning the session facade constructor."""
 
     async def compact(
@@ -56,7 +59,7 @@ class SessionCompactionMixin(SessionCompactionBudgetMixin, SessionCompactionEven
         )
         if trigger != "auto":
             return self._manual_compaction_budget(decision), "manual compaction requested"
-        if decision is None or not decision.should_compact:
+        if snapshot is None or decision is None or not decision.should_compact:
             return None
         fingerprint = self._compaction_fingerprint(snapshot)
         if fingerprint == self._last_compaction_fingerprint:

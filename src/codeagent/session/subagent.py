@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from codeagent.session.host import AgentSessionHost
 from codeagent.session.persistence.models import SubagentRunRecord
 
 
-class SessionSubagentMixin:
+class SessionSubagentMixin(AgentSessionHost):
     """Expose parent-owned Subagent records without owning persistence."""
 
     @property

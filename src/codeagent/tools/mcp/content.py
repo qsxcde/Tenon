@@ -25,7 +25,7 @@ class McpCallResult:
 class McpToolInfo:
     """SDK ``tools/list`` 返回的工具元数据(适配器构造 McpTool 用)。"""
 
-    def __init__(self, name: str, description: str, input_schema: dict[str, Any]) -> None:
+    def __init__(self, name: str, description: str | None, input_schema: dict[str, Any]) -> None:
         self.name = name
         self.description = description or ""
         self.input_schema = input_schema or {}

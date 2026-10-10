@@ -124,7 +124,7 @@ def _probe_shell(
 ) -> ToolCapability:
     try:
         if resolver is not None:
-            path = resolver()
+            path: str | None = resolver()
         elif env is os.environ:
             path = resolve_bash()
         else:

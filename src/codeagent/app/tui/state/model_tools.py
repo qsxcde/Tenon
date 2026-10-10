@@ -7,11 +7,12 @@ from typing import Any
 from codeagent.core.contracts.events import AgentEvent, EventType
 from codeagent.core.contracts.tool_status import ToolLifecycleStatus
 
+from .host import TuiModelHost
 from ..presentation.blocks import CancelledBlock, ToolCallBlock
 from .tool_lifecycle import is_terminal, normalize_status
 
 
-class ToolEventMixin:
+class ToolEventMixin(TuiModelHost):
     """维护工具块、活动工具集合和结果统计。"""
 
     def _apply_tool_call(self, event: AgentEvent) -> None:
@@ -32,7 +33,8 @@ class ToolEventMixin:
         call_id = str(metadata.get("tool_call_id") or "")
         payload = event.payload if isinstance(event.payload, dict) else {}
         name = str(metadata.get("tool_name") or payload.get("name") or "?")
-        args = payload.get("args") if isinstance(payload.get("args"), dict) else {}
+        raw_args = payload.get("args")
+        args = raw_args if isinstance(raw_args, dict) else {}
         block = self._get_or_create_tool_block(call_id or None, name, args)
         default_status = {
             EventType.TOOL_QUEUED: ToolLifecycleStatus.QUEUED,
@@ -98,7 +100,7 @@ class ToolEventMixin:
         if not self._pending_tools:
             self.activity_visible = True
 
-    def _event_metadata(self, event: AgentEvent) -> dict[str, object]:
+    def _event_metadata(self, event: AgentEvent) -> dict[str, Any]:
         metadata = dict(event.metadata or {})
         for field_name in (
             "session_id",
@@ -211,7 +213,7 @@ class ToolEventMixin:
         self.activity_visible = False
 
 
-def _int_or_none(value: object) -> int | None:
+def _int_or_none(value: Any) -> int | None:
     if value is None:
         return None
     try:
@@ -220,6 +222,6 @@ def _int_or_none(value: object) -> int | None:
         return None
 
 
-def _int_or_default(value: object, default: int) -> int:
+def _int_or_default(value: Any, default: int) -> int:
     converted = _int_or_none(value)
     return default if converted is None else converted

@@ -180,7 +180,8 @@ class SubagentBlock(Component):
         elapsed = _int_or_none(metadata.get("elapsed_ms") or payload.get("elapsed_ms"))
         if elapsed is not None:
             self.elapsed_ms = elapsed
-        failure = payload.get("failure") if isinstance(payload.get("failure"), dict) else {}
+        raw_failure = payload.get("failure")
+        failure = raw_failure if isinstance(raw_failure, dict) else {}
         reason = (
             metadata.get("reason_code") or metadata.get("error_code") or failure.get("reason_code")
         )

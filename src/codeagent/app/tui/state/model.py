@@ -205,9 +205,10 @@ class TuiModel(ModelHistoryMixin, ModelEventMixin):
         if not candidates:
             return False
         block = candidates[-1]
-        changed = (
-            block.output_buffer.next_page() if delta > 0 else block.output_buffer.previous_page()
-        )
+        buffer = block.output_buffer
+        if buffer is None:
+            return False
+        changed = buffer.next_page() if delta > 0 else buffer.previous_page()
         if changed:
             block.touch()
         return changed
@@ -223,4 +224,7 @@ class TuiModel(ModelHistoryMixin, ModelEventMixin):
             candidates = [block for block in candidates if block.call_id == call_id]
         if not candidates:
             raise ValueError("没有可导出的工具输出")
-        return str(candidates[-1].output_buffer.export(path))
+        buffer = candidates[-1].output_buffer
+        if buffer is None:
+            raise ValueError("没有可导出的工具输出")
+        return str(buffer.export(path))

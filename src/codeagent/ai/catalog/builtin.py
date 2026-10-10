@@ -8,7 +8,7 @@ from codeagent.ai.catalog.spec import ModelSpec
 
 DEEPSEEK_MODELS: dict[str, ModelSpec] = {
     "deepseek-v4-flash": ModelSpec(
-        id="deepseek-v4-flash", reasoning=True, aliases=["flash"], context_window=256_000
+        id="deepseek-v4-flash", reasoning=True, aliases=("flash",), context_window=256_000
     ),
     "deepseek-v4-pro": ModelSpec(id="deepseek-v4-pro", reasoning=True, context_window=256_000),
 }
@@ -37,7 +37,7 @@ GLM_MODELS: dict[str, ModelSpec] = {
 # Kimi / Moonshot(2026-08):kimi-k3 支持 reasoning_effort,上下文 1M;
 # kimi-k2.x 系列 256K,按官方文档仅列 kimi-k2.6 与 code-highspeed 变体。
 KIMI_MODELS: dict[str, ModelSpec] = {
-    "kimi-k3": ModelSpec(id="kimi-k3", reasoning=True, aliases=["kimi"]),
+    "kimi-k3": ModelSpec(id="kimi-k3", reasoning=True, aliases=("kimi",)),
     "kimi-k2.7-code-highspeed": ModelSpec(id="kimi-k2.7-code-highspeed", reasoning=False),
     "kimi-k2.6": ModelSpec(id="kimi-k2.6", reasoning=False),
 }

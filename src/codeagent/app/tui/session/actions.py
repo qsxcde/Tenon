@@ -6,10 +6,11 @@ import asyncio
 from typing import Any
 
 from codeagent.app.errors.reporting import report_unexpected_error
+from ..commands.host import TuiAppHost
 from ..commands.parser import Command
 
 
-class SessionActionsMixin:
+class SessionActionsMixin(TuiAppHost):
     def _cmd_compact(self, cmd: Command) -> None:
         session = self._manager.current
         if session is None:

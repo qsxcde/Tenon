@@ -6,12 +6,13 @@ from typing import Any, Literal
 
 from codeagent.core.context.budget import ContextBudgetSnapshot
 from codeagent.core.contracts.events import AgentEvent, EventType
+from codeagent.session.host import AgentSessionHost
 
 
 CompactionTrigger = Literal["manual", "auto"]
 
 
-class SessionCompactionEventsMixin:
+class SessionCompactionEventsMixin(AgentSessionHost):
     """Publish stable diagnostics without owning compaction state changes."""
 
     @staticmethod

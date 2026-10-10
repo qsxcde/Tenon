@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from ..presentation.blocks import ErrorBlock, UserBlock
 from ..presentation.primitives import _visible_user_content
 from .runtime import RuntimePhase
@@ -10,7 +12,7 @@ from .model_tools import ToolEventMixin
 from .model_subagents import SubagentEventMixin
 
 
-def _token_label(value: object) -> str:
+def _token_label(value: Any) -> str:
     """Format optional token metadata for compact TUI diagnostics."""
     if value is None:
         return "—"

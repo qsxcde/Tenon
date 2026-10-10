@@ -9,8 +9,10 @@ from codeagent.app.errors.reporting import report_unexpected_error
 from codeagent.app.session_recovery import format_recovery_report
 from codeagent.session.persistence.errors import SessionRecoveryError
 
+from ..commands.host import TuiAppHost
 
-class SessionActionRunnerMixin:
+
+class SessionActionRunnerMixin(TuiAppHost):
     def _schedule_session_action(
         self,
         method_name: str,

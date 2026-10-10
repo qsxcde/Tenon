@@ -75,6 +75,8 @@ class PathLock:
             if os.name == "nt":
                 import msvcrt
 
+                # typeshed 仅在 Windows 平台导出 msvcrt 的锁 API。
+                win_lock = cast(Any, msvcrt)
                 if os.fstat(fd).st_size == 0:
                     os.write(fd, b"0")
                 os.lseek(fd, 0, os.SEEK_SET)
@@ -86,7 +88,7 @@ class PathLock:
                 try:
                     if os.name == "nt":
                         os.lseek(fd, 0, os.SEEK_SET)
-                        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+                        win_lock.locking(fd, win_lock.LK_NBLCK, 1)
                     else:
                         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                     self._fd = fd
@@ -108,8 +110,10 @@ class PathLock:
             if os.name == "nt":
                 import msvcrt
 
+                # typeshed 仅在 Windows 平台导出 msvcrt 的锁 API。
+                win_lock = cast(Any, msvcrt)
                 os.lseek(fd, 0, os.SEEK_SET)
-                msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+                win_lock.locking(fd, win_lock.LK_UNLCK, 1)
             else:
                 import fcntl
 

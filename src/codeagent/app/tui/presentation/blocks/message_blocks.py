@@ -189,7 +189,9 @@ class AssistantBlock(Component):
             return []
         renderer = self._md_renderer
         if renderer is None:
-            from codeagent.app.tui.presentation.md_renderer import md_renderer as renderer
+            from codeagent.app.tui.presentation.md_renderer import md_renderer
+
+            renderer = md_renderer
         inner = max(1, width - 2)
         layout = self._stream_layout(inner)
         for index in range(layout.stable_units, len(self._stream_units)):
@@ -207,7 +209,9 @@ class AssistantBlock(Component):
             return []
         renderer = self._md_renderer
         if renderer is None:
-            from codeagent.app.tui.presentation.md_renderer import md_renderer as renderer
+            from codeagent.app.tui.presentation.md_renderer import md_renderer
+
+            renderer = md_renderer
         inner = max(1, width - 2)
         if self._finalized:
             body = self.body

@@ -10,8 +10,7 @@ from typing import TYPE_CHECKING
 
 from codeagent.core.contracts.ports import ApprovalPolicy
 from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.session.compaction.summarizer import Summarizer
-from codeagent.session.contracts import SessionCloser
+from codeagent.session.manager.host import SessionManagerHost
 from codeagent.session.persistence.errors import SessionRecoveryError
 from codeagent.session.persistence.models import (
     RecoveryDiagnostic,
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
     from codeagent.session.session import AgentSession
 
 
-class SessionManagerOperations:
+class SessionManagerOperations(SessionManagerHost):
     """Create, switch, fork, configure and close active sessions."""
 
     def create(self, *, parent_session: str | None = None) -> AgentSession:
@@ -127,11 +126,11 @@ class SessionManagerOperations:
         return await self.create_async() if not refs else await self.switch_async(refs[-1].id)
 
     def fork(self, session_id: str, message_id: str | None = None) -> AgentSession:
-        self._ensure_fork_source(session_id)
+        store = self._ensure_fork_source(session_id)
         message_id = message_id or self._last_user_message_id(session_id)
         self._halt_current()
         new_id = str(uuid.uuid4())
-        self._store.fork(session_id, message_id, new_id)
+        store.fork(session_id, message_id, new_id)
         return self._adopt(new_id, previous_session_id=session_id)
 
     async def fork_async(
@@ -139,18 +138,19 @@ class SessionManagerOperations:
         session_id: str,
         message_id: str | None = None,
     ) -> AgentSession:
-        self._ensure_fork_source(session_id)
+        store = self._ensure_fork_source(session_id)
         message_id = message_id or self._last_user_message_id(session_id)
         await self._halt_current_and_wait()
         new_id = str(uuid.uuid4())
-        self._store.fork(session_id, message_id, new_id)
+        store.fork(session_id, message_id, new_id)
         return self._adopt(new_id, previous_session_id=session_id)
 
-    def _ensure_fork_source(self, session_id: str) -> None:
+    def _ensure_fork_source(self, session_id: str) -> SessionStore:
         if self._store is None:
             raise ValueError("分叉需要持久化会话(当前无会话存储)")
         if self._store.get(session_id) is None:
             raise ValueError(f"会话不存在: {session_id}")
+        return self._store
 
     def replace_config(
         self,
@@ -176,8 +176,9 @@ class SessionManagerOperations:
             if context_window is not None:
                 session.set_context_window(context_window)
             session.update_persistence_options(model=model, effort=effort)
-        if self._can_write_model_change():
-            self._store.append_model_change(self._current_id, model=model, effort=effort)
+        store, current_id = self._store, self._current_id
+        if store is not None and current_id is not None and self._can_write_model_change():
+            store.append_model_change(current_id, model=model, effort=effort)
 
     @staticmethod
     def _config_context_window(

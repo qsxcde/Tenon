@@ -85,7 +85,9 @@ def _positive_int(value: int, name: str) -> int:
     return value
 
 
-def _positive_number(value: Real, name: str) -> float:
+def _positive_number(value: float | int, name: str) -> float:
+    # 注解用 ``float | int`` 而非 ``numbers.Real``(mypy 不支持 numbers 抽象塔);
+    # 运行时仍按 ``Real`` 语义做完整校验。
     if (
         isinstance(value, bool)
         or not isinstance(value, Real)

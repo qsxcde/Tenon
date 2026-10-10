@@ -37,7 +37,7 @@ class EditArgs(BaseModel):
     replace_all: bool = Field(False, description="替换所有匹配项;为 False 时匹配多处会报错")
 
 
-class EditTool(AtomicTool):
+class EditTool(AtomicTool[EditArgs]):
     name = "edit"
     description = "精确替换文件中的一段文本(old_string → new_string);匹配不到或不唯一时会报错;保留文件原始换行约定与 BOM。"
     Args = EditArgs

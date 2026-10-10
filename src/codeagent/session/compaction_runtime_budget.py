@@ -14,9 +14,10 @@ from codeagent.core.context.budget import (
 from codeagent.core.contracts.messages import Message
 from codeagent.core.model.request import neutral_tool_definitions
 from codeagent.session.constants import SUMMARY_ID_PREFIX, SUMMARY_PREFIX
+from codeagent.session.host import AgentSessionHost
 
 
-class SessionCompactionBudgetMixin:
+class SessionCompactionBudgetMixin(AgentSessionHost):
     """Build model-visible budget snapshots without changing session state."""
 
     async def _next_request_budget(self) -> ContextBudgetSnapshot | None:

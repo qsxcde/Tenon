@@ -31,7 +31,8 @@ def record_from_event(
         )
     )
     payload = event.payload if isinstance(event.payload, dict) else {}
-    failure = payload.get("failure") if isinstance(payload.get("failure"), dict) else {}
+    failure_value = payload.get("failure")
+    failure = failure_value if isinstance(failure_value, dict) else {}
     reason_code = (
         _value(event, metadata, "reason_code")
         or _value(event, metadata, "error_code")
@@ -81,13 +82,13 @@ def record_from_entry(entry: dict[str, Any]) -> SubagentRunRecord:
     return SubagentRunRecord(
         id=str(entry.get("id") or ""),
         timestamp=str(entry.get("timestamp") or ""),
-        delegation_id=delegation_id,
-        parent_run_id=parent_run_id,
+        delegation_id=str(delegation_id),
+        parent_run_id=str(parent_run_id),
         child_run_id=_entry_value(entry, "childRunId", "child_run_id"),
         attempt_id=_entry_value(entry, "attemptId", "attempt_id"),
         profile=str(entry.get("profile") or ""),
         task_label=str(entry.get("taskLabel", entry.get("task_label")) or ""),
-        status=status,
+        status=str(status),
         phase=str(entry.get("phase") or ""),
         summary=str(entry.get("summary") or ""),
         reason_code=str(entry.get("reasonCode", entry.get("reason_code")) or ""),
