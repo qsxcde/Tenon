@@ -419,7 +419,7 @@ TUI:    app/main.py --tui → create_tui_app() → TuiApp.start()
 | **v0.4 Runtime 产品化** | Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 稳定性 | V4-01～V4-38 已完成实现；`0.4.0` 元数据和 `v0.4.0` 标签已固定 |
 | **v0.5 Subagent 协作** | 串行只读委派:`delegate` 工具、`explore` / `review` profile registry、显式上下文隔离、有界预算与取消、结构化结果与证据、父子事件诊断、父会话有界运行记录、TUI / headless 可观察性 | V5-00～V5-10 已完成实现与验收;新增 `subagent-contract` / `subagent-runtime` / `subagent-observability` / `subagent-run-records` 主规格;`0.5.0` 元数据与 CHANGELOG 已收口 |
 
- v0.5 当前进度:V4-01～V4-38 与 V5-00～V5-10 已全部落地；2026-10-10（Windows / Python 3.12）复核结果为 `uv run pytest -q` **1695 passed，3 skipped**（1698 collected）、快速质量集 **1525 passed，3 skipped，170 deselected**、覆盖率 **84.39%**、跨边界集合 **212 passed**、`openspec validate --specs` **24/24**、release check 以 `0.5.0` 通过（wheel/sdist、资源、敏感文件、干净安装、fake provider CLI）。上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 TUI schema v1 基线保留为历史数据，schema v2 候选由 CI 生成并人工复核，性能暂不启用硬阈值。
+ v0.5 当前进度:V4-01～V4-38 与 V5-00～V5-10 已全部落地；2026-10-10（Windows / Python 3.12）复核结果为 `uv run pytest -q` **1695 passed，3 skipped**（1698 collected）、快速质量集 **1525 passed，3 skipped，170 deselected**、覆盖率 **84.40%**、跨边界集合 **212 passed**、`openspec validate --specs` **24/24**、release check 以 `0.5.0` 通过（wheel/sdist、资源、敏感文件、干净安装、fake provider CLI）。上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 TUI schema v1 基线保留为历史数据，schema v2 候选由 CI 生成并人工复核，性能暂不启用硬阈值。
 
 ## 12. 参考
 

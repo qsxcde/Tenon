@@ -44,7 +44,7 @@ v0.5.0 完成 V5-00～V5-10，把单 Agent Runtime 扩展为可委派、可治�
 
 ### Verification
 
-- 当前 Windows / Python 3.12 全量离线测试为 `1695 passed，3 skipped`（1698 collected）；快速质量集为 `1525 passed，3 skipped，170 deselected`，覆盖率 `84.39%`（15232/18048 statements，CI 硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 `212 passed`。
+- 当前 Windows / Python 3.12 全量离线测试为 `1695 passed，3 skipped`（1698 collected）；快速质量集为 `1525 passed，3 skipped，170 deselected`，覆盖率 `84.40%`（15232/18048 statements，CI 硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 `212 passed`。
 - `uv run ruff check src tests scripts` 通过；`git diff --check` 通过。
 - `openspec validate --specs` 为 **24/24**，`openspec/changes/` 无未归档变更。
 - 包版本一致性校验通过：`pyproject.toml` 与 `codeagent.__version__` 均为 `0.5.0`。
