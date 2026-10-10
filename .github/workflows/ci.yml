@@ -43,6 +43,12 @@ jobs:
       - name: Run correctness lint
         run: uv run ruff check src tests scripts
 
+      - name: Check formatting
+        run: uv run ruff format --check src tests scripts
+
+      - name: Run type debt ratchet
+        run: uv run python scripts/type_scan.py
+
       - name: Create quality artifact directory
         run: uv run python -c "from pathlib import Path; Path('artifacts').mkdir(exist_ok=True)"
 

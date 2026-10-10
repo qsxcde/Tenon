@@ -21,6 +21,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.0.0",
     "pytest-cov>=6.0.0",
@@ -54,3 +55,10 @@ line-length = 100
 # can be introduced independently without turning the existing test suite into
 # a formatting migration.
 select = ["E9", "F821", "F841"]
+
+[tool.mypy]
+# 类型门禁按层棘轮推进，见 scripts/type_scan.py 与 docs/type-baseline.json。
+python_version = "3.12"
+ignore_missing_imports = true
+follow_imports = "silent"
+# 逐层调用时避免把被依赖模块的错误重复计入当前层。

@@ -1,0 +1,10 @@
+{
+  "layers": {
+    "ai": 14,
+    "app": 696,
+    "core": 15,
+    "session": 311,
+    "tools": 24
+  },
+  "schema_version": 1
+}
