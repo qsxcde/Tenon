@@ -6,6 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# Local and CI run outputs (coverage, junit, release check, TUI benchmarks)
+artifacts/
+
 # Virtual environments
 .venv
 
@@ -37,3 +40,7 @@ htmlcov/
 *.sqlite
 *.sqlite3
 *.db
+
+# Personal notes, not part of the project
+/interview-prep-codeagent.md
+/resume-draft.md
