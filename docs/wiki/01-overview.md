@@ -85,8 +85,9 @@ codeAgent/
 │   ├── iteration/               # v0.1 ~ v0.5 迭代记录（权威过程与验收证据）
 │   ├── benchmarks/              # TUI 性能基线与观测记录
 │   ├── wiki/                    # ← 本文档集
+│   ├── archive/                 # 历史实施计划与时点快照（只读参考）
 │   ├── type-baseline.json       # mypy 分层棘轮基线
-│   └── testing.md               # 测试分层与命令
+│   └── testing.md               # 测试分层、目录结构、marker 与命令
 ├── openspec/                    # 24 份主规格 + 已归档变更
 ├── scripts/                     # scale_scan / type_scan / layer_scan / release_check / benchmark_tui ...
 ├── src/codeagent/

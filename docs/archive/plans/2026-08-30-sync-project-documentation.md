@@ -33,7 +33,7 @@
 
 ### 3. Synchronize engineering and design documentation
 
-- Update `docs/testing.md` and `docs/test-structure.md` to use the current test and coverage facts.
+- Update `docs/testing.md`（现已包含测试目录结构）to use the current test and coverage facts.
 - Update current sections of `docs/design/architecture.md` and `docs/design/self-built-orchestration-blueprint.md` to reference v0.4 and current runtime/test state.
 - Add a superseding current-status section to `docs/design/requirements-analysis.md` and correct current-facing stale metrics while retaining dated historical appendices.
 

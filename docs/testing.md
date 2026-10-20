@@ -13,6 +13,33 @@
 
 测试改造应保持行为基线不变。测试数量变化时，需要说明是新增覆盖、拆分迁移还是删除过期兼容测试。
 
+## 测试目录结构
+
+`tests/` 按源码层级与行为域组织，与 `src/codeagent/` 的包结构对应：
+
+```text
+tests/
+├── conftest.py             # marker 分层、异步泄漏检查、平台能力探测
+├── contracts/              # 跨实现公共契约与分层 / 导入边界
+├── fixtures/               # fake model、session、TUI backend、资源 tracker
+├── ai/                     # Provider、ChatClient、transport 行为
+├── app/                    # 组合根与任务模式（container/ 为装配用例）
+├── core/                   # Agent、loop、消息与执行契约
+├── mcp/                    # MCP 子进程集成
+├── scripts/                # scripts/ 下工具脚本的单元测试
+├── session/
+│   ├── store/              # JSONL、MemoryStore、索引和记录
+│   └── behavior/           # 运行、恢复、取消、确认、压缩和用量
+├── tools/
+│   └── atomic/             # 原子文件工具和 bash
+└── tui/
+    └── view/               # 生命周期、命令、会话、确认、状态、扩展
+```
+
+历史上集中的 `tests/tui/test_view.py`、`tests/session/test_store.py`、`tests/session/test_session.py`、`tests/test_container.py` 与 `tests/tools/test_tools.py` 已按行为域拆分完毕，拆分过程与验收证据见 [`iteration/`](iteration/)。拆分验收标准保持不变：测试收集总数不减少、每个原测试名称只出现一次、共享 fixture 继续从 `tests/fixtures/` 加载、生产代码不因测试重组而修改。
+
+`tests/contracts/test_ai_import_boundaries.py`、`tests/contracts/test_runtime_boundaries.py` 和对应契约测试集中在 `tests/contracts/`。已删除入口的负向断言保留为公共契约，旧 facade/store 导出测试已迁移或删除；后续删除兼容入口时仍需同步复核契约测试。
+
 ## 应用层包布局
 
 `src/codeagent/app/` 的规范实现按职责归并到 `context/`、`errors/`、`skills/`、`tasks/`、`composition/` 和 `tui/` 子包；`main.py`、`container.py`、`config.py` 保留为根入口。已迁移的根层和 TUI 平铺模块已删除，生产代码和测试必须直接使用具体规范模块。

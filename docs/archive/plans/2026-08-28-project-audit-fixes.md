@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, pytest, asyncio, httpx, JSONL persistence, Textual adapters.
 
-**Spec:** `AGENTS.md`, `docs/code-review-2026-08-28.md`, `openspec/specs/core/spec.md`, `openspec/specs/sessions/spec.md`
+**Spec:** `AGENTS.md`, `docs/archive/snapshots/code-review-2026-08-28.md`, `openspec/specs/core/spec.md`, `openspec/specs/sessions/spec.md`
 
 ## Global Constraints
 
@@ -104,7 +104,7 @@
 ### Task 6: Delivery verification
 
 **Files:**
-- Modify: `docs/code-review-2026-08-28.md`
+- Modify: `docs/archive/snapshots/code-review-2026-08-28.md`
 - Modify: `docs/iteration/v0.4.md`
 - Test: focused suites and OpenSpec validation
 
