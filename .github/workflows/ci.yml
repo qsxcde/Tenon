@@ -56,7 +56,7 @@ jobs:
         run: >-
           uv run pytest -m "unit or contract" -q -ra --strict-markers
           --cov=codeagent
-          --cov-fail-under=77.9
+          --cov-fail-under=80
           --cov-report=term-missing
           --cov-report=xml:artifacts/coverage.xml
           --cov-report=json:artifacts/coverage.json

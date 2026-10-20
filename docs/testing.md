@@ -2,11 +2,12 @@
 
 ## 当前基线
 
-截至 2026-10-10 v0.5.0 收口复核后：
+截至 2026-10-18 复核后（macOS / Python 3.12）：
 
-- `uv run pytest -q`：**1695 passed，3 skipped**（1698 collected；2026-10-10，Windows / Python 3.12）。上一版本 v0.4 基线为 **1532 passed**（2026-08-30，macOS）。测试数量变化来自测试拆分、边界契约补充、工具生命周期状态与事件归约回归、TUI 性能指标/基线契约测试、会话标题重启/分叉回归、会话查询双后端/TUI 回归、归档删除安全回归、恢复诊断回归、会话列表索引失效回归、生命周期 Hook 契约、异常隔离、ContextTransformer 契约、RuntimeExtensions 装配、扩展契约、工具能力探测、工具资源保护、外部检索器 fallback、Provider 错误分类、安全模型重试和模型能力诊断回归，以及 v0.5 的 Subagent 契约、串行运行时、预算与取消、结构化结果、父子事件、TUI/headless 展示和有界运行记录回归。
+- `uv run pytest -q`：**1711 passed**（1711 collected，无 skipped）。历史基线：v0.5.0 发布记录的 `1695 passed，3 skipped`（1698 collected，2026-10-10，Windows）与 v0.4 的 **1532 passed**（2026-08-30，macOS）。`tests/` 自 v0.5.0 发布后仅新增上下文预算事件计数的回归用例，因此 1698→1711 的收集数差异主要来自当时的收集环境而非新增用例；本机不再出现 skipped 是因为 `tests/` 内的 `pytest.skip` 分支均以「当前平台是否有 bash / 能否创建符号链接」为条件，二者在 macOS 上均满足。测试数量变化来自测试拆分、边界契约补充、工具生命周期状态与事件归约回归、TUI 性能指标/基线契约测试、会话标题重启/分叉回归、会话查询双后端/TUI 回归、归档删除安全回归、恢复诊断回归、会话列表索引失效回归、生命周期 Hook 契约、异常隔离、ContextTransformer 契约、RuntimeExtensions 装配、扩展契约、工具能力探测、工具资源保护、外部检索器 fallback、Provider 错误分类、安全模型重试和模型能力诊断回归，以及 v0.5 的 Subagent 契约、串行运行时、预算与取消、结构化结果、父子事件、TUI/headless 展示和有界运行记录回归。
 - `test-foundation-stability` 与 `test-structure-coverage` 均已归档；当前测试结构和 `last_activity_at` 跨层契约已落地。
-- 本地最新快速质量集为 `1525 passed，3 skipped，170 deselected`（98.64s，含覆盖率插桩），覆盖率为 **84.40%**（15232/18048 statements），硬下限为 77.9%；v0.4 时点为 `1391 passed，141 deselected` / **83.61%**（2026-08-30，macOS）。跨平台测试和 CI 质量结果以对应 GitHub Actions artifact 为准。
+- 本地快速质量集为 `1562 passed，149 deselected`（31.59s，含覆盖率插桩），覆盖率为 **86.35%**（15932/18451 statements），硬下限为 **80%**。此前口径为 `1540 passed` / **84.58%** / 下限 77.9%；差异来自 marker 分层修正（见下条），而非新增实现覆盖。v0.5.0 发布时点为 `1525 passed，3 skipped，170 deselected` / **84.40%**（15232/18048 statements），v0.4 时点为 `1391 passed，141 deselected` / **83.61%**（2026-08-30，macOS）。跨平台测试和 CI 质量结果以对应 GitHub Actions artifact 为准。
+- **marker 分层修正**：`tests/conftest.py` 现在让显式主分类（模块级 `pytestmark` 或函数装饰器）优先于目录兜底。`tests/app/container/test_assembly.py` 整体标 `contract`（用 fake provider 与 stub backend，不启外部进程），其中真正启动 MCP 子进程的 `test_config_append_mcp_tools` 单独标 `integration`。效果：`app/composition/policy.py` 的覆盖率从快速口径 **20%** 升至 **84%**，三个决策分支（deny / interactive / allow）与文件边界回归从此进入每次 `quality-fast`；矩阵批次相应从 212 降到 161，移出的纯装配用例由快速批次接管。
 - package smoke 已升级为可复跑的 release check：同时检查 wheel/sdist、版本、资源、敏感文件、干净环境安装和 fake provider CLI，并输出 `release-check.json` 及完整日志。
 - TUI 性能五个标准场景均生成 JSON；仓库内 [`docs/benchmarks/tui-baseline.json`](benchmarks/tui-baseline.json) 仍是 schema v1 历史基线，不能直接与 v2 报告比较。Linux/Python 3.12 的 v2 候选基线由 CI artifact 和 `scripts/update_tui_baseline.py` 生成，历史观测详见 [`docs/benchmarks/tui-ci-2026-08-28.md`](benchmarks/tui-ci-2026-08-28.md)。
 
@@ -153,4 +154,4 @@ done
 `unavailable_metrics`，`not_measured` 则会使比较结果为 `incomplete`。1,000/5,000/10,000
 block 扩展报告用于趋势观察，不与 100 block 的正式 Linux 基线直接比较，也不作为跨机器绝对 SLO。
 
-当前 `quality-fast` 与平台矩阵之间有 25 个兼容性/平台边界测试重复执行；这不影响正确性，但需要后续决定保留边界保护还是调整 marker 分层。覆盖率硬下限当前为 77.9%。TUI 性能采用双门槛：帧/控制事件/丢帧使用硬上限，同环境渲染、恢复和内存指标使用 20% 相对回归线；普通 PR 只告警，发布候选使用 `--fail-on-regression`。
+当前 `quality-fast` 与平台矩阵之间仍有 13 个测试因同时带 `contract` 与 `platform`/`compatibility` 标签而重复执行（此前为 25 个）；这不影响正确性，边界保护可保留，若后续要消除重复需要为这些文件指定唯一主分类。覆盖率硬下限当前为 **80%**（快速口径实测 86.35%）。TUI 性能采用双门槛：帧/控制事件/丢帧使用硬上限，同环境渲染、恢复和内存指标使用 20% 相对回归线；普通 PR 只告警，发布候选使用 `--fail-on-regression`。

@@ -5,7 +5,16 @@
 
 ## [Unreleased]
 
-暂无已归入下一版本的变更。
+### Fixed
+
+- `prepare_context` 在工具结果被预算裁剪时会重复发布一次 `CONTEXT_BUDGET` 事件（两次 payload 完全相同），导致订阅方（TUI `/context`、headless `--context`）把一次请求的预算变化计成两次。现在每个请求恰好发布一个预算快照，并补充按事件计数的回归测试。
+
+### Changed
+
+- 测试 marker 分层修正：`tests/conftest.py` 现在让显式主分类（模块级 `pytestmark` 或函数装饰器）优先于目录兜底，同一目录可按真实边界细化。`tests/app/container/test_assembly.py` 整体改标 `contract`（用 fake provider 与 stub backend，不启外部进程），其中真正启动 MCP 子进程的 `test_config_append_mcp_tools` 单独标 `integration`。
+  - 效果：`app/composition/policy.py` 的快速口径覆盖率由 **20%** 升至 **84%**，deny / interactive / allow 三个安全决策分支与文件边界回归从此进入每次 `quality-fast`；矩阵批次由 212 降到 161，移出的纯装配用例由快速批次接管。
+  - 覆盖率：快速质量集由 `1540 passed` / **84.58%** 变为 `1562 passed` / **86.35%**（15932/18451 statements），CI 硬下限由 77.9% 上调至 **80%**。
+- `docs/testing.md`、`README.md`、wiki 与设计文档同步上述口径。
 
 ## [0.5.0] - 2026-10-10
 
@@ -39,12 +48,12 @@ v0.5.0 完成 V5-00～V5-10，把单 Agent Runtime 扩展为可委派、可治�
 - 规模约束成为覆盖全部生产层的可执行门禁：`scripts/scale_scan.py` 扫描 `app` / `core` / `session` / `ai` / `tools`（单文件 ≤300 行、单函数 ≤80 行），由新增的 `tests/contracts/test_scale_limits.py` 纳入 `unit or contract` 质量门禁，并收敛原先只覆盖三层的重复测试。
 - 为通过规模门禁完成按职责拆分：`tools/security/classifier.py` → `ask_rules.py`，`tools/mcp/client.py` → `content.py`，`session/persistence/jsonl/recovery.py` → `recovery_diagnostics.py`，`session/session.py` → `persistence_control.py` mixin，`app/tui/presentation/status.py` → `status_zones.py`，`app/tui/presentation/blocks/subagent.py` → `subagent_glyphs.py`。外部行为与公共接口未变。
 - 统一格式化门禁接入 CI：`ruff format`（行宽 100）成为唯一格式化方案，`quality-fast` 增加 `ruff format --check src tests scripts`；全仓按该方案完成一次格式化。
-- 类型门禁以分层棘轮方式接入：`scripts/type_scan.py` 逐层统计 mypy 错误数并与 `docs/type-baseline.json` 比较（当前基线 core 15 / ai 14 / tools 24 / session 311 / app 696），任何一层回升即失败，债务下降后用 `--update` 固化基线。dev 依赖新增 `mypy`，`pyproject.toml` 增加 `[tool.mypy]`。
+- 类型门禁以分层棘轮方式接入：`scripts/type_scan.py` 逐层统计 mypy 错误数并与 `docs/type-baseline.json` 比较（接入时基线为 core 15 / ai 14 / tools 24 / session 311 / app 696），任何一层回升即失败，债务下降后用 `--update` 固化基线。dev 依赖新增 `mypy`，`pyproject.toml` 增加 `[tool.mypy]`。
 - `AGENTS.md` 与 `docs/design/architecture.md` 同步了新的分层归属、门禁命令与豁免规则。
 
 ### Verification
 
-- 当前 Windows / Python 3.12 全量离线测试为 `1695 passed，3 skipped`（1698 collected）；快速质量集为 `1525 passed，3 skipped，170 deselected`，覆盖率 `84.40%`（15232/18048 statements，CI 硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 `212 passed`。
+- 当前 Windows / Python 3.12 全量离线测试为 `1695 passed，3 skipped`（1698 collected）；快速质量集为 `1525 passed，3 skipped，170 deselected`，覆盖率 `84.40%`（15232/18048 statements，CI 硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 `212 passed`。（**2026-10-18 复核更正**：在 macOS / Python 3.12 上重跑为全量 `1710 passed`、快速质量集 `1540 passed`、覆盖率 `84.58%`、跨边界集合 `212 passed`。全量收集数从 1698 变为 1710 而 `tests/` 自 v0.5.0 发布后未变更，说明原收集数已不可复现；上列原始数字保留为发布时点的历史记录。）
 - `uv run ruff check src tests scripts` 通过；`git diff --check` 通过。
 - `openspec validate --specs` 为 **24/24**，`openspec/changes/` 无未归档变更。
 - 包版本一致性校验通过：`pyproject.toml` 与 `codeagent.__version__` 均为 `0.5.0`。

@@ -2,7 +2,7 @@
 
 本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排（2026-08-14 起不再依赖 langgraph / langchain），采用端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
 
-`v0.5.0` · Python 3.12 · 全量离线测试 **1695 passed / 3 skipped** · 覆盖率 **84.40%** · OpenSpec **24/24**
+`v0.5.0` · Python 3.12 · 全量离线测试 **1711 passed** · 覆盖率 **86.35%** · OpenSpec **24/24**
 
 设计参考 [earendil-works/pi](https://github.com/earendil-works/pi) 的"三层协作 / 双层 loop / 事件驱动 / 会话即状态"思想。架构见 [`docs/design/architecture.md`](docs/design/architecture.md)，需求基线见 [`docs/design/requirements-analysis.md`](docs/design/requirements-analysis.md)，按版本的权威过程记录见 [`docs/iteration/`](docs/iteration/)。
 
@@ -71,10 +71,10 @@
 
 | 工具 | 作用 | 门禁位置 |
 | --- | --- | --- |
-| `pytest`（+ `asyncio` / `cov` / `timeout`） | 分标记的离线测试：`unit` `contract` `integration` `e2e` `platform` `security` `performance` `slow` `compatibility` | `quality-fast` + 跨平台矩阵 |
+| `pytest`（+ `asyncio` / `cov` / `timeout`） | 分标记的离线测试：`unit` `contract` `integration` `e2e` `platform` `security` `performance` `slow` `compatibility`；显式主分类优先于目录兜底 | `quality-fast`（覆盖率下限 80%）+ 跨平台矩阵 |
 | `ruff check` | 正确性静态检查，当前只启用 `E9` / `F821` / `F841` 阻塞级规则 | `quality-fast` |
 | `ruff format` | **唯一**格式化方案，行宽 100（不引入 Black） | `quality-fast`（`--check`） |
-| `mypy` | 类型债务分层棘轮：`scripts/type_scan.py` 比对 `docs/type-baseline.json`，只降不升（当前 core 15 / ai 14 / tools 24 / session 311 / app 696） | `quality-fast` |
+| `mypy` | 类型债务分层棘轮：`scripts/type_scan.py` 比对 `docs/type-baseline.json`，只降不升（当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22） | `quality-fast` |
 | `scripts/scale_scan.py` | 全部生产层规模门禁：单文件 ≤ 300 行、单函数 ≤ 80 行 | `unit or contract` |
 | OpenSpec CLI | 规格驱动开发与 `openspec validate --specs`（24 份主规格） | `quality-fast` |
 | `scripts/release_check.py` | wheel/sdist 构建、内容与敏感文件检查、干净环境安装、fake provider CLI 冒烟 | `package-smoke` |

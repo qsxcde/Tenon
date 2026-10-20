@@ -137,7 +137,8 @@ async def prepare_context(
         if _message_views_differ(transformed, governed):
             transformed = governed
             final_budget = await describe_context_budget(config, transformed)
-            emit(AgentEvent(EventType.CONTEXT_BUDGET, payload=final_budget))
+        # Exactly one snapshot per request: consumers must not have to
+        # de-duplicate identical budget events when tool results were cropped.
         emit(AgentEvent(EventType.CONTEXT_BUDGET, payload=final_budget))
         return transformed, final_budget
     except ContextPreparationError:

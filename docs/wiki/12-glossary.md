@@ -95,7 +95,7 @@
 | TUI 恢复后台阈值 | >1000 消息 或 >100k 字符 或 >1MB 工具输出 | `app/tui/session/restore.py` |
 | 规模门禁 | 300 行/文件、80 行/函数 | `scripts/scale_scan.py` |
 | 格式化行宽 | 100 | `pyproject.toml` |
-| 覆盖率硬下限 | 77.9% | CI `--cov-fail-under` |
+| 覆盖率硬下限 | 80% | CI `--cov-fail-under` |
 
 ## 三、位置速查：想改 X 去哪找
 

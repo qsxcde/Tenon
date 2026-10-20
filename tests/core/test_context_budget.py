@@ -627,3 +627,48 @@ async def test_budget_failure_emits_a_staged_runtime_error():
     assert error.metadata["error_code"] == "context_preparation_failed"
     assert error.metadata["phase"] == "context_preparation"
     assert error.metadata["cause_type"] == "ValueError"
+
+
+class _CroppingBudgetModel:
+    """预算极小，强制 ``govern_tool_messages`` 触发工具结果裁剪。"""
+
+    model_id = "cropping-budget"
+
+    def describe_context_budget(self, messages, tools=None):
+        return estimate_context_budget(
+            ContextBudgetInput(
+                context_window=300,
+                output_reserve=20,
+                reserve_tokens=10,
+                messages=tuple(messages),
+                window_source="catalog",
+            )
+        )
+
+    def stream(self, messages, tools=None):  # pragma: no cover - must not run
+        raise AssertionError("model stream must not run while preparing context")
+
+
+@pytest.mark.asyncio
+async def test_prepare_context_emits_exactly_one_budget_snapshot_when_cropping():
+    """回归:工具结果被裁剪后 ``prepare_context`` 曾重复发布同一次预算快照。
+
+    重复事件会让订阅方（TUI 诊断、headless ``--context``）把一次请求的
+    预算变化计成两次；预算快照应当是每个请求恰好一个。
+    """
+    from codeagent.core.model.request import prepare_context
+
+    history = [
+        Message(role="user", content="hi"),
+        Message(role="tool", content="x" * 8_000, tool_call_id="call-1"),
+    ]
+    events = []
+
+    await prepare_context(
+        AgentLoopConfig(model=_CroppingBudgetModel()),
+        history,
+        events.append,
+    )
+
+    budget_events = [event for event in events if event.type == "context_budget"]
+    assert len(budget_events) == 1

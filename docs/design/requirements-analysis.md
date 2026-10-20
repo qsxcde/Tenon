@@ -2,7 +2,7 @@
 
 > 版本: v0.4 当前代码树同步版(保留 v0.3 需求基线与历史快照)
 > 更新日期: 2026-08-30(当前状态、测试/CI 门禁和发布检查复核;正文中的历史需求分析数据保留为历史快照)
-> 编制口径: 以 `docs/design/` 下四份文档(需求分析报告 v0.1、架构设计、功能表 GAP 分析、编排自研蓝图)为需求来源综合而成,并对照 **2026-10-10 当前代码树**校准(校准明细见 §0.1、§0.2、§0.3 与附录 B)。**当前架构现状以 §0.3 + architecture.md(v0.5) 为准**。
+> 编制口径: 以 `docs/design/` 下四份文档(需求分析报告 v0.1、架构设计、功能表 GAP 分析、编排自研蓝图)为需求来源综合而成,并对照 **2026-10-18 当前代码树**校准(校准明细见 §0.1、§0.2、§0.3 与附录 B)。**当前架构现状以 §0.3 + architecture.md(v0.5) 为准**。
 > 本版本与 `requirements-analysis.md`(v0.1)的关系:本文为完整合并版,新增架构需求(AR)、数据需求(DR)、接口需求(IR)、验收标准、需求追踪矩阵等章节,并吸收功能表 GAP 分析的修订功能清单(F-01~F-28)与编排自研蓝图的演进路线。v0.1 报告已由本文完全取代并于 2026-08-13 归档删除(原文可从 git 历史提交 5b137b4 恢复)。
 
 ---
@@ -59,7 +59,7 @@
 | 安全确认环(FR-8.2 / NFR-S3) | 🔲 v0.2 | ✅ 已落地(`security-permissions`:ApprovalPolicy + tools/security.py 三档分类器,headless 缺省 fail closed) |
 | AGENTS.md 分层(F-16) | 🔲 v0.2 规划 | ✅ 已落地(`app/agents.py`,全局→项目→子目录分层注入) |
 | 平台部署 `langgraph.json`(F-24 / IR-10) | 📝 P2 | **永久调整**:随自研编排改写为 HTTP/事件订阅入口(F-27);**2026-08-22 定案:Web/HTTP 入口移出 v0.3(E12)**——平台向无真实消费者,价值被 CLI/TUI 事件流订阅覆盖,推迟远期按需重估 |
-| 测试基线(附录 B) | 336(2026-08-14) | 当前权威基线见 §0.3（2026-10-10 复核）；§0.2 记录 2026-08-30 的 v0.4 快照为 **1532 passed**（macOS）；测试零网络零密钥，跨平台结果以 CI artifact 为准 |
+| 测试基线(附录 B) | 336(2026-08-14) | 当前权威基线见 §0.3（2026-10-18 复核：**1710 passed**）；§0.2 记录 2026-08-30 的 v0.4 快照为 **1532 passed**（macOS）；测试零网络零密钥，跨平台结果以 CI artifact 为准 |
 | 解耦扫描测试(NFR-M1 / AR-4) | 已移除待恢复 | ✅ 已重写恢复(`tests/test_decoupling.py`,2026-08-14,AST 扫描 + anti-wargaming 守卫) |
 
 > 历史架构描述见 [architecture.md](./architecture.md)(当时为 v0.3);当前权威架构描述见 [architecture.md](./architecture.md)(v0.5)，迭代与验收见 `docs/iteration/v0.5.md`；历史审计修复结论见 `docs/iteration/v0.3.md` §6.5。
@@ -70,7 +70,7 @@
 - 静态检查：Ruff 已接入，首阶段阻断语法错误、未定义名称和未使用局部变量。
  - 发布前检查：CI 已配置 release check，统一验证 wheel/sdist 构建、产物内容、版本、敏感文件、干净虚拟环境安装、fake provider CLI 和内建 resources，并上传机器可读报告与完整日志。
 - 跨平台检查：CI 已配置 Ubuntu、Windows、macOS 矩阵，统一使用离线测试集；当前三平台的具体结果以对应 CI artifact 为准。
- - 覆盖率/性能：§0.2 记录的快速质量集覆盖率为 **83.61%**（2026-08-30），覆盖率硬下限为 77.9%，当前口径见 §0.3；TUI schema v1 JSON 为历史基线，schema v2 候选由 CI 生成，性能暂只告警。
+ - 覆盖率/性能：§0.2 记录的快速质量集覆盖率为 **83.61%**（2026-08-30）；覆盖率硬下限已于 2026-10-18 由 77.9% 上调至 **80%**，当前口径见 §0.3；TUI schema v1 JSON 为历史基线，schema v2 候选由 CI 生成，性能暂只告警。
 
 ---
 
@@ -84,16 +84,17 @@
 - 包版本已统一为 `0.4.0`，v0.4.0 尚未创建版本标签；发布说明已固定，正式发布前仍需在最终发布提交上重新执行 CI。
 - TUI 性能：仓库内 [`docs/benchmarks/tui-baseline.json`](../benchmarks/tui-baseline.json) 保留 schema v1 历史基线；schema v2 的 Linux/Python 3.12 候选由 CI artifact 生成并经人工复核后再提交，性能当前仍为非阻塞告警。
 
-## 0.3 当前代码树与 v0.5 验证状态(2026-10-10)
+## 0.3 当前代码树与 v0.5 验证状态(2026-10-18)
 
-> 本节覆盖并 supersede §0.2 的当前性描述；§0.2 与附录 B.5 保留为 2026-08-30 的 v0.4 快照。本节复核环境为 Windows / Python 3.12，跨平台结果仍以对应 CI artifact 为准。
+> 本节覆盖并 supersede §0.2 的当前性描述；§0.2 与附录 B.5 保留为 2026-08-30 的 v0.4 快照。本节复核环境为 macOS / Python 3.12（2026-10-18），v0.5.0 发布时点为 Windows / Python 3.12（2026-10-10）；跨平台结果仍以对应 CI artifact 为准。
 
 - v0.5 的 V5-00～V5-10 功能范围已完成实现、验收与归档：`delegate` 委派工具、`explore` / `review` profile registry、显式上下文隔离、有界预算与取消治理、结构化结果与证据回传、父子事件诊断、TUI / headless 可观察性和父会话有界 `subagent` 运行记录。
-- 本地全量离线测试：`uv run pytest -q` 为 **1695 passed，3 skipped**（1698 collected）；快速质量集（unit/contract）为 **1525 passed，3 skipped，170 deselected**，覆盖率 **84.40%**（15232/18048 statements，CI 硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 **212 passed**。
+- 本地全量离线测试：`uv run pytest -q` 为 **1711 passed**（1711 collected，无 skipped）；快速质量集（unit/contract）为 **1562 passed，149 deselected**，覆盖率 **86.35%**（15932/18451 statements，CI 硬下限 80%）；跨边界集合（integration / e2e / platform / compatibility）为 **161 passed**。v0.5.0 发布时点为 `1695 passed，3 skipped`（1698 collected）/ 快速质量集 1525 passed / 覆盖率 84.40%（15232/18048 statements），2026-10-10，Windows / Python 3.12。
+- marker 分层修正（2026-10-18）：`tests/conftest.py` 让显式主分类优先于目录兜底，`tests/app/container/test_assembly.py` 整体标 `contract`（其 MCP 子进程用例单独标 `integration`），使 `app/composition/policy.py` 的快速口径覆盖率由 20% 升至 84%，三个安全决策分支与文件边界回归进入每次 `quality-fast`；覆盖率硬下限同步由 77.9% 上调至 80%。
 - 规格与发布检查：`openspec validate --specs` 为 **24/24**（新增 `subagent-contract` / `subagent-runtime` / `subagent-observability` / `subagent-run-records`）；`openspec/changes/` 无未归档变更；`uv run ruff check src tests scripts` 通过；release check 以 `0.5.0` 通过 wheel/sdist、版本、资源、敏感文件、干净环境安装和 fake provider CLI 检查。
 - 包版本已统一为 `0.5.0`，CHANGELOG 已补齐 `[0.5.0]` 使用者条目；annotated `v0.4.0` 标签指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。
-- 架构边界复核：`src/codeagent/core/` 的 40 个模块零跨层 import（`tests/test_decoupling.py` AST 扫描在全量测试中通过）；src 下超过 300 行的生产文件仅 `tools/security/classifier.py`（310）与 `tools/mcp/client.py`（307）。
-- 已知门禁局限：Ruff 仅启用 `E9` / `F821` / `F841` 阻塞级正确性检查，Black、mypy、pyright 与完整 Ruff 规则集尚未接入 CI；TUI schema v2 正式基线仍待 CI artifact 与人工复核。
+- 架构边界复核：`src/codeagent/core/` 的 40 个模块零跨层 import（`tests/test_decoupling.py` AST 扫描在全量测试中通过）；`scripts/scale_scan.py` 扫描全部生产层，**无任何文件超过 300 行、无函数超过 80 行**（v0.5.0 收口时超限的 `tools/security/classifier.py` 310 行与 `tools/mcp/client.py` 307 行已分别拆分至 128 / 250 行）。
+- 已知门禁局限：Ruff 仅启用 `E9` / `F821` / `F841` 阻塞级正确性检查，Black 与完整 Ruff 规则集尚未接入 CI；mypy 已以分层棘轮接入 `quality-fast`（`scripts/type_scan.py` + `docs/type-baseline.json`，当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22），但 pyright 未接入；TUI schema v2 正式基线仍待 CI artifact 与人工复核。
 - 范围未变：并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件订阅、插件系统和自动化任务仍不属于当前版本。
 
 ## 1. 引言
@@ -599,7 +600,7 @@ class AgentSession:
 | 编号 | 指标 | 要求 | 验收口径 | 状态 |
 |---|---|---|---|---|
 | NFR-M1 | 分层解耦 | 跨层 import 仅发生在 `app/container.py` / `app/main.py` | `tests/test_decoupling.py` AST 强制校验(2026-08-14 重写,70 项断言) | ✅ |
- | NFR-M2 | 测试覆盖 | 核心编排层 100% 离线可测,总体覆盖率 ≥ 80% | `FakeClient` 注入;当前本地质量集覆盖率 **84.40%**，全量测试 **1695 passed，3 skipped**（§0.3，2026-10-10） | ✅（超过 80% 目标；CI 硬下限为 77.9%） |
+ | NFR-M2 | 测试覆盖 | 核心编排层 100% 离线可测,总体覆盖率 ≥ 80% | `FakeClient` 注入;当前本地质量集覆盖率 **86.35%**，全量测试 **1711 passed**（§0.3，2026-10-18，macOS / Python 3.12） | ✅（超过 80% 目标；CI 硬下限为 80%） |
 | NFR-M3 | 可替换性 | provider/工具/存储更换不动编排层 | 端口-适配器契约(`AgentLoopConfig` / `AgentClient`) | ✅ |
 | NFR-M4 | 代码规范 | 类型注解完整、中文 docstring | 分层职责单一,无循环 import | ✅ |
 | NFR-M5 | 变更影响面 | 新增 provider=1 文件;新增工具=0 处 core 改动 | AR-4 判据 | ✅ |
@@ -763,7 +764,7 @@ v0.4(✅ 已发布基线 2026-09-02): V4-01~V4-38 Runtime 可靠性+上下文治
 
 ### 12.1 全局验收基线(每个版本发布前必须满足)
 
-1. **测试无失败**:`uv run pytest -q` 当前全量基线见 §0.3（2026-10-10 复核：**1695 passed，3 skipped**，1698 collected）;核心编排层零网络、零密钥(`FakeClient`)可跑通全量;
+1. **测试无失败**:`uv run pytest -q` 当前全量基线见 §0.3（2026-10-18 复核：**1711 passed**，1711 collected）;核心编排层零网络、零密钥(`FakeClient`)可跑通全量;
 2. **解耦判据**:解耦扫描测试强制校验跨层 import 仅出现在 `app/container.py` / `app/main.py`(2026-08-14 已重写恢复);
 3. **离线可体验**:无任何 API Key 时以 `fake` provider 完整跑通"对话→工具调用→事件流"闭环;
 4. **配置隔离**:全部配置类 `extra="ignore"`,防回归测试通过;
@@ -923,8 +924,18 @@ v0.4(✅ 已发布基线 2026-09-02): V4-01~V4-38 Runtime 可靠性+上下文治
 - 静态检查与版本一致性：`uv run ruff check src tests scripts` 通过；`pyproject.toml` 与 `codeagent.__version__` 均为 `0.5.0`。
 - release check（本地复跑）：wheel 与 sdist 构建、成员与内建资源检查、敏感文件检查、干净环境安装和 fake provider CLI（`cli_returncode: 0`）均为 `passed`。
 - 发布状态：V5-00～V5-10 功能与主规格已落地，包版本已统一为 `0.5.0`，CHANGELOG 已补齐 `[0.5.0]` 使用者条目；`v0.5.0` annotated 标签与发布产物推送由发布流程执行。
-- 遗留待办：TUI schema v2 正式基线仍待 CI artifact 与人工复核后替换；类型检查（mypy / pyright）与统一格式化（Black）尚未接入 CI 门禁。
+- 遗留待办：TUI schema v2 正式基线仍待 CI artifact 与人工复核后替换；pyright 尚未接入 CI 门禁（统一格式化已由 `ruff format` 接入，mypy 已由 `scripts/type_scan.py` 分层棘轮接入）。
+
+### B.7 2026-10-18 当前代码树基线（v0.5.0 发布后复核）
+
+- 复核环境：macOS / Python 3.12。
+- 全量：`uv run pytest -q` **1711 passed**（1711 collected，无 skipped）。
+- 快速质量集（unit / contract）：**1562 passed，149 deselected**（31.59s，含覆盖率插桩）；覆盖率 **86.35%**（15932/18451 statements），CI 硬下限为 80%。
+- 跨边界集合（integration / e2e / platform / compatibility）：**161 passed**（13.64s）；从 212 降到 161 是因为 26 个纯装配用例改由快速批次接管，真正需要 MCP 子进程的用例仍留在矩阵批次。
+- 门禁：`ruff check` / `ruff format --check`（509 files）/ `scripts/type_scan.py` / `scripts/scale_scan.py`（300 行文件、80 行函数）全部通过；`openspec validate --specs` **24/24**。
+- 类型基线实际值：ai 0 / core 0 / tools 0 / session 5 / app 17（合计 22）。`README.md`、`CHANGELOG.md` 与本文档此前的「core 15 / ai 14 / tools 24 / session 311 / app 696」为棘轮接入时的历史基线，已于本次复核同步更正。
+- 规模现状：`src/` 下**无**超过 300 行的生产文件，B.6 中记录的 `tools/security/classifier.py`（310）与 `tools/mcp/client.py`（307）已拆分至 128 / 250 行。
 
 ---
 
-*本文档合并自 docs/design/ 四份文档并经 2026-08-13 代码实测校准(2026-08-21 追加 §0.1 勘误与附录 B.3 复核，2026-08-30 追加 §0.2 与附录 B.5，2026-10-10 追加 §0.3、§12.6 与附录 B.6);对原文的引用以编号(R/A/G/B/C)标注于附录 A。架构现状以 §0.3 + architecture.md(v0.5) 为准。*
+*本文档合并自 docs/design/ 四份文档并经 2026-08-13 代码实测校准(2026-08-21 追加 §0.1 勘误与附录 B.3 复核，2026-08-30 追加 §0.2 与附录 B.5，2026-10-10 追加 §0.3、§12.6 与附录 B.6，2026-10-18 追加附录 B.7 并校正 §0.3 与 NFR-M2);对原文的引用以编号(R/A/G/B/C)标注于附录 A。架构现状以 §0.3 + architecture.md(v0.5) 为准。*

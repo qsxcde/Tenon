@@ -21,10 +21,24 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     主分类默认是 ``unit``，只有明确跨越运行时边界的测试才升级为
     contract/integration/e2e/performance。这样新增测试不会因为忘记写
     marker 而从分层命令中消失；平台和安全标签作为附加分类保留。
+
+    作者在模块级（``pytestmark``）或函数上显式标注的主分类优先于目录兜底，
+    因此同一目录内可以按实际边界细化：不启动外部进程的装配测试标
+    ``contract`` 进入快速质量集，真正起子进程的用例单独标 ``integration``。
     """
+    primary_marks = {
+        "unit": pytest.mark.unit,
+        "contract": pytest.mark.contract,
+        "integration": pytest.mark.integration,
+        "e2e": pytest.mark.e2e,
+        "performance": pytest.mark.performance,
+    }
     for item in items:
         path = item.path.as_posix().lower()
         name = item.name.lower()
+
+        if any(item.get_closest_marker(mark) is not None for mark in primary_marks):
+            continue
 
         if path.endswith("tests/tui/test_performance.py") or "performance" in name:
             primary = "performance"

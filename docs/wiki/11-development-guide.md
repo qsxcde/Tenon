@@ -41,7 +41,7 @@ uv run codeagent --tui             # 交互式终端
 | 格式化 | `uv run ruff format --check src tests scripts` | 唯一方案（不引入 Black），行宽 100 |
 | 类型棘轮 | `uv run python scripts/type_scan.py` | mypy 按 core/ai/tools/session/app 五层统计，与 `docs/type-baseline.json` 比较，回升即失败；债务下降后用 `--update` 固化基线 |
 | 规模门禁 | `uv run python scripts/scale_scan.py` | 生产层单文件 ≤ 300 行、单函数 ≤ 80 行；豁免仅在 `COMPATIBILITY_EXCEPTIONS` 逐项登记 |
-| 分层测试 | `uv run pytest -m "unit or contract" -q` | 快速质量集；CI 覆盖率硬下限 **77.9%** |
+| 分层测试 | `uv run pytest -m "unit or contract" -q` | 快速质量集；CI 覆盖率硬下限 **80%**（实测 86.35%） |
 | 发布检查 | `uv run python scripts/release_check.py --dist-dir artifacts/dist --output artifacts/release-check.json` | 构建 wheel/sdist、版本/资源/敏感文件检查、干净环境安装 + fake provider CLI 验证 |
 
 禁止为通过门禁放宽配置或扩大基线。完整 Ruff 规则集与 pyright 尚未接入 CI；接入任一门禁时必须同步更新 `pyproject.toml`、CI 与 `AGENTS.md`。
@@ -96,7 +96,7 @@ uv run codeagent --tui             # 交互式终端
 
 | 任务 | 内容 |
 | --- | --- |
-| `quality-fast` | Ruff、unit/contract 测试、覆盖率（`--cov-fail-under=77.9`）、版本一致性、补丁格式与 OpenSpec 校验 |
+| `quality-fast` | Ruff、unit/contract 测试、覆盖率（`--cov-fail-under=80`）、版本一致性、补丁格式与 OpenSpec 校验 |
 | `test-matrix` | Ubuntu / Windows / macOS 上执行 integration/e2e/platform/compatibility（统一 fake provider；失败保留 JUnit） |
 | `package-smoke` | release check：构建、产物检查、干净环境安装、CLI 与内建 resources 验证 |
 | `performance` | 离线 TUI 基准（5 场景）并上传 JSON；回归只告警，不阻断普通 PR（发布候选用 `--fail-on-regression`） |
