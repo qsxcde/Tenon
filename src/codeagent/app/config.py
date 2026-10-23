@@ -18,6 +18,14 @@ from pathlib import Path
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+#: 沙箱策略取值(与 tools/execution/sandbox.py 的 SANDBOX_POLICIES 保持同步;
+#: 分层规则禁止 app 直接 import tools,契约测试锁定两者一致)。
+SANDBOX_POLICY_CHOICES: tuple[str, ...] = (
+    "read-only",
+    "workspace-write",
+    "danger-full-access",
+)
+
 #: 固定配置目录(env 文件唯一来源,不随 CWD 变化)。
 CONFIG_DIR = Path.home() / ".codeagent"
 CONFIG_ENV_FILE: Path = CONFIG_DIR / ".env"
@@ -39,6 +47,11 @@ def extensions_dir() -> Path:
     会在导入期固化而失效。
     """
     return CONFIG_DIR / "extensions"
+
+
+def checkpoints_dir() -> Path:
+    """写前快照目录(call-time 派生,理由同上)。"""
+    return CONFIG_DIR / "checkpoints"
 
 
 #: 一次性告警标志:CWD .env 迁移提示只打一次。
@@ -256,8 +269,23 @@ class Settings(BaseSettings):
     tool_cleanup_timeout: float = 10.0
     #: 子 Agent 并发槽位;1 = 串行(默认),>1 启用有界并行。
     subagent_max_concurrency: int = 1
+    #: bash 执行沙箱策略:read-only / workspace-write / danger-full-access(默认)。
+    sandbox_policy: str = "danger-full-access"
+    #: write/edit 前是否记录文件快照(供 `codeagent undo` 回退)。
+    checkpoints_enabled: bool = True
+
+    @property
+    def checkpoints_root(self) -> Path:
+        """快照根目录(call-time 派生,测试隔离可通过 CONFIG_DIR 替换)。"""
+        return checkpoints_dir()
 
     @model_validator(mode="after")
     def _check_cwd_env(self) -> "Settings":
         warn_cwd_env()
+        if self.sandbox_policy not in SANDBOX_POLICY_CHOICES:
+            raise ValueError(
+                f"sandbox_policy 必须为 {', '.join(SANDBOX_POLICY_CHOICES)}: {self.sandbox_policy}"
+            )
+        if type(self.subagent_max_concurrency) is not int or self.subagent_max_concurrency < 1:
+            raise ValueError("subagent_max_concurrency 必须为正整数")
         return self

@@ -33,6 +33,8 @@ class ProcessRequest:
     cwd: str
     env: dict[str, str]
     timeout: float
+    #: 插在 ``"-lc"`` 之前的 argv 前缀(沙箱后端用,如 sandbox-exec/bwrap)。
+    argv_prefix: tuple[str, ...] = ()
     max_output_bytes: int = DEFAULT_MAX_BYTES
     max_output_lines: int = DEFAULT_MAX_LINES
     output_direction: str = "head"
@@ -122,7 +124,7 @@ class ProcessRunner:
         try:
             with open(out_name, "wb") as out_file, open(err_name, "wb") as err_file:
                 proc = subprocess.Popen(
-                    [request.executable, "-lc", request.command],
+                    [request.executable, *request.argv_prefix, "-lc", request.command],
                     stdout=out_file,
                     stderr=err_file,
                     **self._backend.spawn_kwargs(request.cwd, request.env),
@@ -164,6 +166,7 @@ class ProcessRunner:
             with open(out_name, "wb") as out_file, open(err_name, "wb") as err_file:
                 proc = await asyncio.create_subprocess_exec(
                     request.executable,
+                    *request.argv_prefix,
                     "-lc",
                     request.command,
                     stdout=out_file,

@@ -5,6 +5,7 @@
 """
 
 from codeagent.tools.shared.fsops import FsOps, LocalFsOps
+from codeagent.tools.shared.checkpoints import CheckpointEntry, CheckpointStore
 from codeagent.tools.shared.ignore import NOISE_DIRS, prune_noise_dirs
 from codeagent.tools.shared.mutation_queue import with_path_lock
 from codeagent.tools.shared.paths import normalize_path, resolve_to_cwd
@@ -40,6 +41,8 @@ __all__ = [
     "DEFAULT_MAX_BYTES",
     "DEFAULT_MAX_LINES",
     "FsOps",
+    "CheckpointEntry",
+    "CheckpointStore",
     "GovernedOutput",
     "GovernedText",
     "LocalFsOps",

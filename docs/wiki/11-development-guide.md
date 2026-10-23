@@ -37,8 +37,8 @@ uv run codeagent --tui             # 交互式终端
 
 | 门禁 | 命令 | 说明 |
 | --- | --- | --- |
-| 正确性静态检查 | `uv run ruff check src tests scripts` | 仅启用 `E9`（语法错误）、`F821`（未定义名）、`F841`（未使用局部变量） |
-| 格式化 | `uv run ruff format --check src tests scripts` | 唯一方案（不引入 Black），行宽 100 |
+| 正确性静态检查 | `uv run ruff check src tests evals scripts` | 仅启用 `E9`（语法错误）、`F821`（未定义名）、`F841`（未使用局部变量） |
+| 格式化 | `uv run ruff format --check src tests evals scripts` | 唯一方案（不引入 Black），行宽 100 |
 | 类型棘轮 | `uv run python scripts/type_scan.py` | mypy 按 core/ai/tools/session/app 五层统计，与 `docs/type-baseline.json` 比较，回升即失败；债务下降后用 `--update` 固化基线 |
 | 规模门禁 | `uv run python scripts/scale_scan.py` | 生产层单文件 ≤ 300 行、单函数 ≤ 80 行；豁免仅在 `COMPATIBILITY_EXCEPTIONS` 逐项登记 |
 | 分层测试 | `uv run pytest -m "unit or contract" -q` | 快速质量集；CI 覆盖率硬下限 **80%**（实测 86.35%） |
@@ -84,6 +84,13 @@ uv run codeagent --tui             # 交互式终端
 2. 模块导出 `TOOL_SPECS: Iterable[ToolSpec]`（与 `BUILTIN_TOOL_SPECS` 同构，`build(ToolBuildContext) -> AtomicTool`）。
 3. 装配后工具名为 `ext__<id>__<工具名>`；**目录放置即信任**（插件代码同进程执行，import 期副作用属信任范围），调用层 fail-closed：默认需确认，可在 `~/.codeagent/extensions.json` 的 `permissions.deny/ask/allow` 显式放行/拒绝（glob，deny 优先）。
 4. 单插件失败只产生 `plugin_failed:` 诊断并跳过；补离线测试（`tests/tools/plugins/`，tmp_path 假插件目录）。
+
+### 4.6 运行期安全与可验证性
+
+- **沙箱**：`CODEAGENT_SANDBOX_POLICY=read-only|workspace-write|danger-full-access`（默认后者）。macOS 用 `sandbox-exec`、Linux 用 `bwrap`；受限策略无后端时 bash 直接 fail-closed，不会静默降级。
+- **写前快照**：`write`/`edit` 在写入前把原文存入 `~/.codeagent/checkpoints/`（上限 200 条）；`codeagent undo --list|--dry-run` 查看，`codeagent undo` 逐级恢复。
+- **离线评测**：`uv run python -m evals` 用 fake 模型驱动真实循环；`tests/test_evals.py` 已纳入 `contract` 门禁，新增关键行为时优先补用例。
+- **缓存观测**：`--context` 输出命中率与冷/暖诊断码；基础系统提示词前缀不得含时间戳或临时路径（契约测试锁定）。
 
 ## 五、编码规范要点
 

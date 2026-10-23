@@ -12,8 +12,8 @@
 | `tools/security/*` | 统一安全分类（allow / ask / deny）、危险命令、文件边界、MCP 权限 |
 | `tools/mcp/*` | MCP 服务端客户端、工具适配、预算裁剪、加载与收尾 |
 | `tools/plugins/*` | 扩展插件：manifest 解析、`TOOL_SPECS` 加载（`ext__<id>__<工具>` 命名）、`extensions.json` 权限规则 |
-| `tools/execution/*` | 跨平台进程执行、外部检索器（rg/fd）、bash 解析 |
-| `tools/shared/*` | FsOps 抽象、路径、忽略策略、文本、截断、资源限制、写串行化、输出治理 |
+| `tools/execution/*` | 跨平台进程执行、外部检索器（rg/fd）、bash 解析、沙箱策略（read-only / workspace-write / 三档后端） |
+| `tools/shared/*` | FsOps 抽象、路径、忽略策略、文本、截断、资源限制、写串行化、输出治理、写前 checkpoint |
 | `tools/capabilities.py` | 只读环境能力探测（平台 / bash / 清理语义 / rg / fd / 安全策略） |
 
 分层约束：`tools` 可用标准库与外部依赖（pydantic），禁止 import `core`/`session`/`ai`/`app`；`shared` 只提供基础设施，不承载业务流程。
@@ -53,7 +53,7 @@
 | `read` | 读取文本文件（含行区间），二进制给有限预览 | 默认最多 2000 行；`BINARY_PREVIEW_BYTES` 预览截断 |
 | `write` | 写入/覆盖文件（自动建目录） | 统一输出上限（30 000 字节 / 2000 行） |
 | `edit` | 精确字符串替换编辑 | 走路径锁串行化 |
-| `bash` | 执行 shell 命令 | 默认超时 120s，硬上限 600s，输出 ≤30 000 字符 |
+| `bash` | 执行 shell 命令 | 默认超时 120s，硬上限 600s，输出 ≤30 000 字符；沙箱策略默认 `danger-full-access`（受限策略无后端时 fail-closed） |
 | `grep` | 内容检索（优先 `rg`，缺省纯 Python fallback） | `DEFAULT_LIMIT = 100` 条匹配 |
 | `find` | 文件名/路径检索（优先 `fd`，缺省纯 Python fallback） | `DEFAULT_LIMIT = 1000` |
 | `ls` | 列目录 | `DEFAULT_LIMIT = 500` 条 |

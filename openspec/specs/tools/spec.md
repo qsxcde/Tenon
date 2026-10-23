@@ -468,6 +468,59 @@
 - **WHEN** headless(无确认通道)下触发 ask 档插件工具
 - **THEN** 调用被拒绝并给出原因,不执行插件代码
 
+### Requirement: 命令执行沙箱策略
+
+`bash` 工具 SHALL 支持三档执行边界:`read-only`、`workspace-write` 与 `danger-full-access`(默认,保持原有不受限执行)。`read-only` SHALL 禁止文件写入;`workspace-write` SHALL 只允许写入工作区与临时目录。macOS SHALL 使用 `sandbox-exec`(Seatbelt) 生成受限 profile,Linux SHALL 使用 `bwrap` 绑定只读根与可写工作区;沙箱后端的额外参数 SHALL 以独立 argv 元素注入,不得拼接进 shell 命令。受限策略在无可用后端时 SHALL fail-closed:拒绝执行并给出包含平台、策略与安装指引的可诊断错误,不得静默降级为不受限执行。沙箱策略 SHALL 可由配置注入并在装配期校验非法值。
+
+#### Scenario: 默认策略保持原行为
+
+- **WHEN** 未显式配置沙箱策略
+- **THEN** 命令以 `danger-full-access` 执行,参数与既有行为一致
+
+#### Scenario: workspace-write 限制写入范围
+
+- **WHEN** 策略为 `workspace-write` 且平台后端可用
+- **THEN** 命令被放入只写工作区与临时目录的受限边界执行
+
+#### Scenario: read-only 禁止写入
+
+- **WHEN** 策略为 `read-only`
+- **THEN** 受限边界拒绝一切文件写入
+
+#### Scenario: 后端缺失 fail-closed
+
+- **WHEN** 受限策略在当前平台找不到沙箱后端
+- **THEN** 命令不执行,返回包含策略、平台与处理后端建议的错误
+
+### Requirement: 写前 checkpoint 与恢复
+
+`write` 与 `edit` SHALL 在覆盖文件前记录原文快照(写入前文件不存在时记录"不存在"),快照 SHALL 在路径锁内、实际写入前完成,保证快照内容就是即将被覆盖的内容。快照 SHALL 持久化在用户配置目录下,不进入会话 JSONL,也不改变会话提交语义。系统 SHALL 提供 LIFO 恢复入口(`codeagent undo`),支持列出最近快照、预览与恢复;恢复一次消耗一条快照,连续调用可逐级回退;快照条数 SHALL 有上限并淘汰最旧条目。无快照时恢复 SHALL 返回明确错误而不是静默成功。快照记录失败 SHALL 不阻塞正常写入。
+
+#### Scenario: 覆盖前保存原文
+
+- **WHEN** `write` 覆盖一个已存在文件
+- **THEN** 写入前保存其原文,恢复后文件内容回到覆盖前状态
+
+#### Scenario: 新建文件可撤销
+
+- **WHEN** `write` 创建了一个原本不存在的文件
+- **THEN** 恢复该快照会删除该文件并明确报告"原本不存在"
+
+#### Scenario: 连续回退
+
+- **WHEN** 同一文件被连续修改多次
+- **THEN** 每次恢复回到上一条快照,直至无快照并返回明确错误
+
+#### Scenario: 容量有界
+
+- **WHEN** 快照条数超过上限
+- **THEN** 最旧条目被淘汰,保留最近的快照
+
+#### Scenario: 不改变既有写入语义
+
+- **WHEN** 未启用 checkpoint 或快照记录失败
+- **THEN** 写入照常完成,输出与错误语义不变
+
 ### Requirement: 路径解析
 
 所有工具 SHALL 以注入的 `cwd` 为基准解析相对路径;支持 `~` 展开;解析失败 SHALL 返回明确错误而非静默歧义。

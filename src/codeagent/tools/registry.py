@@ -30,7 +30,8 @@ from codeagent.tools.atomic import (
     WriteTool,
 )
 from codeagent.tools.base import AtomicTool
-from codeagent.tools.shared import ToolResourceLimits
+from codeagent.tools.execution.sandbox import SANDBOX_DANGER_FULL_ACCESS
+from codeagent.tools.shared import CheckpointStore, ToolResourceLimits
 
 __all__ = [
     "BUILTIN_TOOL_SPECS",
@@ -45,11 +46,15 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class ToolBuildContext:
-    """一次工具装配的注入上下文(cwd / 技能注册表 / 资源限制)。"""
+    """一次工具装配的注入上下文(cwd / 技能注册表 / 资源限制 / 沙箱策略)。"""
 
     cwd: str | None
     skills: dict[str, str] | None
     resource_limits: ToolResourceLimits
+    #: bash 执行沙箱策略;默认保持原行为(danger-full-access)。
+    sandbox_policy: str = SANDBOX_DANGER_FULL_ACCESS
+    #: 写/编辑前快照存储;None = 不记录 checkpoint。
+    checkpoint_store: CheckpointStore | None = None
 
 
 #: 工具构建函数:由注册项把注入上下文转换为一个原子工具实例。
@@ -105,12 +110,34 @@ def _skill_tool(context: ToolBuildContext) -> AtomicTool:
     )
 
 
+def _bash_tool(context: ToolBuildContext) -> AtomicTool:
+    """bash 工具构建器:注入沙箱策略(受限策略无后端时执行期 fail-closed)。"""
+    return BashTool(
+        cwd=context.cwd,
+        resource_limits=context.resource_limits,
+        sandbox_policy=context.sandbox_policy,
+    )
+
+
+def _checkpointed_tool(cls: Any) -> ToolFactory:
+    """写类工具构建器:注入 checkpoint 存储(None = 不记录快照)。"""
+
+    def build(context: ToolBuildContext) -> AtomicTool:
+        return cls(
+            cwd=context.cwd,
+            resource_limits=context.resource_limits,
+            checkpoint=context.checkpoint_store,
+        )
+
+    return build
+
+
 #: 内建工具声明;顺序即 make_tools 产出顺序(read → todo),契约由测试锁定。
 BUILTIN_TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec("read", _standard_tool(ReadTool)),
-    ToolSpec("write", _standard_tool(WriteTool)),
-    ToolSpec("edit", _standard_tool(EditTool)),
-    ToolSpec("bash", _standard_tool(BashTool)),
+    ToolSpec("write", _checkpointed_tool(WriteTool)),
+    ToolSpec("edit", _checkpointed_tool(EditTool)),
+    ToolSpec("bash", _bash_tool),
     ToolSpec("grep", _standard_tool(GrepTool)),
     ToolSpec("find", _standard_tool(FindTool)),
     ToolSpec("ls", _standard_tool(LsTool)),
@@ -143,5 +170,25 @@ def make_tools(
     """
     cwd = getattr(cfg, "cwd", None) if cfg is not None else None
     limits = resource_limits or ToolResourceLimits.from_config(cfg)
-    context = ToolBuildContext(cwd=cwd, skills=skills, resource_limits=limits)
+    sandbox_policy = (
+        getattr(cfg, "sandbox_policy", SANDBOX_DANGER_FULL_ACCESS) or SANDBOX_DANGER_FULL_ACCESS
+    )
+    checkpoint_store = _resolve_checkpoint_store(cfg)
+    context = ToolBuildContext(
+        cwd=cwd,
+        skills=skills,
+        resource_limits=limits,
+        sandbox_policy=str(sandbox_policy),
+        checkpoint_store=checkpoint_store,
+    )
     return builtin_tool_registry().build(context)
+
+
+def _resolve_checkpoint_store(cfg: Any) -> CheckpointStore | None:
+    """按配置构造 checkpoint 存储;未启用或缺目录时不记录快照。"""
+    if not getattr(cfg, "checkpoints_enabled", False):
+        return None
+    root = getattr(cfg, "checkpoints_root", None)
+    if root is None:
+        return None
+    return CheckpointStore(root)

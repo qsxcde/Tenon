@@ -17,6 +17,10 @@ from pydantic import BaseModel, Field
 
 from codeagent.tools.base import AtomicTool
 from codeagent.tools.execution import ProcessRequest, ProcessRunner, bash_env, resolve_bash
+from codeagent.tools.execution.sandbox import (
+    SANDBOX_DANGER_FULL_ACCESS,
+    plan_sandbox,
+)
 from codeagent.tools.security.bash_rules import (
     DANGEROUS_PATTERNS,
     _dangerous_hit,
@@ -99,9 +103,41 @@ class BashTool(AtomicTool[BashArgs]):
         ops=None,
         runner: ProcessRunner | None = None,
         resource_limits: ToolResourceLimits | None = None,
+        sandbox_policy: str = SANDBOX_DANGER_FULL_ACCESS,
     ) -> None:
         super().__init__(cwd=cwd, ops=ops, resource_limits=resource_limits)
         self._runner = runner or ProcessRunner()
+        self._sandbox_policy = sandbox_policy
+
+    def _process_request(self, command: str, timeout: float) -> ProcessRequest:
+        """按沙箱策略构造执行请求;受限策略无后端时 fail-closed。"""
+        cwd = str(self._cwd or Path.cwd())
+        bash_path = resolve_bash()
+        plan = plan_sandbox(
+            command,
+            workspace=cwd,
+            bash_path=bash_path,
+            policy=self._sandbox_policy,
+        )
+        if not plan.available:
+            diagnostics = "; ".join(plan.diagnostics) or "沙箱后端不可用"
+            raise ValueError(
+                f"沙箱策略 {plan.policy} 无法执行: {diagnostics};"
+                "请安装后端或将 CODEAGENT_SANDBOX_POLICY 设为 danger-full-access"
+            )
+        return ProcessRequest(
+            plan.executable,
+            command,
+            cwd,
+            self._bash_env(),
+            timeout,
+            argv_prefix=plan.argv_prefix,
+            max_output_bytes=self.resource_limits.max_output_bytes,
+            max_output_lines=self.output_max_lines,
+            output_direction="tail",
+            max_memory_bytes=self.resource_limits.max_memory_bytes,
+            cleanup_timeout=self.resource_limits.cleanup_timeout,
+        )
 
     def _timeout(self, args: BashArgs) -> float:
         requested = (
@@ -126,20 +162,7 @@ class BashTool(AtomicTool[BashArgs]):
         command, timeout = self._validate_command(args)
         started = time.monotonic()
         try:
-            result = self._runner.run(
-                ProcessRequest(
-                    resolve_bash(),
-                    command,
-                    str(self._cwd or Path.cwd()),
-                    self._bash_env(),
-                    timeout,
-                    max_output_bytes=self.resource_limits.max_output_bytes,
-                    max_output_lines=self.output_max_lines,
-                    output_direction="tail",
-                    max_memory_bytes=self.resource_limits.max_memory_bytes,
-                    cleanup_timeout=self.resource_limits.cleanup_timeout,
-                )
-            )
+            result = self._runner.run(self._process_request(command, timeout))
         except OSError as exc:
             raise ValueError(f"命令执行失败: {exc}") from exc
         return self._format_result(command, timeout, result, time.monotonic() - started)
@@ -149,20 +172,7 @@ class BashTool(AtomicTool[BashArgs]):
         command, timeout = self._validate_command(args)
         started = time.monotonic()
         try:
-            result = await self._runner.arun(
-                ProcessRequest(
-                    resolve_bash(),
-                    command,
-                    str(self._cwd or Path.cwd()),
-                    self._bash_env(),
-                    timeout,
-                    max_output_bytes=self.resource_limits.max_output_bytes,
-                    max_output_lines=self.output_max_lines,
-                    output_direction="tail",
-                    max_memory_bytes=self.resource_limits.max_memory_bytes,
-                    cleanup_timeout=self.resource_limits.cleanup_timeout,
-                )
-            )
+            result = await self._runner.arun(self._process_request(command, timeout))
         except OSError as exc:
             raise ValueError(f"命令执行失败: {exc}") from exc
         content = self._format_result(command, timeout, result, time.monotonic() - started)

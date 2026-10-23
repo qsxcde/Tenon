@@ -26,11 +26,18 @@ class WriteTool(AtomicTool[WriteArgs]):
     description = "创建新文件或完整覆盖已有文件;父目录不存在时自动创建;统一 LF 换行。"
     Args = WriteArgs
 
+    def __init__(self, cwd=None, ops=None, resource_limits=None, checkpoint=None) -> None:
+        super().__init__(cwd=cwd, ops=ops, resource_limits=resource_limits)
+        self._checkpoint = checkpoint
+
     def _invoke(self, args: WriteArgs) -> str:
         path = resolve_to_cwd(args.file_path, self._cwd)
         data = args.content.encode("utf-8")
         try:
             with with_path_lock(path):
+                # 快照必须在锁内、写入前完成:保证保存的是即将被覆盖的原文。
+                if self._checkpoint is not None:
+                    self._checkpoint.capture(path, self._ops)
                 self._ops.mkdir(path.parent, parents=True)
                 self._ops.write_bytes(path, data)
         except PermissionError:

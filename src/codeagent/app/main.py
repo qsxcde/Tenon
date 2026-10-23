@@ -24,6 +24,8 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv and argv[0] == "skill":
         return _skill_cli(argv[1:])
+    if argv and argv[0] == "undo":
+        return _undo_cli(argv[1:])
     parser = argparse.ArgumentParser(prog="codeagent", description="基于自研编排的编程 Agent")
     parser.add_argument("--prompt", default=None, help="一次性输入(不指定则从 stdin 逐行读取)")
     parser.add_argument("--tui", action="store_true", help="启动交互式终端(TUI)")
@@ -179,6 +181,47 @@ def _skill_cli(argv: list[str]) -> int:
     except (KeyError, PackageValidationError, OSError, ValueError) as exc:
         print(f"Package 操作失败: {exc}", file=sys.stderr)
         return 2
+    return 0
+
+
+def _undo_cli(argv: list[str]) -> int:
+    """``codeagent undo``:查看或恢复最近一次 write/edit 前的文件快照。"""
+    parser = argparse.ArgumentParser(
+        prog="codeagent undo", description="恢复最近一次写/编辑之前的文件快照"
+    )
+    parser.add_argument("--list", action="store_true", dest="list_entries", help="列出最近快照")
+    parser.add_argument("--dry-run", action="store_true", help="只显示将恢复的条目")
+    parser.add_argument("--limit", type=int, default=20, help="列出的最大条数")
+    args = parser.parse_args(argv)
+
+    from codeagent.app.config import checkpoints_dir
+    from codeagent.tools.shared import CheckpointStore
+
+    store = CheckpointStore(checkpoints_dir())
+    if args.list_entries:
+        entries = store.recent(limit=args.limit)
+        if not entries:
+            print("(无 checkpoint)")
+            return 0
+        for entry in entries:
+            kind = "改写" if entry.existed else "新建"
+            print(f"{entry.seq}\t{entry.created_at}\t{kind}\t{entry.path}")
+        return 0
+    if args.dry_run:
+        entries = store.recent(limit=1)
+        if not entries:
+            print("(无 checkpoint)")
+            return 1
+        entry = entries[0]
+        print(f"将恢复: {entry.path} (seq={entry.seq})")
+        return 0
+    try:
+        entry = store.restore_last()
+    except (OSError, ValueError) as exc:
+        print(f"恢复失败: {exc}", file=sys.stderr)
+        return 1
+    suffix = "" if entry.existed else " · 文件原本不存在,已删除"
+    print(f"已恢复: {entry.path} (seq={entry.seq}){suffix}")
     return 0
 
 

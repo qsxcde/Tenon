@@ -42,6 +42,10 @@ class EditTool(AtomicTool[EditArgs]):
     description = "精确替换文件中的一段文本(old_string → new_string);匹配不到或不唯一时会报错;保留文件原始换行约定与 BOM。"
     Args = EditArgs
 
+    def __init__(self, cwd=None, ops=None, resource_limits=None, checkpoint=None) -> None:
+        super().__init__(cwd=cwd, ops=ops, resource_limits=resource_limits)
+        self._checkpoint = checkpoint
+
     def _invoke(self, args: EditArgs) -> str:
         path = resolve_to_cwd(args.file_path, self._cwd)
         if not self._ops.exists(path):
@@ -84,6 +88,8 @@ class EditTool(AtomicTool[EditArgs]):
                     raise ValueError(f"未产生变更(替换结果与原文相同): {path}")
 
                 final = bom + restore_line_endings(updated, ending)
+                if self._checkpoint is not None:
+                    self._checkpoint.capture(path, self._ops)
                 self._ops.write_bytes(path, final.encode("utf-8"))
         except PermissionError:
             raise ValueError(f"没有写入权限: {path}")
