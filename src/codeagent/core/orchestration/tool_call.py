@@ -14,8 +14,9 @@ from codeagent.core.contracts.events import (
     EventType,
 )
 from codeagent.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
-from codeagent.core.contracts.ports import AgentTool, ToolDecision
+from codeagent.core.contracts.ports import AgentTool
 from codeagent.core.orchestration.config import AgentLoopConfig
+from codeagent.core.orchestration.tool_hooks import run_post_chain, run_pre_chain
 
 
 #: 安全警告前缀:单行、固定格式,便于订阅方按行剥离。
@@ -44,9 +45,10 @@ async def new_tool_result(
         )
     if tool is None:
         return _unknown_tool_result(call, operation_id)
-    decision_result, warning = await _check_before_hook(tool, call, context, config, operation_id)
-    if decision_result is not None:
-        return decision_result
+    pre = await run_pre_chain(config.before_tool_calls, call, context)
+    if pre.blocked_reason is not None:
+        return _rejected_result(tool, call, pre.blocked_reason, operation_id)
+    call = pre.call
     try:
         result = await _execute_tool(tool, call, config, emit, operation_id)
     except Exception as exc:  # noqa: BLE001 - tool errors are model-visible
@@ -59,9 +61,10 @@ async def new_tool_result(
             operation_id=operation_id or "",
             cleanup_confirmed=True,
         )
-    result = await _check_after_hook(call, result, context, config)
-    if warning:
-        result = _with_warning(result, warning)
+    result = await run_post_chain(config.after_tool_calls, call, result, context)
+    if pre.warnings:
+        # 多条警告合并进单一安全提示行,保持前缀可按行剥离。
+        result = _with_warning(result, "; ".join(pre.warnings))
     if not result.operation_id:
         result.operation_id = operation_id or ""
     return result
@@ -79,35 +82,23 @@ def _with_warning(result: ToolResult, warning: str) -> ToolResult:
     return result
 
 
-async def _check_before_hook(
+def _rejected_result(
     tool: AgentTool,
     call: ToolCall,
-    context: AgentContext,
-    config: AgentLoopConfig,
+    reason: str,
     operation_id: str | None,
-) -> tuple[ToolResult | None, str | None]:
-    """Return `(blocking_result, warning)`; both are None when nothing applies."""
-    if config.before_tool_call is None:
-        return None, None
-    decision = await await_if_needed(config.before_tool_call(call, context))
-    if not isinstance(decision, ToolDecision):
-        return None, None
-    if decision.action != "allow":
-        return (
-            ToolResult(
-                call.id,
-                f"[工具执行被拒绝] {decision.reason}",
-                error=True,
-                name=tool.name,
-                rejected=True,
-                status=ToolExecutionStatus.REJECTED,
-                operation_id=operation_id or "",
-                cleanup_confirmed=True,
-            ),
-            None,
-        )
-    warning = decision.reason if decision.warning and decision.reason else None
-    return None, warning
+) -> ToolResult:
+    """门禁短路的模型可见拒绝结果(不执行工具、不跑 post 链)。"""
+    return ToolResult(
+        call.id,
+        f"[工具执行被拒绝] {reason}",
+        error=True,
+        name=tool.name,
+        rejected=True,
+        status=ToolExecutionStatus.REJECTED,
+        operation_id=operation_id or "",
+        cleanup_confirmed=True,
+    )
 
 
 async def _execute_tool(
@@ -180,18 +171,6 @@ async def _execute_tool(
         on_update=on_update,
         on_start=on_start,
     )
-
-
-async def _check_after_hook(
-    call: ToolCall,
-    result: ToolResult,
-    context: AgentContext,
-    config: AgentLoopConfig,
-) -> ToolResult:
-    if config.after_tool_call is None:
-        return result
-    updated = await await_if_needed(config.after_tool_call(call, result, context))
-    return result if updated is None else updated
 
 
 def _unknown_tool_result(call: ToolCall, operation_id: str | None) -> ToolResult:

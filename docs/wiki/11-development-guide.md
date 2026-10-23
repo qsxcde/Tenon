@@ -78,6 +78,13 @@ uv run codeagent --tui             # 交互式终端
 3. 若事件携带对子会话的关联，遵循 `delegation_id` 关联约定。
 4. 补契约测试（事件字段稳定性）与 TUI/headless 消费回归。
 
+### 4.5 新增扩展插件（`~/.codeagent/extensions/`）
+
+1. 建目录 `~/.codeagent/extensions/<id>/`，放 `codeagent-plugin.json`（`id`/`name`/`version`/`module`/`tools`，id 与工具名匹配 `^[a-z][a-z0-9_]*$` 且不含 `__`）与 manifest 声明的 Python 模块（单文件，兄弟 import 不支持）。
+2. 模块导出 `TOOL_SPECS: Iterable[ToolSpec]`（与 `BUILTIN_TOOL_SPECS` 同构，`build(ToolBuildContext) -> AtomicTool`）。
+3. 装配后工具名为 `ext__<id>__<工具名>`；**目录放置即信任**（插件代码同进程执行，import 期副作用属信任范围），调用层 fail-closed：默认需确认，可在 `~/.codeagent/extensions.json` 的 `permissions.deny/ask/allow` 显式放行/拒绝（glob，deny 优先）。
+4. 单插件失败只产生 `plugin_failed:` 诊断并跳过；补离线测试（`tests/tools/plugins/`，tmp_path 假插件目录）。
+
 ## 五、编码规范要点
 
 - Python 3.12+、4 空格缩进、完整类型注解；`snake_case`/`PascalCase`/`UPPER_SNAKE_CASE`；布尔用 `is_`/`has_`/`can_` 前缀。

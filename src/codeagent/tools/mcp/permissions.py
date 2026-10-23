@@ -6,6 +6,12 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from codeagent.tools.security.permission_rules import (
+    match_tool_rule,
+    normalize_rule,
+    parse_three_tier_block,
+)
+
 
 @dataclass(frozen=True)
 class McpPermissionRules:
@@ -20,26 +26,13 @@ class McpPermissionRules:
         return cls()
 
     def decide(self, qualified_name: str) -> str | None:
-        normalized = _normalize(qualified_name)
+        normalized = normalize_rule(qualified_name)
         for action in ("deny", "ask", "allow"):
-            if any(_match_rule(normalized, _normalize(rule)) for rule in getattr(self, action)):
+            if any(
+                match_tool_rule(normalized, normalize_rule(rule)) for rule in getattr(self, action)
+            ):
                 return action
         return None
-
-
-def _normalize(text: str) -> str:
-    return text.strip().lower().replace("-", "_").replace(".", "_")
-
-
-def _match_rule(name: str, rule: str) -> bool:
-    if rule == "mcp__*":
-        return name.startswith("mcp__")
-    if rule.endswith("__*"):
-        prefix = rule[:-3]
-        return name.startswith(prefix + "__")
-    if rule.count("__") == 1:
-        return name.startswith(rule + "__")
-    return name == rule
 
 
 def parse_mcp_permissions(config_dir: str | Path) -> McpPermissionRules:
@@ -51,22 +44,8 @@ def parse_mcp_permissions(config_dir: str | Path) -> McpPermissionRules:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return McpPermissionRules.empty()
-    permissions = raw.get("permissions", {}) if isinstance(raw, dict) else {}
-    if not isinstance(permissions, dict):
-        return McpPermissionRules.empty()
-    rules: dict[str, tuple[str, ...]] = {}
-    for action in ("deny", "ask", "allow"):
-        entries = permissions.get(action, [])
-        if not isinstance(entries, list):
-            continue
-        rules[action] = tuple(
-            entry for entry in entries if isinstance(entry, str) and entry.strip()
-        )
-    return McpPermissionRules(
-        deny=rules.get("deny", ()),
-        ask=rules.get("ask", ()),
-        allow=rules.get("allow", ()),
-    )
+    parsed = parse_three_tier_block(raw.get("permissions", {}) if isinstance(raw, dict) else {})
+    return McpPermissionRules(deny=parsed.deny, ask=parsed.ask, allow=parsed.allow)
 
 
 __all__ = ["McpPermissionRules", "parse_mcp_permissions"]

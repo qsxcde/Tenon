@@ -42,3 +42,24 @@ def _load_mcp_tools(cfg: Any = None) -> tuple[list[Any], list[str]]:
     from codeagent.tools.mcp.loader import load_mcp_tools
 
     return load_mcp_tools(CONFIG_DIR)
+
+
+def _load_extension_tools(
+    cfg: Any = None,
+    *,
+    skills: dict[str, str] | None = None,
+    resource_limits: ToolResourceLimits | None = None,
+) -> tuple[list[Any], list[str]]:
+    """加载扩展插件工具及诊断信息(目录放置即信任;单插件失败不阻塞)。"""
+    from codeagent.app.config import extensions_dir
+    from codeagent.tools.plugins import load_extension_tools
+    from codeagent.tools.registry import ToolBuildContext
+
+    context = ToolBuildContext(
+        cwd=getattr(cfg, "cwd", None),
+        skills=skills,
+        resource_limits=resource_limits
+        if resource_limits is not None
+        else resolve_tool_resource_limits(cfg),
+    )
+    return load_extension_tools(extensions_dir(), build_context=context)

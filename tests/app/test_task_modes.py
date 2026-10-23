@@ -75,7 +75,7 @@ async def test_plan_policy_is_enforced_by_react_tool_boundary():
     config = AgentLoopConfig(
         model=ChatModelPort(model),
         tools=adapt_tools([ReadTool(), WriteTool(), EditTool()]),
-        before_tool_call=before_tool_call,
+        before_tool_calls=(before_tool_call,),
     )
 
     await run_agent_loop(AgentContext(), config, "plan", emit=events.append)

@@ -5,7 +5,6 @@ from __future__ import annotations
 import uuid
 import asyncio
 from dataclasses import fields, replace
-import inspect
 from typing import Any
 
 from codeagent.core import AgentContext, ToolDecision
@@ -78,8 +77,8 @@ class SessionExecutionMixin(SessionRuntimeHost):
         values.update(
             {
                 "tools": self._bind_run_tools(values["tools"], run_id),
-                "before_tool_call": self._before_tool_call_factory(
-                    run_id, policy, values["before_tool_call"]
+                "before_tool_calls": self._before_tool_calls_factory(
+                    run_id, policy, values["before_tool_calls"]
                 ),
                 "tool_timeout": (
                     tool_timeout if tool_timeout is not None else values["tool_timeout"]
@@ -97,20 +96,15 @@ class SessionExecutionMixin(SessionRuntimeHost):
             bound.append(binder(run_id) if callable(binder) else tool)
         return bound
 
-    def _before_tool_call_factory(
+    def _before_tool_calls_factory(
         self,
         run_id: str,
         policy: ApprovalPolicy | None,
-        extension: BeforeToolCall | None,
-    ):
-        async def before_tool_call(call, _context):
-            if extension is not None:
-                extension_result = extension(call, _context)
-                if inspect.isawaitable(extension_result):
-                    extension_result = await extension_result
-                if extension_result is not None:
-                    if extension_result.action != "allow":
-                        return extension_result
+        extensions: tuple[BeforeToolCall, ...],
+    ) -> tuple[BeforeToolCall, ...]:
+        """扩展钩子在前,安全策略门禁固定位于链尾(对改参后的调用判定)。"""
+
+        async def policy_gate(call, _context):
             if policy is None:
                 return ToolDecision.allow()
             decision = policy.decide(call.name, call.args)
@@ -143,7 +137,7 @@ class SessionExecutionMixin(SessionRuntimeHost):
             # 超时/取消不在这里截获,保持既有异常语义(confirmation_error / 取消)。
             return ApprovalResult.from_response(approved).to_tool_decision()
 
-        return before_tool_call
+        return (*extensions, policy_gate)
 
 
 __all__ = ["SessionExecutionMixin"]

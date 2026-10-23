@@ -177,7 +177,7 @@ async def test_run_agent_loop_transform_and_before_hook_control_tools():
     context = AgentContext()
     new_messages = await run_agent_loop(
         context,
-        _config(model, tool, transform_context=transform, before_tool_call=before),
+        _config(model, tool, transform_context=transform, before_tool_calls=(before,)),
         "read",
     )
 
@@ -296,7 +296,7 @@ async def test_rejected_tool_keeps_operation_correlation_without_fake_start() ->
         AgentLoopConfig(
             model=model,
             tools=[_ConcurrencyTool("a", [0, 0])],
-            before_tool_call=before_tool_call,
+            before_tool_calls=(before_tool_call,),
         ),
         "go",
         emit=events.append,

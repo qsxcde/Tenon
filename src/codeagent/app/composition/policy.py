@@ -12,11 +12,13 @@ def _create_policy(cfg: Any = None, approval_mode: str = "deny") -> Any:
     """按形态装配执行前安全策略。"""
     from codeagent.app.config import CONFIG_DIR
     from codeagent.tools.mcp.permissions import parse_mcp_permissions
+    from codeagent.tools.plugins.permissions import parse_extension_permissions
     from codeagent.tools.security import classify_tool
 
     workspace = getattr(cfg, "cwd", None) if cfg is not None else None
     workspace = str(Path(workspace or Path.cwd()).expanduser().resolve())
     mcp_rules = parse_mcp_permissions(CONFIG_DIR)
+    ext_rules = parse_extension_permissions(CONFIG_DIR)
 
     def _target_exists(target: str) -> bool:
         path = Path(target)
@@ -33,6 +35,7 @@ def _create_policy(cfg: Any = None, approval_mode: str = "deny") -> Any:
                 cwd=workspace,
                 exists=_target_exists,
                 mcp_rules=mcp_rules,
+                ext_rules=ext_rules,
             )
             if decision.action == "ask" and approval_mode == "deny":
                 # headless 无确认通道:归因 UNAVAILABLE 并 fail-closed 拒绝

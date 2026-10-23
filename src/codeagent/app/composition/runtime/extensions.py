@@ -23,12 +23,16 @@ class RuntimeExtensions:
     context_preparer: ContextPreparer | None = None
     context_budget: ContextBudgetPort | None = None
     context_transform_timeout: float | None = None
-    before_tool_call: BeforeToolCall | None = None
-    after_tool_call: AfterToolCall | None = None
+    #: 有序 pre 钩子链(通知/改参/门禁)。
+    before_tool_calls: tuple[BeforeToolCall, ...] = field(default_factory=tuple)
+    #: 有序 post 钩子链(结果变换/脱敏)。
+    after_tool_calls: tuple[AfterToolCall, ...] = field(default_factory=tuple)
     lifecycle_hooks: tuple[LifecycleHook, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "lifecycle_hooks", tuple(self.lifecycle_hooks or ()))
+        object.__setattr__(self, "before_tool_calls", tuple(self.before_tool_calls or ()))
+        object.__setattr__(self, "after_tool_calls", tuple(self.after_tool_calls or ()))
 
 
 def normalize_runtime_extensions(

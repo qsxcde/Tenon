@@ -110,7 +110,7 @@ async def test_session_runtime_preserves_all_agent_loop_configuration() -> None:
     stop = object()
     config = AgentLoopConfig(
         model=object(),
-        after_tool_call=after,
+        after_tool_calls=(after,),
         tool_execution="sequential",
         should_stop_after_turn=stop,
     )
@@ -131,7 +131,7 @@ async def test_session_runtime_preserves_all_agent_loop_configuration() -> None:
         tool_timeout=None,
     )
 
-    assert captured[0].after_tool_call is after
+    assert captured[0].after_tool_calls == (after,)
     assert captured[0].tool_execution == "sequential"
     assert captured[0].should_stop_after_turn is stop
 

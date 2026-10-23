@@ -47,13 +47,13 @@ async def test_agent_loop_config_accepts_tools_and_context_hooks() -> None:
         model=object(),
         tools=[_Tool()],
         transform_context=transform,
-        before_tool_call=before,
-        after_tool_call=after,
+        before_tool_calls=(before,),
+        after_tool_calls=(after,),
     )
 
     assert isinstance(config.tools[0], AgentTool)
     assert await config.transform_context([]) == []
-    assert (await config.before_tool_call(None, None)).action == "allow"
+    assert (await config.before_tool_calls[0](None, None)).action == "allow"
 
 
 def test_context_continue_rejects_empty_or_assistant_tail() -> None:

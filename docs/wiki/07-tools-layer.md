@@ -11,6 +11,7 @@
 | `tools/atomic/*` | read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo 十一个内置工具 |
 | `tools/security/*` | 统一安全分类（allow / ask / deny）、危险命令、文件边界、MCP 权限 |
 | `tools/mcp/*` | MCP 服务端客户端、工具适配、预算裁剪、加载与收尾 |
+| `tools/plugins/*` | 扩展插件：manifest 解析、`TOOL_SPECS` 加载（`ext__<id>__<工具>` 命名）、`extensions.json` 权限规则 |
 | `tools/execution/*` | 跨平台进程执行、外部检索器（rg/fd）、bash 解析 |
 | `tools/shared/*` | FsOps 抽象、路径、忽略策略、文本、截断、资源限制、写串行化、输出治理 |
 | `tools/capabilities.py` | 只读环境能力探测（平台 / bash / 清理语义 / rg / fd / 安全策略） |

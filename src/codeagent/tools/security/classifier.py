@@ -145,6 +145,7 @@ def classify_tool(
     cwd: str | None = None,
     exists: Callable[[str], bool] | None = None,
     mcp_rules=None,
+    ext_rules=None,
 ) -> SecurityDecision:
     if tool_name == "bash":
         return classify_bash(str(args.get("command", "")), cwd=cwd, exists=exists)
@@ -161,6 +162,14 @@ def classify_tool(
             return classify_file(tool_name, resolve_to_cwd(raw, cwd), workspace)
     if tool_name.startswith("mcp__"):
         return classify_mcp(tool_name, mcp_rules)
+    if tool_name.startswith("ext__"):
+        # 插件工具 fail-closed:无显式 allow 规则即需确认(headless 无确认通道时拒绝)。
+        decision = ext_rules.decide(tool_name) if ext_rules is not None else None
+        if decision == "deny":
+            return SecurityDecision(DENY, "插件工具被权限规则拒绝")
+        if decision == "allow":
+            return SecurityDecision(ALLOW)
+        return SecurityDecision(ASK, "插件工具默认需确认(ext)")
     return SecurityDecision(ALLOW)
 
 

@@ -21,8 +21,8 @@ def _extension_set():
             context_preparer=preparer,
             context_budget=budget,
             context_transform_timeout=1.25,
-            before_tool_call=before,
-            after_tool_call=after,
+            before_tool_calls=(before,),
+            after_tool_calls=(after,),
             lifecycle_hooks=hooks,
         ),
         (transformer, preparer, budget, before, after, hooks),
@@ -57,8 +57,8 @@ def test_create_agent_config_injects_every_runtime_extension() -> None:
     assert config.context_preparer is preparer
     assert config.context_budget is budget
     assert config.context_transform_timeout == 1.25
-    assert config.before_tool_call is before
-    assert config.after_tool_call is after
+    assert config.before_tool_calls == (before,)
+    assert config.after_tool_calls == (after,)
     assert config.lifecycle_hooks == hooks
 
 
@@ -106,8 +106,8 @@ def test_session_restore_reuses_the_same_runtime_extensions() -> None:
     assert config.context_preparer is preparer
     assert config.context_budget is budget
     assert config.context_transform_timeout == 1.25
-    assert config.before_tool_call is before
-    assert config.after_tool_call is after
+    assert config.before_tool_calls == (before,)
+    assert config.after_tool_calls == (after,)
     assert config.lifecycle_hooks == hooks
 
 
@@ -134,8 +134,8 @@ def test_tui_rebuild_keeps_runtime_extensions() -> None:
     assert config.context_preparer is preparer
     assert config.context_budget is budget
     assert config.context_transform_timeout == 1.25
-    assert config.before_tool_call is before
-    assert config.after_tool_call is after
+    assert config.before_tool_calls == (before,)
+    assert config.after_tool_calls == (after,)
     assert config.lifecycle_hooks == hooks
 
 
@@ -167,7 +167,7 @@ async def test_session_runtime_runs_injected_before_tool_hook() -> None:
     )
     runtime.start_run()
     await runtime.execute(
-        AgentLoopConfig(model=object(), before_tool_call=before),
+        AgentLoopConfig(model=object(), before_tool_calls=(before,)),
         "hello",
         history=[],
         recursion_limit=1,
@@ -176,7 +176,7 @@ async def test_session_runtime_runs_injected_before_tool_hook() -> None:
 
     call = ToolCall(id="call-1", name="echo", args={})
     context = AgentContext(messages=[], tools=[])
-    decision = await captured[0].before_tool_call(call, context)
+    decision = captured[0].before_tool_calls[0](call, context)
 
     assert seen == [(call, context)]
     assert decision == ToolDecision.block("扩展阻止")

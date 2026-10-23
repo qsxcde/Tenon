@@ -107,7 +107,7 @@ async def test_after_tool_hook_result_is_sent_to_next_model_request():
 
     messages = await run_agent_loop(
         AgentContext(),
-        _config(model, after_tool_call=after),
+        _config(model, after_tool_calls=(after,)),
         "run",
     )
 
@@ -133,7 +133,7 @@ async def test_tool_extension_failure_stops_the_turn_with_error_event(phase):
     def broken(*args):
         raise RuntimeError(f"{phase} extension failed")
 
-    kwargs = {"before_tool_call" if phase == "before" else "after_tool_call": broken}
+    kwargs = {"before_tool_calls" if phase == "before" else "after_tool_calls": (broken,)}
     with pytest.raises(RuntimeError, match="extension failed"):
         await run_agent_loop(
             AgentContext(),
@@ -171,7 +171,7 @@ async def test_cancelled_tool_extension_propagates_and_publishes_abort():
     task = asyncio.create_task(
         run_agent_loop(
             AgentContext(),
-            _config(model, after_tool_call=after),
+            _config(model, after_tool_calls=(after,)),
             "run",
             emit=events.append,
         )

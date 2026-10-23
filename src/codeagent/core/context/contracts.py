@@ -13,6 +13,7 @@ from codeagent.core.contracts.ports import AgentTool, ToolDecision
 __all__ = [
     "AfterToolCall",
     "BeforeToolCall",
+    "BeforeToolOutcome",
     "ContextBudgetPort",
     "ContextPreparationRequest",
     "ContextPreparer",
@@ -43,7 +44,10 @@ class ContextTransformer(Protocol):
 ContextPreparer = Callable[
     ["ContextPreparationRequest"], Awaitable[Iterable[Message]] | Iterable[Message]
 ]
-BeforeToolCall = Callable[[ToolCall, Any], Awaitable[ToolDecision | None] | ToolDecision | None]
+#: pre 钩子返回值:None=通知继续;ToolCall=改参(后续钩子与执行只见新调用);
+#: ToolDecision=放行(可附警告)或门禁短路。
+BeforeToolOutcome = ToolCall | ToolDecision | None
+BeforeToolCall = Callable[[ToolCall, Any], Awaitable[BeforeToolOutcome] | BeforeToolOutcome]
 AfterToolCall = Callable[
     [ToolCall, ToolResult, Any],
     Awaitable[ToolResult | None] | ToolResult | None,

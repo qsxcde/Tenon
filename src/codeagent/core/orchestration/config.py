@@ -45,8 +45,10 @@ class AgentLoopConfig:
     #: Explicit policy for a fallback/uncertain context window. ``allow``
     #: keeps legacy model adapters usable; ``fail`` makes the boundary hard.
     uncertain_budget_policy: str = "allow"
-    before_tool_call: BeforeToolCall | None = None
-    after_tool_call: AfterToolCall | None = None
+    #: 有序 pre 钩子链:通知/改参/门禁(见 core.orchestration.tool_hooks)。
+    before_tool_calls: tuple[BeforeToolCall, ...] = field(default_factory=tuple)
+    #: 有序 post 钩子链:结果变换/脱敏,返回 None 保留当前结果。
+    after_tool_calls: tuple[AfterToolCall, ...] = field(default_factory=tuple)
     #: Ordered, read-only observers for core lifecycle events.
     lifecycle_hooks: tuple[LifecycleHook, ...] = field(default_factory=tuple)
     tool_execution: str = "parallel"
@@ -63,6 +65,8 @@ class AgentLoopConfig:
 
     def __post_init__(self) -> None:
         self.lifecycle_hooks = tuple(self.lifecycle_hooks or ())
+        self.before_tool_calls = tuple(self.before_tool_calls or ())
+        self.after_tool_calls = tuple(self.after_tool_calls or ())
         if self.uncertain_budget_policy not in {"allow", "fail"}:
             raise ValueError("uncertain_budget_policy must be 'allow' or 'fail'")
         timeout = self.context_transform_timeout

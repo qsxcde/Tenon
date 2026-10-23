@@ -9,7 +9,7 @@ from typing import Any
 from codeagent.tools.shared import ToolResourceLimits
 
 from ..tools.adapter import adapt_tools
-from ..tools.factory import _load_mcp_tools, create_tools
+from ..tools.factory import _load_extension_tools, _load_mcp_tools, create_tools
 
 
 def assemble_runtime_tools(
@@ -25,13 +25,19 @@ def assemble_runtime_tools(
     from codeagent.tools.mcp.loader import close_mcp_tools
 
     rendered_skills = {skill.name: format_skill_invocation(skill) for skill in skills}
+    ext_tools, ext_diags = _load_extension_tools(
+        cfg, skills=rendered_skills, resource_limits=resource_limits
+    )
     mcp_tools, mcp_diags = _load_mcp_tools(cfg)
     if mcp_diagnostics is not None:
+        mcp_diagnostics.extend(ext_diags)
         mcp_diagnostics.extend(mcp_diags)
     if mcp_tools:
         atexit.register(close_mcp_tools, mcp_tools)
     raw_tools = (
-        create_tools(cfg, skills=rendered_skills, resource_limits=resource_limits) + mcp_tools
+        create_tools(cfg, skills=rendered_skills, resource_limits=resource_limits)
+        + ext_tools
+        + mcp_tools
     )
     tools = adapt_tools(raw_tools)
     if allowed_tool_names is not None:

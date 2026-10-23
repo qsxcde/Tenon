@@ -30,11 +30,11 @@ from codeagent.core import (
 from codeagent.tools.atomic import BashTool, ReadTool
 
 
-def _config(model: FakeClient, *, before_tool_call=None, tool_timeout=None):
+def _config(model: FakeClient, *, before_tool_calls=(), tool_timeout=None):
     return AgentLoopConfig(
         model=ChatModelPort(model),
         tools=adapt_tools([ReadTool(), BashTool()]),
-        before_tool_call=before_tool_call,
+        before_tool_calls=before_tool_calls,
         tool_timeout=tool_timeout,
     )
 
@@ -108,7 +108,7 @@ async def test_before_tool_call_blocks_without_side_effect():
     events: list = []
     messages = await run_agent_loop(
         AgentContext(),
-        _config(model, before_tool_call=before_tool_call),
+        _config(model, before_tool_calls=(before_tool_call,)),
         "执行",
         emit=events.append,
     )

@@ -222,8 +222,8 @@ def create_agent_config(
         context_preparer=runtime_extensions.context_preparer,
         context_budget=runtime_extensions.context_budget,
         context_transform_timeout=runtime_extensions.context_transform_timeout,
-        before_tool_call=runtime_extensions.before_tool_call,
-        after_tool_call=runtime_extensions.after_tool_call,
+        before_tool_calls=runtime_extensions.before_tool_calls,
+        after_tool_calls=runtime_extensions.after_tool_calls,
         lifecycle_hooks=runtime_extensions.lifecycle_hooks,
     )
     # Keep environment and AI metadata at the composition boundary.

@@ -31,6 +31,16 @@ PACKAGE_LOCK_FILE: Path = CONFIG_DIR / "skills.lock.json"
 #: MCP server 配置(用户级唯一来源;项目级配置不被加载,见 mcp spec)。
 CONFIG_MCP_FILE: Path = CONFIG_DIR / "mcp.json"
 
+
+def extensions_dir() -> Path:
+    """扩展插件目录(目录放置即信任)。
+
+    call-time 从 ``CONFIG_DIR`` 派生:测试隔离可替换 CONFIG_DIR,模块级常量
+    会在导入期固化而失效。
+    """
+    return CONFIG_DIR / "extensions"
+
+
 #: 一次性告警标志:CWD .env 迁移提示只打一次。
 _cwd_env_warned = False
 
