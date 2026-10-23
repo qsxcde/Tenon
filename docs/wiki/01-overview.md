@@ -32,7 +32,7 @@
 | MCP 客户端 | 按 `~/.codeagent/mcp.json` 接入 `tools/list` / `tools/call`；工具名 `mcp__<server>__<tool>` 命名空间化并实施分组预算 |
 | Skills | `SKILL.md` 三源发现（内建 / 个人 / 项目）+ 渐进式披露（描述入 system prompt，正文经 `skill` 工具按需取）；`codeagent skill` 子命令管理技能包 |
 | 会话层 | JSONL 树形持久化；恢复 / 切换 / 分叉 / 归档 / 删除 / 压缩；标题、搜索、筛选、恢复诊断；成功轮次才落盘；`abort` / `steer` / `followup` |
-| Subagent 委派 | `delegate` 工具串行执行只读子任务；`explore` / `review` 两种 profile；工具白名单 `read`/`grep`/`find`/`ls`/`skill`；预算与输出有界；深度固定 1；父级收回有界摘要与结构化证据 |
+| Subagent 委派 | `delegate` 默认串行（`subagent_max_concurrency>1` 时启用有界并发）；profile `explore` / `review` 只读、`implement` 受限可写（禁止 `delegate`）；预算与输出有界；深度固定 1；父级收回有界摘要与结构化证据 |
 | 安全确认环 | 执行前 `ApprovalPolicy` 三档 deny / ask / allow（危险命令黑名单 + shlex 语义检测 + 文件访问边界） |
 | 用量透明 | 归一累计输入 / 输出 / 推理 / 缓存命中 token；`/status` 与 CLI 可见（**不做费用估算**） |
 | 上下文治理 | token 预算、preflight、自动压缩与恢复回归；`--context` 只读输出治理诊断 |

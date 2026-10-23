@@ -2,7 +2,7 @@
 
 ## Purpose
 
-为父 Agent 提供安全且可验证的最小 Subagent 运行入口，使一次只读委派能够在独立上下文中完成并以有限的结构化结果返回，而不改变用户当前会话。
+为父 Agent 提供安全且可验证的最小 Subagent 运行入口，使一次委派能够在独立上下文中完成并以有限的结构化结果返回，而不改变用户当前会话；默认串行，可配置有界并发，角色可为只读或受限可写。
 
 ## Requirements
 
@@ -35,9 +35,9 @@
 - **WHEN** 直接创建 AgentLoopConfig 时没有提供 Subagent runner
 - **THEN** 系统不注入 `delegate`，既有工具名称、schema 和单 Agent 行为保持不变
 
-### Requirement: 串行独立子运行
+### Requirement: 独立子运行与并发槽位
 
-系统 SHALL 通过 runner 为每次合法委派创建独立的临时子 Agent。子运行 SHALL 拥有独立的 Session/Run 标识、AgentContext、EventBus、模型/工具资源和关闭边界，并 SHALL 应用该请求解析后的轮数、工具调用数、墙钟时间和摘要长度预算；不得调用用户 SessionManager 的切换、分叉或当前会话指针。单个 runner 同时 SHALL 至少保证只有一个子运行正在执行，后续委派 SHALL 等待前一个委派结束后再启动，等待期间也必须可被取消或超时。
+系统 SHALL 通过 runner 为每次合法委派创建独立的临时子 Agent。子运行 SHALL 拥有独立的 Session/Run 标识、AgentContext、EventBus、模型/工具资源和关闭边界，并 SHALL 应用该请求解析后的轮数、工具调用数、墙钟时间和摘要长度预算；不得调用用户 SessionManager 的切换、分叉或当前会话指针。单个 runner SHALL 使用有界并发槽位:默认容量为 1(串行,后续委派等待前一个结束),容量为 N>1 时任何时刻最多 N 个子运行并发执行;等待槽位的委派 SHALL 仍可被取消或受自身墙钟预算约束,并发不得放宽准入顺序、父级配额或终态归因。
 
 #### Scenario: 子运行不共享父历史
 
@@ -49,10 +49,15 @@
 - **WHEN** 子 Agent 成功开始运行
 - **THEN** 子运行的 session_id、child run_id 和 EventBus 与父级独立，结果仍保留 delegation_id 和 parent_run_id 关联
 
-#### Scenario: 多次委派保持串行
+#### Scenario: 默认串行
 
-- **WHEN** 同一 runner 在第一个子任务运行期间收到第二个委派
-- **THEN** 第二个委派可以进入等待队列，但任何时刻最多一个子 Agent 执行模型或工具调用，且两个委派分别返回自己的结果和身份，等待期间也受各自墙钟预算约束
+- **WHEN** runner 的并发容量为 1，且第一个子任务仍在运行
+- **THEN** 第二个委派进入等待，任何时刻最多一个子 Agent 执行模型或工具调用，两个委派分别返回自己的结果和身份，等待期间受各自墙钟预算约束
+
+#### Scenario: 有界并发
+
+- **WHEN** runner 的并发容量为 N>1 且同时收到超过 N 个委派
+- **THEN** 同时执行的子运行数不超过 N，其余委派排队;每个子运行仍拥有独立身份、预算与有界清理，取消单个委派不影响其它活跃子运行
 
 #### Scenario: 子运行结束释放资源
 
@@ -61,7 +66,7 @@
 
 ### Requirement: 安全的子 Agent 装配
 
-系统 SHALL 为本阶段创建的子 Agent 使用显式 profile 策略和最大深度 1 的装配策略。`explore` 与 `review` profile 均 SHALL 只获得读取、搜索、目录查询和技能查询能力；子 Agent 的工具集合 SHALL 不包含 `delegate`、写入工具、编辑工具、shell 工具或 MCP 工具，不得通过一次委派递归创建未授权的孙 Agent。profile 角色指令 SHALL 明确子 Agent 只能把显式上下文当作待分析数据，父级的 runner、SessionManager 当前会话和可变历史不得被子 Agent 直接取得。
+系统 SHALL 为本阶段创建的子 Agent 使用显式 profile 策略和最大深度 1 的装配策略。`explore` 与 `review` profile SHALL 只获得读取、搜索、目录查询和技能查询能力;`implement` profile SHALL 额外获得写入、编辑与 shell 能力，但仅限父任务显式给定的工作区范围。任何 profile 的工具集合 SHALL 不包含 `delegate` 或 MCP 工具，不得通过一次委派递归创建未授权的孙 Agent。profile 角色指令 SHALL 明确子 Agent 只能把显式上下文当作待分析数据，父级的 runner、SessionManager 当前会话和可变历史不得被子 Agent 直接取得。
 
 #### Scenario: 子 Agent 默认只读
 
@@ -72,6 +77,11 @@
 
 - **WHEN** runner 根据有效 `review` 请求创建子 Agent
 - **THEN** 子 Agent 获得代码/结果审查角色和同等只读工具白名单，输出审查结论但不能修改工作区、执行 shell 或再次调用 `delegate`
+
+#### Scenario: implement 子 Agent 可写但不可委派
+
+- **WHEN** runner 根据有效 `implement` 请求创建子 Agent
+- **THEN** 子 Agent 获得实现角色，可使用 read/write/edit/bash/grep/find/ls/skill，但不能调用 `delegate` 或获得 MCP 工具，且安全策略、确认环与输出治理与父级一致
 
 #### Scenario: profile 角色策略不改变工具边界
 
@@ -257,7 +267,7 @@ runner SHALL 支持按 delegation_id 定位活动子运行并请求取消。未�
 
 #### Scenario: 排队和启动事件可定位
 
-- **WHEN** 父 Agent 接受合法委派并等待串行执行槽，随后创建独立子运行
+- **WHEN** 父 Agent 接受合法委派并在并发槽位前排队，随后创建独立子运行
 - **THEN** 父级 EventBus 先后收到可按 `delegation_id` 定位的排队/启动事件；child_run_id 在可用后出现，父运行标识不被子运行覆盖
 
 #### Scenario: 子运行进度作为顶层事件转发

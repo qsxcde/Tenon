@@ -21,9 +21,12 @@ from .host import TuiAssemblerHost
 class TuiConfigMixin(TuiAssemblerHost):
     def _ensure_subagent_runner(self) -> Any:
         if getattr(self, "subagent_runner", None) is None:
-            from ..subagent.factory import create_serial_subagent_runner
+            from ..subagent.factory import create_subagent_runner
 
-            self.subagent_runner = create_serial_subagent_runner(self._create_child_session)
+            self.subagent_runner = create_subagent_runner(
+                self._create_child_session,
+                max_concurrency=getattr(self.cfg, "subagent_max_concurrency", 1),
+            )
         return self.subagent_runner
 
     def _create_child_session(self, request: Any) -> Any:

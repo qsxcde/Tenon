@@ -34,7 +34,7 @@
 | `execution/result.py` | `normalize_tool_result`：任意工具返回值 → `ToolResult` |
 | `subagent/policy.py` | 预算默认值与硬上限、`SubagentRunPolicy`、`resolve_budget` |
 | `subagent/admission.py` | `admit_request`、终态归因 `attribute_*` |
-| `subagent/slots.py` | `SubagentSlotRegistry`：串行槽位登记与重复保护 |
+| `subagent/slots.py` | `SubagentSlotRegistry`：并发槽位登记与重复保护 |
 | `support/awaiting.py` | `await_if_needed`：同步/异步统一等待 |
 | `model/` | 模型请求准备（见上）与请求内类型 |
 

@@ -104,7 +104,7 @@
 | 模块 | 职责 |
 | --- | --- |
 | `factory.py` | 组装委派运行环境 |
-| `delegate_tool.py` | `delegate` 工具（串行只读，白名单 read/grep/find/ls/skill） |
+| `delegate_tool.py` | `delegate` 工具（默认串行、可配置有界并发；只读 profile + `implement` 受限可写） |
 | `profiles.py` | 子代理 profile（提示词/工具白名单/预算） |
 | `runner.py` + `runner_*` | 子会话运行、结果提取、终态归因 |
 | `active.py` | 活跃委派槽位仲裁 |

@@ -254,6 +254,8 @@ class Settings(BaseSettings):
     tool_max_output_lines: int = 2_000
     tool_max_memory_bytes: int = 1_048_576
     tool_cleanup_timeout: float = 10.0
+    #: 子 Agent 并发槽位;1 = 串行(默认),>1 启用有界并行。
+    subagent_max_concurrency: int = 1
 
     @model_validator(mode="after")
     def _check_cwd_env(self) -> "Settings":

@@ -34,7 +34,7 @@ def _create_default_subagent_runner(
     compact_budget: int | None,
     compaction_policy: CompactionPolicyConfig | None,
 ) -> Any:
-    from ..subagent.factory import create_serial_subagent_runner
+    from ..subagent.factory import create_subagent_runner
 
     child_factory = make_child_session_factory(
         create_agent_session,
@@ -54,7 +54,10 @@ def _create_default_subagent_runner(
         compact_budget=compact_budget,
         compaction_policy=compaction_policy,
     )
-    return create_serial_subagent_runner(child_factory)
+    return create_subagent_runner(
+        child_factory,
+        max_concurrency=getattr(cfg, "subagent_max_concurrency", 1) if cfg is not None else 1,
+    )
 
 
 def create_agent_session(

@@ -1,4 +1,4 @@
-"""Child execution and budget observation for the serial Subagent runner."""
+"""Child execution and budget observation for Subagent runners."""
 
 from __future__ import annotations
 
@@ -44,13 +44,16 @@ ChildSessionFactory = Callable[[SubagentRequest], Any]
 
 
 async def run_active(
-    lock: asyncio.Lock,
+    gate: Any,
     child_session_factory: ChildSessionFactory,
     active: ActiveDelegation,
     on_event: Callable[[AgentEvent], Any] | None,
 ) -> SubagentResult:
-    """Start, observe and await one child while holding the serial slot."""
-    async with lock:
+    """Start, observe and await one child while holding a concurrency slot.
+
+    ``gate`` 是 ``asyncio.Semaphore``(串行 runner 容量 1,并行 runner 容量 >1)。
+    """
+    async with gate:
         if active.cancel_requested:
             return cancellation_result(active)
         mark_starting(active)

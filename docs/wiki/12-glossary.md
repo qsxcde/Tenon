@@ -26,7 +26,7 @@
 | **压缩（Compaction）** | 上下文接近窗口时按 user 边界摘要旧历史；摘要消息 id 前缀 `summary-`，永不落盘 |
 | **commit_turn_async** | 会话唯一落盘点：成功才提交；失败/取消按 `before_ids` 内存回滚 |
 | **恢复报告** | 会话恢复三态：healthy / degraded / unavailable |
-| **Subagent / 委派** | `delegate` 工具触发的子会话：串行、只读、深度 1、白名单工具；规则在 `core/subagent/` |
+| **Subagent / 委派** | `delegate` 工具触发的子会话：默认串行、可配并发、深度 1、白名单工具；`implement` 为受限可写 profile；规则在 `core/subagent/` 与 `app/composition/subagent/` |
 | **MCP** | Model Context Protocol：外部工具经 `mcp__<server>__<tool>` 命名进入工具集 |
 | **AtomicTool** | tools 层的无状态工具基类（装配注入 cwd/ops/资源限制） |
 | **TuiBackend** | TUI 引擎端口：视图逻辑只依赖它，Textual 只在适配区 |
@@ -47,7 +47,7 @@
 | token 估算 | `chars // 4`（最小 1） | `core/context/budget.py` |
 | `warning_headroom_tokens` | 2 048 | `core/context/preflight.py` |
 | `uncertain_budget_policy` | `allow` / `fail`（默认 allow） | `core/context/preflight.py` |
-| Subagent 深度 / 工具白名单 | 1 / read、grep、find、ls、skill（串行只读） | `core/subagent/*` |
+| Subagent 深度 / 工具白名单 | 1 / 只读 profile:read、grep、find、ls、skill；`implement`:含 write/edit/bash | `core/subagent/*`、`app/composition/subagent/profiles.py` |
 
 ### session
 

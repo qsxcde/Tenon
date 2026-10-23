@@ -15,20 +15,37 @@ def test_profile_registry_exposes_canonical_read_only_profiles() -> None:
         profile_names,
     )
 
-    assert profile_names() == ("explore", "review")
+    assert profile_names() == ("explore", "review", "implement")
     assert set(READ_ONLY_TOOL_NAMES) == {"read", "grep", "find", "ls", "skill"}
-    for name in profile_names():
+    for name in ("explore", "review"):
         profile = profile_for(name)
         assert profile.name == name
         assert profile.instructions.strip()
         assert profile.output_guidance.strip()
         assert set(profile.tool_names) == set(READ_ONLY_TOOL_NAMES)
+        assert profile.writable is False
         assert not set(profile.tool_names) & {
             "write",
             "edit",
             "bash",
             "delegate",
         }
+
+
+@pytest.mark.unit
+def test_implement_profile_is_writable_but_cannot_delegate() -> None:
+    """可写 profile 只放宽工作区工具,单层约束(禁 delegate)保持。"""
+    from codeagent.app.composition.subagent.profiles import (
+        WRITABLE_TOOL_NAMES,
+        allowed_tool_names_for,
+        profile_for,
+    )
+
+    profile = profile_for("implement")
+    assert profile.writable is True
+    assert set(profile.tool_names) == set(WRITABLE_TOOL_NAMES)
+    assert {"read", "write", "edit", "bash"} <= set(profile.tool_names)
+    assert "delegate" not in set(allowed_tool_names_for("implement"))
 
 
 @pytest.mark.unit
