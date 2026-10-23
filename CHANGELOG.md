@@ -7,10 +7,25 @@
 
 ### Fixed
 
+- **安全分类器可被包装器前缀绕过**：`timeout 5 rm -rf ~`、`nice -n 5 rm -rf ~/d`、`env -i rm -rf /tmp/x`、`stdbuf -oL rm -rf x`、`command rm -rf x`、`bash -lc 'rm -rf ~'`、`foo=$(rm -rf ~)` 此前全部返回 `allow`。现在包装器（`timeout`/`nice`/`env`/`xargs`/`stdbuf`/`time`/`nohup`/`command`/`builtin`/`exec`）按语义消费其选项与操作数后定位真实命令；命令替换在任意位置递归展开；带版本号的解释器名与组合标志（`-lc`）进入确认档；无法可靠展开时保守拒绝。
+- **敏感路径判定误杀正常动作**：`echo secret`、`grep -r SECRET src`、`cat .env.example` 此前全部 `deny`。现在凭据类文件名只在 token 具有路径形态时生效，`.env.example`/`.env.sample`/`.env.template`/`.env.dist` 显式放行；`.env`、`~/.ssh/id_rsa`、`*.pem` 等真实目标仍然拒绝。
+- **只读搜索工具没有文件边界**：`grep`/`find`/`ls` 与 `read` 采用同一边界结论（界内放行、界外放行并警告、敏感路径拒绝），`grep ~/.ssh` 不再能绕过 `read` 读私钥。
+- **越界警告模型看不到**：`ToolDecision` 增加 `warning` 字段，安全策略的越界提示现在以单行 `[安全提示]` 前缀进入模型可见的工具结果。
+- **bash 合并输出无上限**：stdout/stderr 各自 30KB 截断后合并可达约 60KB。现在合并后按有效输出上限再截一次，标记 `truncated_by=merged_budget`，保留末尾与原始总量；超时/清理不确定状态不被覆盖。同时删除从未使用的 `MAX_OUTPUT_CHARS` 常量。
+- **中文 token 被系统性低估约 4 倍**：50 个中文字符此前估为 12 tokens。新增共享估算器（CJK 按字计价、ASCII 保持 `len // 4`），预算快照与自动压缩切点共用同一实现；工具结果裁剪改为按估算 token 二分收敛，不再用 `allocation * 4` 字符硬折算。
 - `prepare_context` 在工具结果被预算裁剪时会重复发布一次 `CONTEXT_BUDGET` 事件（两次 payload 完全相同），导致订阅方（TUI `/context`、headless `--context`）把一次请求的预算变化计成两次。现在每个请求恰好发布一个预算快照，并补充按事件计数的回归测试。
+- **会话索引追加退化为 O(n²)**：`_append` 先写 JSONL 再读索引，指纹必然失配，增量分支永不触发。改为写前读索引并应用记录、写后只刷新指纹；1000 次追加由约 7s 降至 0.37s。
+
+### Added
+
+- `docs/design/roadmap-v0.6.md`：v0.6 硬化路线图与实测证据、后续版本（执行控制 / 沙箱与程序化工具 / 子 Agent 演进 / 对外接口）。
+- 三个 OpenSpec 变更并已归档：`security-classification-hardening`、`context-accounting-fidelity`、`session-index-incremental`；主规格 `tools`、`context-budget`、`sessions` 同步更新。
+- 新增回归测试：安全绕过/误杀/边界（21 例）、合并输出上限（3 例）、token 估算口径（5 例）、索引增量与追加规模（3 例）。
+- 新增模块：`tools/security/wrappers.py`（包装器语义跳过）、`tools/security/interpreters.py`（解释器家族与内联标志）、`tools/shared/merged.py`（合并输出上限）、`core/context/tokens.py`（共享 token 估算）、`core/context/governance.py`（工具结果按预算治理）。
 
 ### Changed
 
+- `tests/session/behavior/test_compaction.py`、`test_context_recovery_regression.py`、`tests/app/container/test_model.py` 的窗口与压缩预算按中英混合估算口径等比放大（中文内容估算值约为旧口径数倍，原参数已小于单轮输入）。
 - 测试 marker 分层修正：`tests/conftest.py` 现在让显式主分类（模块级 `pytestmark` 或函数装饰器）优先于目录兜底，同一目录可按真实边界细化。`tests/app/container/test_assembly.py` 整体改标 `contract`（用 fake provider 与 stub backend，不启外部进程），其中真正启动 MCP 子进程的 `test_config_append_mcp_tools` 单独标 `integration`。
   - 效果：`app/composition/policy.py` 的快速口径覆盖率由 **20%** 升至 **84%**，deny / interactive / allow 三个安全决策分支与文件边界回归从此进入每次 `quality-fast`；矩阵批次由 212 降到 161，移出的纯装配用例由快速批次接管。
   - 覆盖率：快速质量集由 `1540 passed` / **84.58%** 变为 `1562 passed` / **86.35%**（15932/18451 statements），CI 硬下限由 77.9% 上调至 **80%**。

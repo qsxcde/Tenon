@@ -12,6 +12,11 @@ from codeagent.core.context.budget import (
     govern_tool_messages,
 )
 from codeagent.core.context.model import AgentContext
+from codeagent.core.context.preflight import (
+    ContextPreflightConfig,
+    evaluate_context_preflight,
+)
+from codeagent.core.context.tokens import estimate_text_tokens, is_cjk
 from codeagent.core.contracts.messages import Message
 from codeagent.core.contracts.errors import ContextPreparationError
 from codeagent.core.contracts.ports import StreamEvent
@@ -672,3 +677,48 @@ async def test_prepare_context_emits_exactly_one_budget_snapshot_when_cropping()
 
     budget_events = [event for event in events if event.type == "context_budget"]
     assert len(budget_events) == 1
+
+
+# -- v0.6 token 估算口径 ------------------------------------------------------
+
+
+def test_cjk_characters_cost_one_token_each():
+    """中文按约 1 token/字计价,不再被固定除数低估约 4 倍(回归:E6)。"""
+    chinese = "这是一段用于验证中文估算口径的示例文本"
+    assert estimate_text_tokens(chinese) == len(chinese)
+
+
+def test_ascii_text_keeps_legacy_arithmetic():
+    """纯英文保持历史口径(聚合后除以 4),既有预算不漂移。"""
+    english = "the quick brown fox jumps over the lazy dog" * 3
+    assert estimate_text_tokens(english) == len(english) // 4
+
+
+def test_mixed_text_counts_both_parts():
+    text = "预算 budget 与 usage"
+    expected = sum(1 for character in text if is_cjk(character)) + (
+        len([character for character in text if ord(character) < 0x80]) // 4
+    )
+    assert estimate_text_tokens(text) == expected
+
+
+def test_empty_text_is_zero():
+    assert estimate_text_tokens("") == 0
+
+
+def test_cjk_estimate_changes_preflight_outcome():
+    """小窗口中文会话:旧口径判 safe,新口径必须能判定 over_limit(回归:E6)。"""
+    chinese = "这是一段中文字符" * 40  # 320 个 CJK 字符
+    snapshot = estimate_context_budget(
+        ContextBudgetInput(
+            context_window=256,
+            output_reserve=0,
+            reserve_tokens=0,
+            messages=(Message(role="user", content=chinese),),
+            window_source="override",
+        )
+    )
+
+    assert snapshot.input_tokens >= len(chinese)
+    result = evaluate_context_preflight(snapshot, ContextPreflightConfig())
+    assert result.status == "over_limit" and result.allowed is False

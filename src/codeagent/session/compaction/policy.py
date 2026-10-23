@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from codeagent.core.context.budget import ContextBudgetSnapshot
+from codeagent.core.context.tokens import count_tokens, is_cjk
 from codeagent.core.contracts.messages import Message
 
 DEFAULT_BUDGET_TOKENS = 20_000
@@ -189,11 +190,20 @@ def decide_auto_compaction(
 
 
 def estimate_tokens(message: Message) -> int:
-    """Estimate message tokens using the existing conservative heuristic."""
-    chars = len(message.content)
+    """Estimate one message with the shared budgeting estimator.
+
+    Compaction and the request budget must agree on this number: two
+    different coefficients would make the compaction target disagree with
+    the preflight decision it is meant to satisfy.
+    """
+    parts = [message.content]
     for call in message.tool_calls:
-        chars += len(call.name) + len(json.dumps(call.args, ensure_ascii=False))
-    return max(1, chars // 4)
+        parts.append(call.name)
+        parts.append(json.dumps(call.args, ensure_ascii=False))
+    text = "".join(parts)
+    cjk = sum(1 for character in text if is_cjk(character))
+    wide = sum(1 for character in text if ord(character) >= 0x80 and not is_cjk(character))
+    return count_tokens(len(text) - cjk - wide, cjk, wide)
 
 
 def find_cut_point(messages: list[Message], budget: int = DEFAULT_BUDGET_TOKENS) -> int:

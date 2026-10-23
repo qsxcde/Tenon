@@ -242,20 +242,30 @@ class JsonlWritingMixin(JsonlStoreHost):
         return _sum_usage(self._iter_entries(path))
 
     def _append(self, session_id: str, record: dict[str, Any]) -> None:
+        """Append one record and update the derived index incrementally.
+
+        The index is read **before** the JSONL write so its fingerprint still
+        matches the file on disk; reading afterwards always failed validation
+        and silently degraded every append into a full rebuild (O(n²)).
+        A crash between the two steps only leaves a stale index, which the next
+        read detects and rebuilds — JSONL stays the single source of truth.
+        """
         path = self._path(session_id)
         if not path.exists():
             raise ValueError(f"会话不存在: {session_id}")
         with self._lock_for(path):
+            index = self._read_valid_index(path)
+            if index is not None:
+                index = self._apply_index_record_detached(index, path, record)
             with path.open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                 stream.flush()
                 os.fsync(stream.fileno())
             self._chmod_private(path)
-            index = self._read_valid_index(path)
             if index is None:
                 index = self._build_index(path)
             else:
-                index = self._apply_index_record(index, path, record)
+                index = self._refresh_index_source(path, index)
             self._safe_write_index(path, index)
 
 

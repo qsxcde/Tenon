@@ -115,7 +115,9 @@ class SessionExecutionMixin(SessionRuntimeHost):
                 return ToolDecision.allow()
             decision = policy.decide(call.name, call.args)
             if decision.action == "allow":
-                return ToolDecision.allow()
+                # 越界读等"放行但需提示"的判定必须让模型看到原因,否则
+                # 安全策略的 warning 通道在适配层被静默丢弃。
+                return ToolDecision.allow(decision.reason, warning=decision.warning)
             if decision.action == "deny":
                 return ToolDecision.block(decision.reason)
             request_id = str(uuid.uuid4())

@@ -18,6 +18,11 @@ from codeagent.core.contracts.ports import AgentTool, ToolDecision
 from codeagent.core.orchestration.config import AgentLoopConfig
 
 
+#: 安全警告前缀:单行、固定格式,便于订阅方按行剥离。
+_WARNING_PREFIX = "[安全提示] "
+NEWLINE = chr(10)
+
+
 async def new_tool_result(
     tool: AgentTool | None,
     call: ToolCall,
@@ -39,7 +44,7 @@ async def new_tool_result(
         )
     if tool is None:
         return _unknown_tool_result(call, operation_id)
-    decision_result = await _check_before_hook(tool, call, context, config, operation_id)
+    decision_result, warning = await _check_before_hook(tool, call, context, config, operation_id)
     if decision_result is not None:
         return decision_result
     try:
@@ -55,8 +60,22 @@ async def new_tool_result(
             cleanup_confirmed=True,
         )
     result = await _check_after_hook(call, result, context, config)
+    if warning:
+        result = _with_warning(result, warning)
     if not result.operation_id:
         result.operation_id = operation_id or ""
+    return result
+
+
+def _with_warning(result: ToolResult, warning: str) -> ToolResult:
+    """Prefix an allowed-but-noteworthy call so the model can see it.
+
+    The text stays on one line and the structured metadata is untouched, so
+    downstream consumers keep parsing the same facts.
+    """
+    if not warning or result.content.startswith(_WARNING_PREFIX):
+        return result
+    result.content = f"{_WARNING_PREFIX}{warning}{NEWLINE}{result.content}"
     return result
 
 
@@ -66,22 +85,29 @@ async def _check_before_hook(
     context: AgentContext,
     config: AgentLoopConfig,
     operation_id: str | None,
-) -> ToolResult | None:
+) -> tuple[ToolResult | None, str | None]:
+    """Return `(blocking_result, warning)`; both are None when nothing applies."""
     if config.before_tool_call is None:
-        return None
+        return None, None
     decision = await await_if_needed(config.before_tool_call(call, context))
-    if isinstance(decision, ToolDecision) and decision.action != "allow":
-        return ToolResult(
-            call.id,
-            f"[工具执行被拒绝] {decision.reason}",
-            error=True,
-            name=tool.name,
-            rejected=True,
-            status=ToolExecutionStatus.REJECTED,
-            operation_id=operation_id or "",
-            cleanup_confirmed=True,
+    if not isinstance(decision, ToolDecision):
+        return None, None
+    if decision.action != "allow":
+        return (
+            ToolResult(
+                call.id,
+                f"[工具执行被拒绝] {decision.reason}",
+                error=True,
+                name=tool.name,
+                rejected=True,
+                status=ToolExecutionStatus.REJECTED,
+                operation_id=operation_id or "",
+                cleanup_confirmed=True,
+            ),
+            None,
         )
-    return None
+    warning = decision.reason if decision.warning and decision.reason else None
+    return None, warning
 
 
 async def _execute_tool(

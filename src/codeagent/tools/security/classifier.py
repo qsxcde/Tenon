@@ -17,6 +17,8 @@ from codeagent.tools.security.bash_rules import (
 from codeagent.tools.security.decision import ALLOW, ASK, DENY, SecurityDecision
 from codeagent.tools.security.filesystem import (
     _BOUNDED_TOOLS,
+    _READ_TOOLS,
+    _SEARCH_TOOLS,
     _secret_path_hit,
     classify_file,
 )
@@ -24,6 +26,7 @@ from codeagent.tools.security.mcp import classify_mcp
 from codeagent.tools.security.shell_parse import (
     split_segments,
 )
+from codeagent.tools.security.wrappers import effective_segment
 from codeagent.tools.shared import resolve_to_cwd
 
 DEFAULT_ALLOWLIST: tuple[str, ...] = (
@@ -46,6 +49,28 @@ def _split_segments(command: str) -> list[list[str]]:
     """Use the same parser as bash_rules; malformed syntax fails closed there."""
 
     return split_segments(command) or [[command.strip()]]
+
+
+def _rule_candidates(segments: list[list[str]]) -> list[list[str]]:
+    """Yield both the raw and the wrapper-stripped view of every segment.
+
+    Ask-tier rules are written against `segment[0]`:
+
+    - `sudo` / `xargs` rules need the **raw** view (the wrapper is the risk);
+    - `rm -r` / `git push` rules need the **effective** view, otherwise
+      `timeout 5 rm -r` hides the real command behind the wrapper.
+
+    Checking both views keeps existing rules intact and closes the prefix
+    bypass without rewriting each rule.
+    """
+    candidates: list[list[str]] = []
+    for segment in segments:
+        if segment:
+            candidates.append(segment)
+        effective = effective_segment(segment)
+        if effective and effective != segment:
+            candidates.append(effective)
+    return candidates
 
 
 def _matches_allowlist(tokens: list[str], allowlist: tuple[str, ...]) -> bool:
@@ -83,25 +108,29 @@ def classify_bash(
     hit = _dangerous_hit(command) or _dangerous_intent(command, cwd)
     if hit is not None:
         return SecurityDecision(DENY, f"命令命中危险模式: {hit}")
-    segments = _split_segments(command)
-    secret_hit = _secret_path_hit(segments)
+    raw_segments = _split_segments(command)
+    # 敏感路径检查覆盖原始 token(含包装器参数),避免 `env cat .env` 漏判。
+    secret_hit = _secret_path_hit(raw_segments)
     if secret_hit is not None:
         return SecurityDecision(DENY, secret_hit)
+    candidates = _rule_candidates(raw_segments)
     allow = allowlist if allowlist is not None else DEFAULT_ALLOWLIST
     rules = ask_rules if ask_rules is not None else default_ask_rules(exists)
-    for segment in segments:
-        if not segment:
-            continue
+    for segment in candidates:
         for match, reason in rules:
             if match([segment]):
                 return SecurityDecision(ASK, reason)
-        if _matches_allowlist(segment, allow):
-            continue
+    effective_segments = [effective_segment(segment) or segment for segment in raw_segments]
     for match, reason in rules:
-        if match(segments):
+        if match(effective_segments) or match(raw_segments):
             return SecurityDecision(ASK, reason)
-    if _download_to_shell(segments):
+    if _download_to_shell(candidates):
         return SecurityDecision(ASK, "网络下载并执行(curl|sh 类)")
+    if all(
+        _matches_allowlist(segment, allow) or _matches_allowlist(effective, allow)
+        for segment, effective in zip(raw_segments, effective_segments)
+    ):
+        return SecurityDecision(ALLOW)
     return SecurityDecision(ALLOW)
 
 
@@ -118,6 +147,11 @@ def classify_tool(
         return classify_bash(str(args.get("command", "")), cwd=cwd, exists=exists)
     if tool_name in _BOUNDED_TOOLS:
         raw = str(args.get("file_path", ""))
+        if raw:
+            return classify_file(tool_name, resolve_to_cwd(raw, cwd), workspace)
+    if tool_name in _SEARCH_TOOLS:
+        # 只读搜索工具与 read 共享同一边界:界内放行、界外放行并警告、敏感路径拒绝。
+        raw = str(args.get("path") or args.get("file_path") or "")
         if raw:
             return classify_file(tool_name, resolve_to_cwd(raw, cwd), workspace)
     if tool_name.startswith("mcp__"):

@@ -38,11 +38,36 @@ class JsonlIndexingMixin(JsonlStoreHost):
             source_fingerprint=self._source_fingerprint,
         )
 
+    def _apply_index_record_detached(
+        self,
+        index: dict[str, Any],
+        path: Path,
+        record: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Apply one record without refreshing the source fingerprint.
+
+        The append path reads the index *before* writing the JSONL line, so the
+        fingerprint still describes the pre-append file. Refreshing it there
+        would record a stale size and force a full rebuild on the next read;
+        the caller refreshes it once the line is durably written.
+        """
+        return self._index.apply_record(
+            index,
+            path,
+            record,
+            source_fingerprint=lambda _path: dict(index.get("source") or {}),
+        )
+
     def _read_valid_index(self, path: Path) -> dict[str, Any] | None:
         return self._index.read_valid(path, source_fingerprint=self._source_fingerprint)
 
     def _write_index(self, path: Path, index: dict[str, Any]) -> None:
         self._index._write_index(path, index)
+
+    def _refresh_index_source(self, path: Path, index: dict[str, Any]) -> dict[str, Any]:
+        """Stamp one index with the current on-disk source fingerprint."""
+        index["source"] = self._source_fingerprint(path)
+        return index
 
     def _invalidate_index(self, path: Path) -> None:
         self._index.invalidate(path)

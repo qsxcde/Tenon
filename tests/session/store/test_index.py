@@ -1,5 +1,7 @@
 """index behavior tests."""
 
+import time
+
 from tests.session.store.fixtures import *  # noqa: F401,F403
 
 
@@ -187,3 +189,66 @@ def test_list_sessions_sorted(tmp_path):
     store.create("s1")
     ids = [r.id for r in store.list()]
     assert set(ids) == {"s1", "s2"}
+
+
+# -- v0.6 追加路径增量索引 ----------------------------------------------------
+
+
+def test_append_updates_index_incrementally_and_refreshes_fingerprint(tmp_path):
+    """追加后索引与源文件指纹一致,且后续读取命中索引(回归:E7)。"""
+    store = _store(tmp_path)
+    store.create("s1")
+    build_calls = []
+    original_build = store._build_index
+    store._build_index = lambda path: build_calls.append(path) or original_build(path)
+
+    for index in range(5):
+        store.append_message("s1", Message(role="user", content=f"message-{index}"))
+
+    index_path = tmp_path / "sessions" / "s1.index.json"
+    payload = json.loads(index_path.read_text(encoding="utf-8"))
+    source = tmp_path / "sessions" / "s1.jsonl"
+    assert payload["source"]["size"] == source.stat().st_size
+    assert payload["source"]["mtime_ns"] == source.stat().st_mtime_ns
+    assert payload["session"]["title"] == "message-0"
+    assert build_calls == []
+
+    assert store.get("s1").title == "message-0"
+
+
+def test_append_rebuilds_once_after_losing_the_index(tmp_path):
+    """索引被删除后首次追加回源重建,第二次追加继续走增量。"""
+    store = _store(tmp_path)
+    store.create("s1")
+    store.append_message("s1", Message(role="user", content="first"))
+    index_path = tmp_path / "sessions" / "s1.index.json"
+    index_path.unlink()
+
+    build_calls = []
+    original_build = store._build_index
+    store._build_index = lambda path: build_calls.append(path) or original_build(path)
+
+    store.append_message("s1", Message(role="user", content="second"))
+    store.append_message("s1", Message(role="user", content="third"))
+
+    assert len(build_calls) == 1
+    assert store.get("s1").title == "first"
+
+
+def test_repeated_appends_stay_linear(tmp_path):
+    """连续追加不随历史增长线性退化(回归:E7 的 O(n²) 退化)。"""
+    store = _store(tmp_path)
+    store.create("s1")
+
+    def append(count: int) -> float:
+        started = time.perf_counter()
+        for index in range(count):
+            store.append_message("s1", Message(role="user", content=f"m{index}"))
+        return time.perf_counter() - started
+
+    append(50)  # 预热
+    first = append(100)
+    second = append(100)
+
+    # 同样批量下第二段历史更长;若每次全量重建,耗时会成倍上涨。
+    assert second < first * 2.5

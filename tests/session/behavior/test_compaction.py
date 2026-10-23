@@ -112,8 +112,10 @@ async def test_threshold_auto_compact_triggers():
         model,
         store=store,
         summarizer=_StubSummarizer(),
-        context_window=2_000,
-        compact_budget=600,
+        # 中文按约 1 token/字计价,同等 CJK 内容估算约为旧 `len // 4` 的 4 倍;
+        # 窗口与压缩预算等比放大,保持"阈值触发自动压缩"的原场景。
+        context_window=4_000,
+        compact_budget=1_200,
         compaction_policy=CompactionPolicyConfig(
             trigger_ratio=0.8,
             target_ratio=0.6,
@@ -134,8 +136,8 @@ async def test_auto_compaction_emits_budget_diagnostics_without_provider_usage()
         model,
         store=MemoryStore(),
         summarizer=_StubSummarizer(),
-        context_window=2_000,
-        compact_budget=600,
+        context_window=4_000,
+        compact_budget=1_200,
         compaction_policy=CompactionPolicyConfig(
             trigger_ratio=0.8,
             target_ratio=0.6,

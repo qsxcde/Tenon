@@ -318,3 +318,44 @@ def test_bash_output_keeps_tail_on_truncation(tmp_path):
     out = _invoke(BashTool(cwd=str(tmp_path)), command="seq 1 40000")
     assert "[输出已截断(保留末尾)]" in out
     assert "40000" in out
+
+
+def test_bash_merged_output_respects_one_unified_cap():
+    """stdout 与 stderr 各自接近单流上限时,合并结果不得超过统一上限(回归:E5)。
+
+    原实现只在单流层面截断:40000 + 40000 字节合并后模型可见约 60000 字符,
+    一次工具结果即可吃掉大半上下文预算。
+    """
+    tool = BashTool()
+    script = (
+        "import sys; sys.stdout.write('A'*40000); sys.stdout.flush(); sys.stderr.write('B'*40000)"
+    )
+    out = tool._invoke(tool.Args(command=f"python3 -c {script!r}"))
+    limit = tool.output_max_bytes
+
+    assert len(str(out).encode("utf-8")) <= limit
+    assert out.output_metadata["truncated_by"] == "merged_budget"
+    assert out.output_metadata["completeness"] == "truncated"
+    assert out.output_metadata["shown_bytes"] <= limit
+    assert out.output_metadata["total_bytes"] >= 80_000
+    assert "合并输出超过统一上限" in out
+
+
+def test_bash_merged_cap_keeps_timeout_completeness():
+    """合并截断不得把"超时未完整"覆盖成普通截断。"""
+    tool = BashTool()
+    metadata = {"completeness": "incomplete", "total_bytes": 90_000, "shown_bytes": 1}
+    merged, updated = tool._cap_merged("x" * 40_000, metadata)
+
+    assert updated["completeness"] == "incomplete"
+    assert updated["truncated_by"] == "merged_budget"
+    assert len(merged.encode("utf-8")) <= tool.output_max_bytes
+
+
+def test_bash_small_output_is_untouched():
+    """未超限的输出不得被合并截断改写。"""
+    tool = BashTool()
+    out = tool._invoke(tool.Args(command="echo hello"))
+
+    assert out.output_metadata["truncated_by"] is None
+    assert out.output_metadata["completeness"] == "complete"

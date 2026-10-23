@@ -24,14 +24,15 @@ from codeagent.tools.security.bash_rules import (
 )
 from codeagent.tools.security.shell_parse import last_segment_first_token
 from codeagent.tools.shared import GovernedText, ToolResourceLimits, redact_metadata_text
+from codeagent.tools.shared.merged import MERGED_TRUNCATION_MARKER, cap_merged_output
 
 __all__ = [
     "BashTool",
     "BashInvocationResult",
     "DEFAULT_TIMEOUT_S",
     "MAX_TIMEOUT_S",
-    "MAX_OUTPUT_CHARS",
     "DANGEROUS_PATTERNS",
+    "MERGED_TRUNCATION_MARKER",
 ]
 
 
@@ -55,9 +56,10 @@ class BashInvocationResult:
 
 DEFAULT_TIMEOUT_S = 120
 MAX_TIMEOUT_S = 600
-MAX_OUTPUT_CHARS = 30_000
 SEMANTIC_OK_PREFIXES = ("grep",)
 TRUNCATION_MARKER = "\n...[输出已截断(保留末尾)]..."
+#: stdout 与 stderr 合并后再次超限时的标记;区别于单流截断原因。
+MERGED_TRUNCATION_MARKER = "\n...[合并输出超过统一上限,已保留末尾]..."
 
 
 class BashArgs(BaseModel):
@@ -228,7 +230,20 @@ class BashTool(AtomicTool[BashArgs]):
             content = f"{header}\nstdout:\n{stdout}\nstderr:\n{stderr}"
         else:
             content = f"{header}\nstdout:\n{stdout}"
-        return GovernedText(content, output_metadata)
+        return GovernedText(*self._cap_merged(content, output_metadata))
+
+    def _cap_merged(
+        self,
+        content: str,
+        output_metadata: dict[str, Any],
+    ) -> tuple[str, dict[str, Any]]:
+        """Bound the merged stdout+stderr text with one unified limit."""
+        return cap_merged_output(
+            content,
+            output_metadata,
+            max_bytes=self.output_max_bytes,
+            max_lines=self.output_max_lines,
+        )
 
     def _bash_env(self) -> dict[str, str]:
         return bash_env()

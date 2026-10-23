@@ -527,16 +527,18 @@ async def test_recovered_logical_context_drives_automatic_compaction(
     recovery_store: SessionStore,
 ) -> None:
     """Automatic compaction after restart counts logical, not physical, history."""
+    # 窗口与内容按中英混合估算口径放大:中文按约 1 token/字计价,CJK 内容的
+    # 估算值约为旧 `len // 4` 口径的数倍,原 256/80 已小于单轮输入。
     first = _compaction_session(
         FakeClient(response="answer"),
         recovery_store,
         "auto-recovery",
         _DeterministicSummarizer(),
-        context_window=256,
-        compact_budget=80,
+        context_window=1_000,
+        compact_budget=500,
     )
     for index in range(1, 5):
-        await first.run(f"question-{index}" + "x" * 100)
+        await first.run(f"question-{index}" + "x" * 500)
     assert await first.compact() is True
     first_entry_id = first._summary_entry_id
     physical_before = _physical_message_ids(recovery_store, "auto-recovery")
@@ -552,11 +554,11 @@ async def test_recovered_logical_context_drives_automatic_compaction(
         recovery_store,
         "auto-recovery",
         _DeterministicSummarizer(),
-        context_window=256,
-        compact_budget=80,
+        context_window=1_000,
+        compact_budget=500,
         compaction_policy=policy,
     )
-    await restored.run("question-after-restart" + "x" * 100)
+    await restored.run("question-after-restart" + "x" * 500)
 
     records = _compaction_records(recovery_store, "auto-recovery")
     assert len(records) == 2

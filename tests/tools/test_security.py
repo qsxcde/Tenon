@@ -287,3 +287,117 @@ def test_classify_tool_dispatches(tmp_path):
     )
     assert classify_tool("grep", {"pattern": "x"}, workspace=workspace).action == ALLOW
     assert classify_tool("ls", {"path": "/"}, workspace=workspace).action == ALLOW
+
+
+# -- v0.6 安全硬化:包装器/替换绕过 -------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "timeout 5 rm -rf ~",
+        "nice -n 5 rm -rf ~/work",
+        "env -i rm -rf /tmp/x",
+        "env FOO=1 rm -rf /tmp/x",
+        "stdbuf -oL rm -rf /tmp/x",
+        "command rm -rf /tmp/x",
+        "builtin rm -rf /tmp/x",
+        "nice timeout 5 rm -rf ~",
+        "sudo -u root rm -rf /tmp/x",
+    ],
+)
+def test_wrapper_prefix_cannot_hide_destructive_targets(command):
+    """包装器前缀不得让删除家目录/根目录的命令降级为放行(回归:E1)。"""
+    assert classify_bash(command).action in {ASK, DENY}
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "foo=$(rm -rf ~)",
+        "x=$(rm -rf ~); echo $x",
+        'echo "$(rm -rf ~)"',
+        "value=${UNSET:-$(rm -rf ~)}",
+    ],
+)
+def test_embedded_substitution_is_expanded_before_classification(command):
+    """赋值前缀与花括号中的命令替换同样递归展开(回归:E1)。"""
+    assert classify_bash(command).action == DENY
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "python3.12 -c 'import os'",
+        "node20 -e 'console.log(1)'",
+        "bash -lc 'echo hi'",
+        "/usr/bin/python3 -c 'print(1)'",
+    ],
+)
+def test_versioned_interpreter_inline_code_asks(command):
+    """带版本号的解释器名与组合标志必须进入确认档(回归:E1)。"""
+    assert classify_bash(command).action == ASK
+
+
+# -- v0.6 安全硬化:误杀回归 -------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "echo secret",
+        "grep -r SECRET src",
+        "grep -rn token .",
+        "echo token",
+        "cat .env.example",
+        "cat .env.sample",
+        "cat .env.template",
+        "cat .env.dist",
+    ],
+)
+def test_plain_words_and_templates_are_not_secret_paths(command):
+    """字面量与模板文件不得触发凭据拒绝(回归:E2)。"""
+    assert classify_bash(command).action != DENY
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "cat .env",
+        "cat ./config/.env",
+        "cat ~/.ssh/id_rsa",
+        "cat ./credentials.json",
+        "cat secrets.yaml",
+        "cat private.pem",
+    ],
+)
+def test_real_secret_targets_still_denied(command):
+    """真正的凭据目标保持硬拒绝(收紧误报不得放宽真实风险)。"""
+    assert classify_bash(command).action == DENY
+
+
+# -- v0.6 安全硬化:只读搜索工具边界 -----------------------------------------
+
+
+def test_search_tools_share_read_boundary(tmp_path):
+    """grep / find / ls 与 read 采用同一边界结论(回归:E3)。"""
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+    (workspace / "src").mkdir()
+
+    inside_decision = classify_tool(
+        "grep", {"pattern": "x", "path": "src"}, workspace=workspace, cwd=str(workspace)
+    )
+    assert inside_decision.action == ALLOW and inside_decision.warning is False
+
+    outside_decision = classify_tool(
+        "ls", {"path": str(tmp_path)}, workspace=workspace, cwd=str(workspace)
+    )
+    assert outside_decision.action == ALLOW and outside_decision.warning is True
+
+    assert classify_tool("grep", {"pattern": "x"}, workspace=workspace).action == ALLOW
+
+    secret_decision = classify_tool(
+        "grep", {"pattern": "x", "path": "~/.ssh"}, workspace=workspace, cwd=str(workspace)
+    )
+    assert secret_decision.action == DENY

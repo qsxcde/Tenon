@@ -8,22 +8,16 @@ from __future__ import annotations
 
 from typing import Callable
 
+from codeagent.tools.security.interpreters import (
+    INTERPRETER_FAMILIES,
+    inline_code_index,
+    interpreter_family,
+)
+
 __all__ = ["INTERPRETER_WRAPPERS", "default_ask_rules", "flags_of"]
 
-INTERPRETER_WRAPPERS = {
-    "bash",
-    "sh",
-    "zsh",
-    "python",
-    "python3",
-    "node",
-    "perl",
-    "ruby",
-    "php",
-    "lua",
-    "awk",
-    "gawk",
-}
+#: 家族名集合;带版本号的名字由 :func:`interpreter_family` 归一后再判断。
+INTERPRETER_WRAPPERS = frozenset(INTERPRETER_FAMILIES)
 
 AskRule = tuple[Callable[[list[list[str]]], bool], str]
 SegmentsMatcher = Callable[[list[list[str]]], bool]
@@ -94,17 +88,19 @@ def _kill_process(segments: list[list[str]]) -> bool:
 
 
 def _nested_shell(segments: list[list[str]]) -> bool:
+    """嵌套 shell:家族名(含版本号)内联代码,如 `bash -lc '...'`。"""
     segment = segments[-1]
-    return bool(segment) and segment[0] in ("bash", "sh", "zsh") and "-c" in segment[1:]
+    if not segment or interpreter_family(segment[0]) not in {"bash", "sh", "zsh", "ksh", "dash"}:
+        return False
+    return inline_code_index(segment, 0) is not None
 
 
 def _interpreter_inline(segments: list[list[str]]) -> bool:
+    """任意解释器家族(含版本号)的内联代码,如 `python3.12 -c ...`。"""
     segment = segments[-1]
-    return (
-        bool(segment)
-        and segment[0] in INTERPRETER_WRAPPERS
-        and any(flag in segment[1:] for flag in ("-c", "-e", "--eval"))
-    )
+    if not segment or interpreter_family(segment[0]) is None:
+        return False
+    return inline_code_index(segment, 0) is not None
 
 
 def _encoded_pipeline(segments: list[list[str]]) -> bool:
@@ -114,7 +110,7 @@ def _encoded_pipeline(segments: list[list[str]]) -> bool:
         if not any(flag in {"-d", "--decode"} for flag in segment[1:]):
             continue
         next_segment = segments[index + 1]
-        if next_segment and next_segment[0] in INTERPRETER_WRAPPERS:
+        if next_segment and interpreter_family(next_segment[0]) is not None:
             return True
     return False
 

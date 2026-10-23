@@ -13,6 +13,11 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from codeagent.core.context.tokens import (
+    count_tokens,
+    estimate_text_tokens,
+    is_cjk,
+)
 from codeagent.core.contracts.messages import (
     Message,
     OutputCompleteness,
@@ -90,17 +95,24 @@ class ContextBudgetSnapshot:
 
 
 def _estimate_text_tokens(value: str) -> int:
-    if not value:
-        return 0
-    return max(1, len(value) // 4)
+    """Keep the module-private name while delegating to the shared estimator."""
+    return estimate_text_tokens(value)
 
 
 def _estimate_message_tokens(message: Message) -> int:
-    chars = len(message.content)
+    """Aggregate the message's characters, then apply one estimation rule.
+
+    Dividing once per message (instead of once per field) keeps pure-ASCII
+    results byte-identical to the legacy `chars // 4` implementation.
+    """
+    parts = [message.content]
     for call in message.tool_calls:
-        chars += len(call.name)
-        chars += len(json.dumps(call.args, ensure_ascii=False, sort_keys=True))
-    return max(1, chars // 4)
+        parts.append(call.name)
+        parts.append(json.dumps(call.args, ensure_ascii=False, sort_keys=True))
+    text = "".join(parts)
+    cjk = sum(1 for character in text if is_cjk(character))
+    wide = sum(1 for character in text if ord(character) >= 0x80 and not is_cjk(character))
+    return count_tokens(len(text) - cjk - wide, cjk, wide)
 
 
 def _estimate_tool_definition_tokens(definition: Mapping[str, Any]) -> int:
@@ -146,119 +158,12 @@ def estimate_context_budget(request: ContextBudgetInput) -> ContextBudgetSnapsho
     )
 
 
-def govern_tool_messages(messages: list[Message], budget: ContextBudgetSnapshot) -> list[Message]:
-    """Return a detached message view whose tool results fit this request.
-
-    The operation is deterministic and request-local.  It never mutates the
-    session history, and keeps structured facts in a tool message even when
-    its visible body must be reduced to a metadata-only summary.
-    """
-    tools = [message for message in messages if message.role == "tool"]
-    if not tools:
-        return [_clone_message(message) for message in messages]
-    non_tool_tokens = budget.input_tokens - budget.tool_result_tokens
-    available_tokens = max(0, budget.input_budget - non_tool_tokens)
-    remaining = available_tokens
-    remaining_tools = len(tools)
-    replacements: dict[str, Message] = {}
-    for message in tools:
-        current_tokens = _estimate_message_tokens(message)
-        allocation = max(1, remaining // remaining_tools) if remaining else 0
-        if current_tokens <= allocation:
-            replacement = _clone_message(message)
-        else:
-            replacement = _crop_tool_message(message, allocation)
-        replacements[message.id] = replacement
-        remaining = max(0, remaining - _estimate_message_tokens(replacement))
-        remaining_tools -= 1
-    return [replacements.get(message.id, _clone_message(message)) for message in messages]
-
-
-def _crop_tool_message(message: Message, allocation: int) -> Message:
-    metadata = message.tool_output or ToolOutputMetadata(
-        completeness=OutputCompleteness.UNKNOWN,
-        total_bytes=len(message.content.encode("utf-8")),
-        total_lines=len(message.content.splitlines()),
-        shown_bytes=len(message.content.encode("utf-8")),
-        shown_lines=len(message.content.splitlines()),
-        source="legacy",
-    )
-    summary = _tool_metadata_summary(metadata)
-    max_chars = max(0, allocation * 4)
-    suffix = "\n[工具结果已按请求预算裁剪]"
-    if max_chars <= len(summary) + len(suffix):
-        content = summary[:max_chars] if max_chars else "[工具结果已省略]"
-    else:
-        body_chars = max_chars - len(summary) - len(suffix) - 1
-        content = f"{summary}\n{message.content[:body_chars]}{suffix}"
-    cropped = ToolOutputMetadata(
-        completeness=OutputCompleteness.TRUNCATED,
-        total_bytes=metadata.total_bytes,
-        total_lines=metadata.total_lines,
-        shown_bytes=len(content.encode("utf-8")),
-        shown_lines=len(content.splitlines()),
-        truncated_by="request_budget",
-        path=metadata.path,
-        range_start=metadata.range_start,
-        range_end=metadata.range_end,
-        exit_code=metadata.exit_code,
-        duration_ms=metadata.duration_ms,
-        stderr_summary=metadata.stderr_summary,
-        change_summary=metadata.change_summary,
-        artifact_path=metadata.artifact_path,
-        artifact_ref=metadata.artifact_ref,
-        continuation=metadata.continuation,
-        semantic_success=metadata.semantic_success,
-        source="budget",
-        unsupported_blocks=metadata.unsupported_blocks,
-    )
-    return _clone_message(message, content=content, tool_output=cropped)
-
-
-def _tool_metadata_summary(metadata: ToolOutputMetadata) -> str:
-    fields = [f"完整性={metadata.completeness}"]
-    if metadata.path:
-        fields.append(f"路径={metadata.path}")
-    if metadata.exit_code is not None:
-        fields.append(f"退出码={metadata.exit_code}")
-    if metadata.total_bytes is not None:
-        fields.append(f"总字节={metadata.total_bytes}")
-    if metadata.total_lines is not None:
-        fields.append(f"总行数={metadata.total_lines}")
-    if metadata.truncated_by:
-        fields.append(f"原因={metadata.truncated_by}")
-    if metadata.change_summary:
-        fields.append(f"变更={metadata.change_summary}")
-    return "[工具结果元数据] " + ", ".join(fields)
-
-
-def _clone_message(
-    message: Message,
-    *,
-    content: str | None = None,
-    tool_output: ToolOutputMetadata | None = None,
-) -> Message:
-    return Message(
-        role=message.role,
-        content=message.content if content is None else content,
-        tool_calls=[
-            ToolCall(
-                id=call.id,
-                name=call.name,
-                args=copy.deepcopy(call.args),
-                details=copy.deepcopy(call.details),
-            )
-            for call in message.tool_calls
-        ],
-        tool_call_id=message.tool_call_id,
-        id=message.id,
-        parent_id=message.parent_id,
-        tool_output=message.tool_output if tool_output is None else tool_output,
-    )
-
+from codeagent.core.context.governance import clone_message as _clone_message
+from codeagent.core.context.governance import govern_tool_messages as govern_tool_messages
 
 __all__ = [
     "BudgetStatus",
+    "estimate_text_tokens",
     "ContextBudgetInput",
     "ContextBudgetSnapshot",
     "DEFAULT_CONTEXT_WINDOW",

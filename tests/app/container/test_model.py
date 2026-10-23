@@ -190,7 +190,9 @@ async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkey
         ports,
         EventBus(),
         summarizer=_StubSummarizer(),
-        compact_budget=50,
+        # 中文按约 1 token/字计价后,单条 80 字消息约 50 token,
+        # 原 50 的压缩目标已小于最近一轮,预算按新口径放大。
+        compact_budget=80,
     )
     for text in ("问1" * 40, "问2" * 40, "问3" * 40):
         await session.run(text)

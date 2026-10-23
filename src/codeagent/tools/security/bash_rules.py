@@ -5,9 +5,11 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from codeagent.tools.security.interpreters import inline_code_index
 from codeagent.tools.security.shell_parse import (
     tokenize_shell,
 )
+from codeagent.tools.security.wrappers import effective_command_index
 
 __all__ = ["DANGEROUS_PATTERNS"]
 
@@ -21,20 +23,6 @@ DANGEROUS_PATTERNS: list[re.Pattern[str]] = [
 ]
 
 _DYNAMIC_TARGET_CHARS = set('$`\\"*?[]{}')
-_INTERPRETER_WRAPPERS = (
-    "bash",
-    "sh",
-    "zsh",
-    "python",
-    "python3",
-    "node",
-    "perl",
-    "ruby",
-    "php",
-    "lua",
-    "awk",
-    "gawk",
-)
 _MAX_NESTING_DEPTH = 5
 _SEGMENT_SEPARATORS = {"|", "&&", ";", "||", "&"}
 
@@ -61,17 +49,8 @@ def _split_segments_tokens(tokens: list[str]) -> list[list[str]]:
 
 
 def _effective_command_index(segment: list[str]) -> int:
-    index = 0
-    while index < len(segment):
-        token = segment[index]
-        if "=" in token and token.split("=", 1)[0].isidentifier():
-            index += 1
-            continue
-        if token in ("sudo", "env", "time", "nohup", "command"):
-            index += 1
-            continue
-        break
-    return index
+    """Delegate wrapper/assignment skipping to the shared semantic resolver."""
+    return effective_command_index(segment)
 
 
 def _collect_paren(segment: list[str], open_index: int) -> tuple[list[str] | None, int]:
@@ -96,18 +75,70 @@ def _collect_paren(segment: list[str], open_index: int) -> tuple[list[str] | Non
 
 
 def _strip_substitution(token: str) -> str | None:
+    """Return the body of a whole-token command substitution, if any."""
     if token.startswith("$(") and token.endswith(")"):
         body = token[2:-1]
         return body if body.count("(") == body.count(")") else None
+    if token.startswith("${") and token.endswith("}"):
+        return token[2:-1]
     if token.startswith("`") and token.endswith("`") and len(token) > 1:
         return token[1:-1]
     return None
+
+
+def _embedded_substitutions(token: str) -> list[str] | None:
+    """Extract every `$(...)`/`${...}` body embedded anywhere inside a token.
+
+    `shlex` splits `foo=$(rm -rf ~)` into `['foo=$', '(', 'rm', '-rf', '~', ')']`,
+    so a prefix before `$(` must not hide the substitution. Returns `None`
+    when a substitution is opened but never closed (fail closed).
+    """
+    bodies: list[str] = []
+    index = 0
+    while index < len(token):
+        marker = token.find("$(", index)
+        brace = token.find("${", index)
+        if marker == -1 and brace == -1:
+            return bodies
+        if brace != -1 and (marker == -1 or brace < marker):
+            end = token.find("}", brace)
+            if end == -1:
+                return None
+            bodies.append(token[brace + 2 : end])
+            index = end + 1
+            continue
+        depth = 0
+        cursor = marker + 1
+        while cursor < len(token):
+            if token[cursor] == "(":
+                depth += 1
+            elif token[cursor] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            cursor += 1
+        if cursor >= len(token):
+            return None
+        bodies.append(token[marker + 2 : cursor])
+        index = cursor + 1
+    return bodies
 
 
 def _substitution_danger(segment: list[str], cwd: str | None, depth: int) -> str | None:
     index = 0
     while index < len(segment):
         token = segment[index]
+        # `shlex` turns `foo=$(cmd)` into `['foo=$', '(', ...]`, so a token
+        # ending in `$` followed by `(` is the same substitution.
+        if token.endswith("$") and index + 1 < len(segment) and segment[index + 1] == "(":
+            inner, end = _collect_paren(segment, index + 1)
+            if inner is None:
+                return "命令替换 $(...) 未闭合,保守拒绝"
+            hit = _dangerous_intent(" ".join(inner), cwd, depth + 1)
+            if hit is not None:
+                return f"命令替换内命中危险模式: {hit}"
+            index = end + 1
+            continue
         if token == "$" and index + 1 < len(segment) and segment[index + 1] == "(":
             inner, end = _collect_paren(segment, index + 1)
             if inner is None:
@@ -120,6 +151,13 @@ def _substitution_danger(segment: list[str], cwd: str | None, depth: int) -> str
         stripped = _strip_substitution(token)
         if stripped is not None:
             hit = _dangerous_intent(stripped, cwd, depth + 1)
+            if hit is not None:
+                return f"命令替换内命中危险模式: {hit}"
+        embedded = _embedded_substitutions(token)
+        if embedded is None:
+            return f"命令替换未闭合,保守拒绝: {token}"
+        for body in embedded:
+            hit = _dangerous_intent(body, cwd, depth + 1)
             if hit is not None:
                 return f"命令替换内命中危险模式: {hit}"
         index += 1
@@ -211,16 +249,11 @@ def _dangerous_intent(command: str, cwd: str | None = None, _depth: int = 0) -> 
         if index >= len(segment):
             continue
         first = segment[index]
-        inline_flag = next(
-            (flag for flag in ("-c", "-e", "--eval") if flag in segment[index:]),
-            None,
-        )
-        if first in _INTERPRETER_WRAPPERS and inline_flag is not None:
-            arg_index = segment.index(inline_flag, index) + 1
-            if arg_index < len(segment):
-                inner = _dangerous_intent(segment[arg_index], cwd, _depth + 1)
-                if inner is not None:
-                    return f"嵌套 shell 内命中危险模式: {inner}"
+        arg_index = inline_code_index(segment, index)
+        if arg_index is not None:
+            inner = _dangerous_intent(" ".join(segment[arg_index:]), cwd, _depth + 1)
+            if inner is not None:
+                return f"嵌套 shell 内命中危险模式: {inner}"
             continue
         if first == "eval":
             return "eval 间接执行,无法静态判定,保守拒绝"

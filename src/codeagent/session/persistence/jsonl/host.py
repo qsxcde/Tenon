@@ -40,6 +40,8 @@ class JsonlStoreHost:
     _new_index: Callable[[Path, dict[str, Any]], dict[str, Any]]
     _build_index: Callable[[Path], dict[str, Any]]
     _apply_index_record: Callable[[dict[str, Any], Path, dict[str, Any]], dict[str, Any]]
+    _apply_index_record_detached: Callable[[dict[str, Any], Path, dict[str, Any]], dict[str, Any]]
+    _refresh_index_source: Callable[[Path, dict[str, Any]], dict[str, Any]]
     _read_valid_index: Callable[[Path], dict[str, Any] | None]
     _write_index: Callable[[Path, dict[str, Any]], None]
     _invalidate_index: Callable[[Path], None]

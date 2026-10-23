@@ -154,15 +154,22 @@ class ToolCleanupPort(Protocol):
 
 @dataclass(frozen=True)
 class ToolDecision:
-    """Generic pre-execution decision returned by an Agent hook."""
+    """Generic pre-execution decision returned by an Agent hook.
+
+    `warning` marks an allowed call whose reason must stay visible to the
+    model (for example an out-of-workspace read). The loop prefixes the
+    reason to the tool result instead of dropping it, so the design intent
+    "allow but tell the model" is actually observable.
+    """
 
     action: str
     reason: str = ""
+    warning: bool = False
 
     @classmethod
-    def allow(cls) -> "ToolDecision":
-        return cls("allow")
+    def allow(cls, reason: str = "", *, warning: bool = False) -> "ToolDecision":
+        return cls("allow", reason, warning)
 
     @classmethod
-    def block(cls, reason: str) -> "ToolDecision":
-        return cls("block", reason)
+    def block(cls, reason: str, *, warning: bool = False) -> "ToolDecision":
+        return cls("block", reason, warning)
