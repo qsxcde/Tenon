@@ -28,7 +28,7 @@
 | 交互式 TUI | 多行 composer（Enter 提交 / Shift+Enter 换行）、流式正文、可展开工具结果、edit/write 红绿差异、状态栏（model/effort/cwd）、Markdown 渲染、Esc 打断、斜杠命令 + 模糊补全 |
 | Headless CLI | `--prompt` 一次性 / stdin 逐行；事件聚合输出最终回复；敏感操作默认 fail closed |
 | 自研编排 | `core/agent.py` 有状态外壳 + `core/orchestration/loop.py` ReAct 主循环（模型 → 工具 → 继续/结束） |
-| 8 个内建工具 | `read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill`；无状态 `AtomicTool` + `FsOps` 抽象缝；`grep`/`find` 把 `rg`/`fd` 当可选加速，失败回退纯 Python |
+| 11 个内建工具 | `read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill` / `web_fetch` / `web_search` / `todo`；无状态 `AtomicTool` + `FsOps` 抽象缝；`grep`/`find` 把 `rg`/`fd` 当可选加速，失败回退纯 Python；web 工具网络经注入、出站进确认环 |
 | MCP 客户端 | 按 `~/.codeagent/mcp.json` 接入 `tools/list` / `tools/call`；工具名 `mcp__<server>__<tool>` 命名空间化并实施分组预算 |
 | Skills | `SKILL.md` 三源发现（内建 / 个人 / 项目）+ 渐进式披露（描述入 system prompt，正文经 `skill` 工具按需取）；`codeagent skill` 子命令管理技能包 |
 | 会话层 | JSONL 树形持久化；恢复 / 切换 / 分叉 / 归档 / 删除 / 压缩；标题、搜索、筛选、恢复诊断；成功轮次才落盘；`abort` / `steer` / `followup` |

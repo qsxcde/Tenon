@@ -4,7 +4,7 @@ from tests.tools.atomic.fixtures import *  # noqa: F401,F403
 
 from pydantic import BaseModel
 
-from codeagent.tools.atomic import SkillTool
+from codeagent.tools.atomic import SkillTool, TodoTool, WebFetchTool, WebSearchTool
 from codeagent.tools.registry import (
     BUILTIN_TOOL_SPECS,
     ToolBuildContext,
@@ -14,7 +14,19 @@ from codeagent.tools.registry import (
 )
 from codeagent.tools.shared import ToolResourceLimits
 
-BUILTIN_ORDER = ("read", "write", "edit", "bash", "grep", "find", "ls", "skill")
+BUILTIN_ORDER = (
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "grep",
+    "find",
+    "ls",
+    "skill",
+    "web_fetch",
+    "web_search",
+    "todo",
+)
 EXPECTED_TOOL_TYPES = (
     ReadTool,
     WriteTool,
@@ -24,6 +36,9 @@ EXPECTED_TOOL_TYPES = (
     FindTool,
     LsTool,
     SkillTool,
+    WebFetchTool,
+    WebSearchTool,
+    TodoTool,
 )
 
 
@@ -47,9 +62,21 @@ def _demo_tool(context: ToolBuildContext) -> AtomicTool:
 def test_make_tools_returns_all_atomic_tools():
     tools = create_tools()
     assert isinstance(tools, list)
-    assert len(tools) == 8
+    assert len(tools) == 11
     names = {t.name for t in tools}
-    assert names == {"read", "write", "edit", "bash", "grep", "find", "ls", "skill"}
+    assert names == {
+        "read",
+        "write",
+        "edit",
+        "bash",
+        "grep",
+        "find",
+        "ls",
+        "skill",
+        "web_fetch",
+        "web_search",
+        "todo",
+    }
     from codeagent.tools.base import AtomicTool
 
     assert all(isinstance(t, AtomicTool) for t in tools)

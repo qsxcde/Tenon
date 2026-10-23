@@ -44,6 +44,9 @@ DEFAULT_ALLOWLIST: tuple[str, ...] = (
     "git show",
 )
 
+#: 网络出站工具:出站访问统一进 ask 档(headless 无确认通道时 fail-closed)。
+_NETWORK_TOOLS: frozenset[str] = frozenset({"web_fetch", "web_search"})
+
 
 def _split_segments(command: str) -> list[list[str]]:
     """Use the same parser as bash_rules; malformed syntax fails closed there."""
@@ -145,6 +148,8 @@ def classify_tool(
 ) -> SecurityDecision:
     if tool_name == "bash":
         return classify_bash(str(args.get("command", "")), cwd=cwd, exists=exists)
+    if tool_name in _NETWORK_TOOLS:
+        return SecurityDecision(ASK, "网络出站访问(web)")
     if tool_name in _BOUNDED_TOOLS:
         raw = str(args.get("file_path", ""))
         if raw:

@@ -13,7 +13,7 @@
 | 04 | [core 层：Agent Runtime](04-core-layer.md) | 消息模型、端口、ReAct 循环、上下文治理、执行运行时、Subagent 策略 | 核心开发者 |
 | 05 | [session 层：会话与持久化](05-session-layer.md) | AgentSession、SessionManager、JSONL 格式、压缩、状态机、事件总线 | 核心开发者 |
 | 06 | [ai 层：模型基础设施](06-ai-layer.md) | provider、catalog、transport/SSE、错误分类、fake 模型 | 模型接入开发者 |
-| 07 | [tools 层：工具与安全](07-tools-layer.md) | AtomicTool、8 个内建工具、安全分类器、MCP、进程执行、共享设施 | 工具开发者 |
+| 07 | [tools 层：工具与安全](07-tools-layer.md) | AtomicTool、11 个内建工具、安全分类器、MCP、进程执行、共享设施 | 工具开发者 |
 | 08 | [app 层：入口与组合根](08-app-layer.md) | CLI/headless、config、composition 装配、skills、tasks、AGENTS.md | 应用层开发者 |
 | 09 | [TUI 层详解](09-tui-layer.md) | 端口-适配器、状态归约、渲染调度、命令体系、展示块 | TUI 开发者 |
 | 10 | [依赖关系图](10-dependency-map.md) | 分层 import 矩阵、跨层允许点、外部依赖、资源所有权 | 所有人 |

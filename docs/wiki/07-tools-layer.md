@@ -1,6 +1,6 @@
 # 07 · tools 层：内置工具、安全与基础设施
 
-> tools 层是 Agent 与真实世界之间的唯一接口层：8 个原子工具、统一安全分类、MCP 外部工具适配、跨平台进程执行，以及一组可离线测试的共享基础设施。它不 import `core`（由 `tests/test_decoupling.py` 强制），对 core 的适配只发生在 `app/composition/tools/adapter.py`。
+> tools 层是 Agent 与真实世界之间的唯一接口层：11 个原子工具、统一安全分类、MCP 外部工具适配、跨平台进程执行，以及一组可离线测试的共享基础设施。它不 import `core`（由 `tests/test_decoupling.py` 强制），对 core 的适配只发生在 `app/composition/tools/adapter.py`。
 
 ## 一、层内地图
 
@@ -8,7 +8,7 @@
 | --- | --- |
 | `tools/base.py` | `AtomicTool` 抽象基类（无状态、依赖注入） |
 | `tools/registry.py` | `make_tools(...)` 工具集工厂 |
-| `tools/atomic/*` | read / write / edit / bash / grep / find / ls / skill 八个内置工具 |
+| `tools/atomic/*` | read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo 十一个内置工具 |
 | `tools/security/*` | 统一安全分类（allow / ask / deny）、危险命令、文件边界、MCP 权限 |
 | `tools/mcp/*` | MCP 服务端客户端、工具适配、预算裁剪、加载与收尾 |
 | `tools/execution/*` | 跨平台进程执行、外部检索器（rg/fd）、bash 解析 |
@@ -42,10 +42,10 @@
 
 - `cwd` 从 `cfg.cwd` 读取（否则进程启动目录）；
 - `skills` 是"技能名 → 预渲染块"注册表，注入 `SkillTool`；`None` 时 skill 工具返回"未注入"提示；
-- 默认返回八个工具：read / write / edit / bash / grep / find / ls / skill；
-- 无网络、无密钥副作用；资源限制通过 `ToolResourceLimits.from_config(cfg)` 从应用配置读取。
+- 默认返回十一个工具：read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo（声明见 `BUILTIN_TOOL_SPECS`，声明顺序即装配顺序）；
+- 无网络、无密钥副作用（web 工具的网络能力经注入，缺省实现不主动出网）；资源限制通过 `ToolResourceLimits.from_config(cfg)` 从应用配置读取。
 
-## 三、八个内置工具
+## 三、十一个内置工具
 
 | 工具 | 能力 | 关键默认值 |
 | --- | --- | --- |
@@ -57,6 +57,9 @@
 | `find` | 文件名/路径检索（优先 `fd`，缺省纯 Python fallback） | `DEFAULT_LIMIT = 1000` |
 | `ls` | 列目录 | `DEFAULT_LIMIT = 500` 条 |
 | `skill` | 返回已注入技能文档 | 内容由组合根预渲染 |
+| `web_fetch` | 抓取 http/https URL 内容 | 网络经注入 fetcher（缺省 urllib，读取 ≤2MB）；出站进 ask 档 |
+| `web_search` | 经注入的搜索提供方检索 | 未注入返回不可用提示；`DEFAULT_LIMIT = 5`；出站进 ask 档 |
+| `todo` | 整体替换式会话级任务清单 | `MAX_TODOS = 200`；状态经 `TodoState` 注入，仅驻内存 |
 
 - 全部工具输出经 `shared/truncate` 统一截断：任一上限（行/字节）先到即截，且**截断必标记**；`truncate_head` 保留开头（read/grep/find/ls），`truncate_tail` 保留末尾（bash，超时/报错信息通常在末尾）。
 - 截断结果承载 `ToolOutputMetadata`（完整性、总字节/行数、截断原因、`continuation` 续读提示等），是会话层归约与 TUI 展示的事实来源。

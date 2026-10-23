@@ -10,6 +10,10 @@ from .models import Skill
 BOOTSTRAP_TAG = "<codeagent_bootstrap>"
 ADAPTER_VERSION = "codeagent-v1"
 
+#: 未注入工具清单时的保守默认(基础八工具);能力由注入的实际工具名派生,
+#: 本模块不 import tools(app/skills 分层约束),清单由组合根传入。
+_DEFAULT_TOOL_NAMES = ("read", "write", "edit", "bash", "grep", "find", "ls", "skill")
+
 
 class CodeAgentAdapter:
     """Translate Superpowers' abstract actions to CodeAgent capabilities."""
@@ -23,20 +27,21 @@ class CodeAgentAdapter:
         ("find files", "find"),
         ("list files", "ls"),
         ("invoke a skill", "skill"),
+        ("fetch web content", "web_fetch"),
+        ("search the web", "web_search"),
+        ("track task todos", "todo"),
     )
-    _CAPABILITIES = {
-        "read": True,
-        "write": True,
-        "edit": True,
-        "bash": True,
-        "grep": True,
-        "find": True,
-        "ls": True,
-        "skill": True,
-        "subagents": True,
-        "todo": False,
-        "web": False,
-    }
+
+    def __init__(self, tool_names: Iterable[str] | None = None) -> None:
+        names = frozenset(_DEFAULT_TOOL_NAMES if tool_names is None else tool_names)
+        capabilities = {
+            name: name in names
+            for name in ("read", "write", "edit", "bash", "grep", "find", "ls", "skill")
+        }
+        capabilities["subagents"] = True
+        capabilities["todo"] = "todo" in names
+        capabilities["web"] = {"web_fetch", "web_search"} <= names
+        self._capabilities = capabilities
 
     @property
     def version(self) -> str:
@@ -45,17 +50,19 @@ class CodeAgentAdapter:
     def tool_mapping(self) -> str:
         lines = ["CodeAgent 工具映射:"]
         lines.extend(f"- {action} -> `{tool}`" for action, tool in self._TOOLS)
-        lines.extend(
-            [
-                "- subagent dispatch -> 使用 `delegate` 委派只读任务给独立子 Agent",
-                "- todo/task tracking -> 当前不可用,使用计划或 TODO 文件降级",
-                "- web fetch/search -> 当前不可用,不得调用不存在的工具",
-            ]
-        )
+        lines.append("- subagent dispatch -> 使用 `delegate` 委派只读任务给独立子 Agent")
+        if self._capabilities["todo"]:
+            lines.append("- todo/task tracking -> 使用 `todo` 提交完整任务清单(整体替换)")
+        else:
+            lines.append("- todo/task tracking -> 当前不可用,使用计划或 TODO 文件降级")
+        if self._capabilities["web"]:
+            lines.append("- web fetch/search -> `web_fetch` 抓取 URL,`web_search` 检索(需用户确认)")
+        else:
+            lines.append("- web fetch/search -> 当前不可用,不得调用不存在的工具")
         return "\n".join(lines)
 
     def capabilities(self) -> dict[str, bool]:
-        return dict(self._CAPABILITIES)
+        return dict(self._capabilities)
 
     def select_bootstrap(self, skills: Iterable[Skill]) -> Skill | None:
         return next((skill for skill in skills if skill.bootstrap), None)
@@ -72,10 +79,12 @@ class CodeAgentAdapter:
         )
 
 
-def build_bootstrap_prompt(base: str, skills: Iterable[Skill]) -> str:
+def build_bootstrap_prompt(
+    base: str, skills: Iterable[Skill], tool_names: Iterable[str] | None = None
+) -> str:
     """Append the one selected bootstrap without preloading ordinary skills."""
 
-    adapter = CodeAgentAdapter()
+    adapter = CodeAgentAdapter(tool_names=tool_names)
     bootstrap = adapter.select_bootstrap(skills)
     if bootstrap is None:
         return base

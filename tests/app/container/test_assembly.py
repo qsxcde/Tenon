@@ -26,7 +26,7 @@ def test_create_agent_config_returns_config():
 
         config = create_agent_config()
     assert isinstance(config, AgentLoopConfig)
-    assert len(config.tools) == 8
+    assert len(config.tools) == 11
     assert config.model.model_id == "fake-model"
     assert [item.key for item in config.tool_capabilities.items] == [
         "platform",

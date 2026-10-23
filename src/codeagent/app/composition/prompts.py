@@ -34,8 +34,9 @@ def _build_system_prompt(cfg: Any = None, skills: list[Any] | None = None) -> st
         skills, _ = _load_skills(cfg)
     from codeagent.app.skills.runtime import build_bootstrap_prompt
     from codeagent.app.skills.prompt import build_skills_prompt
+    from codeagent.tools.registry import builtin_tool_registry
 
-    base = build_bootstrap_prompt(base, skills)
+    base = build_bootstrap_prompt(base, skills, tool_names=builtin_tool_registry().names())
     return build_skills_prompt(base, skills)
 
 

@@ -24,6 +24,9 @@ from codeagent.tools.atomic import (
     LsTool,
     ReadTool,
     SkillTool,
+    TodoTool,
+    WebFetchTool,
+    WebSearchTool,
     WriteTool,
 )
 from codeagent.tools.base import AtomicTool
@@ -102,7 +105,7 @@ def _skill_tool(context: ToolBuildContext) -> AtomicTool:
     )
 
 
-#: 内建工具声明;顺序即 make_tools 产出顺序(read → skill),契约由测试锁定。
+#: 内建工具声明;顺序即 make_tools 产出顺序(read → todo),契约由测试锁定。
 BUILTIN_TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec("read", _standard_tool(ReadTool)),
     ToolSpec("write", _standard_tool(WriteTool)),
@@ -112,6 +115,9 @@ BUILTIN_TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec("find", _standard_tool(FindTool)),
     ToolSpec("ls", _standard_tool(LsTool)),
     ToolSpec("skill", _skill_tool),
+    ToolSpec("web_fetch", _standard_tool(WebFetchTool)),
+    ToolSpec("web_search", _standard_tool(WebSearchTool)),
+    ToolSpec("todo", _standard_tool(TodoTool)),
 )
 
 
@@ -131,9 +137,9 @@ def make_tools(
       否则回退进程启动目录(P2-8);
     - ``skills`` 为技能名 → 渲染块 注册表(组合根预渲染;None = skill 工具
       返回"未注入"提示);
-    - 默认包含 read / write / edit / bash / grep / find / ls / skill 八个工具,
-      声明见 ``BUILTIN_TOOL_SPECS``;
-    - 无网络、无密钥副作用。
+    - 默认包含 read / write / edit / bash / grep / find / ls / skill /
+      web_fetch / web_search / todo 十一个工具,声明见 ``BUILTIN_TOOL_SPECS``;
+    - 无网络、无密钥副作用(web 工具的网络能力经注入,缺省实现不主动出网)。
     """
     cwd = getattr(cfg, "cwd", None) if cfg is not None else None
     limits = resource_limits or ToolResourceLimits.from_config(cfg)

@@ -401,3 +401,22 @@ def test_search_tools_share_read_boundary(tmp_path):
         "grep", {"pattern": "x", "path": "~/.ssh"}, workspace=workspace, cwd=str(workspace)
     )
     assert secret_decision.action == DENY
+
+
+# -- web/todo 工具分类 -------------------------------------------------------
+
+
+def test_web_tools_ask_and_todo_allows(tmp_path):
+    """网络出站工具进 ask 档(headless 时 fail-closed),todo 直接放行。"""
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+
+    for name, args in (
+        ("web_fetch", {"url": "https://example.com"}),
+        ("web_search", {"query": "codeagent"}),
+    ):
+        decision = classify_tool(name, args, workspace=workspace)
+        assert decision.action == ASK
+        assert decision.reason
+
+    assert classify_tool("todo", {"todos": []}, workspace=workspace).action == ALLOW
