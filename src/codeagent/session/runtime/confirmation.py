@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 
+from codeagent.core.contracts.ports import ApprovalOutcome
+
 
 class ConfirmationTimeoutError(TimeoutError):
     """Raised when a confirmation request expires before a response."""
@@ -16,7 +18,8 @@ class ConfirmationTimeoutError(TimeoutError):
 class ConfirmationRequest:
     request_id: str
     future: asyncio.Future[bool]
-    status: str = "pending"
+    #: 封闭终态;None = 仍在等待(开放字符串状态已收敛为 ApprovalOutcome)
+    outcome: ApprovalOutcome | None = None
     timeout_handle: asyncio.TimerHandle | None = None
 
 
@@ -72,17 +75,17 @@ class ConfirmationCoordinator:
     def respond(self, request_id: str, approved: bool) -> bool:
         """Resolve an active request; return False for stale responses."""
         request = self._requests.get(request_id)
-        if request is None or request.status != "pending" or request.future.done():
+        if request is None or request.outcome is not None or request.future.done():
             return False
-        request.status = "approved" if approved else "rejected"
+        request.outcome = ApprovalOutcome.ALLOWED_ONCE if approved else ApprovalOutcome.REJECTED
         request.future.set_result(approved)
         return True
 
     def cancel(self, request_id: str) -> bool:
         request = self._requests.get(request_id)
-        if request is None or request.status != "pending":
+        if request is None or request.outcome is not None:
             return False
-        request.status = "cancelled"
+        request.outcome = ApprovalOutcome.CANCELLED
         request.future.cancel()
         return True
 
@@ -95,9 +98,9 @@ class ConfirmationCoordinator:
 
     def _expire(self, request_id: str) -> None:
         request = self._requests.get(request_id)
-        if request is None or request.status != "pending" or request.future.done():
+        if request is None or request.outcome is not None or request.future.done():
             return
-        request.status = "expired"
+        request.outcome = ApprovalOutcome.TIMED_OUT
         request.future.set_exception(ConfirmationTimeoutError(f"确认请求已超时: {request_id}"))
 
     def clear(self) -> None:

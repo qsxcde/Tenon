@@ -12,7 +12,7 @@ from codeagent.core import AgentContext, ToolDecision
 from codeagent.core.context.contracts import BeforeToolCall
 from codeagent.core.contracts.events import AgentEvent, EventType
 from codeagent.core.contracts.messages import Message
-from codeagent.core.contracts.ports import ApprovalPolicy
+from codeagent.core.contracts.ports import ApprovalPolicy, ApprovalResult
 from codeagent.core.context.contracts import ContextTransformer
 from codeagent.core.orchestration.config import AgentLoopConfig
 from codeagent.session.runtime.host import SessionRuntimeHost
@@ -139,7 +139,9 @@ class SessionExecutionMixin(SessionRuntimeHost):
                 request_id,
                 timeout=self._confirmation_timeout,
             )
-            return ToolDecision.allow() if approved else ToolDecision.block("用户拒绝执行")
+            # 封闭审批结果 + fail-closed 映射:拒绝原因对模型可见;
+            # 超时/取消不在这里截获,保持既有异常语义(confirmation_error / 取消)。
+            return ApprovalResult.from_response(approved).to_tool_decision()
 
         return before_tool_call
 

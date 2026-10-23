@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from codeagent.core.contracts.ports import PolicyDecision
+from codeagent.core.contracts.ports import ApprovalOutcome, ApprovalResult, PolicyDecision
 
 
 def _create_policy(cfg: Any = None, approval_mode: str = "deny") -> Any:
@@ -35,9 +35,16 @@ def _create_policy(cfg: Any = None, approval_mode: str = "deny") -> Any:
                 mcp_rules=mcp_rules,
             )
             if decision.action == "ask" and approval_mode == "deny":
-                return PolicyDecision("deny", f"未确认不得执行(headless): {decision.reason}")
+                # headless 无确认通道:归因 UNAVAILABLE 并 fail-closed 拒绝
+                # (ask→deny 语义保留,枚举使"为何拒绝"可诊断)。
+                return ApprovalResult(
+                    ApprovalOutcome.UNAVAILABLE,
+                    f"未确认不得执行(headless): {decision.reason}",
+                ).to_policy_decision()
             if decision.action == "ask" and approval_mode == "allow":
-                return PolicyDecision("allow", decision.reason)
+                return ApprovalResult(
+                    ApprovalOutcome.ALLOWED_ONCE, decision.reason
+                ).to_policy_decision()
             return PolicyDecision(decision.action, decision.reason, decision.warning)
 
     return _Policy()

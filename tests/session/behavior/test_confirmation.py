@@ -128,3 +128,31 @@ async def test_wait_timeout_applies_to_request_registered_without_timer():
     with pytest.raises(ConfirmationTimeoutError):
         await coordinator.wait("late", timeout=0.001)
     assert coordinator.active_request_ids == ()
+
+
+async def test_request_outcomes_use_closed_enum_on_boundary_paths():
+    """确认请求终态收敛为 ApprovalOutcome(拒绝/超时/取消三条边界路径)。"""
+    from codeagent.core.contracts.ports import ApprovalOutcome
+    from codeagent.session.runtime.confirmation import (
+        ConfirmationCoordinator,
+        ConfirmationTimeoutError,
+    )
+
+    coordinator = ConfirmationCoordinator()
+
+    coordinator.register("rejected")
+    rejected = coordinator._requests["rejected"]
+    assert rejected.outcome is None
+    coordinator.respond("rejected", False)
+    assert rejected.outcome is ApprovalOutcome.REJECTED
+
+    coordinator.register("expiring", timeout=0.001)
+    expiring = coordinator._requests["expiring"]
+    with pytest.raises(ConfirmationTimeoutError):
+        await coordinator.wait("expiring", timeout=0.001)
+    assert expiring.outcome is ApprovalOutcome.TIMED_OUT
+
+    coordinator.register("cancelled")
+    cancelled = coordinator._requests["cancelled"]
+    assert coordinator.cancel("cancelled") is True
+    assert cancelled.outcome is ApprovalOutcome.CANCELLED

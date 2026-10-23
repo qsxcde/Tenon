@@ -11,6 +11,8 @@ are responsible for adapting those implementations to these ports.
 
 from __future__ import annotations
 
+import asyncio
+import enum
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from collections.abc import Mapping
@@ -20,6 +22,8 @@ from codeagent.core.contracts.messages import Message, ToolCall, ToolResult
 
 __all__ = [
     "AgentTool",
+    "ApprovalOutcome",
+    "ApprovalResult",
     "ModelPort",
     "ModelResponse",
     "PolicyDecision",
@@ -173,3 +177,88 @@ class ToolDecision:
     @classmethod
     def block(cls, reason: str, *, warning: bool = False) -> "ToolDecision":
         return cls("block", reason, warning)
+
+
+class ApprovalOutcome(enum.StrEnum):
+    """审批流的封闭终态(fail-closed):仅显式放行才可执行。
+
+    封闭集合借鉴 harness 通行做法(allowed-once / rejected / cancelled /
+    unavailable),并按本仓库错误语义把「超时」独立出来(区分失败、超时、取消
+    与清理不确定)。任何映射都不得超出该集合。
+    """
+
+    #: 用户确认放行(一次性授权,不缓存为长期许可)
+    ALLOWED_ONCE = "allowed_once"
+    #: 用户明确拒绝
+    REJECTED = "rejected"
+    #: 等待被取消(abort / 会话取消)
+    CANCELLED = "cancelled"
+    #: 确认请求超时无响应
+    TIMED_OUT = "timed_out"
+    #: 审批通道不可用(如 headless 无确认通道)
+    UNAVAILABLE = "unavailable"
+
+
+#: fail-closed 的默认拒绝原因:非放行终态必须给出可诊断理由。
+_APPROVAL_BLOCK_REASONS: dict[ApprovalOutcome, str] = {
+    ApprovalOutcome.REJECTED: "用户拒绝执行",
+    ApprovalOutcome.CANCELLED: "确认被取消,未确认不得执行",
+    ApprovalOutcome.TIMED_OUT: "确认超时,未确认不得执行",
+    ApprovalOutcome.UNAVAILABLE: "审批通道不可用,未确认不得执行",
+}
+
+
+@dataclass(frozen=True)
+class ApprovalResult:
+    """一次审批的封闭结果:放行判定与终态归因只认这个封闭集合。
+
+    ``to_tool_decision`` / ``to_policy_decision`` 均为 fail-closed 映射:
+    只有 ``ALLOWED_ONCE`` 放行,其余终态一律拒绝执行并携带可诊断原因。
+    """
+
+    outcome: ApprovalOutcome
+    reason: str = ""
+
+    @classmethod
+    def from_response(cls, approved: bool, reason: str = "") -> "ApprovalResult":
+        """把确认响应(批准/拒绝)映射为封闭终态。"""
+        if approved:
+            return cls(ApprovalOutcome.ALLOWED_ONCE, reason)
+        return cls(
+            ApprovalOutcome.REJECTED,
+            reason or _APPROVAL_BLOCK_REASONS[ApprovalOutcome.REJECTED],
+        )
+
+    @classmethod
+    def from_exception(cls, exc: BaseException) -> "ApprovalResult":
+        """把等待审批期间的异常归因到封闭终态(取消/超时),其余归为通道不可用。"""
+        if isinstance(exc, asyncio.CancelledError):
+            return cls(
+                ApprovalOutcome.CANCELLED,
+                str(exc) or _APPROVAL_BLOCK_REASONS[ApprovalOutcome.CANCELLED],
+            )
+        if isinstance(exc, TimeoutError):
+            return cls(
+                ApprovalOutcome.TIMED_OUT,
+                str(exc) or _APPROVAL_BLOCK_REASONS[ApprovalOutcome.TIMED_OUT],
+            )
+        return cls(
+            ApprovalOutcome.UNAVAILABLE,
+            str(exc) or _APPROVAL_BLOCK_REASONS[ApprovalOutcome.UNAVAILABLE],
+        )
+
+    @property
+    def is_allowed(self) -> bool:
+        return self.outcome is ApprovalOutcome.ALLOWED_ONCE
+
+    def to_tool_decision(self) -> ToolDecision:
+        """fail-closed:仅 ALLOWED_ONCE 放行,其余终态映射为工具级拒绝。"""
+        if self.is_allowed:
+            return ToolDecision.allow(self.reason)
+        return ToolDecision.block(self.reason or _APPROVAL_BLOCK_REASONS[self.outcome])
+
+    def to_policy_decision(self) -> PolicyDecision:
+        """fail-closed:仅 ALLOWED_ONCE 映射为 allow,其余映射为 deny 且带原因。"""
+        if self.is_allowed:
+            return PolicyDecision("allow", self.reason)
+        return PolicyDecision("deny", self.reason or _APPROVAL_BLOCK_REASONS[self.outcome])
