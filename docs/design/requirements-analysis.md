@@ -52,7 +52,7 @@
 | AgentLoopConfig | `bound_model / tool_executor / checkpointer`(IR-1、AR-2) | `model / tools / policy`(无 store;core 循环不落盘,存储经会话层注入) |
 | 编排自研第二步(FR-4.8 / AR-5) | 📝 暂缓,三未决问题待答 | ✅ **已落地**(2026-08-14,spike 双跑 diff 通过;平台部署非刚需、JSONL 树形为格式结论) |
 | 事件类型(FR-6.1 / NFR-O1) | 10 类 | **11 类**(新增 `confirmation_requested`,执行前安全确认环事件) |
-| 工具数量(附录 B #11) | 7 | **8 个内建工具**(新增 `skill` 技能寻址工具);MCP 工具按用户配置动态加载 |
+| 工具数量(附录 B #11) | 7 | **11 个内建工具**(v0.3 增 `skill`;v0.7 增 `web_fetch` / `web_search` / `todo`);MCP 与插件工具按用户配置动态加载 |
 | 会话持久化(DR-3 / FR-5.4) | 🔲 v0.2 线性 | ✅ **JSONL 树形**(`SessionStore` 按 id/parentId,v0.2 已落地,含 fork) |
 | 会话生命周期(FR-5.5 / FR-5.10) | 🔲 v0.2 / 🔲 未落地 | ✅ `SessionManager`(create/switch/fork/dispose)+ `steer`/`followup`/`abort` 已落地 |
 | 上下文压缩(FR-5.6) | 🔲 v0.2 | ✅ 已落地(`compaction`,手动 + 阈值) |
@@ -95,7 +95,7 @@
 - 包版本已统一为 `0.5.0`，CHANGELOG 已补齐 `[0.5.0]` 使用者条目；annotated `v0.4.0` 标签指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。
 - 架构边界复核：`src/codeagent/core/` 的 40 个模块零跨层 import（`tests/test_decoupling.py` AST 扫描在全量测试中通过）；`scripts/scale_scan.py` 扫描全部生产层，**无任何文件超过 300 行、无函数超过 80 行**（v0.5.0 收口时超限的 `tools/security/classifier.py` 310 行与 `tools/mcp/client.py` 307 行已分别拆分至 128 / 250 行）。
 - 已知门禁局限：Ruff 仅启用 `E9` / `F821` / `F841` 阻塞级正确性检查，Black 与完整 Ruff 规则集尚未接入 CI；mypy 已以分层棘轮接入 `quality-fast`（`scripts/type_scan.py` + `docs/type-baseline.json`，当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22），但 pyright 未接入；TUI schema v2 正式基线仍待 CI artifact 与人工复核。
-- 范围未变：并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件订阅、插件系统和自动化任务仍不属于当前版本。
+- 范围更新(2026-10-24,v0.7):**并行子 Agent(有界并发,默认串行)、子 Agent 受限可写 profile(`implement`,禁 `delegate`/MCP)、插件系统(v1 仅贡献工具)、执行时沙箱(三档策略)已落地**;跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件订阅、工作区合并、自动化任务与 Web UI 仍不属于当前版本。
 
 ## 1. 引言
 
@@ -811,7 +811,7 @@ v0.4(✅ 已发布基线 2026-09-02): V4-01~V4-38 Runtime 可靠性+上下文治
 - ✅ 结果与证据：结构化 `SubagentFinding` / `SubagentEvidence` / `SubagentUsage` / `SubagentArtifact` 有界回传（≤32 条证据、≤1 个 artifact 引用），父级不接收完整子 transcript。
 - ✅ 可观察性与持久化：`subagent_queued/started/progress/finished` 携带 `delegation_id`、父子运行 ID 与各自序列且终态只发布一次；父会话有界 `subagent` 运行记录在进程重启后折叠为 `abandoned/process_restarted`；TUI 独立委派块、状态栏聚合与 headless `子Agent状态:` 行可见。
 - ✅ 规格与质量门禁：新增 `subagent-contract` / `subagent-runtime` / `subagent-observability` / `subagent-run-records` 主规格，V5-00～V5-10 变更已全部归档，`openspec validate --specs` 为 24/24，Ruff 与 release check 通过。
-- ⏭ 未纳入 v0.5（延续 F-25 后续片）：并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆与自动任务调度。
+- ⏭ 未纳入 v0.5（延续 F-25 后续片）：并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆与自动任务调度。**2026-10-24 更新**：并行（有界并发）与受限可写 profile 已在 v0.7 交付；工作区合并、跨进程恢复与长期记忆仍未纳入。
 
 ---
 

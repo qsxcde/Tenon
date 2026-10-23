@@ -2,7 +2,7 @@
 
 本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排（2026-08-14 起不再依赖 langgraph / langchain），采用端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
 
-`v0.5.0` + v0.6 硬化（未发版） · Python 3.12 · 全量离线测试 **1759 passed** · 快速集覆盖率 **86%** · OpenSpec **24/24**
+`v0.5.0` + v0.6/v0.7 硬化（未发版） · Python 3.12 · 全量离线测试 **1870 passed** · 快速质量集 **1718 passed** · OpenSpec **25/25**
 
 设计参考 [earendil-works/pi](https://github.com/earendil-works/pi) 的"三层协作 / 双层 loop / 事件驱动 / 会话即状态"思想。架构见 [`docs/design/architecture.md`](docs/design/architecture.md)，需求基线见 [`docs/design/requirements-analysis.md`](docs/design/requirements-analysis.md)，v0.6 硬化路线与实测证据见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)，按版本的权威过程记录见 [`docs/iteration/`](docs/iteration/)。
 
@@ -79,7 +79,7 @@
 | `ruff format` | **唯一**格式化方案，行宽 100（不引入 Black） | `quality-fast`（`--check`） |
 | `mypy` | 类型债务分层棘轮：`scripts/type_scan.py` 比对 `docs/type-baseline.json`，只降不升（当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22） | `quality-fast` |
 | `scripts/scale_scan.py` | 全部生产层规模门禁：单文件 ≤ 300 行、单函数 ≤ 80 行 | `unit or contract` |
-| OpenSpec CLI | 规格驱动开发与 `openspec validate --specs`（24 份主规格） | `quality-fast` |
+| OpenSpec CLI | 规格驱动开发与 `openspec validate --specs`（25 份主规格） | `quality-fast` |
 | `scripts/release_check.py` | wheel/sdist 构建、内容与敏感文件检查、干净环境安装、fake provider CLI 冒烟 | `package-smoke` |
 | GitHub Actions | `quality-fast` / `test-matrix`(ubuntu, windows, macos) / `package-smoke` / `performance`(非阻塞) | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 
@@ -154,10 +154,12 @@ echo "列出本目录最大的 5 个文件" | uv run codeagent
 | `--continue` / `-c` | 继续最近有活动的会话（无会话时新建） |
 | `--session <id>` | 恢复指定会话继续对话（id 见 `--list-sessions`） |
 | `--list-sessions` | 列出全部会话 |
-| `--context` | 只读显示当前会话的上下文预算与治理诊断 |
+| `--context` | 只读显示当前会话的上下文预算、治理诊断与缓存命中率/冷热诊断 |
 | `--yes` | 跳过敏感操作确认、全部放行（显式承担风险）；缺省在无头模式下敏感操作一律拒绝 |
 
 技能包管理走子命令：`uv run codeagent skill install <source>` / `update` / `remove` / `list` / `reload`（`--project` 作用于当前项目）。
+
+写前快照回退：`uv run codeagent undo --list`（查看）→ `uv run codeagent undo --dry-run`（预览）→ `uv run codeagent undo`（逐级恢复最近一次 write/edit 之前的文件）。
 
 TUI 内主要命令：`/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` `/status` `/sessions`（含 `search` / `filter` / `archive` / `archived` / `recovery` / `delete`）`/tree` `/fork` `/quit`；运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。
 
@@ -166,9 +168,10 @@ TUI 内主要命令：`/provider` `/model` `/effort` `/login` `/skills` `/mcp` `
 ```bash
 uv run pytest -m "unit or contract" -q --strict-markers   # 快速质量集（日常首选）
 uv run pytest -q                                          # 全量离线测试
-uv run ruff check src tests scripts                       # 正确性静态检查
-uv run ruff format src tests scripts                      # 提交前格式化
-uv run ruff format --check src tests scripts              # CI 的格式化门禁
+uv run python -m evals                                    # 离线端到端评测套件
+uv run ruff check src tests evals scripts                 # 正确性静态检查
+uv run ruff format src tests evals scripts                # 提交前格式化
+uv run ruff format --check src tests evals scripts        # CI 的格式化门禁
 uv run python scripts/scale_scan.py                       # 规模门禁（也被 contract 测试覆盖）
 uv run python scripts/type_scan.py                        # 类型债务棘轮
 openspec validate --specs                                 # 规格校验
@@ -194,7 +197,8 @@ codeAgent/
 │   ├── archive/                 # 历史实施计划与时点快照（只读参考）
 │   ├── type-baseline.json       # mypy 分层棘轮基线
 │   └── testing.md               # 测试分层、目录结构、marker 与 CI 说明
-├── openspec/                    # 24 份主规格 + 已归档变更（spec-driven）
+├── openspec/                    # 25 份主规格 + 已归档变更（spec-driven）
+├── evals/                       # 离线评测框架（python -m evals，contract 门禁）
 ├── scripts/                     # scale_scan / type_scan / layer_scan / release_check / benchmark_tui ...
 ├── src/codeagent/
 │   ├── app/                     # [入口 + 组合根] 唯一允许跨层装配的地方
@@ -208,7 +212,7 @@ codeAgent/
 │   ├── core/                    # [Agent Runtime] 纯内存、全异步、零外部依赖
 │   │   ├── agent.py / observation.py
 │   │   ├── contracts/           #   messages / events / hooks / errors / ports / subagent*
-│   │   ├── orchestration/       #   loop / turn / batch / tool_call / AgentLoopConfig
+│   │   ├── orchestration/       #   loop / turn / batch / tool_call / tool_hooks / AgentLoopConfig
 │   │   ├── context/             #   预算、preflight、transform、诊断
 │   │   ├── execution/           #   运行、操作状态、清理与结果归一化
 │   │   └── subagent/            #   委派策略：policy / admission / slots
@@ -217,8 +221,8 @@ codeAgent/
 │   │   ├── persistence/         #   JSONL / MemoryStore / 索引 / 恢复诊断
 │   │   ├── compaction/          #   压缩策略与摘要
 │   │   └── navigation/          #   会话树与分支导航
-│   ├── ai/                      # [模型层] providers / catalog / model / transport / errors
-│   ├── tools/                   # [工具层] atomic / mcp / security / execution / shared
+│   ├── ai/                      # [模型层] providers / catalog / model / transport（含 API 形状注册表）/ errors
+│   ├── tools/                   # [工具层] atomic / mcp / plugins / security / execution（含沙箱）/ shared（含 checkpoint）
 │   └── resources/               # [资源层] 内建 prompts 与 skills
 └── tests/                       # 按行为域分包，与源码层级对应
 ```
@@ -232,7 +236,8 @@ codeAgent/
 - **v0.5** 完成 V5-00～V5-10：串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI / headless 可观察性；领域规则已下沉 `core/subagent/`。
 - **工程护栏**：格式化与类型棘轮门禁已接入 CI，规模门禁覆盖全部生产层。
 - **v0.6 硬化（未发版）**：安全分类语义化（包装器/命令替换/误杀）、只读搜索工具文件边界、越界警告送达模型、bash 合并输出统一上限、中英混合 token 估算、会话索引追加增量更新。详见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)。
-- **后续评估**：执行控制（steer 接入 UI、后台作业、事件流导出）、沙箱与程序化工具编排、并行子 Agent 与可写隔离、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换。
+- **v0.7 扩展与运行期安全（未发版）**：工具注册表数据化、审批结果封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表与自定义 provider、三档 bash 沙箱、写前 checkpoint + `undo`、缓存命中诊断、离线评测框架。详见 [`docs/iteration/v0.7.md`](docs/iteration/v0.7.md)。
+- **后续评估**：执行控制（steer 接入 UI、后台作业、事件流导出）、程序化工具编排（`run_code` 形态）、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换；Web UI 暂不规划。
 
 ## 参考
 

@@ -1,9 +1,9 @@
 # codeagent 架构设计文档
 
-> 版本: v0.5(Subagent 协作落地后的架构校准)
+> 版本: v0.7(扩展与运行期安全落地后的架构校准)
 > 适用范围: 自研编排(2026-08-14 起,已弃用 langgraph/langchain)的 Code Agent 项目
-> 更新日期: 2026-10-10(校准至当前树:V5-00～V5-10 串行只读 Subagent 契约、委派工具与串行运行器、profile registry、预算与取消治理、结构化结果、父子事件诊断、父会话有界运行记录与 TUI / headless 展示;此前 v0.4 的 Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 诊断、测试分层与 CI 质量门禁保持有效)
-> 事实来源: 本文描述当前代码树;演进决策见 [self-built-orchestration-blueprint.md](./self-built-orchestration-blueprint.md)(决策与收益记录)、迭代记录 `docs/iteration/v0.1.md` / `v0.2.md` / `v0.3.md` / `v0.4.md` / `v0.5.md`
+> 更新日期: 2026-10-24(校准至当前树:v0.6 正确性硬化与 v0.7 扩展/运行期安全——工具注册表数据化、审批封闭枚举、web/todo 工具、工具执行瀑布链、扩展插件目录、Subagent 有界并发与受限可写 profile、API 形状注册表、三档沙箱、写前 checkpoint、缓存诊断与离线评测;此前 V5-00～V5-10 串行只读 Subagent、v0.4 Runtime 可靠性、TUI / Session 交互、生命周期 Hook、测试分层与 CI 质量门禁保持有效)
+> 事实来源: 本文描述当前代码树;演进决策见 [self-built-orchestration-blueprint.md](./self-built-orchestration-blueprint.md)(决策与收益记录)、迭代记录 `docs/iteration/v0.1.md` ~ `v0.7.md`
 
 ## 1. 背景与目标
 
@@ -40,10 +40,10 @@
 - **已完成(v0.1~v0.5 功能范围)**:
 - 密钥外置:固定目录 `~/.codeagent/.env`(首次启动幂等生成模板),**不读取 CWD 下 `.env`**(安全决策 H10);全局 `Settings` 保存 provider 选择和工具资源限制，工具资源由组合根解析为不可变 `ToolResourceLimits`。
 - `ai/` 层:模型基础设施(provider / catalog / model / transport / errors),**不负责应用装配**;支持 6 个真实 provider(deepseek / openai / qwen / glm / kimi / minimax)+ 离线 `fake`;模型客户端自研(httpx + 自研 SSE 解析,thinking / usage 全量透传);`errors.py` 统一分类网络、超时、限流、认证、参数、服务端和未知失败并提供脱敏诊断;provider/model/effort 选择位于 `app/composition/model/selection.py`,适配自研循环的 `ChatModelPort` 在组合根。
-- 工具层(hexagonal):`AtomicTool` 无状态基类 + `FsOps` 文件系统抽象缝 + cwd 注入;read / write / edit / bash / grep / find / ls / skill 八个内建工具;MCP 客户端可接入 `tools/list` / `tools/call`，以 `mcp__<server>__<tool>` 命名空间化，并实施全局 / 单 server / 描述长度分组预算;`ToolResourceLimits` 在组合根统一注入并发、超时、输出字节/行、预览内存和清理等待上限；`grep`/`find` 只把 `rg`/`fd` 作为不经 shell 的可选加速，失败时回退纯 Python；bash 带危险命令黑名单(字符串正则 + shlex 分词语义级检测)、树级进程击杀、默认 120s 超时(上限 600)、30k 输出截断;`tools/security/` 提供执行前安全分类器(deny > ask > allow)，`tools/capabilities.py` 在组合根生成只读环境能力快照。
+- 工具层(hexagonal):`AtomicTool` 无状态基类 + `FsOps` 文件系统抽象缝 + cwd 注入;read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo 十一个内建工具(声明式 `BUILTIN_TOOL_SPECS`);MCP 客户端可接入 `tools/list` / `tools/call`，以 `mcp__<server>__<tool>` 命名空间化，并实施全局 / 单 server / 描述长度分组预算;扩展插件经 `tools/plugins/` 以 `ext__<id>__<tool>` 命名注入;`ToolResourceLimits` 在组合根统一注入并发、超时、输出字节/行、预览内存和清理等待上限；`grep`/`find` 只把 `rg`/`fd` 作为不经 shell 的可选加速，失败时回退纯 Python；bash 带危险命令黑名单(字符串正则 + shlex 分词语义级检测)、树级进程击杀、默认 120s 超时(上限 600)、30k 输出截断与三档沙箱(受限策略无后端 fail-closed);`tools/security/` 提供执行前安全分类器(deny > ask > allow，MCP/插件权限同源匹配)，`tools/capabilities.py` 在组合根生成只读环境能力快照；`tools/shared/checkpoints.py` 为 write/edit 提供写前快照与 `codeagent undo`。
 - `core/` Agent Runtime:根级 `agent.py` 为运行时外壳，`contracts/`、`context/`、`model/`、`execution/`、`orchestration/`、`observation.py` 和 `support/` 按职责组织纯内存、全异步实现；模块顶层零副作用。
 - `session/` 会话层:bus + session + manager + store(JSONL 树形,含 usage 与父级 `subagent` entry)+ compaction + tree;`SessionRef.last_activity_at` 在创建时初始化并随成功消息追加更新,最近会话按该值排序;会话标题支持自动派生和 append-only `name` 元数据重命名;`SessionQuery` 统一标题/id、模型、时间、运行状态和归档范围筛选,管理器为驻留会话叠加只读运行态;归档使用 append-only 元数据,删除由存储边界完成路径保护和索引清理;恢复报告区分 healthy/degraded/unavailable,有效损坏记录局部降级,结构性错误携带可操作建议;父会话通过独立且有界的运行记录保留委派事实，非终态记录重启后转为 `abandoned/process_restarted`，不改变普通消息、标题、最近活动、usage、压缩、fork 或 `/sessions` 子会话列表；`abort()` 运行中断、`steer()` 运行中注入、`followup()` 结束后续跑一轮、成功轮次才落盘、失败/取消内存回滚。
-- `app/composition/subagent/` 是 Subagent 的应用装配边界：`profiles.py` 作为唯一 registry 定义 `explore`/`review` 的角色、输出指导和只读工具白名单；`delegate_tool.py` 与 `runner.py` 在创建子 Session 前复用同一校验入口，`factory.py` 和 TUI 组合根复用同一装配策略。`read_only` 只作为历史记录中可能出现的有界文本，不是新的 delegate 输入；`tester` 和命令执行不属于当前能力。
+- `app/composition/subagent/` 是 Subagent 的应用装配边界：`profiles.py` 作为唯一 registry 定义 `explore`/`review`（只读）与 `implement`（受限可写，禁 `delegate`/MCP）的角色、输出指导和工具白名单；`delegate_tool.py` 与 `runner.py` 在创建子 Session 前复用同一校验入口，`factory.py` 和 TUI 组合根复用同一装配策略，`subagent_max_concurrency` 控制有界并发（默认 1 = 串行）。`read_only` 只作为历史记录中可能出现的有界文本，不是新的 delegate 输入；`tester` 和命令执行不属于当前能力。
 - 会话列表、搜索、筛选和 `continue_recent` 使用派生索引完成候选元数据读取与排序；单个索引缺失、损坏或过期时只对目标会话回源，其它会话不重复扫描 JSONL，最终目标恢复允许单独检查。
 - 事件按消息、模型请求、工具生命周期、运行控制和 Subagent 委派分组；模型请求显式发布 `model_request_started / model_request_finished`，工具生命周期包含 `tool_queued / tool_started / tool_progress / tool_finished / tool_result`，Subagent 使用 `subagent_queued / subagent_started / subagent_progress / subagent_finished`，事件通过 `run_id`、`parent_run_id`、`child_run_id`、`delegation_id`、`tool_call_id` 和结构化状态字段关联。
 - 入口形态:`app/main.py` headless 双路径(`--prompt` / stdin)+ `--tui` 交互式终端(斜杠命令 / 模糊补全 / 选择器 / Markdown / 滚动 / `/login` / `/skills` / `/mcp` / `/tree` 等命令体系)；headless 对 Subagent 输出有界 `子Agent状态:` 行，TUI 使用独立委派块和状态栏聚合，不复制 child transcript。
@@ -53,10 +53,10 @@
 - 会话树(v0.3 阶段 4):`build_tree` 纯函数、`/tree` 导航及 `/sessions list` 父子缩进展示。
 - 会话列表、搜索、筛选和 `continue_recent` 使用派生索引完成候选元数据读取与排序；单个索引缺失、损坏或过期时只对目标会话回源，其它会话不重复扫描 JSONL，最终目标恢复允许单独检查。
 - 安全确认环(v0.2):执行前 `ApprovalPolicy`(组合根把 `tools/security.py` 分类器适配为端口),`ask` 由循环 emit `confirmation_requested` 并等待会话确认队列;headless 缺省 deny(fail closed),`--yes` 逃生舱。
- - 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型),`uv run pytest -q` **1711 passed**(2026-10-18,macOS / Python 3.12;v0.5.0 发布记录为 1695 passed，3 skipped / 1698 collected,2026-10-10, Windows);本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。
+ - 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型),`uv run pytest -q` **1870 passed**(2026-10-24,macOS / Python 3.12;此前 v0.5 基线为 1711 passed，v0.5.0 发布记录为 1695 passed，3 skipped / 1698 collected,2026-10-10, Windows);离线评测 `python -m evals` 4/4；本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。
  - TUI 性能验收:`benchmark/` 使用 schema v2 的固定离线 fixture 测量提交首帧、首 token、帧 p50/p95、控制延迟、峰值 Python 分配和协调器的 dropped/over-budget 计数；`compare_benchmark.py` 只在 schema、平台、Python、视口和 fixture 一致时比较，`update_tui_baseline.py` 负责生成受约束的 Linux/Python 3.12 候选基线。
 
-**v0.5 当前状态与远期**:V4-01～V4-38 与 V5-00～V5-10 均已完成实现与验收；发布包版本已统一为 `0.5.0`，CHANGELOG 已补齐 v0.5 使用者条目，历史 annotated `v0.4.0` 标签固定指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。当前工程治理已接入覆盖率报告、Ruff、构建安装冒烟和 CI 跨平台矩阵；TUI schema v2 的正式 Linux/Python 3.12 基线仍按 CI artifact 与人工复核流程推进，性能暂保持非阻塞。v0.5 交付的是**串行、只读**的 Subagent MVP：委派深度固定为 1、子 Agent 工具白名单为 `read` / `grep` / `find` / `ls` / `skill`、预算与输出均有界、子 transcript 默认临时且进程重启只折叠为 `abandoned/process_restarted`。并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆继续作为后续方向；插件系统、轻量记忆及 Web/HTTP 事件流订阅待出现真实消费者或价值域扩大时重估。
+**v0.7 当前状态与远期**:V4-01～V4-38、V5-00～V5-10、v0.6 正确性硬化与 v0.7 扩展/运行期安全均已完成实现与验收；发布包版本仍为 `0.5.0`（v0.6/v0.7 尚未发版），CHANGELOG 已补齐使用者条目。当前工程治理已接入覆盖率报告、Ruff（覆盖 `src tests evals scripts`）、构建安装冒烟和 CI 跨平台矩阵；TUI schema v2 的正式 Linux/Python 3.12 基线仍按 CI artifact 与人工复核流程推进，性能暂保持非阻塞。Subagent 已从"串行只读 MVP"扩展为**默认串行、可配置有界并发**，并新增 `implement` 受限可写 profile（工具白名单含 write/edit/bash，禁 `delegate`/MCP，深度仍固定为 1）；插件系统已交付 v1（仅贡献工具、目录即信任、默认需确认）；执行期已有三档沙箱与写前 checkpoint。工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件流订阅与 Web UI 仍不在范围内。
 
 ## 4. 总体结构
 
@@ -144,18 +144,19 @@ codeagent/
 │   │
 │   ├── tools/                        # [工具层] hexagonal ✅ 已落地
 │   │   ├── base.py                   #   AtomicTool 实现(由组合根适配为 AgentTool)
-│   │   ├── registry.py               #   make_tools 工厂(8 个内建工具,cwd/ops 注入)
+│   │   ├── registry.py               #   make_tools 工厂(11 个内建工具,声明式 ToolSpec,cwd/ops/沙箱/快照注入)
 │   │   ├── capabilities.py           #   shell/平台/检索器/权限能力只读快照
-│   │   ├── security/                  #   执行前安全分类器与 deny/ask/allow 决策
-│   │   ├── atomic/                   #   read / write / edit / bash / grep / find / ls / skill
+│   │   ├── security/                  #   执行前安全分类器与 deny/ask/allow 决策(含 MCP/插件权限)
+│   │   ├── atomic/                   #   read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo
 │   │   ├── mcp/                      #   MCP client / loader / adapter / budget / config
-│   │   ├── execution/                #   Shell / process / optional rg/fd execution boundaries
-│   │   └── shared/                   #   FsOps / paths / textfile / truncate / resource_limits / mutation_queue / ignore
+│   │   ├── plugins/                  #   扩展插件 manifest / loader / permissions
+│   │   ├── execution/                #   Shell / process / sandbox / optional rg/fd execution boundaries
+│   │   └── shared/                   #   FsOps / paths / textfile / truncate / resource_limits / checkpoints / mutation_queue / ignore
 │   │
 │   └── resources/                    # [资源层]  ← Pi 资源系统(v0.3 已启用 skills)
 │       └── skills/ prompts/          #   *.md 技能文件 / 提示词模板
 │
-└── tests/                            # 按行为域分包,1711 passed(2026-10-18)
+└── tests/                            # 按行为域分包,1870 passed(2026-10-24)
     ├── conftest.py / fixtures/       # 全局 marker、隔离环境和共享离线夹具
     ├── contracts/                    # AI、core、session、tools 边界契约
     ├── ai/ / core/ / mcp/            # 模型、编排和 MCP 行为
@@ -418,8 +419,10 @@ TUI:    app/main.py --tui → create_tui_app() → TuiApp.start()
 | **v0.3 生态成型** | Skills(✅)+ MCP(✅)+ 成本透明(✅)+ 会话树 UI(✅);插件 / 轻量记忆 / Web 经评估移出(见 E5/E4/E12) | 扩展生态、体验差异、平台导航 |
 | **v0.4 Runtime 产品化** | Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 稳定性 | V4-01～V4-38 已完成实现；`0.4.0` 元数据和 `v0.4.0` 标签已固定 |
 | **v0.5 Subagent 协作** | 串行只读委派:`delegate` 工具、`explore` / `review` profile registry、显式上下文隔离、有界预算与取消、结构化结果与证据、父子事件诊断、父会话有界运行记录、TUI / headless 可观察性 | V5-00～V5-10 已完成实现与验收;新增 `subagent-contract` / `subagent-runtime` / `subagent-observability` / `subagent-run-records` 主规格;`0.5.0` 元数据与 CHANGELOG 已收口 |
+| **v0.6 正确性硬化** | 安全分类语义化、只读搜索边界、合并输出上限、中英 token 估算、会话索引增量 | 已实现;`docs/iteration/v0.6.md` 记录证据 |
+| **v0.7 扩展与运行期安全** | 工具注册表数据化、审批封闭枚举、web/todo 工具、工具执行瀑布链、扩展插件目录、Subagent 有界并发与 `implement`、API 形状注册表、三档沙箱、写前 checkpoint/`undo`、缓存诊断、离线评测 | 已实现并推送;详见 `docs/iteration/v0.7.md` |
 
- v0.5 当前进度:V4-01～V4-38 与 V5-00～V5-10 已全部落地；2026-10-18（macOS / Python 3.12）复核结果为 `uv run pytest -q` **1711 passed**（1711 collected，无 skipped）、快速质量集 **1562 passed，149 deselected**、覆盖率 **86.35%**（15932/18451 statements）、跨边界集合 **161 passed**、`openspec validate --specs` **24/24**、release check 以 `0.5.0` 通过（wheel/sdist、资源、敏感文件、干净安装、fake provider CLI）。同批次修正 marker 分层：显式主分类优先于目录兜底，`tests/app/container/test_assembly.py` 改标 `contract` 后 `app/composition/policy.py` 快速口径覆盖率由 20% 升至 84%，覆盖率硬下限同步上调至 80%。v0.5.0 发布时点为 `1695 passed，3 skipped`（1698 collected）/ 快速质量集 1525 passed / 覆盖率 84.40%（2026-10-10，Windows / Python 3.12）；上一版本 v0.4 基线为 1532 passed / 覆盖率 83.61% / OpenSpec 20/20（2026-08-30，macOS）。仓库内 TUI schema v1 基线保留为历史数据，schema v2 候选由 CI 生成并人工复核，性能暂不启用硬阈值。
+ v0.7 当前进度:V4-01～V4-38、V5-00～V5-10、v0.6 三项硬化与 v0.7 扩展/运行期安全均已落地。2026-10-24（macOS / Python 3.12）复核结果为 `uv run pytest -q` **1870 passed**（无 skipped）、快速质量集 **1718 passed / 152 deselected**、集成层 **931 passed**、`python -m evals` **4/4**、`openspec validate --specs` **25/25**。此前 v0.5 基线为 1711 passed / 86.35% / 24 规格（2026-10-18）；覆盖率以 CI `quality-fast` 实测为准。v0.5.0 发布时点为 `1695 passed，3 skipped`（1698 collected）/ 覆盖率 84.40%（2026-10-10，Windows / Python 3.12）；v0.4 基线为 1532 passed / 83.61% / 20 规格（2026-08-30，macOS）。仓库内 TUI schema v1 基线保留为历史数据，schema v2 候选由 CI 生成并人工复核，性能暂不启用硬阈值。
 
 ## 12. 参考
 

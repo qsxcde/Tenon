@@ -31,10 +31,15 @@ tests/
 │   ├── store/              # JSONL、MemoryStore、索引和记录
 │   └── behavior/           # 运行、恢复、取消、确认、压缩和用量
 ├── tools/
-│   └── atomic/             # 原子文件工具和 bash
+│   ├── atomic/             # 原子文件工具、bash、web/todo 与注册表契约
+│   └── plugins/            # 扩展插件 manifest / loader / 权限（tmp_path 假插件）
 └── tui/
     └── view/               # 生命周期、命令、会话、确认、状态、扩展
 ```
+
+离线评测套件独立于 `tests/`，位于仓库根 `evals/`：`uv run python -m evals` 用 fake 模型驱动真实 Agent 循环，覆盖工具流、未知工具、审批阻断与改参传播；`tests/test_evals.py` 以 `contract` marker 将套件纳入快速质量集，避免用例失效后无人察觉。
+
+运行期安全相关回归：`tests/tools/test_sandbox.py`（三档策略、Seatbelt/bwrap 计划、无后端 fail-closed、配置取值一致性）与 `tests/tools/test_checkpoints.py`（快照/淘汰/LIFO 恢复、write/edit 集成、快照失败不阻塞写入、`codeagent undo` CLI）。
 
 历史上集中的 `tests/tui/test_view.py`、`tests/session/test_store.py`、`tests/session/test_session.py`、`tests/test_container.py` 与 `tests/tools/test_tools.py` 已按行为域拆分完毕，拆分过程与验收证据见 [`iteration/`](iteration/)。拆分验收标准保持不变：测试收集总数不减少、每个原测试名称只出现一次、共享 fixture 继续从 `tests/fixtures/` 加载、生产代码不因测试重组而修改。
 

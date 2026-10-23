@@ -133,3 +133,21 @@ openspec validate --specs                           # 24 passed
 - 架构事实以 [architecture.md](./architecture.md) 为准;本文只描述 v0.6 的范围与验收。
 - 三项变更分别对应 OpenSpec change:`security-classification-hardening`、`context-accounting-fidelity`、`session-index-incremental`。
 - 完成后同步更新 `docs/iteration/v0.6.md`、`CHANGELOG.md` 与相关主规格。
+
+---
+
+## 附录：事后状态（2026-10-24）
+
+E1～E7 已全部修复并通过回归（见 `docs/iteration/v0.6.md`）。§3 中标为"结构性代差"的部分也已分两批补齐或明确收口：
+
+| 原结论 | 当前状态 |
+|---|---|
+| 安全只有执行前分类，无执行时隔离 | **已交付**三档沙箱（`read-only` / `workspace-write` / `danger-full-access`，macOS Seatbelt / Linux bwrap，受限策略无后端 fail-closed） |
+| 子 Agent 串行只读、不可写 | **已交付**有界并发槽位（默认仍串行）与 `implement` 受限可写 profile（禁 `delegate`/MCP） |
+| 工具调用 = 一次函数调用 = 一次模型往返 | 未变；程序化工具编排（`run_code` 形态）仍在后续评估 |
+| `steer`/`followup` 未接通 UI、无后台作业 | 未变，仍在后续评估 |
+| 事件仅内部消费、无对外导出 | 未变；离线评测（`python -m evals`）已补齐行为回归，但不等于事件导出 |
+| 无插件机制 | **已交付 v1**（仅贡献工具、目录即信任、`ext__` 命名空间、默认需确认） |
+| 工作区无回退能力 | **已交付**写前 checkpoint 与 `codeagent undo`（LIFO、有界、不阻塞写入） |
+
+Web UI 明确不规划；跨进程恢复、长期记忆与费用估算仍不在范围内。

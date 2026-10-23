@@ -38,8 +38,8 @@
 ├───────────────┬───────────────────────────┬─────────────────────┤
 │ core/         │ ai/                       │ tools/              │
 │ Agent Runtime │ 模型基础设施              │ 工具层              │
-│ 纯内存/全异步 │ providers/transport/catalog│ atomic/mcp/security │
-│ 零外部依赖    │ errors                    │ execution/shared    │
+│ 纯内存/全异步 │ providers/transport/catalog│ atomic/mcp/plugins  │
+│ 零外部依赖    │ shapes/errors             │ security/execution  │
 ├───────────────┴───────────────────────────┴─────────────────────┤
 │ resources/     内建 prompts（system.md）与 skills（*.md）        │
 └─────────────────────────────────────────────────────────────────┘
@@ -57,7 +57,7 @@
 | `tools` | `list[AgentTool]` | 统一工具契约列表 |
 | `transform_context` / `context_preparer` / `context_transform_timeout` | 扩展点 | 请求级上下文变换与准备（有超时） |
 | `context_budget` / `context_preflight` / `uncertain_budget_policy` | 上下文治理 | 预算提供者、preflight 配置、不确定窗口策略（`allow`/`fail`） |
-| `before_tool_call` / `after_tool_call` | 工具 Hook | 执行前后决策（安全策略在此适配） |
+| `before_tool_calls` / `after_tool_calls` | 工具 Hook 链 | 有序 pre 链（通知/改参/门禁）与 post 链（变换/脱敏）；安全策略门禁固定链尾 |
 | `lifecycle_hooks` | `tuple[LifecycleHook, ...]` | 只读观察者（turn/model/tool scope） |
 | `tool_execution` | `"parallel"` \| 顺序 | 工具批次执行方式 |
 | `tool_timeout` / `tool_runtime` | 执行控制 | 单工具超时；受控执行端口 |

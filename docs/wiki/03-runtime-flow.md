@@ -144,7 +144,7 @@ session.run(text)
      · 构造 history 副本；若有摘要，在头部注入 SUMMARY_PREFIX 消息（带 "summary-" 前缀 id）
  → SessionRuntime.execute
      · 排空 inject_queue（pending steer）
-     · 构造 AgentContext + Agent（绑 run_id、注入 before_tool_call=policy 适配）
+     · 构造 AgentContext + Agent（绑 run_id、注入 before_tool_calls=扩展链 + 策略门禁）
      · await agent.prompt(text)
          → run_agent_loop
              ├─ prepare_context：transform_context → describe_context_budget
@@ -154,7 +154,7 @@ session.run(text)
              ├─ 有 tool_calls → execute_tool_batch
              │     · emit tool_queued（含 queue_position）
              │     · 并行（默认）或串行执行；new_tool_result：
-             │        参数错误 → 未知工具 → before_tool_call(policy) → runtime.execute → after_tool_call
+             │        参数错误 → 未知工具 → before_tool_calls 链(改参/门禁) → runtime.execute → after_tool_calls 链
              │     · emit tool_started / tool_progress / tool_finished（保序结果）
              ├─ 排空 steer_queue（用户运行中注入的消息）
              ├─ 无 tool_calls → turn_end → 结束
@@ -217,7 +217,7 @@ uv run ruff check src tests scripts                       # 正确性静态检�
 uv run ruff format src tests scripts                      # 提交前格式化
 uv run python scripts/scale_scan.py                       # 规模门禁
 uv run python scripts/type_scan.py                        # 类型债务棘轮
-openspec validate --specs                                 # 规格校验（24 份）
+openspec validate --specs                                 # 规格校验（25 份）
 uv build                                                  # 构建 wheel / sdist
 ```
 

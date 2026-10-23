@@ -44,3 +44,6 @@ htmlcov/
 # Personal notes, not part of the project
 /interview-prep-codeagent.md
 /resume-draft.md
+
+# Local agent IDE artifacts (plans, scratch)
+/.trae/

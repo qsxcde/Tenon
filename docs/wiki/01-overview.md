@@ -64,7 +64,7 @@
 | `ruff format` | 唯一格式化方案，行宽 100 | `quality-fast --check` |
 | `mypy` + `scripts/type_scan.py` | 分层类型债务棘轮（对照 `docs/type-baseline.json`） | `quality-fast` |
 | `scripts/scale_scan.py` | 规模门禁：单文件 ≤ 300 行、单函数 ≤ 80 行（全部生产层） | `unit or contract` |
-| OpenSpec CLI | 规格驱动开发（24 份主规格） | `quality-fast` |
+| OpenSpec CLI | 规格驱动开发（25 份主规格） | `quality-fast` |
 | `scripts/release_check.py` | wheel/sdist 构建、资源/敏感文件检查、干净安装、fake provider 冒烟 | `package-smoke` |
 
 ## 5. 版本与迭代状态
@@ -72,8 +72,10 @@
 - **已发布**：`v0.1.0` → `v0.5.0`（annotated 标签 `v0.4.0` → `b981534`，`v0.5.0` → `7bbc6a7`）。
 - **v0.4**：V4-01～V4-38，Runtime 可靠性、上下文治理、TUI/Session 交互、生命周期 Hook、工具与 Provider 稳定性。
 - **v0.5**：V5-00～V5-10，串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI/headless 可观察性；领域规则下沉 `core/subagent/`。
-- **基线**：`1711 passed`（1711 collected，无 skipped），覆盖率 86.35%，快速质量集 1562 passed，OpenSpec 24/24（2026-10-18，macOS / Python 3.12）。v0.5.0 发布记录为 `1695 passed / 3 skipped` / 84.40% / 1525 passed（2026-10-10，Windows / Python 3.12）。
-- **后续评估**：并行子 Agent、子 Agent 可写隔离与工作区合并、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换。
+- **基线**：`1870 passed`（无 skipped），快速质量集 `1718 passed`，OpenSpec 25/25（2026-10-24，macOS / Python 3.12）。此前 v0.5.0 发布记录为 `1695 passed / 3 skipped` / 84.40% / 1525 passed（2026-10-10，Windows / Python 3.12）；覆盖率基线以 CI `quality-fast` 实测为准。
+- **v0.6**：三项正确性硬化（安全分类语义化、合并输出上限与 token 估算、会话索引增量）。
+- **v0.7**：工具注册表数据化、审批封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint/`undo`、缓存诊断与离线评测。
+- **后续评估**：程序化工具编排（`run_code` 形态）、执行控制（steer 接入 UI、后台作业、事件流导出）、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换；Web UI 暂不规划。
 
 ## 6. 顶层目录结构
 
@@ -84,20 +86,21 @@ codeAgent/
 ├── CHANGELOG.md                 # 面向使用者的版本记录
 ├── docs/
 │   ├── design/                  # 架构 / 需求 / 自研编排蓝图 / 会话布局
-│   ├── iteration/               # v0.1 ~ v0.5 迭代记录（权威过程与验收证据）
+│   ├── iteration/               # v0.1 ~ v0.7 迭代记录（权威过程与验收证据）
 │   ├── benchmarks/              # TUI 性能基线与观测记录
 │   ├── wiki/                    # ← 本文档集
 │   ├── archive/                 # 历史实施计划与时点快照（只读参考）
 │   ├── type-baseline.json       # mypy 分层棘轮基线
 │   └── testing.md               # 测试分层、目录结构、marker 与命令
-├── openspec/                    # 24 份主规格 + 已归档变更
+├── openspec/                    # 25 份主规格 + 已归档变更
+├── evals/                       # 离线评测框架（python -m evals）
 ├── scripts/                     # scale_scan / type_scan / layer_scan / release_check / benchmark_tui ...
 ├── src/codeagent/
 │   ├── app/                     # 入口 + 组合根（唯一跨层装配点）
 │   ├── core/                    # 纯内存 Agent Runtime
 │   ├── session/                 # 会话状态、持久化、压缩、导航
-│   ├── ai/                      # provider、catalog、transport、错误分类
-│   ├── tools/                   # 原子工具、MCP、安全、执行、共享设施
+│   ├── ai/                      # provider、catalog、transport（含 API 形状）、错误分类
+│   ├── tools/                   # 原子工具、MCP、插件、安全、执行（含沙箱）、共享设施
 │   └── resources/               # 内建 prompts 与 skills
 └── tests/                       # 按行为域分包，与源码层级对应
 ```

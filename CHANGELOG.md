@@ -16,7 +16,22 @@
 - `prepare_context` 在工具结果被预算裁剪时会重复发布一次 `CONTEXT_BUDGET` 事件（两次 payload 完全相同），导致订阅方（TUI `/context`、headless `--context`）把一次请求的预算变化计成两次。现在每个请求恰好发布一个预算快照，并补充按事件计数的回归测试。
 - **会话索引追加退化为 O(n²)**：`_append` 先写 JSONL 再读索引，指纹必然失配，增量分支永不触发。改为写前读索引并应用记录、写后只刷新指纹；1000 次追加由约 7s 降至 0.37s。
 
-### Added
+### Added（v0.7 扩展与运行期安全）
+
+- **工具注册表数据化**：`make_tools` 由硬编码列表改为声明式 `ToolSpec` / `ToolRegistry`，新增工具只需追加声明；契约测试锁定名称、类型与顺序。
+- **11 个内建工具**：新增 `web_fetch`（http/https、网络经注入、响应有界）、`web_search`（注入式搜索提供方，未配置时明确不可用）、`todo`（整体替换式任务清单，仅驻内存）；web 出站进确认环，headless 下 fail-closed。
+- **审批结果封闭枚举**：新增 `ApprovalOutcome`（`allowed_once` / `rejected` / `cancelled` / `timed_out` / `unavailable`）与 fail-closed 映射；确认请求状态由开放字符串收敛为封闭终态。
+- **工具执行瀑布管线**：`before_tool_calls` / `after_tool_calls` 有序链——pre 支持通知、改参、门禁短路，post 支持结果变换；安全策略门禁固定链尾并对改参后的调用判定。**BREAKING**：原单值字段改名为复数元组。
+- **扩展插件目录（v1）**：`~/.codeagent/extensions/<id>/` + `codeagent-plugin.json`，模块导出 `TOOL_SPECS`，工具名 `ext__<id>__<tool>`；目录放置即信任，调用层默认需确认，`extensions.json` 提供 deny/ask/allow 三级规则（与 MCP 共用匹配语义）。
+- **Subagent 有界并发与 `implement` profile**：`subagent_max_concurrency`（默认 1 保持串行）启用有界并发；新增受限可写 `implement`（read/write/edit/bash/grep/find/ls/skill，禁 `delegate`/MCP）。
+- **API 形状注册表**：`ai/transport/shapes.py` 与 `ProviderDefinition.api_shape`（未知形状 fail-closed）；新增 `register_provider` / `register_api_shape` 入口，同形状 provider 无需改 transport。
+- **三档 bash 沙箱**：`read-only` / `workspace-write` / `danger-full-access`（默认）；macOS Seatbelt、Linux bwrap，受限策略无后端 fail-closed；后端参数以独立 argv 注入。
+- **写前 checkpoint 与 `codeagent undo`**：`write` / `edit` 在锁内保存原文，快照有界淘汰，支持 `--list` / `--dry-run` / LIFO 恢复；快照失败不阻塞写入。
+- **缓存命中诊断**：`--context` 输出命中率与 `cache_unknown` / `cache_cold` / `cache_effective`；契约测试锁定基础系统提示词前缀不含时间戳/临时目录。
+- **离线评测框架**：`evals/` + `python -m evals`，覆盖工具流、未知工具、审批阻断与改参传播；`tests/test_evals.py` 纳入 `contract` 门禁。
+- `docs/iteration/v0.7.md`：本批次实现、验证与限制的完整记录。
+
+### Added（v0.6 正确性硬化）
 
 - `docs/design/roadmap-v0.6.md`：v0.6 硬化路线图与实测证据、后续版本（执行控制 / 沙箱与程序化工具 / 子 Agent 演进 / 对外接口）。
 - 三个 OpenSpec 变更并已归档：`security-classification-hardening`、`context-accounting-fidelity`、`session-index-incremental`；主规格 `tools`、`context-budget`、`sessions` 同步更新。
@@ -30,6 +45,7 @@
   - 效果：`app/composition/policy.py` 的快速口径覆盖率由 **20%** 升至 **84%**，deny / interactive / allow 三个安全决策分支与文件边界回归从此进入每次 `quality-fast`；矩阵批次由 212 降到 161，移出的纯装配用例由快速批次接管。
   - 覆盖率：快速质量集由 `1540 passed` / **84.58%** 变为 `1562 passed` / **86.35%**（15932/18451 statements），CI 硬下限由 77.9% 上调至 **80%**。
 - `docs/testing.md`、`README.md`、wiki 与设计文档同步上述口径。
+- **v0.7**：CI 的 Ruff 检查与格式化门禁覆盖范围扩展为 `src tests evals scripts`（同步 AGENTS.md、`docs/testing.md` 与 wiki 开发指南）；`docs/wiki/` 与设计文档同步工具数量、Subagent 能力、沙箱/checkpoint/缓存/评测、版本状态与"明确不做"清单；`docs/design/roadmap-v0.6.md` 追加事后状态，说明沙箱、并发 Subagent、插件与回退能力已交付，剩余结构性缺口未变。
 
 ## [0.5.0] - 2026-10-10
 

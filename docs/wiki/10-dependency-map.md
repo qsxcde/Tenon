@@ -38,8 +38,9 @@
 | `app/main.py` | 入口 | CLI 参数、会话准备、headless 编排 |
 | `app/composition/model/port.py` | core ↔ ai | `to_chat_message`：core `Message` → ai `ChatMessage` |
 | `app/composition/model/factory.py` | core → ai | `ChatModelPort` 适配、预算元数据、能力解析 |
-| `app/composition/tools/adapter.py` | core ← tools | `AtomicTool` → core `AgentTool` |
-| `app/composition/policy.py` | core ← tools/security | `SecurityDecision` → core `ApprovalPolicy` |
+| `app/composition/tools/adapter.py` | core ← tools | `AtomicTool` → core `AgentTool`（含 MCP / 插件 `ext__*` 工具） |
+| `app/composition/policy.py` | core ← tools/security | `SecurityDecision` → core `ApprovalPolicy`（MCP/插件权限规则同源匹配） |
+| `app/composition/model/cache.py` | app 内部 | 缓存命中观测与稳定前缀诊断（不依赖 core，避免 app→core 违规） |
 | `app/composition/runtime/*` | 全部 | `AgentLoopConfig` 组装与 `AgentRuntime` 所有权 |
 | `app/composition/session/*` | core + session | 会话/管理器/Agent 工厂 |
 | `app/composition/subagent/*` | core + session | 委派工具、runner、槽位、生命周期装配 |
@@ -115,7 +116,9 @@ JSONL 持久化（session/store）      TUI / headless 消费
 | Subagent 预算/准入/槽位/深度 | `core/subagent/*` | app 层不得维护第二份默认值或上限 |
 | Subagent 装配 | `app/composition/subagent/*` | 子会话创建、事件发布、资源收尾 |
 | 模型错误分类/脱敏 | `ai/errors.py` | 单点实现 |
-| 安全规则 | `tools/security/*` | 分类是纯函数，裁定在 core 策略端口 |
+| 安全规则 | `tools/security/*`（含 `permission_rules.py` 供 MCP/插件共用） | 分类是纯函数，裁定在 core 策略端口 |
+| 沙箱策略 | `tools/execution/sandbox.py` | 纯计划函数；受限策略无后端 fail-closed |
+| 写前快照 | `tools/shared/checkpoints.py` | 工具层基础设施，不进入会话持久化 |
 
 ## 六、资源所有权与生命周期
 

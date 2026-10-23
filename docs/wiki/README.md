@@ -38,7 +38,7 @@
 | 分层 | `app` / `core` / `session` / `ai` / `tools` / `resources`，依赖单向流动 |
 | 编排 | 自研 ReAct（`core/orchestration/loop.py`），无 langchain/langgraph |
 | 持久化 | `~/.codeagent/sessions/<id>.jsonl`（JSONL 树形，格式版本 1） |
-| 测试基线 | `1711 passed`（无 skipped），覆盖率 86.35%，OpenSpec 24/24（2026-10-18，macOS） |
+| 测试基线 | `1870 passed`（无 skipped），快速质量集 1718 passed，OpenSpec 25/25（2026-10-24，macOS）；覆盖率以 CI `quality-fast` 实测为准 |
 
 ## 维护约定
 
