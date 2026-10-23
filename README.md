@@ -28,18 +28,21 @@
 - **交互式 TUI**（`--tui`）：无边框多行 composer（Enter 提交 / Shift+Enter 换行）、流式正文、可展开的工具结果与 edit/write 红绿意图差异、model/effort/cwd 状态栏、Markdown 渲染、Esc 运行中打断、斜杠命令体系与模糊补全。
 - **Headless CLI**：`--prompt` 一次性输入或 stdin 逐行读取，事件聚合输出最终回复；敏感操作默认 fail closed。
 - **自研编排**：`core/agent.py` 纯内存 `Agent` 外壳 + `core/orchestration/loop.py` 的 ReAct 主循环（模型 → 工具 → 继续/结束）。
-- **8 个内建工具**：`read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill`，无状态 `AtomicTool` + `FsOps` 文件系统抽象缝；`grep` / `find` 把 `rg` / `fd` 只当可选加速，失败回退纯 Python。
+- **11 个内建工具**：`read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill` / `web_fetch` / `web_search` / `todo`，无状态 `AtomicTool` + `FsOps` 文件系统抽象缝；`grep` / `find` 把 `rg` / `fd` 只当可选加速，失败回退纯 Python；web 工具网络经注入、出站进确认环。
 - **MCP 客户端**：按用户配置接入 `tools/list` / `tools/call`，工具名 `mcp__<server>__<tool>` 命名空间化并实施分组预算。
+- **扩展插件（v1）**：`~/.codeagent/extensions/<id>/` + `codeagent-plugin.json` + 模块导出 `TOOL_SPECS`，工具名 `ext__<id>__<tool>`；目录即信任、调用层默认需确认，`extensions.json` 可显式放行/拒绝。
 - **Skills 技能系统**：`SKILL.md` 三源发现（内建 / 个人 / 项目）+ 渐进式披露（描述入 system prompt，正文经 `skill` 工具按需取），`codeagent skill` 子命令管理技能包。
 - **会话层**：JSONL 树形持久化，可恢复 / 切换 / 分叉 / 归档 / 删除 / 压缩；标题、搜索、筛选、恢复诊断；成功轮次才落盘，失败与取消内存回滚；`abort` / `steer` / `followup`。
-- **Subagent 委派（v0.5）**：`delegate` 工具把只读子任务交给独立子 Agent——串行、`explore` / `review` 两种 profile、工具白名单限 `read`/`grep`/`find`/`ls`/`skill`、预算与输出有界、深度固定 1；父级收回有界摘要与结构化证据而非完整 transcript，委派事实以有界 `subagent` 记录落库。
-- **安全确认环**：执行前 `ApprovalPolicy` 三档 deny / ask / allow（危险命令黑名单 + shlex 语义检测 + 文件访问边界）。
-- **用量透明**：归一并累计输入 / 输出 / 推理 / 缓存命中 token，`/status` 与 CLI 可见（**不做费用估算**）。
+- **Subagent 委派**：`delegate` 默认串行，`subagent_max_concurrency>1` 时启用有界并发；`explore` / `review` 只读、`implement` 受限可写（禁用 `delegate`/MCP）；预算与输出有界、深度固定 1；父级收回有界摘要与结构化证据。
+- **安全确认环**：执行前 `ApprovalPolicy` 三档 deny / ask / allow（危险命令黑名单 + shlex 语义检测 + 文件访问边界）；审批终态封闭枚举且 fail-closed。
+- **运行期安全**：三档 bash 沙箱（`read-only` / `workspace-write` / `danger-full-access`，受限策略无后端 fail-closed）；写入前 checkpoint + `codeagent undo` 逐级回退。
+- **用量透明**：归一并累计输入 / 输出 / 推理 / 缓存命中 token，`/status` 与 CLI 可见（**不做费用估算**）；`--context` 输出缓存命中率与冷/暖诊断码。
 - **上下文治理**：token 预算、preflight、自动压缩与恢复回归，`--context` 只读输出治理诊断。
+- **离线评测**：`python -m evals` 用 fake 模型驱动真实 Agent 循环，覆盖工具流 / 未知工具 / 审批阻断 / 改参传播，纳入 `contract` 门禁。
 
 ### 明确不做
 
-费用估算、Web / HTTP 事件订阅、轻量记忆、插件系统、自动化任务调度、并行子 Agent、子 Agent 写权限与工作区合并、跨进程恢复与自动重试、`tester` profile 与子 Agent 命令执行。
+费用估算、Web / HTTP 事件订阅、轻量记忆、自动化任务调度、跨进程恢复与自动重试、`tester` profile 与子 Agent 命令执行；**Web UI 暂不规划**（TUI + headless CLI 为唯一交付形态）。
 
 ---
 

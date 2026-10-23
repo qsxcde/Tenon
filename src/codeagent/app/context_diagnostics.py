@@ -58,10 +58,18 @@ def _budget_line(diagnostics: Any) -> str:
 def _actual_usage_line(diagnostics: Any) -> str:
     if diagnostics.actual_input_tokens is None:
         return "实际用量: (未发生或未知)"
+    from codeagent.app.composition.model.cache import CacheObservation
+
+    observation = CacheObservation(
+        samples=1,
+        input_tokens=int(diagnostics.actual_input_tokens or 0),
+        cached_tokens=int(diagnostics.actual_cached_tokens or 0),
+    )
     return (
         f"实际用量: 输入 {_token(diagnostics.actual_input_tokens)} · "
         f"输出 {_token(diagnostics.actual_output_tokens)} · "
         f"缓存 {_token(diagnostics.actual_cached_tokens)}"
+        f"({observation.hit_ratio:.0%} · {observation.diagnosis(min_samples=1)})"
     )
 
 

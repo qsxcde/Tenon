@@ -94,7 +94,7 @@ uv run pytest -m "not slow" -q
 uv run pytest -q
 
 # CI 同步的正确性静态检查（只阻断语法错误、未定义名称和未使用局部变量）
-uv run ruff check src tests scripts
+uv run ruff check src tests evals scripts
 
 # 应用层生产文件/函数规模护栏
 uv run python scripts/scale_scan.py

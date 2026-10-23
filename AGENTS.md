@@ -37,8 +37,8 @@ uv run pytest -m "integration or e2e or platform or compatibility" -q --strict-m
 uv run pytest -m "not slow" -q                          # 排除慢测试的日常反馈集
 uv run pytest -q                                         # 完整离线测试
 uv run pytest tests/session/test_store.py::test_create_and_header
-uv run ruff check src tests scripts                      # 当前 CI 的正确性检查
-uv run ruff format --check src tests scripts             # 当前 CI 的统一格式化门禁
+uv run ruff check src tests evals scripts                      # 当前 CI 的正确性检查
+uv run ruff format --check src tests evals scripts             # 当前 CI 的统一格式化门禁
 uv run python scripts/type_scan.py                       # 当前 CI 的类型债务棘轮
 uv run python scripts/scale_scan.py                      # 全生产层规模门禁(也被 contract 测试覆盖)
 uv run pytest -m "unit or contract" -q --cov=codeagent --cov-report=term-missing
@@ -146,7 +146,7 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - 需求行为已实现，且没有改变无关行为。
 - 相关测试已新增或更新，回归测试覆盖了修复场景。
 - 已运行与变更范围匹配的窄测试和分层测试；必要时已运行完整测试。
-- 当前可用的 Ruff 正确性检查、`uv run ruff format --check src tests scripts`、`uv run python scripts/type_scan.py`（类型棘轮）、`uv run python scripts/scale_scan.py`（规模门禁）、`git diff --check` 和相关构建检查已通过。
+- 当前可用的 Ruff 正确性检查、`uv run ruff format --check src tests evals scripts`、`uv run python scripts/type_scan.py`（类型棘轮）、`uv run python scripts/scale_scan.py`（规模门禁）、`git diff --check` 和相关构建检查已通过。
 - 相关文档或 OpenSpec 已同步。
 - 没有提交密钥、临时文件、用户数据或无关修改。
 - 最终回复列出修改摘要、验证命令、验证结果和已知限制。

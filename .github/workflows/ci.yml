@@ -41,10 +41,10 @@ jobs:
         run: uv sync --locked --group dev
 
       - name: Run correctness lint
-        run: uv run ruff check src tests scripts
+        run: uv run ruff check src tests evals scripts
 
       - name: Check formatting
-        run: uv run ruff format --check src tests scripts
+        run: uv run ruff format --check src tests evals scripts
 
       - name: Run type debt ratchet
         run: uv run python scripts/type_scan.py
