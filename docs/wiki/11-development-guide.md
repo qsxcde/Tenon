@@ -52,7 +52,7 @@ uv run codeagent --tui             # 交互式终端
 
 1. 在 `tools/atomic/<name>.py` 实现 `AtomicTool` 子类：`name`/`description`/`Args`（pydantic）/`_invoke`。
 2. 只通过注入的 `self._cwd`/`self._ops`/`self._resource_limits` 访问外部；输出经 `shared/truncate` 或 `govern_text` 截断。
-3. 在 `tools/registry.make_tools` 注册。
+3. 在 `tools/registry.BUILTIN_TOOL_SPECS` 追加 `ToolSpec` 声明（名称 + 构建函数，顺序即装配顺序）。
 4. 若涉及写操作：在 `tools/security/ask_rules.py` 增加确认规则；涉及路径边界则在 `filesystem._BOUNDED_TOOLS` 纳入。
 5. 补 `tests/tools/` 的 unit 测试与必要的安全测试（`security` marker）。
 
