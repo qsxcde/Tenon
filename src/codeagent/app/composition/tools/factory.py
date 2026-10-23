@@ -61,5 +61,6 @@ def _load_extension_tools(
         resource_limits=resource_limits
         if resource_limits is not None
         else resolve_tool_resource_limits(cfg),
+        sandbox_policy=getattr(cfg, "sandbox_policy", "danger-full-access"),
     )
     return load_extension_tools(extensions_dir(), build_context=context)
