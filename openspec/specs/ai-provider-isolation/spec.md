@@ -2,9 +2,28 @@
 
 ## Purpose
 
-确保 AI 基础设施只消费规范化的模型请求数据，并使可复用客户端在并发调用、无效目录输入和兼容调用方式下保持隔离且可诊断。
+确保 AI 基础设施只消费规范化的模型请求数据，并使可复用客户端在并发调用、无效目录输入和兼容调用方式下保持隔离且可诊断；provider 端点/鉴权与线上协议形状（API shape）分离，二者可独立扩展。
 
 ## Requirements
+
+### Requirement: API 形状与 provider 正交
+
+系统 SHALL 以显式的 API 形状注册表描述线上协议形状（消息/工具/流式/思考字段能力），provider 注册项 SHALL 声明其 API 形状；未知形状 SHALL 在注册项构造时 fail-closed，不得静默回退默认形状。新增同形状 provider SHALL 只需声明端点、鉴权与模型目录，不修改 transport；新增形状 SHALL 通过注册入口登记并在 `ai/transport/` 提供实现。系统 SHALL 提供自定义 provider 注册入口，重复 provider id 或重复形状名 SHALL 明确拒绝且不得覆盖内置项。
+
+#### Scenario: 未知形状在装配前失败
+
+- **WHEN** 注册项声明一个未登记的 API 形状
+- **THEN** 构造注册项时即返回包含形状名与可用形状列表的错误，不进入运行时
+
+#### Scenario: 内置 provider 形状可解析
+
+- **WHEN** 读取全部内置 provider 注册项
+- **THEN** 每个注册项的 API 形状都能在注册表中解析到明确的能力描述
+
+#### Scenario: 自定义 provider 与形状登记
+
+- **WHEN** 调用方登记新的 provider 或新的 API 形状
+- **THEN** 成功后可从注册入口按 id 取得；重复登记被明确拒绝，内置 provider 不被覆盖
 
 ### Requirement: Normalized model-visible tool definitions
 

@@ -10,6 +10,7 @@
 | `ai/model/types.py` | 传输用中性类型 | `ChatMessage`、`ToolCall`、`ToolDefinition`、`ChatResponse`、`StreamEvent`、`StreamEventType`、`Usage` |
 | `ai/providers/*` | 内置 provider 配置 + 工厂 | 6 个真实 provider + 1 个 `fake` |
 | `ai/providers/base.py` | 注册类型 | `ProviderDefinition`、`ProviderFactory` |
+| `ai/transport/shapes.py` | API 形状注册表 | `ApiShape`、`resolve_api_shape`（未知 fail-closed）、`register_api_shape` |
 | `ai/transport/openai_compat.py` | OpenAI 兼容 HTTP 客户端 | `OpenAICompatClient` |
 | `ai/transport/sse.py` | SSE 解析 | `SSEParser` |
 | `ai/transport/streaming.py` | 流式消费与重试规则 | 首事件后不重放 |
@@ -67,6 +68,7 @@
 - `reasoning_effort` 默认 `None` 表示"该兼容层未确认支持，不发送"；即使配置了值，工厂仍会先看 `ModelSpec.reasoning` 再决定是否透传。
 - `extra="ignore"`：同一进程内的多个 provider 共享环境变量空间，无关变量不报错。
 - 注册表在 `ai/providers/all.py`：`BUILTIN_PROVIDERS`（有序元组）、`PROVIDERS`（id → 工厂）、`PROVIDER_CONFIGS`（id → 配置类）。`fake` 只出现在 `PROVIDERS`，不出现在 `PROVIDER_CONFIGS`。
+- **API 形状与 provider 正交**：`ProviderDefinition.api_shape` 声明线上协议形状（默认 `openai-completions`），构造期经 `resolve_api_shape` 校验、未知形状 fail-closed。新增同形状 provider 只需绑端点/鉴权/模型目录；新形状经 `register_api_shape` 登记并在 `ai/transport/` 提供实现。自定义 provider 经 `register_provider(definition, config_cls)` 注册，重复 id 拒绝且不覆盖内置项。
 - 工厂按 `ModelSpec.reasoning` 决定是否透传 `reasoning_effort`（单次覆盖参数 > 配置默认值），非推理模型忽略该参数。
 
 ### 3.2 fake provider

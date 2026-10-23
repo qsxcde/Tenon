@@ -1,7 +1,14 @@
 """模型供应商包:每 provider 一个文件。"""
 
 from . import deepseek, fake, glm, kimi, minimax, openai, qwen
-from .all import BUILTIN_PROVIDERS, PROVIDER_CONFIGS, PROVIDERS
+from .all import (
+    BUILTIN_PROVIDERS,
+    PROVIDER_CONFIGS,
+    PROVIDERS,
+    provider_definition,
+    provider_definitions,
+    register_provider,
+)
 from .base import ProviderDefinition, ProviderFactory
 from .fake import FakeClient
 
@@ -18,5 +25,8 @@ __all__ = [
     "kimi",
     "minimax",
     "openai",
+    "provider_definition",
+    "provider_definitions",
     "qwen",
+    "register_provider",
 ]

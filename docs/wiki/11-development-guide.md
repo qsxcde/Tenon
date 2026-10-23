@@ -60,7 +60,7 @@ uv run codeagent --tui             # 交互式终端
 
 1. 在 `ai/providers/<name>.py` 定义 `XxxConfig(BaseSettings)`（`env_prefix="XXX_"`，`api_key: SecretStr`、`base_url`、`model`）与 `make_llm` 工厂（缺 key 时报可操作错误）。
 2. 在 `ai/catalog/builtin.py` 增加模型目录（`ModelSpec` 必须显式声明能力三态与 `context_window`）。
-3. 在 `ai/providers/all.py` 注册 `BUILTIN_PROVIDERS` 与 `PROVIDER_CONFIGS`。
+3. 在 `ai/providers/all.py` 注册 `BUILTIN_PROVIDERS` 与 `PROVIDER_CONFIGS`；同形状 provider 声明 `api_shape`（缺省 `openai-completions`）即可，新形状需先在 `ai/transport/shapes.py` 用 `register_api_shape` 登记并提供 transport 实现。
 4. 若 provider 有特殊流式形状，补 `ai/transport` 的契约测试；`reasoning_effort` 兼容性未确认时默认 `None` 不发送。
 5. 补离线契约测试（`tests/contracts/test_provider_contract.py` 风格），不得依赖真实网络。
 
