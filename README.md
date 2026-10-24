@@ -1,125 +1,76 @@
 # codeagent
 
-本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排（2026-08-14 起不再依赖 langgraph / langchain），采用端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
+> 本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排，端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
 
-`v0.7.0` · Python 3.12 · 全量离线测试 **1870 passed** · 快速质量集 **1718 passed** · OpenSpec **25/25**
+[![CI](https://github.com/qsxcde/codeAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/qsxcde/codeAgent/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v0.7.0-blue)](https://github.com/qsxcde/codeAgent/releases/tag/v0.7.0)
+[![Python](https://img.shields.io/badge/python-3.12%2B-3776AB)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-设计参考 [earendil-works/pi](https://github.com/earendil-works/pi) 的"三层协作 / 双层 loop / 事件驱动 / 会话即状态"思想。架构见 [`docs/design/architecture.md`](docs/design/architecture.md)，需求基线见 [`docs/design/requirements-analysis.md`](docs/design/requirements-analysis.md)，v0.6 硬化路线与实测证据见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)，按版本的权威过程记录见 [`docs/iteration/`](docs/iteration/)。
+发布说明：[v0.7.0](docs/releases/v0.7.0.md) · 升级指南：[v0.7](docs/releases/v0.7-upgrade.md) · [架构设计](docs/design/architecture.md) · [测试与 CI](docs/testing.md) · [变更日志](CHANGELOG.md)
 
----
+## 目录
 
-## 一、项目描述
+- [项目简介](#项目简介)
+- [核心特性](#核心特性)
+- [快速开始](#快速开始)
+- [使用方式](#使用方式)
+- [配置参考](#配置参考)
+- [架构与项目结构](#架构与项目结构)
+- [开发与测试](#开发与测试)
+- [版本与路线图](#版本与路线图)
+- [贡献](#贡献)
+- [许可证](#许可证)
+- [参考](#参考)
 
-### 它解决什么问题
+## 项目简介
 
-多数 Agent 框架把编排、模型适配、工具实现和持久化揉在同一层，换模型要动业务代码、加工具要动核心循环、出问题只能看最终返回值。`codeagent` 把这四件事彻底拆开：核心层是纯内存的可测试运行时，模型/工具/存储全部通过端口注入，运行过程以事件流对外暴露，任何一层都能被替换而不牵动其它层。
+多数 Agent 框架把编排、模型适配、工具实现和持久化揉在同一层：换模型要动业务代码、加工具要动核心循环、出问题只能看最终返回值。`codeagent` 把这四件事拆开——核心层是纯内存、可离线测试的运行时，模型/工具/存储全部通过端口注入，运行过程以事件流对外暴露，任何一层都能替换而不牵动其它层。
 
-### 四条设计目标
+设计参考 [earendil-works/pi](https://github.com/earendil-works/pi) 的“三层协作 / 双层 loop / 事件驱动 / 会话即状态”思想，自 2026-08-14 起不再依赖 langgraph / langchain。
 
-| 目标 | 含义 |
+| 设计目标 | 含义 |
 | --- | --- |
-| **可演进** | 从单工具调用 Agent 平滑演进到多 Agent（v0.5 已交付串行只读委派）、多会话、平台部署 |
+| **可演进** | 从单工具调用 Agent 平滑演进到多 Agent、多会话与平台部署 |
 | **可替换** | 换模型供应商、换工具集、换存储后端都不触碰编排代码 |
-| **可感知** | 会话过程以事件流暴露，CLI / TUI / 测试 / CI 都能订阅，而非只拿最终返回值 |
-| **可测试** | 核心层零网络、零密钥即可运行，注入 `FakeClient` 离线假模型即可跑通全量测试 |
+| **可感知** | 会话过程以事件流暴露，CLI / TUI / 测试 / CI 都能订阅 |
+| **可测试** | 核心层零网络、零密钥即可运行，注入 `FakeClient` 即可跑通全量测试 |
 
-### 当前能力
+当前状态：`v0.7.0` · Python 3.12+ · 全量离线测试 **1870 passed** · 快速质量集 **1718 passed** · OpenSpec **25/25**。
 
-- **交互式 TUI**（`--tui`）：无边框多行 composer（Enter 提交 / Shift+Enter 换行）、流式正文、可展开的工具结果与 edit/write 红绿意图差异、model/effort/cwd 状态栏、Markdown 渲染、Esc 运行中打断、斜杠命令体系与模糊补全。
-- **Headless CLI**：`--prompt` 一次性输入或 stdin 逐行读取，事件聚合输出最终回复；敏感操作默认 fail closed。
-- **自研编排**：`core/agent.py` 纯内存 `Agent` 外壳 + `core/orchestration/loop.py` 的 ReAct 主循环（模型 → 工具 → 继续/结束）。
-- **11 个内建工具**：`read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill` / `web_fetch` / `web_search` / `todo`，无状态 `AtomicTool` + `FsOps` 文件系统抽象缝；`grep` / `find` 把 `rg` / `fd` 只当可选加速，失败回退纯 Python；web 工具网络经注入、出站进确认环。
-- **MCP 客户端**：按用户配置接入 `tools/list` / `tools/call`，工具名 `mcp__<server>__<tool>` 命名空间化并实施分组预算。
-- **扩展插件（v1）**：`~/.codeagent/extensions/<id>/` + `codeagent-plugin.json` + 模块导出 `TOOL_SPECS`，工具名 `ext__<id>__<tool>`；目录即信任、调用层默认需确认，`extensions.json` 可显式放行/拒绝。
-- **Skills 技能系统**：`SKILL.md` 三源发现（内建 / 个人 / 项目）+ 渐进式披露（描述入 system prompt，正文经 `skill` 工具按需取），`codeagent skill` 子命令管理技能包。
-- **会话层**：JSONL 树形持久化，可恢复 / 切换 / 分叉 / 归档 / 删除 / 压缩；标题、搜索、筛选、恢复诊断；成功轮次才落盘，失败与取消内存回滚；`abort` / `steer` / `followup`。
-- **Subagent 委派**：`delegate` 默认串行，`subagent_max_concurrency>1` 时启用有界并发；`explore` / `review` 只读、`implement` 受限可写（禁用 `delegate`/MCP）；预算与输出有界、深度固定 1；父级收回有界摘要与结构化证据。
-- **安全确认环**：执行前 `ApprovalPolicy` 三档 deny / ask / allow（危险命令黑名单 + shlex 语义检测 + 文件访问边界）；审批终态封闭枚举且 fail-closed。
-- **运行期安全**：三档 bash 沙箱（`read-only` / `workspace-write` / `danger-full-access`，受限策略无后端 fail-closed）；写入前 checkpoint + `codeagent undo` 逐级回退。
-- **用量透明**：归一并累计输入 / 输出 / 推理 / 缓存命中 token，`/status` 与 CLI 可见（**不做费用估算**）；`--context` 输出缓存命中率与冷/暖诊断码。
-- **上下文治理**：token 预算、preflight、自动压缩与恢复回归，`--context` 只读输出治理诊断。
-- **离线评测**：`python -m evals` 用 fake 模型驱动真实 Agent 循环，覆盖工具流 / 未知工具 / 审批阻断 / 改参传播，纳入 `contract` 门禁。
+## 核心特性
 
-### 明确不做
+- **双形态交互**：`--tui` 提供流式正文、可展开工具结果、edit/write 红绿差异、Markdown 渲染、模糊补全与斜杠命令；`--prompt` / stdin 提供无头单次执行。
+- **自研 ReAct 编排**：`core/agent.py` 的纯内存 `Agent` 外壳加 `core/orchestration/loop.py` 的“模型 → 工具 → 继续/结束”主循环，不依赖第三方编排框架。
+- **11 个内建工具**：`read` `write` `edit` `bash` `grep` `find` `ls` `skill` `web_fetch` `web_search` `todo`。`rg` / `fd` 仅作可选加速，缺失时回退纯 Python；web 工具网络经注入，出站进入确认环。
+- **可扩展工具层**：声明式 `ToolSpec` / `ToolRegistry`；MCP 客户端（`mcp__<server>__<tool>`）；扩展插件 v1（`ext__<id>__<tool>`）；Skills 三源发现与渐进式披露。
+- **会话层**：JSONL 树形持久化，支持恢复、切换、分叉、归档、删除与压缩；成功轮次才落盘，失败/取消内存回滚；`abort` / `steer` / `followup`。
+- **Subagent 委派**：`delegate` 默认串行，配置 `SUBAGENT_MAX_CONCURRENCY>1` 后启用有界并发；`explore` / `review` 只读、`implement` 受限可写，预算与输出有界、深度固定为 1。
+- **安全与回退**：审批结果封闭枚举且 fail-closed；三档 bash 沙箱（`read-only` / `workspace-write` / `danger-full-access`）；`write` / `edit` 写前快照，`codeagent undo` 逐级回退。
+- **可观测与治理**：token 用量归一见 `/status` 与 CLI；`--context` 输出预算、压缩与缓存命中诊断；离线评测 `python -m evals` 纳入 `contract` 门禁。
 
-费用估算、Web / HTTP 事件订阅、轻量记忆、自动化任务调度、跨进程恢复与自动重试、`tester` profile 与子 Agent 命令执行；**Web UI 暂不规划**（TUI + headless CLI 为唯一交付形态）。
+## 快速开始
 
----
-
-## 二、项目技术栈
-
-### 运行时与构建
-
-| 项 | 选型 |
-| --- | --- |
-| 语言版本 | Python 3.12+（[`.python-version`](.python-version)） |
-| 包与虚拟环境管理 | [uv](https://docs.astral.sh/uv/)，依赖集中在 `pyproject.toml` 并由 `uv.lock` 锁定 |
-| 项目布局 | `src/` layout，包名 `codeagent` |
-| 构建后端 | `uv_build`（产出 wheel / sdist） |
-| 入口 | `codeagent = "codeagent.app.main:main"`，亦支持 `python -m codeagent` |
-
-### 运行时依赖
-
-| 依赖 | 用途 |
-| --- | --- |
-| `textual` | 交互式 TUI 后端（仅 `app/tui/adapters/textual/` 可 import） |
-| `httpx` | Provider HTTP 与流式传输（自研 SSE 解析） |
-| `mcp` | 官方 MCP SDK 客户端（stdio 传输，后台线程 + 独立事件循环） |
-| `pydantic-settings` | 配置加载，全部配置类 `extra="ignore"` 做命名空间隔离 |
-| `pyyaml` | 技能包元数据解析 |
-
-模型供应商适配：`deepseek` / `openai` / `qwen` / `glm` / `kimi` / `minimax` 六家真实 provider + `fake` 离线假模型，每 provider 一个自包含文件（配置 + 工厂）。
-
-### 开发与质量工具链
-
-| 工具 | 作用 | 门禁位置 |
-| --- | --- | --- |
-| `pytest`（+ `asyncio` / `cov` / `timeout`） | 分标记的离线测试：`unit` `contract` `integration` `e2e` `platform` `security` `performance` `slow` `compatibility`；显式主分类优先于目录兜底 | `quality-fast`（覆盖率下限 80%）+ 跨平台矩阵 |
-| `ruff check` | 正确性静态检查，当前只启用 `E9` / `F821` / `F841` 阻塞级规则 | `quality-fast` |
-| `ruff format` | **唯一**格式化方案，行宽 100（不引入 Black） | `quality-fast`（`--check`） |
-| `mypy` | 类型债务分层棘轮：`scripts/type_scan.py` 比对 `docs/type-baseline.json`，只降不升（当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22） | `quality-fast` |
-| `scripts/scale_scan.py` | 全部生产层规模门禁：单文件 ≤ 300 行、单函数 ≤ 80 行 | `unit or contract` |
-| OpenSpec CLI | 规格驱动开发与 `openspec validate --specs`（25 份主规格） | `quality-fast` |
-| `scripts/release_check.py` | wheel/sdist 构建、内容与敏感文件检查、干净环境安装、fake provider CLI 冒烟 | `package-smoke` |
-| GitHub Actions | `quality-fast` / `test-matrix`(ubuntu, windows, macos) / `package-smoke` / `performance`(非阻塞) | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
-
-### 分层架构与依赖方向
-
-依赖单向流动，跨层 import 只发生在组合根。规则由 `tests/test_decoupling.py` 的 AST 扫描强制校验。
-
-| 层 | 职责 | 禁止依赖 |
-| --- | --- | --- |
-| `app/` | 入口、CLI、TUI、依赖组装（`app/container.py` 为外观，实体在 `app/composition/*`） | — |
-| `core/` | 领域模型、协议、ReAct 编排、`core/subagent/` 委派策略 | `config` `ai` `tools` `session` |
-| `session/` | 会话状态、生命周期、JSONL 持久化、压缩、会话树 | `ai` `tools` `config` |
-| `ai/` | provider、模型目录、transport、错误分类 | `app` `core` `session` `tools` |
-| `tools/` | 原子工具、MCP、安全分类、子进程适配 | `core` `session` `ai` `app` |
-| `resources/` | 内建 prompts 与 skills 资源 | — |
-
----
-
-## 三、启动步骤
-
-### 1. 准备前置
+### 环境要求
 
 - Python 3.12 或更高
-- 已安装 [uv](https://docs.astral.sh/uv/)
+- [uv](https://docs.astral.sh/uv/)
 
-### 2. 安装依赖
+### 安装
 
 ```bash
-git clone https://github.com/qsxcde/codeAgent.git && cd codeAgent
+git clone https://github.com/qsxcde/codeAgent.git
+cd codeAgent
 
-uv sync --group dev      # 运行时 + 开发依赖（推荐开发时用这条）
-uv sync                  # 只装运行时依赖
+uv sync --group dev   # 运行时 + 开发依赖
+uv sync               # 仅运行时依赖
 ```
 
-### 3. 配置模型密钥
+### 配置模型
 
-密钥只写在**固定目录** `~/.codeagent/.env`（首次启动幂等生成模板，已存在的文件不会被覆盖）。项目**有意不读取**当前目录下的 `.env`，避免在任意仓库内运行时被其 `.env` 劫持流量与密钥。
+密钥只写在固定目录 `~/.codeagent/.env`（首次启动幂等生成模板，已有文件不会被覆盖）。项目**有意不读取**当前目录下的 `.env`，避免在任意仓库运行时被其 `.env` 劫持流量与密钥。
 
 ```ini
-# 选择 provider: deepseek / openai / qwen / glm / kimi / minimax / fake
 LLM_PROVIDER=deepseek
 
 DEEPSEEK_API_KEY=sk-你的key
@@ -128,24 +79,21 @@ DEEPSEEK_MODEL=deepseek-v4-flash
 DEEPSEEK_REASONING_EFFORT=high
 ```
 
-换其它 provider 只需追加对应的 `*_API_KEY` 等键——全局 `Settings` 与各 provider `Config` 各自只认自己的键。自定义模型可编辑 `~/.codeagent/models.json`，按 `id` 与内置目录 upsert 合并。
+换其它 provider 只需追加对应的 `*_API_KEY` 等键。自定义模型可编辑 `~/.codeagent/models.json`，按 `id` 与内置目录合并。
 
-> **想先零配置跑通？** 把 `LLM_PROVIDER` 设为 `fake`（或删掉 `.env` 里的 key），即可在没有网络与密钥的情况下走完"对话 → 工具调用 → 事件流"闭环。
+> 想零配置跑通？把 `LLM_PROVIDER` 设为 `fake`，即可在没有网络与密钥的情况下走完“对话 → 工具调用 → 事件流”闭环。
 
-### 4. 启动
+### 运行
 
 ```bash
-# 交互式 TUI
-uv run codeagent --tui
-
-# 无头单次执行
-uv run codeagent --prompt "梳理登录流程的入口有哪些"
-
-# 从 stdin 逐行读取
-echo "列出本目录最大的 5 个文件" | uv run codeagent
+uv run codeagent --tui                                  # 交互式 TUI
+uv run codeagent --prompt "梳理登录流程的入口有哪些"     # 无头单次执行
+echo "列出本目录最大的 5 个文件" | uv run codeagent      # 从 stdin 逐行读取
 ```
 
-### 5. 常用参数
+## 使用方式
+
+### 常用参数
 
 | 参数 | 行为 |
 | --- | --- |
@@ -154,90 +102,102 @@ echo "列出本目录最大的 5 个文件" | uv run codeagent
 | `--continue` / `-c` | 继续最近有活动的会话（无会话时新建） |
 | `--session <id>` | 恢复指定会话继续对话（id 见 `--list-sessions`） |
 | `--list-sessions` | 列出全部会话 |
-| `--context` | 只读显示当前会话的上下文预算、治理诊断与缓存命中率/冷热诊断 |
-| `--yes` | 跳过敏感操作确认、全部放行（显式承担风险）；缺省在无头模式下敏感操作一律拒绝 |
+| `--context` | 只读显示上下文预算、治理诊断与缓存命中率 |
+| `--yes` | 跳过敏感操作确认、全部放行（显式承担风险）；无头模式缺省一律拒绝 |
 
-技能包管理走子命令：`uv run codeagent skill install <source>` / `update` / `remove` / `list` / `reload`（`--project` 作用于当前项目）。
+### 技能包与快照
 
-写前快照回退：`uv run codeagent undo --list`（查看）→ `uv run codeagent undo --dry-run`（预览）→ `uv run codeagent undo`（逐级恢复最近一次 write/edit 之前的文件）。
+```bash
+uv run codeagent skill install <source>   # 另有 update / remove / list / reload；--project 作用于当前项目
+uv run codeagent undo --list              # 查看写前快照
+uv run codeagent undo --dry-run           # 预览将恢复的文件
+uv run codeagent undo                     # LIFO 逐级恢复最近一次 write/edit 之前的文件
+```
 
-TUI 内主要命令：`/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` `/status` `/sessions`（含 `search` / `filter` / `archive` / `archived` / `recovery` / `delete`）`/tree` `/fork` `/quit`；运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。
+### TUI 命令
 
-### 6. 验证与质量检查
+`/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` `/status` `/sessions`（含 `search` / `filter` / `archive` / `archived` / `recovery` / `delete`）`/tree` `/fork` `/quit`。运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。
+
+## 配置参考
+
+配置统一来自 `~/.codeagent/.env` 或同名环境变量（无前缀，全大写）。
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `LLM_PROVIDER` | `deepseek` | `deepseek` / `openai` / `qwen` / `glm` / `kimi` / `minimax` / `fake` |
+| `SANDBOX_POLICY` | `danger-full-access` | bash 沙箱：`read-only` / `workspace-write` / `danger-full-access` |
+| `SUBAGENT_MAX_CONCURRENCY` | `1` | `1` 串行；大于 1 启用有界并发 |
+| `CHECKPOINTS_ENABLED` | `true` | `write` / `edit` 写前是否记录快照 |
+| `TOOL_MAX_CONCURRENCY` | `4` | 同轮工具调用的并发上限 |
+| `TOOL_TIMEOUT` / `TOOL_MAX_TIMEOUT` | 无 / `600` | 单次工具超时与硬上限（秒） |
+
+完整迁移与回滚说明见 [v0.7 升级指南](docs/releases/v0.7-upgrade.md)。
+
+## 架构与项目结构
+
+依赖单向流动，跨层 import 只允许发生在组合根，规则由 `tests/test_decoupling.py` 的 AST 扫描强制校验。
+
+| 层 | 职责 | 禁止依赖 |
+| --- | --- | --- |
+| `app/` | 入口、CLI、TUI、依赖组装（`app/composition/*`） | — |
+| `core/` | 领域模型、协议、ReAct 编排、Subagent 策略 | `config` `ai` `tools` `session` |
+| `session/` | 会话状态、JSONL 持久化、压缩、会话树 | `ai` `tools` `config` |
+| `ai/` | provider、模型目录、transport、错误分类 | `app` `core` `session` `tools` |
+| `tools/` | 原子工具、MCP、插件、安全分类、子进程与沙箱 | `core` `session` `ai` `app` |
+| `resources/` | 内建 prompts 与 skills | — |
+
+```text
+codeAgent/
+├── src/codeagent/
+│   ├── app/          # 入口、组合根、composition、TUI、skills、context
+│   ├── core/         # Agent、contracts、orchestration、context、execution、subagent
+│   ├── session/      # 会话生命周期、persistence、compaction、navigation
+│   ├── ai/           # providers、catalog、model、transport、errors
+│   ├── tools/        # atomic、mcp、plugins、security、execution、shared
+│   └── resources/    # 内建 prompts 与 skills
+├── tests/            # 按行为域分包，与源码层级对应
+├── evals/            # 离线评测框架（python -m evals）
+├── scripts/          # scale_scan / type_scan / release_check / benchmark_tui ...
+├── openspec/         # 25 份主规格与已归档变更（spec-driven）
+├── docs/             # 架构、迭代记录、wiki、基准与发布文档
+├── AGENTS.md         # 开发与协作规范
+└── CHANGELOG.md      # 面向使用者的版本记录
+```
+
+更多设计细节见 [架构设计](docs/design/architecture.md)、[需求基线](docs/design/requirements-analysis.md) 与 [代码级 wiki](docs/wiki/README.md)。
+
+## 开发与测试
 
 ```bash
 uv run pytest -m "unit or contract" -q --strict-markers   # 快速质量集（日常首选）
 uv run pytest -q                                          # 全量离线测试
-uv run python -m evals                                    # 离线端到端评测套件
+uv run python -m evals                                    # 离线端到端评测
 uv run ruff check src tests evals scripts                 # 正确性静态检查
-uv run ruff format src tests evals scripts                # 提交前格式化
-uv run ruff format --check src tests evals scripts        # CI 的格式化门禁
-uv run python scripts/scale_scan.py                       # 规模门禁（也被 contract 测试覆盖）
+uv run ruff format --check src tests evals scripts        # 格式化门禁
 uv run python scripts/type_scan.py                        # 类型债务棘轮
+uv run python scripts/scale_scan.py                       # 规模门禁（文件 ≤300 行 / 函数 ≤80 行）
 openspec validate --specs                                 # 规格校验
 uv build                                                  # 构建 wheel / sdist
 ```
 
-CI 分层与测试标记说明见 [`docs/testing.md`](docs/testing.md)。
+CI 由 `quality-fast`（Ruff、快速测试、覆盖率下限 80%、类型棘轮、OpenSpec）、三平台离线测试矩阵、`package-smoke`（构建、干净安装、fake provider CLI 冒烟）与非阻塞性能报告组成。测试标记与分层说明见 [docs/testing.md](docs/testing.md)。
 
----
+## 版本与路线图
 
-## 四、项目结构
+- **已发布**：`v0.1.0` → `v0.7.0`，当前 [v0.7.0 发布说明](docs/releases/v0.7.0.md)。
+- **v0.7.0**：工具注册表数据化、审批结果封闭枚举、`web_fetch` / `web_search` / `todo`、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint + `undo`、缓存诊断、离线评测框架；同时包含 v0.6 正确性硬化。
+- **后续评估**：执行控制（steer 接入 UI、后台作业、事件流导出）、程序化工具编排、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线。Web UI 暂不规划。
+- **明确不做**：费用估算、Web/HTTP 事件订阅、轻量记忆、自动化任务调度、`tester` profile。
 
-```text
-codeAgent/
-├── pyproject.toml / uv.lock     # 依赖、CLI 入口、ruff / mypy / pytest 配置
-├── AGENTS.md                    # 本仓库开发与协作规范（当前树的权威快速参考）
-├── CHANGELOG.md                 # 面向使用者的版本记录
-├── docs/
-│   ├── design/                  # 架构设计 / 需求分析 / 自研编排蓝图 / 会话布局
-│   ├── iteration/               # v0.1 ~ v0.5 迭代记录（权威过程与验收证据）
-│   ├── benchmarks/              # TUI 性能基线、边界策略与观测记录
-│   ├── wiki/                    # 13 篇代码级文档（结构、分层、开发指南）
-│   ├── archive/                 # 历史实施计划与时点快照（只读参考）
-│   ├── type-baseline.json       # mypy 分层棘轮基线
-│   └── testing.md               # 测试分层、目录结构、marker 与 CI 说明
-├── openspec/                    # 25 份主规格 + 已归档变更（spec-driven）
-├── evals/                       # 离线评测框架（python -m evals，contract 门禁）
-├── scripts/                     # scale_scan / type_scan / layer_scan / release_check / benchmark_tui ...
-├── src/codeagent/
-│   ├── app/                     # [入口 + 组合根] 唯一允许跨层装配的地方
-│   │   ├── main.py / headless.py / config.py
-│   │   ├── container.py         #   装配外观（实体在 composition/*）
-│   │   ├── composition/         #   model / tools / session / runtime / subagent / tui 工厂与策略
-│   │   ├── context/             #   AGENTS.md 分层加载
-│   │   ├── skills/              #   技能发现、提示词构建、技能包管理
-│   │   ├── tasks/               #   任务模式与验证环
-│   │   └── tui/                 #   状态、渲染协调器、命令、presentation、textual 适配器
-│   ├── core/                    # [Agent Runtime] 纯内存、全异步、零外部依赖
-│   │   ├── agent.py / observation.py
-│   │   ├── contracts/           #   messages / events / hooks / errors / ports / subagent*
-│   │   ├── orchestration/       #   loop / turn / batch / tool_call / tool_hooks / AgentLoopConfig
-│   │   ├── context/             #   预算、preflight、transform、诊断
-│   │   ├── execution/           #   运行、操作状态、清理与结果归一化
-│   │   └── subagent/            #   委派策略：policy / admission / slots
-│   ├── session/                 # [会话层] 外壳 + 持久化 + 压缩 + 事件
-│   │   ├── session.py / manager/ / lifecycle.py / run_coordinator.py
-│   │   ├── persistence/         #   JSONL / MemoryStore / 索引 / 恢复诊断
-│   │   ├── compaction/          #   压缩策略与摘要
-│   │   └── navigation/          #   会话树与分支导航
-│   ├── ai/                      # [模型层] providers / catalog / model / transport（含 API 形状注册表）/ errors
-│   ├── tools/                   # [工具层] atomic / mcp / plugins / security / execution（含沙箱）/ shared（含 checkpoint）
-│   └── resources/               # [资源层] 内建 prompts 与 skills
-└── tests/                       # 按行为域分包，与源码层级对应
-```
+按版本的权威过程记录见 [docs/iteration/](docs/iteration/)。
 
----
+## 贡献
 
-## 五、版本状态与后续
+欢迎提交 Issue 与 Pull Request。开发环境、提交规范、必须通过的门禁与 PR 要求见 [CONTRIBUTING.md](CONTRIBUTING.md)；仓库内的分层约束与编码规范见 [AGENTS.md](AGENTS.md)。
 
-- **已发布**：`v0.1.0` → `v0.7.0`。annotated 标签 `v0.4.0` 指向纯 v0.4 提交 `b981534`，`v0.5.0` 指向发布内容快照 `7bbc6a7`，均已推送；`v0.7.0` 对应本版本发布提交。
-- **v0.4** 完成 V4-01～V4-38：Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 稳定性。
-- **v0.5** 完成 V5-00～V5-10：串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI / headless 可观察性；领域规则已下沉 `core/subagent/`。
-- **工程护栏**：格式化与类型棘轮门禁已接入 CI，规模门禁覆盖全部生产层。
-- **v0.6 硬化（随 v0.7.0 交付）**：安全分类语义化（包装器/命令替换/误杀）、只读搜索工具文件边界、越界警告送达模型、bash 合并输出统一上限、中英混合 token 估算、会话索引追加增量更新。详见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)。
-- **v0.7.0 扩展与运行期安全**：工具注册表数据化、审批结果封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表与自定义 provider、三档 bash 沙箱、写前 checkpoint + `undo`、缓存命中诊断、离线评测框架。详见 [`docs/releases/v0.7.0.md`](docs/releases/v0.7.0.md)。
-- **后续评估**：执行控制（steer 接入 UI、后台作业、事件流导出）、程序化工具编排（`run_code` 形态）、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换；Web UI 暂不规划。
+## 许可证
+
+本项目采用 [MIT License](LICENSE)，Copyright (c) 2026 qsxcde。
 
 ## 参考
 

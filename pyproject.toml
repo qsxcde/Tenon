@@ -3,6 +3,8 @@ name = "codeagent"
 version = "0.7.0"
 description = "本地、单用户、可离线验证的编程 Agent（自研 ReAct 编排；TUI + 无头 CLI）"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
