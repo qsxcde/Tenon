@@ -61,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.tui:
         from codeagent.app.tui.main import run_tui
 
-        run_tui()
+        run_tui(continue_recent=args.continue_session)
         return 0
 
     if args.list_sessions:
