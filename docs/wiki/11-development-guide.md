@@ -87,7 +87,7 @@ uv run codeagent --tui             # 交互式终端
 
 ### 4.6 运行期安全与可验证性
 
-- **沙箱**：`CODEAGENT_SANDBOX_POLICY=read-only|workspace-write|danger-full-access`（默认后者）。macOS 用 `sandbox-exec`、Linux 用 `bwrap`；受限策略无后端时 bash 直接 fail-closed，不会静默降级。
+- **沙箱**：`SANDBOX_POLICY=read-only|workspace-write|danger-full-access`（默认后者，写入 `~/.codeagent/.env`）。macOS 用 `sandbox-exec`、Linux 用 `bwrap`；受限策略无后端时 bash 直接 fail-closed，不会静默降级。
 - **写前快照**：`write`/`edit` 在写入前把原文存入 `~/.codeagent/checkpoints/`（上限 200 条）；`codeagent undo --list|--dry-run` 查看，`codeagent undo` 逐级恢复。
 - **离线评测**：`uv run python -m evals` 用 fake 模型驱动真实循环；`tests/test_evals.py` 已纳入 `contract` 门禁，新增关键行为时优先补用例。
 - **缓存观测**：`--context` 输出命中率与冷/暖诊断码；基础系统提示词前缀不得含时间戳或临时路径（契约测试锁定）。

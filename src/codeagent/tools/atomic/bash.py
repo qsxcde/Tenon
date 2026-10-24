@@ -123,7 +123,7 @@ class BashTool(AtomicTool[BashArgs]):
             diagnostics = "; ".join(plan.diagnostics) or "沙箱后端不可用"
             raise ValueError(
                 f"沙箱策略 {plan.policy} 无法执行: {diagnostics};"
-                "请安装后端或将 CODEAGENT_SANDBOX_POLICY 设为 danger-full-access"
+                "请安装后端或将 SANDBOX_POLICY 设为 danger-full-access"
             )
         return ProcessRequest(
             plan.executable,
