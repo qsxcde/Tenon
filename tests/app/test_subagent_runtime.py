@@ -23,7 +23,6 @@ from codeagent.core.contracts.subagents import (
     SubagentStatus,
     SubagentUsage,
 )
-from codeagent.core.contracts.events import AgentEvent
 
 
 def _request(delegation_id: str, task: str = "inspect the repository") -> SubagentRequest:

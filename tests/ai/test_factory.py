@@ -3,8 +3,6 @@
 测试直接使用自研客户端接口(``generate``/``bind_tools``),不依赖 langchain。
 """
 
-import asyncio
-
 from codeagent.ai.providers import FakeClient
 from codeagent.ai.model.types import ChatMessage
 

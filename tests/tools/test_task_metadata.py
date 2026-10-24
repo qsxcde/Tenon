@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 
 from codeagent.core import ToolCall, ToolExecutionRuntime
 from codeagent.tools.atomic.bash import BashArgs, BashInvocationResult, BashTool

@@ -1,8 +1,5 @@
 """AI 层中立模型类型与组合根工具适配测试。"""
 
-import asyncio
-import json
-
 import pytest
 
 from codeagent.ai.model.types import ToolDefinition

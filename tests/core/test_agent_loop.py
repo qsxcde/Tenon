@@ -9,7 +9,6 @@ from codeagent.core.orchestration.loop import run_agent_loop, run_agent_loop_con
 from codeagent.core.contracts.messages import (
     Message,
     OutputCompleteness,
-    ToolCall,
     ToolOutputMetadata,
     ToolResult,
 )

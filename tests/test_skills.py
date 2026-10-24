@@ -292,7 +292,6 @@ def test_superpowers_package_loads_skills_without_executing_harness_extensions(t
 
 
 def _sample_skill():
-    from codeagent.app.skills.models import Skill
 
     return Skill(
         name="fmt",
@@ -304,7 +303,6 @@ def _sample_skill():
 
 def test_build_skills_prompt_appends_section():
     """技能段位于基础提示词之后,每技能一行(名称/描述/来源),按名称排序。"""
-    from codeagent.app.skills.models import Skill
 
     skills = [
         Skill("zeta", "z 描述。", "/z/SKILL.md", "BODY-Z"),

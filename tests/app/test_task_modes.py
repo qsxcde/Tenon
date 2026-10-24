@@ -36,7 +36,6 @@ def test_read_only_mode_denies_mutation_and_allows_reads():
 
 
 async def test_plan_policy_is_enforced_by_react_tool_boundary():
-    import asyncio
 
     from codeagent.ai.providers.fake import FakeClient
     from codeagent.app.container import ChatModelPort

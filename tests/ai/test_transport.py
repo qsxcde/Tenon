@@ -494,7 +494,6 @@ async def test_stream_retry_exhausted():
 @pytest.mark.anyio
 async def test_stream_body_includes_stream_options():
     """流式请求体携带 include_usage(M2)。"""
-    import json
 
     import httpx
 
@@ -517,7 +516,6 @@ async def test_stream_body_includes_stream_options():
 @pytest.mark.anyio
 async def test_generate_stream_true_uses_streaming_request():
     """generate(stream=True) 请求体 stream=true,并聚合流式响应(M5)。"""
-    import json
 
     import httpx
 
@@ -543,7 +541,6 @@ async def test_generate_stream_true_uses_streaming_request():
 
 async def test_client_reuses_connection_and_aclosable(async_resource_tracker):
     """单一 AsyncClient 复用,可显式 aclose(M6)。"""
-    import asyncio
 
     c = async_resource_tracker(_client())
     c1 = c._get_client()

@@ -4,8 +4,6 @@
 与「文件访问边界」(读警告放行 / 写确认 / 符号链接逃逸拦截 / 平台无关)。
 """
 
-import os
-
 import pytest
 
 from codeagent.tools.security import (

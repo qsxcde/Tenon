@@ -24,7 +24,6 @@ from codeagent.core import (
     RecursionLimitError,
     ToolDecision,
     ToolExecutionRuntime,
-    ToolCall,
     run_agent_loop,
 )
 from codeagent.tools.atomic import BashTool, ReadTool

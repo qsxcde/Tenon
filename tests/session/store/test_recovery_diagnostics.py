@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 
-import pytest
 
 from codeagent.core.contracts.messages import Message
 from codeagent.session.persistence import (

@@ -5,7 +5,6 @@ textual 延迟 import(与 src 侧一致)。覆盖 fix-tui-command-completion D3:
 PageUp/PageDown 恒滚视口;确认键仅在激活时拦截;终端背景融合。
 """
 
-import asyncio
 from typing import Any
 
 from textual.events import MouseScrollDown, MouseScrollUp

@@ -53,7 +53,6 @@ def test_available_providers_includes_fake(tmp_path):
 
 def test_provider_selection_honors_fake_config(tmp_path):
     """LLM_PROVIDER=fake 时容器应选中 fake,而非回退 deepseek(P1-3)。"""
-    from codeagent.ai.catalog.registry import ModelRegistry
 
     reg = _empty_registry(tmp_path)
     providers = get_available_providers(reg)

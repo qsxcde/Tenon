@@ -1,7 +1,5 @@
 """Runtime lifecycle and snapshot tests for the observable TUI state."""
 
-from dataclasses import replace
-
 from codeagent.app.tui.state.model import TuiModel
 from codeagent.app.tui.state.runtime import (
     RuntimePhase,

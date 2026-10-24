@@ -1,7 +1,5 @@
 """FakeClient 测试:脚本消费、usage 注入、bind_tools 占位、离线不联网。"""
 
-import asyncio
-
 from codeagent.ai.providers.fake import FakeClient
 from codeagent.ai.model.types import ChatMessage
 

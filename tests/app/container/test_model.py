@@ -95,7 +95,6 @@ async def test_system_prompt_only_once_and_hot_swap_stable(tmp_path, monkeypatch
         from codeagent.app.container import create_agent_config
 
         ports = create_agent_config()
-    import asyncio
 
     events: list = []
     history = await _run_config(ports, "第一问", emit=events.append)
@@ -159,7 +158,6 @@ async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkey
 
     from codeagent.app.skills.packages.manager import PackageManager
     from codeagent.app.skills.runtime import BOOTSTRAP_TAG
-    from codeagent.core import AgentLoopConfig
     from codeagent.session import EventBus
     from codeagent.session import AgentSession
 
@@ -216,7 +214,6 @@ async def test_config_inject_skills_section_and_tool(tmp_path, monkeypatch):
         from codeagent.app.container import create_agent_config
 
         ports = create_agent_config()
-    import asyncio
 
     events: list = []
     await _run_config(ports, "你好", emit=events.append)
@@ -241,7 +238,6 @@ async def test_session_with_summarizer_can_compact():
 
         session = create_agent_session(summarizer=_StubSummarizer())
         assert await session.compact() is False  # 空历史:全保留,不压缩
-        from codeagent.session import AgentSession
 
         plain = create_agent_session()
         with pytest.raises(ValueError, match="压缩不可用"):
@@ -258,7 +254,6 @@ async def test_tui_app_with_store_persists_session_and_usage():
     from codeagent.session.persistence import MemoryStore
 
     store = MemoryStore()
-    import asyncio
 
     session = None
     with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
