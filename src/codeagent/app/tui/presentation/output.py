@@ -200,14 +200,6 @@ class OutputBuffer:
             f"不完整(按 {self.metadata.truncated_by or self.metadata.completeness} 截断,{recovery})"
         )
 
-    def head_tail_preview(self, head: int = 12, tail: int = 12) -> list[str]:
-        """返回有限首尾预览，避免默认展开大结果。"""
-        lines = self.lines
-        limit = max(1, head) + max(1, tail)
-        if len(lines) <= limit:
-            return list(lines)
-        return [*lines[:head], "… 中间输出已折叠 …", *lines[-tail:]]
-
     def next_page(self) -> bool:
         if self.page >= self.page_count:
             return False

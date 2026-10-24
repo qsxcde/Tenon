@@ -76,16 +76,8 @@ class StatusBar(Component):
         self._task_clock.phase = phase
 
     @property
-    def task_started_at(self) -> float | None:
-        return self._task_clock.started_at
-
-    @property
     def task_elapsed_ms(self) -> int:
         return self._task_clock.elapsed_ms
-
-    @property
-    def task_elapsed_frozen(self) -> bool:
-        return self._task_clock.elapsed_frozen
 
     def set_task_status(
         self,
@@ -111,10 +103,6 @@ class StatusBar(Component):
         self.runtime = replace(snapshot, elapsed_ms=elapsed_ms)
         self.context_tokens = snapshot.context_tokens
         self.context_window = snapshot.context_window
-
-    def refresh_runtime(self, now: float | None = None) -> None:
-        """只刷新阶段计时，不改变其它状态。"""
-        self.apply_snapshot(self.runtime, now)
 
     @property
     def status_clock_active(self) -> bool:

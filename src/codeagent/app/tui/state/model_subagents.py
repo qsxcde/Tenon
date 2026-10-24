@@ -23,10 +23,6 @@ class SubagentEventMixin(TuiModelHost):
         """Return compact projections in event arrival order."""
         return list(self._subagent_blocks_by_id.values())
 
-    @property
-    def subagent_block_capacity(self) -> int:
-        return _MAX_SUBAGENT_BLOCKS
-
     def hydrate_subagent_records(self, records: list[Any]) -> None:
         """Restore compact delegation facts without replaying runtime events."""
         for record in records:

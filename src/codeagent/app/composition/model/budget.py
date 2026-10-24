@@ -78,13 +78,3 @@ def resolve_context_budget_metadata(
         output_reserve=DEFAULT_OUTPUT_RESERVE,
         window_source="fallback",
     )
-
-
-def resolve_context_window(
-    registry: Any,
-    cfg: Any,
-    provider: str | None,
-    model: str | None,
-) -> int:
-    """解析上下文窗口，缺失时使用显式 fallback。"""
-    return resolve_context_budget_metadata(registry, cfg, provider, model).context_window

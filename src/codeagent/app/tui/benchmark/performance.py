@@ -136,9 +136,6 @@ class PerformanceRecorder:
     def increment(self, name: str, value: int | float = 1) -> None:
         self._counters[name] = self._counters.get(name, 0) + value
 
-    def set_counter(self, name: str, value: int | float) -> None:
-        self._counters[name] = value
-
     def samples(self, name: str) -> list[float]:
         return list(self._samples.get(name, []))
 

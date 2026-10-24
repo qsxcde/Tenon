@@ -79,21 +79,6 @@ class ToolLifecycleMixin(ToolBlockHost):
             queue_position=queue_position,
         )
 
-    def set_started(self, *, elapsed_ms: int | None = None) -> None:
-        self.set_execution_status(ToolLifecycleStatus.RUNNING, elapsed_ms=elapsed_ms)
-
-    def set_progress(
-        self,
-        *,
-        elapsed_ms: int | None = None,
-        progress_text: str | None = None,
-    ) -> None:
-        self.set_execution_status(
-            ToolLifecycleStatus.RUNNING,
-            elapsed_ms=elapsed_ms,
-            progress_text=progress_text,
-        )
-
     def set_awaiting(
         self,
         *,

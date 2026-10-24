@@ -25,11 +25,6 @@ class TuiEventBuffer:
         self._flush_count = 0
 
     @property
-    def pending_chars(self) -> int:
-        """Return the number of buffered characters awaiting model apply."""
-        return self._pending_chars
-
-    @property
     def max_pending_chars(self) -> int:
         """Return the largest buffered batch observed by this buffer."""
         return self._max_pending_chars
