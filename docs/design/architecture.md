@@ -56,7 +56,7 @@
  - 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型),`uv run pytest -q` **1870 passed**(2026-10-24,macOS / Python 3.12;此前 v0.5 基线为 1711 passed，v0.5.0 发布记录为 1695 passed，3 skipped / 1698 collected,2026-10-10, Windows);离线评测 `python -m evals` 4/4；本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。
  - TUI 性能验收:`benchmark/` 使用 schema v2 的固定离线 fixture 测量提交首帧、首 token、帧 p50/p95、控制延迟、峰值 Python 分配和协调器的 dropped/over-budget 计数；`compare_benchmark.py` 只在 schema、平台、Python、视口和 fixture 一致时比较，`update_tui_baseline.py` 负责生成受约束的 Linux/Python 3.12 候选基线。
 
-**v0.7 当前状态与远期**:V4-01～V4-38、V5-00～V5-10、v0.6 正确性硬化与 v0.7 扩展/运行期安全均已完成实现与验收；发布包版本仍为 `0.5.0`（v0.6/v0.7 尚未发版），CHANGELOG 已补齐使用者条目。当前工程治理已接入覆盖率报告、Ruff（覆盖 `src tests evals scripts`）、构建安装冒烟和 CI 跨平台矩阵；TUI schema v2 的正式 Linux/Python 3.12 基线仍按 CI artifact 与人工复核流程推进，性能暂保持非阻塞。Subagent 已从"串行只读 MVP"扩展为**默认串行、可配置有界并发**，并新增 `implement` 受限可写 profile（工具白名单含 write/edit/bash，禁 `delegate`/MCP，深度仍固定为 1）；插件系统已交付 v1（仅贡献工具、目录即信任、默认需确认）；执行期已有三档沙箱与写前 checkpoint。工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件流订阅与 Web UI 仍不在范围内。
+**v0.7 当前状态与远期**:V4-01～V4-38、V5-00～V5-10、v0.6 正确性硬化与 v0.7 扩展/运行期安全均已完成实现与验收；发布包版本已提升为 `0.7.0`，v0.6 修复与 v0.7 能力同版交付，CHANGELOG 已收口。当前工程治理已接入覆盖率报告、Ruff（覆盖 `src tests evals scripts`）、构建安装冒烟和 CI 跨平台矩阵；TUI schema v2 的正式 Linux/Python 3.12 基线仍按 CI artifact 与人工复核流程推进，性能暂保持非阻塞。Subagent 已从"串行只读 MVP"扩展为**默认串行、可配置有界并发**，并新增 `implement` 受限可写 profile（工具白名单含 write/edit/bash，禁 `delegate`/MCP，深度仍固定为 1）；插件系统已交付 v1（仅贡献工具、目录即信任、默认需确认）；执行期已有三档沙箱与写前 checkpoint。工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件流订阅与 Web UI 仍不在范围内。
 
 ## 4. 总体结构
 

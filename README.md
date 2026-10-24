@@ -2,7 +2,7 @@
 
 本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排（2026-08-14 起不再依赖 langgraph / langchain），采用端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
 
-`v0.5.0` + v0.6/v0.7 硬化（未发版） · Python 3.12 · 全量离线测试 **1870 passed** · 快速质量集 **1718 passed** · OpenSpec **25/25**
+`v0.7.0` · Python 3.12 · 全量离线测试 **1870 passed** · 快速质量集 **1718 passed** · OpenSpec **25/25**
 
 设计参考 [earendil-works/pi](https://github.com/earendil-works/pi) 的"三层协作 / 双层 loop / 事件驱动 / 会话即状态"思想。架构见 [`docs/design/architecture.md`](docs/design/architecture.md)，需求基线见 [`docs/design/requirements-analysis.md`](docs/design/requirements-analysis.md)，v0.6 硬化路线与实测证据见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)，按版本的权威过程记录见 [`docs/iteration/`](docs/iteration/)。
 
@@ -231,12 +231,12 @@ codeAgent/
 
 ## 五、版本状态与后续
 
-- **已发布**：`v0.1.0` → `v0.5.0`。annotated 标签 `v0.4.0` 指向纯 v0.4 提交 `b981534`，`v0.5.0` 指向发布内容快照 `7bbc6a7`，均已推送。
+- **已发布**：`v0.1.0` → `v0.7.0`。annotated 标签 `v0.4.0` 指向纯 v0.4 提交 `b981534`，`v0.5.0` 指向发布内容快照 `7bbc6a7`，均已推送；`v0.7.0` 对应本版本发布提交。
 - **v0.4** 完成 V4-01～V4-38：Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 稳定性。
 - **v0.5** 完成 V5-00～V5-10：串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI / headless 可观察性；领域规则已下沉 `core/subagent/`。
 - **工程护栏**：格式化与类型棘轮门禁已接入 CI，规模门禁覆盖全部生产层。
-- **v0.6 硬化（未发版）**：安全分类语义化（包装器/命令替换/误杀）、只读搜索工具文件边界、越界警告送达模型、bash 合并输出统一上限、中英混合 token 估算、会话索引追加增量更新。详见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)。
-- **v0.7 扩展与运行期安全（未发版）**：工具注册表数据化、审批结果封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表与自定义 provider、三档 bash 沙箱、写前 checkpoint + `undo`、缓存命中诊断、离线评测框架。详见 [`docs/iteration/v0.7.md`](docs/iteration/v0.7.md)。
+- **v0.6 硬化（随 v0.7.0 交付）**：安全分类语义化（包装器/命令替换/误杀）、只读搜索工具文件边界、越界警告送达模型、bash 合并输出统一上限、中英混合 token 估算、会话索引追加增量更新。详见 [`docs/design/roadmap-v0.6.md`](docs/design/roadmap-v0.6.md)。
+- **v0.7.0 扩展与运行期安全**：工具注册表数据化、审批结果封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表与自定义 provider、三档 bash 沙箱、写前 checkpoint + `undo`、缓存命中诊断、离线评测框架。详见 [`docs/releases/v0.7.0.md`](docs/releases/v0.7.0.md)。
 - **后续评估**：执行控制（steer 接入 UI、后台作业、事件流导出）、程序化工具编排（`run_code` 形态）、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换；Web UI 暂不规划。
 
 ## 参考

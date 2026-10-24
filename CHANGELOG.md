@@ -3,7 +3,7 @@
 本文件记录面向使用者的版本变化。完整的任务拆分、设计决策与验收证据见
 [`docs/iteration/`](docs/iteration/) 下的迭代记录。
 
-## [Unreleased]
+## [0.7.0] - 2026-10-24
 
 ### Fixed
 
@@ -30,6 +30,7 @@
 - **缓存命中诊断**：`--context` 输出命中率与 `cache_unknown` / `cache_cold` / `cache_effective`；契约测试锁定基础系统提示词前缀不含时间戳/临时目录。
 - **离线评测框架**：`evals/` + `python -m evals`，覆盖工具流、未知工具、审批阻断与改参传播；`tests/test_evals.py` 纳入 `contract` 门禁。
 - `docs/iteration/v0.7.md`：本批次实现、验证与限制的完整记录。
+- 发布文档：[v0.7.0 发布说明](docs/releases/v0.7.0.md) 与 [升级指南](docs/releases/v0.7-upgrade.md)。
 
 ### Added（v0.6 正确性硬化）
 

@@ -1,6 +1,6 @@
 # codeagent Code Wiki
 
-> 面向开发者的代码级 Wiki。描述**当前代码树**（v0.5.0，Python 3.12）的结构、职责与运行方式。
+> 面向开发者的代码级 Wiki。描述**当前代码树**（v0.7.0，Python 3.12）的结构、职责与运行方式。
 > 架构决策背景见 [`../design/architecture.md`](../design/architecture.md) 与 [`../iteration/`](../iteration/)；本 Wiki 侧重"代码在哪里、由谁负责、怎么跑通"。
 
 ## 文档地图
@@ -32,7 +32,7 @@
 
 | 项 | 值 |
 | --- | --- |
-| 包名 / 版本 | `codeagent` / `0.5.0` |
+| 包名 / 版本 | `codeagent` / `0.7.0` |
 | 语言 / 构建 | Python 3.12+ / `uv_build`（`uv` 管理依赖与虚拟环境） |
 | CLI 入口 | `codeagent = "codeagent.app.main:main"`（亦支持 `python -m codeagent`） |
 | 分层 | `app` / `core` / `session` / `ai` / `tools` / `resources`，依赖单向流动 |

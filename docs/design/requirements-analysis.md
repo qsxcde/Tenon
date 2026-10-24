@@ -96,6 +96,7 @@
 - 架构边界复核：`src/codeagent/core/` 的 40 个模块零跨层 import（`tests/test_decoupling.py` AST 扫描在全量测试中通过）；`scripts/scale_scan.py` 扫描全部生产层，**无任何文件超过 300 行、无函数超过 80 行**（v0.5.0 收口时超限的 `tools/security/classifier.py` 310 行与 `tools/mcp/client.py` 307 行已分别拆分至 128 / 250 行）。
 - 已知门禁局限：Ruff 仅启用 `E9` / `F821` / `F841` 阻塞级正确性检查，Black 与完整 Ruff 规则集尚未接入 CI；mypy 已以分层棘轮接入 `quality-fast`（`scripts/type_scan.py` + `docs/type-baseline.json`，当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22），但 pyright 未接入；TUI schema v2 正式基线仍待 CI artifact 与人工复核。
 - 范围更新(2026-10-24,v0.7):**并行子 Agent(有界并发,默认串行)、子 Agent 受限可写 profile(`implement`,禁 `delegate`/MCP)、插件系统(v1 仅贡献工具)、执行时沙箱(三档策略)已落地**;跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件订阅、工作区合并、自动化任务与 Web UI 仍不属于当前版本。
+- 版本与发布(2026-10-24):包版本提升为 `0.7.0`,v0.6 正确性修复与 v0.7 能力同版交付;本机复核为全量 **1870 passed**、快速集 **1718 passed**、`python -m evals` 4/4、OpenSpec **25/25**,`release_check` 以 `0.7.0` 通过 wheel/sdist、资源、敏感文件、干净安装与 fake provider CLI;发布说明与升级指南见 [`docs/releases/`](../releases/)。
 
 ## 1. 引言
 

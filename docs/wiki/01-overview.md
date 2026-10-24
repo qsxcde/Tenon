@@ -69,7 +69,7 @@
 
 ## 5. 版本与迭代状态
 
-- **已发布**：`v0.1.0` → `v0.5.0`（annotated 标签 `v0.4.0` → `b981534`，`v0.5.0` → `7bbc6a7`）。
+- **已发布**：`v0.1.0` → `v0.7.0`（annotated 标签 `v0.4.0` → `b981534`，`v0.5.0` → `7bbc6a7`；`v0.7.0` 对应本次发布提交）。
 - **v0.4**：V4-01～V4-38，Runtime 可靠性、上下文治理、TUI/Session 交互、生命周期 Hook、工具与 Provider 稳定性。
 - **v0.5**：V5-00～V5-10，串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI/headless 可观察性；领域规则下沉 `core/subagent/`。
 - **基线**：`1870 passed`（无 skipped），快速质量集 `1718 passed`，OpenSpec 25/25（2026-10-24，macOS / Python 3.12）。此前 v0.5.0 发布记录为 `1695 passed / 3 skipped` / 84.40% / 1525 passed（2026-10-10，Windows / Python 3.12）；覆盖率基线以 CI `quality-fast` 实测为准。
