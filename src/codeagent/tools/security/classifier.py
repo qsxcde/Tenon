@@ -17,7 +17,6 @@ from codeagent.tools.security.bash_rules import (
 from codeagent.tools.security.decision import ALLOW, ASK, DENY, SecurityDecision
 from codeagent.tools.security.filesystem import (
     _BOUNDED_TOOLS,
-    _READ_TOOLS,
     _SEARCH_TOOLS,
     _secret_path_hit,
     classify_file,

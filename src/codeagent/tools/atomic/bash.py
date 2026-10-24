@@ -62,8 +62,6 @@ DEFAULT_TIMEOUT_S = 120
 MAX_TIMEOUT_S = 600
 SEMANTIC_OK_PREFIXES = ("grep",)
 TRUNCATION_MARKER = "\n...[输出已截断(保留末尾)]..."
-#: stdout 与 stderr 合并后再次超限时的标记;区别于单流截断原因。
-MERGED_TRUNCATION_MARKER = "\n...[合并输出超过统一上限,已保留末尾]..."
 
 
 class BashArgs(BaseModel):
