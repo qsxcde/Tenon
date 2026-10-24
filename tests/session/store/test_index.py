@@ -1,7 +1,5 @@
 """index behavior tests."""
 
-import time
-
 from tests.session.store.fixtures import *  # noqa: F401,F403
 
 
@@ -236,19 +234,25 @@ def test_append_rebuilds_once_after_losing_the_index(tmp_path):
 
 
 def test_repeated_appends_stay_linear(tmp_path):
-    """连续追加不随历史增长线性退化(回归:E7 的 O(n²) 退化)。"""
+    """连续追加不随历史增长线性退化(回归:E7 的 O(n²) 退化)。
+
+    以回源重建次数与索引体量判定工作量,不依赖墙钟时间在共享 CI 上的抖动:
+    增量路径不得重新扫描 JSONL,索引摘要也不应随历史行数增长。
+    """
     store = _store(tmp_path)
     store.create("s1")
 
-    def append(count: int) -> float:
-        started = time.perf_counter()
-        for index in range(count):
-            store.append_message("s1", Message(role="user", content=f"m{index}"))
-        return time.perf_counter() - started
+    build_calls = []
+    original_build = store._build_index
+    store._build_index = lambda path: build_calls.append(path) or original_build(path)
 
-    append(50)  # 预热
-    first = append(100)
-    second = append(100)
+    index_path = tmp_path / "sessions" / "s1.index.json"
+    index_sizes = []
+    for index in range(200):
+        store.append_message("s1", Message(role="user", content=f"m{index}"))
+        if index in (9, 99, 199):
+            index_sizes.append(index_path.stat().st_size)
 
-    # 同样批量下第二段历史更长;若每次全量重建,耗时会成倍上涨。
-    assert second < first * 2.5
+    assert build_calls == []
+    # 时间戳等字段的字节长度可有小幅波动,但索引不得随 200 条历史增长。
+    assert max(index_sizes) - min(index_sizes) <= 32
