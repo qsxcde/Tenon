@@ -41,6 +41,7 @@
 ## 核心特性
 
 - **双形态交互**：`--tui` 提供流式正文、可展开工具结果、edit/write 红绿差异、Markdown 渲染、模糊补全与斜杠命令；`--prompt` / stdin 提供无头单次执行。
+- **任务模式**：`ask`（只读问答）/ `plan`（只读规划）/ `code`（编码执行）/ `auto`（自动）四档；输入以 `/ask` `/plan` `/code` 前缀指定单次模式，`/mode` 切换粘性模式，TUI 与 headless 通用。
 - **自研 ReAct 编排**：`core/agent.py` 的纯内存 `Agent` 外壳加 `core/orchestration/loop.py` 的“模型 → 工具 → 继续/结束”主循环，不依赖第三方编排框架。
 - **11 个内建工具**：`read` `write` `edit` `bash` `grep` `find` `ls` `skill` `web_fetch` `web_search` `todo`。`rg` / `fd` 仅作可选加速，缺失时回退纯 Python；web 工具网络经注入，出站进入确认环。
 - **可扩展工具层**：声明式 `ToolSpec` / `ToolRegistry`；MCP 客户端（`mcp__<server>__<tool>`）；扩展插件 v1（`ext__<id>__<tool>`）；Skills 三源发现与渐进式披露。
@@ -116,7 +117,15 @@ uv run codeagent undo                     # LIFO 逐级恢复最近一次 write/
 
 ### TUI 命令
 
-`/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` `/status` `/sessions`（含 `search` / `filter` / `archive` / `archived` / `recovery` / `delete`）`/tree` `/fork` `/quit`。运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。
+| 类别 | 命令 |
+| --- | --- |
+| 会话 | `/help` `/clear` `/name` `/context` `/status` `/tree` `/fork` `/compact` `/output` `/retry` `/continue` |
+| 会话管理 | `/sessions <action>`：`search` `filter` `archive` `unarchive` `archived` `recovery` `delete` |
+| 任务模式 | `/ask` `/plan` `/code`（单次模式）· `/mode <ask\|plan\|code\|auto>`（粘性模式） |
+| 模型与工具 | `/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` |
+| 退出 | `/quit` |
+
+运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。
 
 ## 配置参考
 
