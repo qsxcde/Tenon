@@ -69,7 +69,8 @@ def test_registry_covers_expected_commands():
         "retry",
         "continue",
     } <= names
-    assert "undo" not in names  # /undo 槽位已由 /fork 取代
+    # 维护类命令:快照恢复、会话导出、委派管理与上下文窗口。
+    assert {"undo", "export", "subagents", "context-window"} <= names
 
 
 def test_registry_exposes_task_mode_commands():

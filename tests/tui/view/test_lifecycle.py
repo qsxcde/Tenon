@@ -449,25 +449,34 @@ def test_start_registers_scroll_handler():
     assert backend.scroll(5) is None  # 处理器可调用且不抛错
 
 
-def test_confirm_suppresses_async_repopulate():
-    """(回归:D1)确认填入后,set_input_text 引发的异步变更通知不重弹浮层。
+def test_confirm_exact_command_executes_and_suppresses_repopulate():
+    """(回归:D1)完整命令名确认 → 直接执行,异步 Changed 不重弹浮层。
 
-    早期缺陷:confirm 同步清理浮层,但异步 Changed 事件重算建议使浮层复活,
-    Enter 永远被消费为确认,命令无法提交。正确行为:该次通知被抑制,
-    浮层保持收起;后续真实编辑恢复正常建议计算。
+    早期缺陷:confirm 把同名文本填回输入框,异步 Changed 重算建议使浮层复活,
+    Enter 被反复消费为确认,无参命令在任何时序下都无法提交。
     """
     app, backend, _ = _make_app()
     backend.input_changed("/tools")
-    assert app._suggestions == ["tools"]
+    assert "tools" in app._suggestions
     backend.suggestion_confirm()
-    assert backend.input_texts[-1] == "/tools"
+    assert backend.input_texts[-1] == ""  # 清空并执行,而不是填入同名文本
+    assert app._suggestions == []
     # 模拟 textual 异步投递的 Changed 通知(内容 = 填入后的文本)。
     backend.input_changed("/tools")
     assert app._suggestions == []
     assert backend.suggestion_lines[-1] == []
     # 标志只消费一次:继续编辑恢复正常建议计算。
     backend.input_changed("/to")
-    assert app._suggestions == ["tools"]
+    assert "tools" in app._suggestions
+
+
+def test_confirm_prefix_fills_command_without_immediate_execute():
+    """前缀确认保持两段式:填入完整命令名,由下一次 Enter 执行。"""
+    app, backend, _ = _make_app()
+    backend.input_changed("/to")
+    app._suggestion_index = app._suggestions.index("tools")
+    backend.suggestion_confirm()
+    assert backend.input_texts[-1] == "/tools"
 
 
 def test_selector_empty_arg_shows_all_candidates():

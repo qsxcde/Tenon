@@ -586,3 +586,40 @@ def test_create_tui_app_injects_configured_providers(tmp_path, monkeypatch):
     assert app._configured_providers == {"deepseek", "kimi"}
     # 登录选择器候选 = provider 全表
     assert app._candidates["login"] == app._candidates["provider"]
+
+
+def test_create_tui_app_continue_recent_restores_instead_of_creating():
+    """``continue_recent=True`` 走恢复路径,空存储时退化为新建(-c/TUI)。"""
+    from codeagent.app.container import create_tui_app
+    from codeagent.session.persistence import MemoryStore
+
+    app = create_tui_app(
+        provider="deepseek",
+        backend=_StubBackend(),
+        store=MemoryStore(),
+        continue_recent=True,
+    )
+
+    assert app._manager.current is not None
+
+
+def test_run_tui_forwards_continue_recent(monkeypatch):
+    """``run_tui(continue_recent=True)`` 把标志透传给 TUI 工厂并启动。"""
+    from codeagent.app import container
+    from codeagent.app.tui import main as tui_main
+
+    calls: dict[str, object] = {}
+
+    class _App:
+        def start(self) -> None:
+            calls["started"] = True
+
+    def _factory(**kwargs):
+        calls.update(kwargs)
+        return _App()
+
+    monkeypatch.setattr(container, "create_tui_app", _factory)
+    tui_main.run_tui(continue_recent=True)
+
+    assert calls["continue_recent"] is True
+    assert calls["started"] is True

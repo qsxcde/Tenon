@@ -271,3 +271,70 @@ def test_conflicting_context_window_keys_prefer_camel_case(tmp_path, caplog):
 
     assert model.context_window == 32_000
     assert "contextWindow" in caplog.text
+
+
+def test_write_model_override_appends_and_preserves_other_providers(tmp_path):
+    """新增 id 追加到对应 provider,其它 provider 记录原样保留。"""
+    path = tmp_path / "models.json"
+    path.write_text(
+        json.dumps({"glm": {"models": [{"id": "glm-4", "maxTokens": 4096}]}}),
+        encoding="utf-8",
+    )
+    store = ModelStore(path)
+
+    store.write_model_override(
+        "deepseek",
+        {"id": "deepseek-v4-pro", "contextWindow": 131_072, "maxTokens": 8192},
+    )
+
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert data["glm"]["models"] == [{"id": "glm-4", "maxTokens": 4096}]
+    assert data["deepseek"]["models"] == [
+        {"id": "deepseek-v4-pro", "contextWindow": 131_072, "maxTokens": 8192}
+    ]
+    loaded = ModelStore(path).load()
+    assert loaded["deepseek"]["models"][0].context_window == 131_072
+
+
+def test_write_model_override_replaces_same_id_in_place(tmp_path):
+    """同 id 覆盖为整体替换,不产生重复记录。"""
+    path = tmp_path / "models.json"
+    path.write_text(
+        json.dumps(
+            {
+                "deepseek": {
+                    "models": [
+                        {"id": "other", "maxTokens": 1024},
+                        {"id": "deepseek-v4-pro", "contextWindow": 256_000},
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    store = ModelStore(path)
+
+    store.write_model_override("deepseek", {"id": "deepseek-v4-pro", "contextWindow": 65_536})
+
+    models = json.loads(path.read_text(encoding="utf-8"))["deepseek"]["models"]
+    assert [m["id"] for m in models] == ["other", "deepseek-v4-pro"]
+    assert models[1] == {"id": "deepseek-v4-pro", "contextWindow": 65_536}
+
+
+def test_write_model_override_recovers_from_broken_json(tmp_path):
+    """损坏文件不阻塞写入:从空结构重建并告警跳过原内容。"""
+    path = tmp_path / "models.json"
+    path.write_text("{not json", encoding="utf-8")
+
+    ModelStore(path).write_model_override("fake", {"id": "m1", "contextWindow": 8_000})
+
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert data == {"fake": {"models": [{"id": "m1", "contextWindow": 8_000}]}}
+
+
+def test_write_model_override_requires_id_and_path(tmp_path):
+    """缺少 id 或未指定路径时明确报错,而不是写入无效记录。"""
+    with pytest.raises(ValueError):
+        ModelStore(None).write_model_override("fake", {"id": "m1"})
+    with pytest.raises(ValueError):
+        ModelStore(tmp_path / "models.json").write_model_override("fake", {"contextWindow": 1})
