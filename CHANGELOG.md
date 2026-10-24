@@ -3,6 +3,17 @@
 本文件记录面向使用者的版本变化。完整的任务拆分、设计决策与验收证据见
 [`docs/iteration/`](docs/iteration/) 下的迭代记录。
 
+## [Unreleased]
+
+### Added
+
+- **TUI 维护类命令**：新增 `/undo`（查看/恢复写前快照）、`/export <path>`（导出当前会话文档）、`/subagents`（查看并发上限与活跃委派，`cancel <id>` 终止单个委派）、`/context-window`（读取或写入 `models.json` 的 `contextWindow` 并热切换）；`/mcp reload` 免重启重建 MCP 与工具运行时。这些高权限动作经 `TuiAdminPort` 由组合根实现，视图层不直接触碰快照存储与模型目录。
+- **TUI 启动恢复**：`codeagent --tui -c` 恢复最近有活动的会话（此前 TUI 启动固定新建）。
+
+### Fixed
+
+- **完整命令名的斜杠命令在补全浮层下无法提交**：输入 `/status` 等无参命令后按 Enter 只反复确认补全（填入同名文本又使浮层复活），命令始终不执行。现在候选与输入完全一致时直接派发，前缀补全仍保持"填入 → 再提交"的两段式。
+
 ## [0.7.0] - 2026-10-24
 
 ### Fixed

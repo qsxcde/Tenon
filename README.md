@@ -87,7 +87,8 @@ DEEPSEEK_REASONING_EFFORT=high
 ### 运行
 
 ```bash
-uv run codeagent --tui                                  # 交互式 TUI
+uv run codeagent --tui                                  # 交互式 TUI（新建会话）
+uv run codeagent --tui -c                               # 交互式 TUI 并恢复最近会话
 uv run codeagent --prompt "梳理登录流程的入口有哪些"     # 无头单次执行
 echo "列出本目录最大的 5 个文件" | uv run codeagent      # 从 stdin 逐行读取
 ```
@@ -100,7 +101,7 @@ echo "列出本目录最大的 5 个文件" | uv run codeagent      # 从 stdin 
 | --- | --- |
 | `--prompt <文本>` | 一次性输入；不指定则从 stdin 读取 |
 | `--tui` | 启动交互式终端 |
-| `--continue` / `-c` | 继续最近有活动的会话（无会话时新建） |
+| `--continue` / `-c` | 继续最近有活动的会话（无会话时新建）；与 `--tui` 组合时 TUI 启动即恢复 |
 | `--session <id>` | 恢复指定会话继续对话（id 见 `--list-sessions`） |
 | `--list-sessions` | 列出全部会话 |
 | `--context` | 只读显示上下文预算、治理诊断与缓存命中率 |
@@ -122,7 +123,8 @@ uv run codeagent undo                     # LIFO 逐级恢复最近一次 write/
 | 会话 | `/help` `/clear` `/name` `/context` `/status` `/tree` `/fork` `/compact` `/output` `/retry` `/continue` |
 | 会话管理 | `/sessions <action>`：`search` `filter` `archive` `unarchive` `archived` `recovery` `delete` |
 | 任务模式 | `/ask` `/plan` `/code`（单次模式）· `/mode <ask\|plan\|code\|auto>`（粘性模式） |
-| 模型与工具 | `/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` |
+| 模型与工具 | `/provider` `/model` `/effort` `/login` `/skills` `/mcp`（含 `reload`）`/tools` `/context-window` |
+| 维护 | `/undo`（快照查看/恢复）`/export <path>`（导出会话）`/subagents`（委派查看/取消） |
 | 退出 | `/quit` |
 
 运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。

@@ -87,6 +87,8 @@ TuiRenderCoordinator（30fps 防抖）→ TuiBackend.render(...) → Textual
 - `interaction.py`：`/sessions`、`/skills` 等交互式多步命令的状态机。
 - `coordinator.py`：命令提交与运行态的协调（空闲/运行中可用命令不同）。
 - `model_capabilities.py`、`status.py`、`skills.py`：`/model`、`/status`、`/skills` 的专用逻辑。
+- `admin.py`：`/undo`、`/export`、`/subagents`、`/context-window` 与 `/mcp reload`；高权限动作经 `TuiAdminPort`（`ports/admin.py`）交组合根执行。
+- `suggestions.py`、`registry.py`：补全浮层渲染与共享命令表实例，避免协调器之间循环 import。
 
 命令总表（`default_registry()`，`*` 表示带交互 picker）：
 
@@ -107,12 +109,16 @@ TuiRenderCoordinator（30fps 防抖）→ TuiBackend.render(...) → Textual
 | `/model *` | 切换模型（支持 `model:effort`） |
 | `/effort *` | 切换思考强度 |
 | `/fork` | 从指定消息（缺省最近用户消息）分叉会话 |
+| `/undo` | 查看或恢复写前快照（`list` / `preview`），与 `codeagent undo` 同源 |
+| `/export <path>` | 导出当前会话完整文档到文件 |
+| `/subagents` | 查看并发上限与活跃委派；`cancel <delegation-id>` 终止单个委派 |
+| `/context-window` | 查看或设置模型上下文窗口（写入 `models.json` 后热切换） |
 | `/compact` | 压缩当前会话上下文 |
 | `/output` | 浏览或导出最近工具输出 |
 | `/retry` | 安全重试最近一次模型失败 |
 | `/continue` | 在失败回合后继续新的消息 |
 | `/skills` | 列出/加载技能或管理 Package（install/list/update/remove/reload） |
-| `/mcp` | 列出 MCP server 与工具（含诊断） |
+| `/mcp` | 列出 MCP server 与工具（含诊断）；`/mcp reload` 重建 MCP 与工具运行时 |
 | `/quit` | 退出 TUI（等同 Ctrl+C） |
 
 ## 七、会话动作（tui/session）

@@ -436,6 +436,7 @@ def create_tui_app(cfg=None, *, backend=None, store=None, ...) -> TuiApp: ...
 - `registry` / `reasoning_effort` / `provider` / `model` 均可注入;`create_tui_app` 的 `rebuild_ports` 回调支持运行时热切换(/provider /model /effort /login)。
 - `extensions` 是组合根统一归一的 `RuntimeExtensions`；旧的 `lifecycle_hooks` 参数继续兼容，但恢复、模型切换和 TUI 重建均从同一不可变集合重建配置。
 - `create_agent_config` 返回端口(平台 / 测试用);`create_agent_session` 供 CLI 入口消费。
+- TUI 的维护类操作(`/undo`、`/export`、`/subagents`、`/context-window`、`/mcp reload`)经 `TuiAdminPort`(`app/tui/ports/admin.py`)注入,组合根实现位于 `app/composition/tui/admin.py`;快照存储、委派槽位与 `models.json` 写入因此不进入视图层。`continue_recent=True` 让 TUI 启动恢复最近会话(`--tui -c`)。
 
 详细装配见 `docs/wiki/08-app-layer.md`。
 
