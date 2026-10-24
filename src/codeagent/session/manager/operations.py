@@ -224,12 +224,6 @@ class SessionManagerOperations(SessionManagerHost):
         if self._current_id == session_id:
             self._current_id = None
 
-    async def dispose_async(self, session_id: str) -> None:
-        session = self._sessions.get(session_id)
-        if session is not None:
-            await self._wait_session(session)
-        self.dispose(session_id)
-
     async def close(self) -> None:
         if self._close_task is None:
             self._closed = True

@@ -12,7 +12,6 @@ from codeagent.core.context.budget import ContextBudgetSnapshot
 from codeagent.core.context.contracts import ContextTransformer
 from codeagent.core.context.diagnostics import ContextDiagnostics
 from codeagent.core.context.preflight import ContextPreflightResult
-from codeagent.core.contracts.events import AgentEvent
 from codeagent.core.contracts.hooks import (
     HookDiagnostic,
     LifecycleHook,
@@ -99,7 +98,6 @@ class AgentSession(
         self._closed = False
         self._close_task: asyncio.Task[None] | None = None
         self._lifecycle_hook_tasks: set[asyncio.Task[Any]] = set()
-        self._lifecycle_hook_errors: list[tuple[AgentEvent, Exception]] = []
         self._lifecycle_hook_diagnostics: list[HookDiagnostic] = []
         if compaction_policy is None:
             compaction_policy = CompactionPolicyConfig(compact_budget=compact_budget)
@@ -160,11 +158,6 @@ class AgentSession(
 
     def subscribe(self, fn: Subscriber) -> Callable[[], None]:
         return self._bus.subscribe(fn)
-
-    @property
-    def lifecycle_hook_errors(self) -> list[tuple[AgentEvent, Exception]]:
-        """Return observer failures without changing session run outcomes."""
-        return list(self._lifecycle_hook_errors)
 
     @property
     def lifecycle_hook_diagnostics(self) -> list[HookDiagnostic]:

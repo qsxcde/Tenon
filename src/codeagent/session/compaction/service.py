@@ -69,12 +69,6 @@ class CompactionService:
         self._min_recent_turns = min_recent_turns
         self._candidate_budget = candidate_budget
         self._enforce_target = enforce_target
-        self._last_plan: CompactionPlan | None = None
-
-    @property
-    def last_plan(self) -> CompactionPlan | None:
-        """Return the most recent pure selection result for diagnostics."""
-        return self._last_plan
 
     async def compact(
         self,
@@ -94,7 +88,6 @@ class CompactionService:
             target,
             min_recent_turns=self._min_recent_turns,
         )
-        self._last_plan = plan
         if plan.reason_code != "ready":
             return CompactionResult(
                 status="skipped",

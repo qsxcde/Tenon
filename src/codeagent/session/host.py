@@ -53,7 +53,6 @@ class AgentSessionHost:
     _closed: bool
     _close_task: asyncio.Task[None] | None
     _lifecycle_hook_tasks: set[asyncio.Task[Any]]
-    _lifecycle_hook_errors: list[tuple[AgentEvent, Exception]]
     _lifecycle_hook_diagnostics: list[HookDiagnostic]
     _compaction_policy: CompactionPolicyConfig
     _compact_budget: int | None

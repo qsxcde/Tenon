@@ -102,9 +102,6 @@ class SessionRuntime(RuntimeEventMixin, SessionExecutionMixin):
         """Return core Hook failures retained after the temporary Agent ends."""
         return list(self._hook_diagnostics)
 
-    def set_event_handler(self, handler: Callable[[AgentEvent, str], None]) -> None:
-        self._event_handler = handler
-
     async def wait_for_idle(self, timeout: float | None = None) -> bool:
         """Wait until the current run has completed its session cleanup."""
         if self.phase is RunPhase.IDLE:

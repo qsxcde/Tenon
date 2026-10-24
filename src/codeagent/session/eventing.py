@@ -148,8 +148,6 @@ class SessionEventMixin(AgentSessionHost):
                 phase=lifecycle.phase if lifecycle is not None else phase,
             )
         )
-        # Keep the V4-28 compatibility surface populated as well.
-        self._lifecycle_hook_errors.append((event, exception))
 
     async def _drain_lifecycle_hooks(self) -> None:
         tasks = tuple(self._lifecycle_hook_tasks)

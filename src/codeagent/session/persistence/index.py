@@ -203,23 +203,6 @@ class SessionIndex:
         except Exception:
             self.invalidate(path)
 
-    def for_read(
-        self,
-        path: Path,
-        *,
-        source_fingerprint: Callable[[Path], dict[str, int]] | None = None,
-    ) -> dict[str, Any] | None:
-        with self._lock_for(path):
-            index = self.read_valid(path, source_fingerprint=source_fingerprint)
-            if index is not None:
-                return index
-            try:
-                index = self.build(path, source_fingerprint=source_fingerprint)
-            except Exception:
-                return None
-            self.safe_write(path, index)
-            return index
-
     @staticmethod
     def ref_from_index(index: dict[str, Any], session_id: str) -> SessionRef:
         session = index["session"]
