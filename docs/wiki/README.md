@@ -1,14 +1,14 @@
 # codeagent Code Wiki
 
 > 面向开发者的代码级 Wiki。描述**当前代码树**（v0.7.0，Python 3.12）的结构、职责与运行方式。
-> 架构决策背景见 [`../design/architecture.md`](../design/architecture.md) 与 [`../iteration/`](../iteration/)；本 Wiki 侧重"代码在哪里、由谁负责、怎么跑通"。
+> 整体架构、核心契约与不变量统一由 [`../design/architecture.md`](../design/architecture.md) 维护（原 `02-architecture.md` 已合并入该文）；演进决策背景见 [`../iteration/`](../iteration/)，本 Wiki 侧重"代码在哪里、由谁负责、怎么跑通"。
 
 ## 文档地图
 
 | # | 文档 | 内容 | 主要读者 |
 | --- | --- | --- | --- |
 | 01 | [项目总览](01-overview.md) | 定位、设计目标、能力与不做、技术栈、版本状态、目录结构 | 所有人 |
-| 02 | [整体架构](02-architecture.md) | 两条正交轴、双层 loop、五层边界、核心契约、事件驱动、组合根 | 所有人 |
+| 02 | [整体架构](../design/architecture.md) | 两条正交轴、双层 loop、五层边界、核心契约、事件驱动、组合根（由 `docs/design/` 维护） | 所有人 |
 | 03 | [运行方式与端到端数据流](03-runtime-flow.md) | 安装配置、CLI/TUI 启动、一次对话的完整生命周期、干预与会话管理 | 使用者 / 新成员 |
 | 04 | [core 层：Agent Runtime](04-core-layer.md) | 消息模型、端口、ReAct 循环、上下文治理、执行运行时、Subagent 策略 | 核心开发者 |
 | 05 | [session 层：会话与持久化](05-session-layer.md) | AgentSession、SessionManager、JSONL 格式、压缩、状态机、事件总线 | 核心开发者 |
@@ -44,4 +44,4 @@
 
 - 本 Wiki 描述"当前树"；行为或公共接口变化时同步更新对应章节与 [`AGENTS.md`](../../AGENTS.md)。
 - 文档中的代码位置一律写**模块路径**（如 `src/codeagent/core/agent.py`），不写行号，避免漂移。
-- 与 `docs/design/` 的分工：设计文档记录"为什么这样决策"，本 Wiki 记录"现在是什么样、怎么用"。
+- 与 `docs/design/` 的分工：设计文档记录"为什么这样决策"并承载整体架构、核心契约与全局不变量（`docs/design/architecture.md`），本 Wiki 记录各层"代码在哪里、怎么跑通"。原独立架构页已合并，避免两处同时维护同一组结构事实。

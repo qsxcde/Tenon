@@ -116,4 +116,4 @@ codeAgent/
 | `tools/` | 原子工具、MCP、安全分类、子进程适配 | `core` `session` `ai` `app` |
 | `resources/` | 内建 prompts / skills 资源 | — |
 
-下一章：[整体架构](02-architecture.md) · 运行方式见 [03](03-runtime-flow.md)。
+下一章：[整体架构](../design/architecture.md) · 运行方式见 [03](03-runtime-flow.md)。

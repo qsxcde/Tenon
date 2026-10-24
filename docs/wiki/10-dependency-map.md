@@ -152,6 +152,6 @@ JSONL 持久化（session/store）      TUI / headless 消费
 
 ## 相关阅读
 
-- 架构总览与不变量：[02-architecture.md](./02-architecture.md)
+- 架构总览与不变量：[architecture.md](../design/architecture.md)
 - 各层职责入口：[04-core-layer.md](./04-core-layer.md) ~ [09-tui-layer.md](./09-tui-layer.md)
 - 门禁命令与扩展流程：[11-development-guide.md](./11-development-guide.md)

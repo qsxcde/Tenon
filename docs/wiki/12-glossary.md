@@ -137,7 +137,7 @@
 | 篇 | 主题 |
 | --- | --- |
 | [01](./01-overview.md) | 项目概览与目标 |
-| [02](./02-architecture.md) | 架构与核心契约 |
+| [02](../design/architecture.md) | 架构与核心契约 |
 | [03](./03-runtime-flow.md) | 运行方式与生命周期 |
 | [04](./04-core-layer.md) | core 层 |
 | [05](./05-session-layer.md) | session 层 |

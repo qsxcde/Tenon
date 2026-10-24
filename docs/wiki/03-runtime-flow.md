@@ -223,4 +223,4 @@ uv build                                                  # 构建 wheel / sdist
 
 CI 分层、marker 约定与发布检查见 [11 · 开发指南](11-development-guide.md)。
 
-上一章：[整体架构](02-architecture.md) · 下一章：[core 层](04-core-layer.md)。
+上一章：[整体架构](../design/architecture.md) · 下一章：[core 层](04-core-layer.md)。
