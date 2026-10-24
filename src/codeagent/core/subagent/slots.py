@@ -44,9 +44,6 @@ class SubagentSlotRegistry(Generic[T]):
         """Return reserved pairs in reservation order for diagnostics."""
         return tuple(self._payloads.items())
 
-    def contains(self, delegation_id: str) -> bool:
-        return delegation_id in self._payloads
-
     def is_full(self) -> bool:
         return self._capacity is not None and len(self._payloads) >= self._capacity
 

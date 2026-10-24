@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from codeagent.core.support.awaiting import await_if_needed
 from codeagent.core.context.model import AgentContext
 from codeagent.core.contracts.errors import AgentRuntimeError
 from codeagent.core.contracts.events import (

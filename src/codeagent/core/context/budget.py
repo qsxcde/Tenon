@@ -18,12 +18,7 @@ from codeagent.core.context.tokens import (
     estimate_text_tokens,
     is_cjk,
 )
-from codeagent.core.contracts.messages import (
-    Message,
-    OutputCompleteness,
-    ToolOutputMetadata,
-    ToolCall,
-)
+from codeagent.core.contracts.messages import Message
 
 BudgetStatus = Literal["estimate", "uncertain"]
 
@@ -158,7 +153,6 @@ def estimate_context_budget(request: ContextBudgetInput) -> ContextBudgetSnapsho
     )
 
 
-from codeagent.core.context.governance import clone_message as _clone_message
 from codeagent.core.context.governance import govern_tool_messages as govern_tool_messages
 
 __all__ = [
