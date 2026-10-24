@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any
 
+from codeagent.ai.catalog.spec import ModelSpec
 from codeagent.app.composition.tui.admin import model_override_record
 from codeagent.app.tui.application import TuiApp
+from codeagent.app.tui.commands.parser import Command
 from codeagent.app.tui.presentation.primitives import rich_to_plain
 from codeagent.app.tui.presentation.status import FooterInfo
-from codeagent.ai.catalog.spec import ModelSpec
 from tests.fixtures.tui import FakeBackend
 from tests.tui.view.fixtures import FakeManager
 
@@ -227,3 +229,260 @@ def test_model_override_record_preserves_metadata():
         "promptCache": True,
         "aliases": ["pro"],
     }
+
+
+class FaultyAdmin(FakeAdmin):
+    """按开关注入失败与空数据的维护端口变体。"""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.checkpoints = []
+        self.active = {}
+        self.restore_error: Exception | None = None
+        self.snapshot_error: Exception | None = None
+        self.cancel_error: Exception | None = None
+        self.reload_error: Exception | None = None
+        self.window_error: Exception | None = None
+
+    def restore_checkpoint(self) -> _Entry:
+        if self.restore_error is not None:
+            raise self.restore_error
+        return super().restore_checkpoint()
+
+    def subagent_snapshot(self) -> dict[str, Any]:
+        if self.snapshot_error is not None:
+            raise self.snapshot_error
+        return super().subagent_snapshot()
+
+    async def cancel_subagent(self, delegation_id: str) -> bool:
+        if self.cancel_error is not None:
+            raise self.cancel_error
+        return await super().cancel_subagent(delegation_id)
+
+    async def reload_runtime(self) -> tuple[str, str]:
+        if self.reload_error is not None:
+            raise self.reload_error
+        return await super().reload_runtime()
+
+    async def set_context_window(self, tokens: int) -> tuple[int, str]:
+        if self.window_error is not None:
+            raise self.window_error
+        return await super().set_context_window(tokens)
+
+
+def _text(app: TuiApp) -> str:
+    return "\n".join(app.model.transcript.all_lines(120))
+
+
+def test_undo_preview_without_checkpoints():
+    """/undo preview 无快照 → 明确提示而不是空消息。"""
+    app, _backend = _make_app(FaultyAdmin())
+
+    app._cmd_undo(Command("undo", ("preview",)))
+
+    assert "写前快照: (无)" in _text(app)
+
+
+def test_undo_preview_lists_target_and_missing_file_note():
+    """/undo preview 展示 seq/path,新建文件的快照标注恢复会删除。"""
+    admin = FakeAdmin()
+    admin.checkpoints = [_Entry(1, "2026-10-25T09:00:00", "/w/new.py", False)]
+    app, _backend = _make_app(admin)
+
+    app._cmd_undo(Command("undo", ("preview",)))
+
+    text = _text(app)
+    assert "将恢复: /w/new.py (seq=1)" in text
+    assert "恢复时会删除" in text
+
+
+def test_undo_unknown_action_shows_usage():
+    """/undo 未知动作 → 用法提示。"""
+    app, _backend = _make_app(FakeAdmin())
+
+    app._cmd_undo(Command("undo", ("sideways",)))
+
+    assert "用法: /undo [list|preview]" in _text(app)
+
+
+def test_undo_restore_failure_reports_reason():
+    """/undo 恢复失败(权限/IO)→ 保留错误原因。"""
+    admin = FaultyAdmin()
+    admin.restore_error = OSError("permission denied")
+    app, _backend = _make_app(admin)
+
+    app._cmd_undo(Command("undo", ()))
+
+    assert "快照操作失败:permission denied" in _text(app)
+
+
+async def test_export_oserror_is_reported(tmp_path):
+    """/export 目标不可写 → 提示失败原因。"""
+    app, _backend = _make_app(FakeAdmin())
+
+    app._cmd_export(Command("export", (str(tmp_path),)))
+
+    assert "导出失败:" in _text(app)
+
+
+def test_subagents_without_admin_reports_unsupported():
+    """/subagents 未注入维护端口 → 可操作提示。"""
+    app, _backend = _make_app(None)
+
+    app._cmd_subagents(Command("subagents", ()))
+
+    assert "不支持委派管理" in _text(app)
+
+
+def test_subagents_cancel_requires_identifier():
+    """/subagents cancel 缺 id → 用法提示,不触达端口。"""
+    app, _backend = _make_app(FakeAdmin())
+
+    app._cmd_subagents(Command("subagents", ("cancel",)))
+
+    assert "用法: /subagents cancel <delegation-id>" in _text(app)
+
+
+def test_subagents_unknown_action_shows_usage():
+    """/subagents 未知动作 → 用法提示。"""
+    app, _backend = _make_app(FakeAdmin())
+
+    app._cmd_subagents(Command("subagents", ("explode",)))
+
+    assert "用法: /subagents [list|cancel" in _text(app)
+
+
+def test_subagents_snapshot_failure_reports_reason():
+    """读取委派状态失败 → 保留原因。"""
+    admin = FaultyAdmin()
+    admin.snapshot_error = ValueError("runner 尚未装配")
+    app, _backend = _make_app(admin)
+
+    app._cmd_subagents(Command("subagents", ()))
+
+    assert "读取委派状态失败:runner 尚未装配" in _text(app)
+
+
+def test_subagents_empty_active_lists_none():
+    """/subagents 无活跃委派 → 显式 (无) 行。"""
+    app, _backend = _make_app(FaultyAdmin())
+
+    app._cmd_subagents(Command("subagents", ()))
+
+    assert "(无)" in _text(app)
+
+
+async def test_cancel_subagent_failure_reports_diagnostic():
+    """取消委派抛异常 → 通用提示,不中断 TUI。"""
+    admin = FaultyAdmin()
+    admin.cancel_error = RuntimeError("boom")
+    app, _backend = _make_app(admin)
+
+    app._cmd_subagents(Command("subagents", ("cancel", "d-1")))
+    for _ in range(20):
+        await asyncio.sleep(0)
+
+    assert "取消委派失败，请查看日志。" in _text(app)
+
+
+async def test_reload_failure_reports_diagnostic():
+    """/mcp reload 失败 → 通用提示并保留当前状态。"""
+    admin = FaultyAdmin()
+    admin.reload_error = RuntimeError("boom")
+    app, _backend = _make_app(admin)
+
+    app._reload_mcp()
+    for _ in range(20):
+        await asyncio.sleep(0)
+
+    assert "重载运行时失败，请查看日志。" in _text(app)
+
+
+def test_context_window_without_admin_reports_unsupported():
+    """/context-window 未注入维护端口 → 可操作提示。"""
+    app, _backend = _make_app(None)
+
+    app._cmd_context_window(Command("context-window", ()))
+
+    assert "不支持修改上下文窗口" in _text(app)
+
+
+def test_context_window_shows_numeric_window_and_source():
+    """/context-window 无参 → 展示窗口、来源与用法。"""
+    app, _backend = _make_app(FakeAdmin())
+    app.model.status.model_capabilities = SimpleNamespace(
+        context_window=256_000, window_source="catalog"
+    )
+
+    app._cmd_context_window(Command("context-window", ()))
+
+    text = _text(app)
+    assert "上下文窗口: 256,000 · 来源 catalog" in text
+    assert "用法: /context-window <tokens>" in text
+
+
+async def test_context_window_accepts_megabyte_suffix():
+    """/context-window 1m 换算为 1,048,576。"""
+    admin = FakeAdmin()
+    app, _backend = _make_app(admin)
+
+    app._cmd_context_window(Command("context-window", ("1m",)))
+    for _ in range(20):
+        await asyncio.sleep(0)
+
+    assert admin.window_calls == [1_048_576]
+
+
+async def test_context_window_rejects_zero_value():
+    """窗口为 0 → 就地报错,不写盘。"""
+    admin = FakeAdmin()
+    app, _backend = _make_app(admin)
+
+    app._cmd_context_window(Command("context-window", ("0",)))
+
+    assert "必须大于 0" in _text(app)
+    assert admin.window_calls == []
+
+
+def test_undo_list_without_checkpoints():
+    """/undo list 无快照 → 明确提示。"""
+    app, _backend = _make_app(FaultyAdmin())
+
+    app._cmd_undo(Command("undo", ("list",)))
+
+    assert "写前快照: (无)" in _text(app)
+
+
+def test_reload_mcp_without_admin_reports_unsupported():
+    """/mcp reload 未注入维护端口 → 可操作提示。"""
+    app, _backend = _make_app(None)
+
+    app._reload_mcp()
+
+    assert "不支持重载 MCP" in _text(app)
+
+
+async def test_context_window_value_error_is_reported():
+    """窗口写入被端口拒绝 → 呈现业务错误原文。"""
+    admin = FaultyAdmin()
+    admin.window_error = ValueError("窗口超出模型上限")
+    app, _backend = _make_app(admin)
+
+    app._cmd_context_window(Command("context-window", ("200k",)))
+    for _ in range(20):
+        await asyncio.sleep(0)
+
+    assert "设置上下文窗口失败:窗口超出模型上限" in _text(app)
+
+
+async def test_context_window_unexpected_error_is_reported():
+    """窗口写入抛未预期异常 → 通用提示,不崩溃。"""
+    admin = FaultyAdmin()
+    admin.window_error = RuntimeError("boom")
+    app, _backend = _make_app(admin)
+
+    app._cmd_context_window(Command("context-window", ("64k",)))
+    for _ in range(20):
+        await asyncio.sleep(0)
+
+    assert "设置上下文窗口失败，请查看日志。" in _text(app)

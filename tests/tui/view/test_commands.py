@@ -128,3 +128,29 @@ def test_bare_slash_shows_all_commands():
     backend.input_changed("/")
     # 候选列表 = 注册表全量(原序),不按排名截断。
     assert app._suggestions == list(default_registry())
+
+
+def test_unknown_command_reports_hint():
+    """未注册命令 → 提示输入 /help,不发起对话。"""
+    app, backend, manager = _make_app()
+    backend.on_submit(app._submit)
+
+    backend.submit("/nosuchcmd")
+
+    assert "未知命令: /nosuchcmd" in "\n".join(app.model.transcript.all_lines(120))
+    assert manager.current.run_texts == []
+
+
+def test_command_handler_failure_is_isolated():
+    """命令处理器抛异常 → 隔离为可操作提示,不打断 TUI。"""
+    app, backend, _manager = _make_app()
+    backend.on_submit(app._submit)
+
+    def explode(cmd):
+        raise RuntimeError("boom")
+
+    app._cmd_help = explode  # type: ignore[method-assign]
+
+    backend.submit("/help")
+
+    assert "命令执行失败，请查看日志。" in "\n".join(app.model.transcript.all_lines(120))
