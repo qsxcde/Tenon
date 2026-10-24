@@ -87,6 +87,7 @@ class TuiAssembler(TuiConfigMixin):
         context_preflight: ContextPreflightConfig | None = None,
         extensions: RuntimeExtensions | None = None,
         resource_limits: ToolResourceLimits | None = None,
+        continue_recent: bool = False,
     ) -> None:
         from codeagent.ai.catalog.registry import ModelRegistry
         from codeagent.ai.catalog.store import ModelStore
@@ -107,6 +108,7 @@ class TuiAssembler(TuiConfigMixin):
         self.resource_limits = resource_limits
         self.mcp_diagnostics: list[str] = []
         self.package_manager = PackageManager(CONFIG_DIR, _workspace(cfg))
+        self.continue_recent = continue_recent
         self.manager: Any = None
 
     def refresh_skills(self) -> tuple[list[Any], list[str]]:
@@ -155,15 +157,27 @@ class TuiAssembler(TuiConfigMixin):
         raise ValueError(f"未知 Package 操作: {action}")
 
     def build(self) -> Any:
-        """创建 TuiApp，并保持启动即进入首个会话。"""
+        """创建 TuiApp；``continue_recent`` 时恢复最近会话，否则新建。"""
+        from codeagent.app import config as app_config
         from codeagent.app.tui.application import TuiApp
         from codeagent.app.tui.adapters.textual.backend import TextualBackend
+        from .admin import TuiAdminService
 
         manager = self._build_manager()
-        manager.create()
+        if self.continue_recent:
+            manager.continue_recent()
+        else:
+            manager.create()
         self.backend = self.backend or TextualBackend()
         footer = _resolve_footer_info(
             self.cfg, self.provider, self.model, self.reasoning_effort, self.registry
+        )
+        admin = TuiAdminService(
+            checkpoints_root=app_config.checkpoints_dir,
+            reload_runtime=self.reload_runtime_async,
+            subagent_runner=self._ensure_subagent_runner,
+            set_context_window=self.set_context_window,
+            max_concurrency=lambda: getattr(self.cfg, "subagent_max_concurrency", 1),
         )
         return TuiApp(
             manager,
@@ -181,6 +195,7 @@ class TuiAssembler(TuiConfigMixin):
             configured_providers=_configured_providers(),
             close_runtime=lambda: close_runtime_for_config(manager._config),
             resolve_model_capabilities=self.resolve_model_capabilities,
+            admin=admin,
         )
 
     def resolve_model_capabilities(
@@ -206,6 +221,7 @@ def create_tui_app(
     context_preflight: ContextPreflightConfig | None = None,
     extensions: RuntimeExtensions | None = None,
     resource_limits: ToolResourceLimits | None = None,
+    continue_recent: bool = False,
 ) -> Any:
     """创建 TUI 应用，具体状态由 ``TuiAssembler`` 持有。"""
     return TuiAssembler(
@@ -220,4 +236,5 @@ def create_tui_app(
         context_preflight=context_preflight,
         extensions=extensions,
         resource_limits=resource_limits,
+        continue_recent=continue_recent,
     ).build()

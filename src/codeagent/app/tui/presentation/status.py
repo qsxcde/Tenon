@@ -67,6 +67,15 @@ class StatusBar(Component):
         self.mode = ""
         self.subagent_counts: dict[str, int] = {}
 
+    def apply_footer(self, footer: FooterInfo | None) -> None:
+        """写入组合根解析的状态栏装配数据(design D5)。"""
+        if footer is None:
+            return
+        self.model = footer.model
+        self.effort = footer.effort
+        self.cwd = footer.cwd
+        self.model_capabilities = footer.capabilities
+
     @property
     def task_phase(self) -> str:
         return self._task_clock.phase

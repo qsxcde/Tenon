@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 from .dispatch import TuiCommandDispatcher
-from .parser import Command, Literal, UnknownCommand, default_registry, parse
 from .fuzzy import fuzzy_rank
-from ..presentation.primitives import Span
-from ..presentation.theme import ACCENT, DIM, SUCCESS
+from .parser import Command, Literal, UnknownCommand, parse
+from .registry import _COMMANDS
+from .suggestions import TuiSuggestionRenderMixin, _MAX_SUGGESTIONS, _SUGGESTION_WINDOW
 
-
-_COMMANDS = default_registry()
-_MAX_SUGGESTIONS = 64
-_SUGGESTION_WINDOW = 9
 _PICKER_HINTS = {
     "provider": "/provider <name>: 切换模型提供方",
     "model": "/model <model[:effort]>: 切换模型(支持内联思考强度)",
@@ -21,7 +17,7 @@ _PICKER_HINTS = {
 }
 
 
-class TuiInteractionCoordinator(TuiCommandDispatcher):
+class TuiInteractionCoordinator(TuiCommandDispatcher, TuiSuggestionRenderMixin):
     # -- 模糊补全 / 选择器(T-45)------------------------------------------
 
     def _suggestion_context(self, text: str) -> tuple[str, list[str]] | None:
@@ -103,8 +99,20 @@ class TuiInteractionCoordinator(TuiCommandDispatcher):
         if not self._suggestions:
             return
         name = self._suggestions[self._suggestion_index]
+        typed = self._last_text[1:].partition(" ")[0]
         self._suggestions = []
         self._backend.set_suggestions([])
+        # 已输完整命令名(候选与输入一致)时直接执行:否则填入同名文本会让补全浮层
+        # 重新激活,Enter 被反复消费为补全确认,无参命令永远无法提交。
+        if self._suggestion_kind == "command" and typed == name:
+            self._suppress_next_suggestions = True
+            self._backend.set_input_text("")
+            if _COMMANDS[name].picker:
+                self._open_inline_picker(name)
+            else:
+                self._dispatch_command(Command(name, ()))
+            self._schedule_render()
+            return
         # picker 命令的命令名确认 → 进入内联选择(输入框填 "/kind " 弹候选浮层)。
         if self._suggestion_kind == "command" and _COMMANDS[name].picker:
             self._open_inline_picker(name)
@@ -135,57 +143,6 @@ class TuiInteractionCoordinator(TuiCommandDispatcher):
         # 置位后再填入:set_input_text 引发的异步变更通知将被抑制,浮层不重弹(D1)。
         self._suppress_next_suggestions = True
         self._backend.set_input_text(f"/{name}")
-
-    def _render_suggestions(self) -> None:
-        if not self._suggestions:
-            self._backend.set_suggestions([])
-            return
-        # 固定窗口视口滚动(design:浮层高度 = _SUGGESTION_WINDOW 行,高亮项居中
-        # 跟随;候选少于窗口时按实际数展示,浮层不虚高)。窗口切片只影响渲染,
-        # _suggestion_index 仍指向全量候选列表(确认逻辑不受影响)。
-        total = len(self._suggestions)
-        window = min(_SUGGESTION_WINDOW, total)
-        start = min(max(0, self._suggestion_index - window // 2), max(0, total - window))
-        lines: list[list[Span]] = []
-        for index in range(start, start + window):
-            name = self._suggestions[index]
-            active = index == self._suggestion_index
-            fg = ACCENT if active else DIM
-            spans = [Span("› " if active else "  ", fg=fg)]
-            if self._suggestion_kind == "command":
-                # 命令条目附 summary 描述列(命令名语境)。
-                spans.append(Span(f"/{name}", fg=fg))
-                spans.append(Span(f" — {_COMMANDS[name].summary}", fg=DIM))
-            else:
-                # 值候选:当前生效项打 ✓;login 语境 = 已配置 key 的 provider 打 ✓。
-                marked = self._value_marked(name) if self._suggestion_kind == "value" else False
-                spans.append(Span("✓ " if marked else "  ", fg=SUCCESS if marked else DIM))
-                spans.append(Span(self._value_label(name), fg=fg))
-            lines.append(spans)
-        self._backend.set_suggestions(lines)
-
-    def _value_marked(self, name: str) -> bool:
-        """值候选的 ✓ 标记:model/effort/provider 标记当前生效项;login 标记
-        已配置 key 的 provider(组合根注入的 ``configured_providers``);
-        sessions 标记当前会话。"""
-        cmd_name = self._last_text[1:].partition(" ")[0]
-        if cmd_name == "login":
-            return name in self._configured_providers
-        if cmd_name == "sessions":
-            current = self._manager.current
-            return current is not None and name == current.session_id
-        return bool(self._current_picker_value()) and name == self._current_picker_value()
-
-    def _value_label(self, name: str) -> str:
-        """值候选的展示串:sessions 显示标题(+ id 前 8 位,可区分),其余原样。"""
-        cmd_name = self._last_text[1:].partition(" ")[0]
-        if cmd_name != "sessions":
-            return name
-        for ref in self._manager.list():
-            if ref.id == name:
-                title = ref.title or "(无标题)"
-                return f"{title} ({name[:8]}…)"
-        return name
 
     # -- 内联选择(/provider /model /effort)--------------------------------
 

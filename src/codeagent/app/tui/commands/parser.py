@@ -100,6 +100,10 @@ def default_registry() -> dict[str, CommandSpec]:
         "status": CommandSpec("status", "显示会话状态"),
         "name": CommandSpec("name", "设置或查看当前会话标题", args=("title...",)),
         "context": CommandSpec("context", "显示上下文预算与治理诊断"),
+        "context-window": CommandSpec(
+            "context-window", "查看或设置模型上下文窗口", args=("tokens",)
+        ),
+        "export": CommandSpec("export", "导出当前会话文档到文件", args=("path",)),
         "sessions": CommandSpec(
             "sessions",
             "列出 / 搜索 / 筛选 / 归档 / 删除 / 恢复会话",
@@ -108,6 +112,8 @@ def default_registry() -> dict[str, CommandSpec]:
         ),
         "tree": CommandSpec("tree", "展示会话 fork 链树(/tree <id> 切换)", args=("session-id",)),
         "tools": CommandSpec("tools", "列出可用工具"),
+        "undo": CommandSpec("undo", "查看或恢复写前文件快照", args=("action",)),
+        "subagents": CommandSpec("subagents", "查看委派槽位或取消委派", args=("action", "args...")),
         "provider": CommandSpec("provider", "切换 provider", args=("name",), picker=True),
         "login": CommandSpec(
             "login", "配置 provider 的 API key 并切换", args=("provider",), picker=True

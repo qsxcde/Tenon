@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..model import selection as model_selection
+from ..model.budget import resolve_context_budget_metadata
 from ..model.factory import _resolve_context_window, _resolve_model_effort
 from ..runtime.factory import (
     _LazyConfig,
@@ -15,6 +16,7 @@ from ..runtime.factory import (
     policy_for_config,
 )
 from ..session.factory import create_agent_session, create_session_manager
+from .admin import model_override_record
 from .host import TuiAssemblerHost
 
 
@@ -221,3 +223,38 @@ class TuiConfigMixin(TuiAssemblerHost):
 
         app_config.write_env_key(provider, key, app_config.CONFIG_ENV_FILE)
         return self.rebuild_config(new_provider=provider)
+
+    async def reload_runtime_async(self) -> tuple[str, str]:
+        """重建模型、MCP 与工具运行时(等待旧回合收尾后生效)。"""
+        return await self.rebuild_config_async(None, None, None)
+
+    async def set_context_window(self, tokens: int) -> tuple[int, str]:
+        """把当前模型的上下文窗口写入 models.json 并热切换。
+
+        覆盖记录必须写全已知元数据:``ModelStore`` 按 id 整体替换,只写窗口会让该
+        模型的 ``maxTokens``/``reasoning``/``aliases`` 丢失。
+        """
+        if type(tokens) is not int or tokens < 1:
+            raise ValueError("上下文窗口必须为正整数")
+        from codeagent.ai.catalog.registry import ModelRegistry
+        from codeagent.ai.catalog.store import ModelStore
+        from codeagent.app import config as app_config
+
+        provider, model_id = self._active_selection()
+        if not provider:
+            raise ValueError("无法确定当前 provider,请先用 /provider 选择")
+        spec = self.registry.resolve(model_id, provider=provider)
+        store = ModelStore(app_config.CONFIG_MODELS_FILE)
+        store.write_model_override(provider, model_override_record(spec, tokens))
+        self.registry = ModelRegistry(ModelStore(app_config.CONFIG_MODELS_FILE))
+        await self.rebuild_config_async(provider, model_id, self.reasoning_effort)
+        budget = resolve_context_budget_metadata(self.registry, self.cfg, provider, model_id)
+        return budget.context_window, budget.window_source
+
+    def _active_selection(self) -> tuple[str | None, str]:
+        """解析当前生效的 provider 与模型 id(缺省回落到配置默认值)。"""
+        provider = self.provider
+        model_id, _ = _resolve_model_effort(self.cfg, provider, self.model, self.reasoning_effort)
+        if not provider:
+            provider = self._target_provider(model_id, None)
+        return provider, model_id

@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from codeagent.app.tasks.modes import TaskMode
     from codeagent.app.tasks.supervisor import TaskSupervisor
 
+    from ..ports.admin import TuiAdminPort
     from ..ports.backend import TuiBackend
     from ..rendering.coordinator import TuiEventBuffer, TuiRenderCoordinator
     from ..state.model import TuiModel
@@ -49,6 +50,7 @@ class TuiAppHost:
     _package_action: Callable[[str, tuple[str, ...]], str] | None
     _close_runtime: Callable[[], Any] | None
     _resolve_model_capabilities: Callable[[str | None, str | None, str | None], Any] | None
+    _admin: TuiAdminPort | None
     # -- 任务与登录状态 ---------------------------------------------------
     _task_mode: TaskMode
     _task_active: bool
@@ -86,6 +88,7 @@ class TuiAppHost:
     _run_conversation: Callable[..., None]
     _open_inline_picker: Callable[[str], None]
     _picker_candidates: Callable[[str], list[str]]
+    _current_picker_value: Callable[[], str]
     _begin_login: Callable[[str], None]
     _end_login: Callable[[], None]
     _apply_config: Callable[..., bool]
@@ -115,3 +118,8 @@ class TuiAppHost:
     _cmd_model: Callable[..., None]
     _cmd_effort: Callable[..., None]
     _cmd_quit: Callable[..., None]
+    _cmd_undo: Callable[..., None]
+    _cmd_export: Callable[..., None]
+    _cmd_subagents: Callable[..., None]
+    _cmd_context_window: Callable[..., None]
+    _reload_mcp: Callable[[], None]

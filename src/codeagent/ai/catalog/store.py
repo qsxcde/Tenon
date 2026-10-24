@@ -7,6 +7,7 @@
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 from codeagent.ai.catalog.spec import ModelSpec
 
@@ -63,6 +64,50 @@ class ModelStore:
             conf["models"] = specs
             result[provider] = conf
         return result
+
+    def write_model_override(self, provider: str, record: dict[str, Any]) -> Path:
+        """按模型 id upsert 一条用户覆盖记录,返回写入的 models.json 路径。
+
+        upsert 语义与读取一致:同 id 整体替换,新 id 追加。写入先落临时文件再
+        原子替换,避免中途失败留下半截 JSON 让下次启动退回内置目录。
+        """
+        if self.path is None:
+            raise ValueError("未指定 models.json 路径,无法写入模型覆盖")
+        model_id = record.get("id")
+        if not isinstance(model_id, str) or not model_id:
+            raise ValueError("模型记录缺少字符串 id")
+        data = self._read_raw()
+        provider_conf = data.get(provider)
+        if not isinstance(provider_conf, dict):
+            provider_conf = {}
+            data[provider] = provider_conf
+        models = provider_conf.get("models")
+        if not isinstance(models, list):
+            models = []
+            provider_conf["models"] = models
+        for index, item in enumerate(models):
+            if isinstance(item, dict) and item.get("id") == model_id:
+                models[index] = dict(record)
+                break
+        else:
+            models.append(dict(record))
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        payload = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+        temp = self.path.with_name(f"{self.path.name}.tmp")
+        temp.write_text(payload, encoding="utf-8")
+        temp.replace(self.path)
+        return self.path
+
+    def _read_raw(self) -> dict[str, Any]:
+        """读取原始 JSON 结构;缺失或损坏时返回空对象(不阻塞写入)。"""
+        path = self.path
+        if path is None or not path.exists():
+            return {}
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8-sig"))
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            return {}
+        return raw if isinstance(raw, dict) else {}
 
 
 def _parse_record(m: dict) -> ModelSpec | None:

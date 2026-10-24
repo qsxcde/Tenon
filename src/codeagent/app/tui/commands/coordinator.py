@@ -7,13 +7,18 @@ import inspect
 from typing import Any
 
 from codeagent.app.tasks.modes import TaskMode
+from .admin import TuiAdminCommandCoordinator
 from .skills import TuiSkillCommandCoordinator
 from .status import TuiStatusCommandCoordinator
 from .parser import Command, help_text
 from .interaction import _COMMANDS
 
 
-class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordinator):
+class TuiCommandCoordinator(
+    TuiStatusCommandCoordinator,
+    TuiSkillCommandCoordinator,
+    TuiAdminCommandCoordinator,
+):
     """分派非会话命令；状态和技能由专门协作者处理。"""
 
     def _cmd_help(self, cmd: Command) -> None:
@@ -50,6 +55,9 @@ class TuiCommandCoordinator(TuiStatusCommandCoordinator, TuiSkillCommandCoordina
         self.model.transcript.clear()
 
     def _cmd_mcp(self, cmd: Command) -> None:
+        if cmd.args and cmd.args[0] in {"reload", "reconnect"}:
+            self._reload_mcp()
+            return
         grouped: dict[str, list[str]] = {}
         for tool in self._manager.tools:
             name = getattr(tool, "name", "")

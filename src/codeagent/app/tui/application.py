@@ -13,6 +13,7 @@ from collections.abc import Callable
 from typing import Any
 
 from codeagent.app.skills.models import Skill
+from .ports.admin import TuiAdminPort
 from .ports.backend import TuiBackend
 from .presentation.blocks import SubagentBlock, ToolCallBlock
 from .state.model import TuiModel
@@ -64,6 +65,7 @@ class TuiApp(
         close_runtime: Callable[[], Any] | None = None,
         resolve_model_capabilities: Callable[[str | None, str | None, str | None], Any]
         | None = None,
+        admin: TuiAdminPort | None = None,
     ) -> None:
         """初始化 TUI 状态、回调和组合根注入的适配器。"""
         self._manager = manager
@@ -82,6 +84,7 @@ class TuiApp(
         self._package_action = package_action
         self._close_runtime = close_runtime
         self._resolve_model_capabilities = resolve_model_capabilities
+        self._admin = admin
         self._task_mode = TaskMode.AUTO
         self._task_active = False
         self._task_supervisor: TaskSupervisor | None = None
@@ -109,12 +112,7 @@ class TuiApp(
         self._shutdown_complete = False
         self._accepting_input = True
         self.model = TuiModel()
-        if footer is not None:
-            # 底部状态栏装配数据在组合根解析固化(design D5):模型名/思考强度/工作目录。
-            self.model.status.model = footer.model
-            self.model.status.effort = footer.effort
-            self.model.status.cwd = footer.cwd
-            self.model.status.model_capabilities = footer.capabilities
+        self.model.status.apply_footer(footer)
         self._event_buffer = TuiEventBuffer(self._apply_event)
         self._render_coordinator = TuiRenderCoordinator(
             self.model,
