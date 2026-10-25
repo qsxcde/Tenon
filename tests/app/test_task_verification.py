@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 
 from tenon.app.tasks.verification.models import TaskStatus, VerificationResult
-from tenon.app.tasks.verification.runner import VerificationRunner, _shell_argv
+from tenon.app.tasks.verification import runner as runner_module
+from tenon.app.tasks.verification.runner import VerificationRunner
 from tenon.app.tasks.verification.workspace import (
     VerificationCommandResolver,
     WorkspaceInspector,
@@ -82,23 +83,24 @@ async def test_verification_runner_reports_cancellation(tmp_path: Path, task_tra
 
 
 @pytest.mark.unit
-def test_shell_argv_offsets_cmd_quote_stripping():
-    """cmd /s /c 会剥离首尾引号,带引号的命令必须外层再包一层。
+async def test_spawn_uses_shell_mode_on_windows(monkeypatch):
+    """Windows 必须走 shell 模式,避免 list2cmdline 对引号二次转义。
 
-    回归:未包装时 ``"python.exe" -c "..."`` 被截断成非法命令行,
-    Windows 上真实子进程测试全部报 not recognized。
+    回归:exec 模式下含引号的命令被截断,报 not recognized 或
+    network path not found,windows-latest 真实子进程测试全部失败。
     """
+    captured: dict[str, str] = {}
+
+    async def fake_shell(command: str, **_kwargs) -> None:
+        captured["command"] = command
+        raise RuntimeError("停在进程创建之前")
+
+    monkeypatch.setattr(runner_module, "_is_windows", lambda: True)
+    monkeypatch.setattr(asyncio, "create_subprocess_shell", fake_shell)
     command = '"C:\\py\\python.exe" -c "print(1)"'
 
-    argv = _shell_argv(command, is_windows=True)
+    runner = VerificationRunner(".")
+    with pytest.raises(RuntimeError):
+        await runner._spawn(command)
 
-    assert argv[:4] == ["cmd.exe", "/d", "/s", "/c"]
-    assert argv[-1] == f'"{command}"'
-    # 被 cmd 剥离一层后恰好还原成原始命令。
-    assert argv[-1][1:-1] == command
-
-
-@pytest.mark.unit
-def test_shell_argv_keeps_plain_command_unwrapped_on_posix():
-    """POSIX 分支保持 /bin/sh -lc,不做任何引号包装。"""
-    assert _shell_argv("pytest -q", is_windows=False) == ["/bin/sh", "-lc", "pytest -q"]
+    assert captured["command"] == command

@@ -15,18 +15,9 @@ from .models import TaskStatus, VerificationResult
 ExecuteFn = Callable[[str, float], Awaitable[Any] | Any]
 
 
-def _shell_argv(command: str, *, is_windows: bool | None = None) -> list[str]:
-    """构造平台 shell 调用参数。
-
-    Windows 的 ``cmd /s /c`` 会剥离命令首尾引号:带引号的命令,例如
-    ``"C:\\path\\python.exe" -c "..."``,会被截断成非法命令行并报
-    "is not recognized"。Windows 下单统一在外层再包一对引号,正好抵消
-    这次剥离;``is_windows`` 可注入,便于在任意平台验证两条分支。
-    """
-    windows = os.name == "nt" if is_windows is None else is_windows
-    if windows:
-        return ["cmd.exe", "/d", "/s", "/c", f'"{command}"']
-    return ["/bin/sh", "-lc", command]
+def _is_windows() -> bool:
+    """平台判断独立成函数:测试可注入,无需改动全局 ``os.name``。"""
+    return os.name == "nt"
 
 
 class VerificationRunner:
@@ -79,17 +70,35 @@ class VerificationRunner:
             )
         return self._normalize(raw, command, source, started)
 
-    async def _execute(self, command: str, timeout: float) -> Any:
-        if self.execute is not None:
-            value = self.execute(command, timeout)
-            return await value if inspect.isawaitable(value) else value
-        argv = _shell_argv(command)
-        process = await asyncio.create_subprocess_exec(
-            *argv,
+    async def _spawn(self, command: str) -> asyncio.subprocess.Process:
+        """按平台启动命令进程。
+
+        Windows 必须走 shell 模式:``cmd /s /c`` 会剥离命令首尾引号,而
+        ``create_subprocess_exec`` 还会用 ``list2cmdline`` 对参数内引号做
+        二次转义,cmd 不认反斜杠转义,含引号的命令因此被截断。shell 模式
+        由 Python 直接拼出 ``cmd.exe /c "<command>"``,不再二次转义。
+        """
+        if _is_windows():
+            return await asyncio.create_subprocess_shell(
+                command,
+                cwd=self.cwd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT,
+            )
+        return await asyncio.create_subprocess_exec(
+            "/bin/sh",
+            "-lc",
+            command,
             cwd=self.cwd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
         )
+
+    async def _execute(self, command: str, timeout: float) -> Any:
+        if self.execute is not None:
+            value = self.execute(command, timeout)
+            return await value if inspect.isawaitable(value) else value
+        process = await self._spawn(command)
         try:
             output, _ = await asyncio.wait_for(process.communicate(), timeout=timeout)
         except asyncio.TimeoutError:
