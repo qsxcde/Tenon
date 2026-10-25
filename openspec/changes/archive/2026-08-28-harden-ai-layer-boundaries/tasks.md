@@ -1,8 +1,8 @@
 ## 1. Establish the AI request boundary
 
 - [x] 1.1 Add a typed composition-layer adapter that converts concrete tool objects into validated `ToolDefinition` values and reports conversion failures with tool context.
-- [x] 1.2 Remove concrete-tool introspection and silent schema-conversion fallback from `codeagent.ai.model`; retain only provider-neutral value-object serialization there.
-- [x] 1.3 Update the AI import-boundary tests to assert that concrete tool schema adaptation remains outside `src/codeagent/ai`.
+- [x] 1.2 Remove concrete-tool introspection and silent schema-conversion fallback from `tenon.ai.model`; retain only provider-neutral value-object serialization there.
+- [x] 1.3 Update the AI import-boundary tests to assert that concrete tool schema adaptation remains outside `src/tenon/ai`.
 
 ## 2. Isolate provider requests and split transport responsibilities
 

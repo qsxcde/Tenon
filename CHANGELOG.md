@@ -8,7 +8,11 @@
 ### Added
 
 - **TUI 维护类命令**：新增 `/undo`（查看/恢复写前快照）、`/export <path>`（导出当前会话文档）、`/subagents`（查看并发上限与活跃委派，`cancel <id>` 终止单个委派）、`/context-window`（读取或写入 `models.json` 的 `contextWindow` 并热切换）；`/mcp reload` 免重启重建 MCP 与工具运行时。这些高权限动作经 `TuiAdminPort` 由组合根实现，视图层不直接触碰快照存储与模型目录。
-- **TUI 启动恢复**：`codeagent --tui -c` 恢复最近有活动的会话（此前 TUI 启动固定新建）。
+- **TUI 启动恢复**：`tenon --tui -c` 恢复最近有活动的会话（此前 TUI 启动固定新建）。
+
+### Changed
+
+- **项目更名为 `tenon`**：发行名、import 名与 CLI 入口统一为 `tenon`，配置目录由 `~/.codeagent` 更名为 `~/.tenon`。首次启动时若新目录不存在且旧目录存在，会把旧目录整体迁移过去，`.env`、`models.json`、`secrets.toml` 与会话记录一并保留；新旧目录并存时保持现状并告警，避免覆盖已写好的新配置。旧目录仍按敏感路径拒绝访问，未迁移期间不会因改名而失去保护。
 
 ### Fixed
 
@@ -33,11 +37,11 @@
 - **11 个内建工具**：新增 `web_fetch`（http/https、网络经注入、响应有界）、`web_search`（注入式搜索提供方，未配置时明确不可用）、`todo`（整体替换式任务清单，仅驻内存）；web 出站进确认环，headless 下 fail-closed。
 - **审批结果封闭枚举**：新增 `ApprovalOutcome`（`allowed_once` / `rejected` / `cancelled` / `timed_out` / `unavailable`）与 fail-closed 映射；确认请求状态由开放字符串收敛为封闭终态。
 - **工具执行瀑布管线**：`before_tool_calls` / `after_tool_calls` 有序链——pre 支持通知、改参、门禁短路，post 支持结果变换；安全策略门禁固定链尾并对改参后的调用判定。**BREAKING**：原单值字段改名为复数元组。
-- **扩展插件目录（v1）**：`~/.codeagent/extensions/<id>/` + `codeagent-plugin.json`，模块导出 `TOOL_SPECS`，工具名 `ext__<id>__<tool>`；目录放置即信任，调用层默认需确认，`extensions.json` 提供 deny/ask/allow 三级规则（与 MCP 共用匹配语义）。
+- **扩展插件目录（v1）**：`~/.tenon/extensions/<id>/` + `tenon-plugin.json`，模块导出 `TOOL_SPECS`，工具名 `ext__<id>__<tool>`；目录放置即信任，调用层默认需确认，`extensions.json` 提供 deny/ask/allow 三级规则（与 MCP 共用匹配语义）。
 - **Subagent 有界并发与 `implement` profile**：`subagent_max_concurrency`（默认 1 保持串行）启用有界并发；新增受限可写 `implement`（read/write/edit/bash/grep/find/ls/skill，禁 `delegate`/MCP）。
 - **API 形状注册表**：`ai/transport/shapes.py` 与 `ProviderDefinition.api_shape`（未知形状 fail-closed）；新增 `register_provider` / `register_api_shape` 入口，同形状 provider 无需改 transport。
 - **三档 bash 沙箱**：`read-only` / `workspace-write` / `danger-full-access`（默认）；macOS Seatbelt、Linux bwrap，受限策略无后端 fail-closed；后端参数以独立 argv 注入。
-- **写前 checkpoint 与 `codeagent undo`**：`write` / `edit` 在锁内保存原文，快照有界淘汰，支持 `--list` / `--dry-run` / LIFO 恢复；快照失败不阻塞写入。
+- **写前 checkpoint 与 `tenon undo`**：`write` / `edit` 在锁内保存原文，快照有界淘汰，支持 `--list` / `--dry-run` / LIFO 恢复；快照失败不阻塞写入。
 - **缓存命中诊断**：`--context` 输出命中率与 `cache_unknown` / `cache_cold` / `cache_effective`；契约测试锁定基础系统提示词前缀不含时间戳/临时目录。
 - **离线评测框架**：`evals/` + `python -m evals`，覆盖工具流、未知工具、审批阻断与改参传播；`tests/test_evals.py` 纳入 `contract` 门禁。
 - `docs/iteration/v0.7.md`：本批次实现、验证与限制的完整记录。
@@ -99,7 +103,7 @@ v0.5.0 完成 V5-00～V5-10，把单 Agent Runtime 扩展为可委派、可治�
 - 当前 Windows / Python 3.12 全量离线测试为 `1695 passed，3 skipped`（1698 collected）；快速质量集为 `1525 passed，3 skipped，170 deselected`，覆盖率 `84.40%`（15232/18048 statements，CI 硬下限 77.9%）；跨边界集合（integration / e2e / platform / compatibility）为 `212 passed`。（**2026-10-18 复核更正**：在 macOS / Python 3.12 上重跑为全量 `1710 passed`、快速质量集 `1540 passed`、覆盖率 `84.58%`、跨边界集合 `212 passed`。全量收集数从 1698 变为 1710 而 `tests/` 自 v0.5.0 发布后未变更，说明原收集数已不可复现；上列原始数字保留为发布时点的历史记录。）
 - `uv run ruff check src tests scripts` 通过；`git diff --check` 通过。
 - `openspec validate --specs` 为 **24/24**，`openspec/changes/` 无未归档变更。
-- 包版本一致性校验通过：`pyproject.toml` 与 `codeagent.__version__` 均为 `0.5.0`。
+- 包版本一致性校验通过：`pyproject.toml` 与 `tenon.__version__` 均为 `0.5.0`。
 - release check（`scripts/release_check.py`）以 `0.5.0` 通过：wheel/sdist 构建、内建资源与敏感文件检查、干净环境安装和 fake provider CLI 冒烟。
 
 ## [0.4.0] - 2026-09-01
@@ -125,7 +129,7 @@ v0.4.0 完成 V4-01～V4-38，重点将单 Agent Runtime 收敛为可长期使�
 ### Verification
 
 - v0.4 发布时的 macOS / Python 3.12 全量离线测试为 `1532 passed`；快速质量集为 `1391 passed，141 deselected`，覆盖率为 `83.61%`。
-- 包版本一致性校验通过：`pyproject.toml`、`codeagent.__version__` 和构建产物均为 `0.4.0`。
+- 包版本一致性校验通过：`pyproject.toml`、`tenon.__version__` 和构建产物均为 `0.4.0`。
 - release check 已通过 wheel/sdist 构建、资源与敏感文件检查、干净环境安装和 fake provider CLI 冒烟。
 
 ## [0.3.0] - 2026-08-22
@@ -182,6 +186,6 @@ v0.4.0 完成 V4-01～V4-38，重点将单 Agent Runtime 收敛为可长期使�
 - 异步 ReAct 对话、工具调用和事件流订阅
 - 危险命令黑名单、Windows bash 探测和离线测试基线
 
-[Unreleased]: https://github.com/qsxcde/codeAgent/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/qsxcde/codeAgent/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/qsxcde/codeAgent/compare/v0.3.0...v0.4.0
+[Unreleased]: https://github.com/qsxcde/tenon/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/qsxcde/tenon/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/qsxcde/tenon/compare/v0.3.0...v0.4.0

@@ -1,4 +1,4 @@
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 def test_new_event_constants():

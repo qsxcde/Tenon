@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.tools.plugins.loader import load_extension_tools
-from codeagent.tools.registry import ToolBuildContext
-from codeagent.tools.shared import ToolResourceLimits
+from tenon.tools.plugins.loader import load_extension_tools
+from tenon.tools.registry import ToolBuildContext
+from tenon.tools.shared import ToolResourceLimits
 from tests.tools.plugins.fixtures import make_plugin
 
 pytestmark = pytest.mark.contract
@@ -15,8 +15,8 @@ _BAD_MODULE = 'raise RuntimeError("boom")'
 _NO_SPECS_MODULE = "VALUE = 1\n"
 _DUP_SPECS_MODULE = """
 from pydantic import BaseModel
-from codeagent.tools.base import AtomicTool
-from codeagent.tools.registry import ToolSpec
+from tenon.tools.base import AtomicTool
+from tenon.tools.registry import ToolSpec
 
 
 class Args(BaseModel):
@@ -38,7 +38,7 @@ TOOL_SPECS = (
 )
 """
 _BAD_NAME_MODULE = """
-from codeagent.tools.registry import ToolSpec
+from tenon.tools.registry import ToolSpec
 
 TOOL_SPECS = (ToolSpec("Bad__Name", lambda context: None),)
 """

@@ -32,7 +32,7 @@
 - [x] 4.5 Move `MemoryStore` into `persistence/memory_store.py` and align its observable behavior with the file backend through shared protocol tests.
 - [x] 4.6 Move metadata indexing into `persistence/index.py` and path/process locking helpers into `persistence/locking.py` without changing index invalidation or rebuild behavior.
 - [x] 4.7 Move successful-turn, usage and compaction commit coordination into `persistence/commit.py`; failed and cancelled turns must remain uncommitted.
-- [x] 4.8 Preserve `codeagent.session.store` as an export façade while migrating all internal imports to the new persistence modules.
+- [x] 4.8 Preserve `tenon.session.store` as an export façade while migrating all internal imports to the new persistence modules.
 - [x] 4.9 Add dual-backend tests for recovery, corrupted lines, unknown entries, metadata, usage, compaction, fork, index rebuild and append concurrency.
 
 ## 5. Migrate callers and remove obsolete internals

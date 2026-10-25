@@ -6,19 +6,19 @@ import asyncio
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import AgentLoopConfig, EventType
-from codeagent.session import SessionManager
-from codeagent.session.compaction import CompactionPolicyConfig
-from codeagent.session.persistence import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import AgentLoopConfig, EventType
+from tenon.session import SessionManager
+from tenon.session.compaction import CompactionPolicyConfig
+from tenon.session.persistence import (
     CompactionEntry,
     JsonFileStore,
     MemoryStore,
     SessionQuery,
     SessionRecoveryError,
 )
-from codeagent.session.runtime.state import RunPhase
+from tenon.session.runtime.state import RunPhase
 
 
 def _manager(client: FakeClient | None = None, store=None, **kwargs) -> SessionManager:
@@ -387,7 +387,7 @@ async def test_dispose_keeps_file_and_allows_reswitch():
 
 async def test_continue_recent_returns_latest(monkeypatch):
     """continue_recent 返回最近有活动的会话,不依赖真实时钟或固定 sleep。"""
-    from codeagent.session.persistence import memory_store
+    from tenon.session.persistence import memory_store
 
     timestamps = iter(
         (
@@ -670,8 +670,8 @@ async def test_fork_subscription_follows():
 
 async def test_fork_compacted_session_restores_summary():
     """fork 已压缩会话:新会话恢复摘要状态(回归:此前摘要丢失,上下文信息缺失)。"""
-    from codeagent.session.compaction import find_cut_point
-    from codeagent.session.persistence import CompactionEntry
+    from tenon.session.compaction import find_cut_point
+    from tenon.session.persistence import CompactionEntry
 
     store = MemoryStore()
     mgr = _manager(store=store)

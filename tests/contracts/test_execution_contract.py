@@ -5,8 +5,8 @@ import time
 
 import pytest
 
-from codeagent.core.execution.runtime import ToolExecutionRuntime
-from codeagent.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
+from tenon.core.execution.runtime import ToolExecutionRuntime
+from tenon.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
 
 
 class _AgentTool:
@@ -116,7 +116,7 @@ async def test_runtime_treats_false_cleanup_hook_result_as_failed_cleanup() -> N
 
 
 async def test_runtime_marks_sync_thread_timeout_as_unsupported_cleanup() -> None:
-    from codeagent.app.composition.tools.adapter import adapt_tools
+    from tenon.app.composition.tools.adapter import adapt_tools
 
     started = asyncio.Event()
 
@@ -176,9 +176,9 @@ async def test_cancel_all_waits_for_async_operation_cleanup_and_is_idempotent():
 
 
 async def test_runtime_respects_configured_concurrency_limit():
-    from codeagent.core.contracts.messages import ToolCall, ToolResult
-    from codeagent.core.contracts.ports import AgentTool
-    from codeagent.core.execution.runtime import ToolExecutionRuntime
+    from tenon.core.contracts.messages import ToolCall, ToolResult
+    from tenon.core.contracts.ports import AgentTool
+    from tenon.core.execution.runtime import ToolExecutionRuntime
 
     class SlowTool(AgentTool):
         name = "slow"

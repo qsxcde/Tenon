@@ -14,7 +14,7 @@ def _http_error(status: int, body: dict, headers: dict[str, str] | None = None):
 
 
 def test_provider_error_classifies_http_kinds_and_retry_hints() -> None:
-    from codeagent.ai.errors import classify_provider_error
+    from tenon.ai.errors import classify_provider_error
 
     error = classify_provider_error(
         _http_error(
@@ -44,7 +44,7 @@ def test_provider_error_classifies_http_kinds_and_retry_hints() -> None:
 
 
 def test_provider_error_distinguishes_unsupported_parameter() -> None:
-    from codeagent.ai.errors import classify_provider_error
+    from tenon.ai.errors import classify_provider_error
 
     error = classify_provider_error(
         _http_error(
@@ -59,7 +59,7 @@ def test_provider_error_distinguishes_unsupported_parameter() -> None:
 
 
 def test_provider_error_redacts_sensitive_detail() -> None:
-    from codeagent.ai.errors import classify_provider_error
+    from tenon.ai.errors import classify_provider_error
 
     error = classify_provider_error(
         _http_error(
@@ -83,7 +83,7 @@ def test_provider_error_redacts_sensitive_detail() -> None:
 
 
 def test_transport_and_timeout_errors_are_retryable() -> None:
-    from codeagent.ai.errors import classify_provider_error
+    from tenon.ai.errors import classify_provider_error
 
     request = httpx.Request("POST", "https://example.test")
     network = classify_provider_error(httpx.ConnectError("offline", request=request))
@@ -97,8 +97,8 @@ def test_transport_and_timeout_errors_are_retryable() -> None:
 
 @pytest.mark.anyio
 async def test_openai_compat_generate_raises_classified_http_error() -> None:
-    from codeagent.ai.transport.openai_compat import OpenAICompatClient
-    from codeagent.ai.errors import ProviderError
+    from tenon.ai.transport.openai_compat import OpenAICompatClient
+    from tenon.ai.errors import ProviderError
 
     response = httpx.Response(
         403,
@@ -124,8 +124,8 @@ async def test_openai_compat_generate_raises_classified_http_error() -> None:
 
 @pytest.mark.anyio
 async def test_openai_compat_stream_raises_same_classified_http_error() -> None:
-    from codeagent.ai.errors import ProviderError
-    from codeagent.ai.transport.openai_compat import OpenAICompatClient
+    from tenon.ai.errors import ProviderError
+    from tenon.ai.transport.openai_compat import OpenAICompatClient
 
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(403, json={"error": {"message": "forbidden"}})

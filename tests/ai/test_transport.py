@@ -11,8 +11,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from codeagent.ai.transport.openai_compat import OpenAICompatClient
-from codeagent.ai.model.types import ChatMessage, ToolCall, ToolDefinition
+from tenon.ai.transport.openai_compat import OpenAICompatClient
+from tenon.ai.model.types import ChatMessage, ToolCall, ToolDefinition
 
 
 def _client(**kwargs) -> OpenAICompatClient:

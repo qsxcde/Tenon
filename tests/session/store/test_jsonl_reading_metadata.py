@@ -11,8 +11,8 @@ from typing import Any
 
 import pytest
 
-from codeagent.session.persistence.jsonl import JsonFileStore
-from codeagent.session.persistence.models import CURRENT_VERSION
+from tenon.session.persistence.jsonl import JsonFileStore
+from tenon.session.persistence.models import CURRENT_VERSION
 
 pytestmark = pytest.mark.unit
 
@@ -175,7 +175,7 @@ def test_load_context_uses_compaction_cut_point(tmp_path):
 
 def test_load_messages_skips_unparsable_message(monkeypatch, tmp_path):
     """单条消息解析失败时跳过,不让整个会话不可读。"""
-    from codeagent.session.persistence.jsonl import reading as reading_mod
+    from tenon.session.persistence.jsonl import reading as reading_mod
 
     store = _store(tmp_path)
     path = store._path("s1")

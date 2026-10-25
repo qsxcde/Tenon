@@ -21,7 +21,7 @@ REQUIRED_RESOURCES = (
 
 
 def _console_script() -> Path:
-    executable_name = "codeagent.exe" if os.name == "nt" else "codeagent"
+    executable_name = "tenon.exe" if os.name == "nt" else "tenon"
     executable = Path(sys.executable).with_name(executable_name)
     if not executable.is_file():
         raise RuntimeError(f"installed console script not found: {executable}")
@@ -29,7 +29,7 @@ def _console_script() -> Path:
 
 
 def _check_resources() -> list[str]:
-    root = importlib.resources.files("codeagent.resources")
+    root = importlib.resources.files("tenon.resources")
     missing = [name for name in REQUIRED_RESOURCES if not root.joinpath(*name.split("/")).is_file()]
     if missing:
         raise RuntimeError(f"installed resources missing: {', '.join(missing)}")
@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     resources = _check_resources()
     executable = _console_script()
-    with tempfile.TemporaryDirectory(prefix="codeagent-package-smoke-") as config_dir:
+    with tempfile.TemporaryDirectory(prefix="tenon-package-smoke-") as config_dir:
         environment = os.environ.copy()
         environment.update(
             {

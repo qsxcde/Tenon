@@ -20,11 +20,11 @@
 
 | 所在层 | 禁止 import |
 | --- | --- |
-| `core/` | `codeagent.config`、`codeagent.tools`、`codeagent.ai`、`codeagent.session` |
-| `session/` | `codeagent.ai`、`codeagent.tools`、`codeagent.config` |
-| `ai/` | `codeagent.app`、`codeagent.core`、`codeagent.session`、`codeagent.tools` |
-| `tools/` | `codeagent.core`、`codeagent.session`、`codeagent.ai`、`codeagent.app` |
-| `app/`（根层与子包） | `codeagent.core`、`codeagent.session`、`codeagent.ai`、`codeagent.tools` |
+| `core/` | `tenon.config`、`tenon.tools`、`tenon.ai`、`tenon.session` |
+| `session/` | `tenon.ai`、`tenon.tools`、`tenon.config` |
+| `ai/` | `tenon.app`、`tenon.core`、`tenon.session`、`tenon.tools` |
+| `tools/` | `tenon.core`、`tenon.session`、`tenon.ai`、`tenon.app` |
+| `app/`（根层与子包） | `tenon.core`、`tenon.session`、`tenon.ai`、`tenon.tools` |
 | `app/tui/`（非 `adapters/textual/*`） | 上述 app 禁止项 + `textual` |
 | 例外：`app/container.py`、`app/main.py`、`app/composition/**` | 无限制（组合根与入口） |
 
@@ -136,10 +136,10 @@ JSONL 持久化（session/store）      TUI / headless 消费
 
 | 命名空间 | 内容 | 读取位置 |
 | --- | --- | --- |
-| `~/.codeagent/.env` | `<PROVIDER>_API_KEY` / `_BASE_URL` / `_MODEL` / `_REASONING_EFFORT`；工具资源字段 | provider `BaseSettings`、`app/config.Settings` |
-| `~/.codeagent/models.json` | 用户模型目录覆盖（camelCase/snake_case 双拼写） | `ai/catalog/store.py` |
-| `~/.codeagent/sessions/` | 会话 JSONL + 索引 + 锁 | `session/store` |
-| `~/.codeagent/skills/`（及项目级技能） | 技能与安装的 Package | `app/skills` |
+| `~/.tenon/.env` | `<PROVIDER>_API_KEY` / `_BASE_URL` / `_MODEL` / `_REASONING_EFFORT`；工具资源字段 | provider `BaseSettings`、`app/config.Settings` |
+| `~/.tenon/models.json` | 用户模型目录覆盖（camelCase/snake_case 双拼写） | `ai/catalog/store.py` |
+| `~/.tenon/sessions/` | 会话 JSONL + 索引 + 锁 | `session/store` |
+| `~/.tenon/skills/`（及项目级技能） | 技能与安装的 Package | `app/skills` |
 | `AGENTS.md` | 仓库/用户级上下文提示 | `app/context/agents.py` |
 
 应用有意不读取仓库本地 `.env`，避免"运行目录决定凭据"的歧义。

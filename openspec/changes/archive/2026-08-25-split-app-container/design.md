@@ -1,6 +1,6 @@
 ## Context
 
-当前组合根集中在 `src/codeagent/app/container.py`。它同时包含 AI 协议适配、模型和上下文解析、Skill/AGENTS.md 装配、工具/MCP 装配、安全策略、运行时资源关闭、会话工厂以及 TUI 的状态切换回调。`app/main.py` 和 `app/tui/main.py` 通过 `codeagent.app.container` 使用这些入口，测试也直接导入其中的部分适配器和私有辅助函数。
+当前组合根集中在 `src/tenon/app/container.py`。它同时包含 AI 协议适配、模型和上下文解析、Skill/AGENTS.md 装配、工具/MCP 装配、安全策略、运行时资源关闭、会话工厂以及 TUI 的状态切换回调。`app/main.py` 和 `app/tui/main.py` 通过 `tenon.app.container` 使用这些入口，测试也直接导入其中的部分适配器和私有辅助函数。
 
 本变更是纯内部重构。现有 provider、Skill、MCP、会话持久化、TUI 命令和模型配置优先级均属于既有行为，不能因为文件移动而改变。
 
@@ -9,7 +9,7 @@
 **Goals:**
 
 - 按职责和资源生命周期拆分组合根，降低单模块的认知和测试成本。
-- 保留 `codeagent.app.container` 的稳定导入路径和现有工厂函数签名。
+- 保留 `tenon.app.container` 的稳定导入路径和现有工厂函数签名。
 - 让 TUI 装配状态（Package、诊断、SessionManager、热切换）由显式对象持有，而不是依赖大量嵌套闭包。
 - 明确模型客户端与 MCP 工具的唯一资源所有者，保持懒加载、热切换和幂等关闭语义。
 - 让分层导入测试能够识别一个明确的组合包，同时保护 `app/tui/` 的依赖边界。

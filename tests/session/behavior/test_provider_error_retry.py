@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from codeagent.ai.errors import ProviderError
-from codeagent.session.runtime.error_policy import classify_error
-from codeagent.session.runtime.state import RunPhase
+from tenon.ai.errors import ProviderError
+from tenon.session.runtime.error_policy import classify_error
+from tenon.session.runtime.state import RunPhase
 
 
 def test_session_preserves_non_retryable_provider_classification() -> None:

@@ -1,6 +1,6 @@
 ## Why
 
-`src/codeagent/session/store.py` 同时承担数据模型、JSONL 编解码、索引、文件后端和内存后端，已经超过 1,000 行；`session.py` 也把运行控制、持久化、压缩和错误诊断集中在一个会话类中。职责耦合使定位问题、编写单元测试和后续扩展变得困难。本变更在不改变现有行为和公共导入路径的前提下拆分模块，降低维护风险。
+`src/tenon/session/store.py` 同时承担数据模型、JSONL 编解码、索引、文件后端和内存后端，已经超过 1,000 行；`session.py` 也把运行控制、持久化、压缩和错误诊断集中在一个会话类中。职责耦合使定位问题、编写单元测试和后续扩展变得困难。本变更在不改变现有行为和公共导入路径的前提下拆分模块，降低维护风险。
 
 ## What Changes
 
@@ -25,8 +25,8 @@
 
 ## Impact
 
-- 主要代码：`src/codeagent/session/store.py`、`src/codeagent/session/session.py`，以及新增的 session 层内部模块。
-- 兼容入口：`codeagent.session.store`、`codeagent.session.session.AgentSession`、`DEFAULT_CONTEXT_WINDOW` 和现有公开数据类型。
+- 主要代码：`src/tenon/session/store.py`、`src/tenon/session/session.py`，以及新增的 session 层内部模块。
+- 兼容入口：`tenon.session.store`、`tenon.session.session.AgentSession`、`DEFAULT_CONTEXT_WINDOW` 和现有公开数据类型。
 - 依赖关系：session 层仍只依赖 `core` 与同层模块，不引入对 `ai`、`tools` 或 `config` 的依赖。
 - 测试范围：`tests/session/`、容器装配测试、CLI/TUI 的会话存储相关测试，以及完整测试套件。
 - 持久化数据：不迁移、不重写既有 JSONL 或索引文件。

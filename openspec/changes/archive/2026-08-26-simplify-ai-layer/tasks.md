@@ -8,8 +8,8 @@
 ## 2. 迁移传输、provider 与目录边界
 
 - [x] 2.1 将 SSE 帧解析实现归入 `ai/transport/sse.py`，将 provider 无关事件映射到 `ai.model` 类型，并保留多行 data、DONE、usage、thinking 和 tool-call delta 行为
-- [x] 2.2 更新 `ai/transport/openai_compat.py` 使用 AI 层中立消息、工具定义和事件协议，移除对 `codeagent.core`、`codeagent.tools` 或应用层类型的直接依赖
-- [x] 2.3 更新各 provider 配置和构造函数，使环境文件路径、凭据、base URL、模型规格和 reasoning effort 由调用方显式注入；移除 provider 对 `codeagent.app.config` 的导入
+- [x] 2.2 更新 `ai/transport/openai_compat.py` 使用 AI 层中立消息、工具定义和事件协议，移除对 `tenon.core`、`tenon.tools` 或应用层类型的直接依赖
+- [x] 2.3 更新各 provider 配置和构造函数，使环境文件路径、凭据、base URL、模型规格和 reasoning effort 由调用方显式注入；移除 provider 对 `tenon.app.config` 的导入
 - [x] 2.4 修改 `ModelStore` 接收显式模型目录路径，不在 AI 层默认读取 `app.config` 常量；保留文件缺失、损坏文件和坏记录跳过的现有行为
 - [x] 2.5 保持 `catalog` 只依赖模型类型和自身存储逻辑，移除 `ModelRegistry` 对 provider 工厂注册表的反向依赖，并补充目录与 provider 可用性分离的测试
 
@@ -25,7 +25,7 @@
 
 - [x] 4.1 增加中立 `ToolDefinition` 或等价协议，并在组合根完成内置工具、MCP 工具和其他工具对象到模型 schema 的转换
 - [x] 4.2 保留并更新 provider、transport、SSE、FakeClient、模型目录和工具 schema 测试，覆盖请求体、流事件、工具调用、usage、重试和参数错误语义
-- [x] 4.3 增加 AI 层依赖方向测试，确保 `src/codeagent/ai/` 不导入 `codeagent.app`、`codeagent.core`、`codeagent.session` 或 `codeagent.tools`
+- [x] 4.3 增加 AI 层依赖方向测试，确保 `src/tenon/ai/` 不导入 `tenon.app`、`tenon.core`、`tenon.session` 或 `tenon.tools`
 - [x] 4.4 增加组合根装配测试，覆盖默认配置、显式环境文件、用户模型目录、provider/model/effort 选择和 FakeClient 离线路径
 
 ## 5. 清理兼容层并完成验证

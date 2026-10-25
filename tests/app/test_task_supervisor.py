@@ -4,10 +4,10 @@ import asyncio
 import threading
 from pathlib import Path
 
-from codeagent.app.tasks.modes import TaskMode
-from codeagent.app.tasks.supervisor import TaskSupervisor
-from codeagent.app.tasks.verification.models import TaskStatus, VerificationResult
-from codeagent.app.tasks.verification.workspace import WorkspaceInspector
+from tenon.app.tasks.modes import TaskMode
+from tenon.app.tasks.supervisor import TaskSupervisor
+from tenon.app.tasks.verification.models import TaskStatus, VerificationResult
+from tenon.app.tasks.verification.workspace import WorkspaceInspector
 
 
 class FakeSession:

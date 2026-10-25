@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from codeagent.app.main import main
+from tenon.app.main import main
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def test_stdin_mode_returns_reply(fake_provider_env, capsys, monkeypatch):
 # -- session-manager change:会话入口(--list-sessions / --session / -c) ---------
 #
 # 注:conftest._isolate_config_dir(autouse)已把 CONFIG_DIR 重定向到临时目录,
-# main 函数内 `from codeagent.app.config import CONFIG_DIR` 取到的即隔离值。
+# main 函数内 `from tenon.app.config import CONFIG_DIR` 取到的即隔离值。
 
 
 def test_list_sessions_empty(fake_provider_env, capsys):
@@ -49,9 +49,9 @@ def test_list_sessions_empty(fake_provider_env, capsys):
 
 
 def test_list_sessions_shows_refs(fake_provider_env, capsys):
-    from codeagent.app.config import CONFIG_DIR
-    from codeagent.core.contracts.messages import Message
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.app.config import CONFIG_DIR
+    from tenon.core.contracts.messages import Message
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(CONFIG_DIR / "sessions")
     store.create("s1", model="deepseek-v4-flash")
@@ -65,9 +65,9 @@ def test_list_sessions_shows_refs(fake_provider_env, capsys):
 
 def test_session_flag_resumes_existing(fake_provider_env, capsys):
     """--session <id>:恢复既有会话,新消息追加到同一会话文件。"""
-    from codeagent.app.config import CONFIG_DIR
-    from codeagent.core.contracts.messages import Message
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.app.config import CONFIG_DIR
+    from tenon.core.contracts.messages import Message
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(CONFIG_DIR / "sessions")
     store.create("s1")
@@ -85,9 +85,9 @@ def test_session_flag_resumes_existing(fake_provider_env, capsys):
 
 def test_continue_flag_appends_to_recent(fake_provider_env, capsys):
     """-c:继续最近会话(唯一会话时即该会话),新消息追加到同一文件。"""
-    from codeagent.app.config import CONFIG_DIR
-    from codeagent.core.contracts.messages import Message
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.app.config import CONFIG_DIR
+    from tenon.core.contracts.messages import Message
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(CONFIG_DIR / "sessions")
     store.create("recent1")
@@ -101,8 +101,8 @@ def test_continue_flag_appends_to_recent(fake_provider_env, capsys):
 
 
 def test_session_flag_reports_incompatible_recovery_and_returns_nonzero(fake_provider_env, capsys):
-    from codeagent.app.config import CONFIG_DIR
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.app.config import CONFIG_DIR
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(CONFIG_DIR / "sessions")
     store.create("bad")
@@ -118,9 +118,9 @@ def test_session_flag_reports_incompatible_recovery_and_returns_nonzero(fake_pro
 
 
 def test_session_flag_shows_degraded_recovery_before_continuing(fake_provider_env, capsys):
-    from codeagent.app.config import CONFIG_DIR
-    from codeagent.core.contracts.messages import Message
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.app.config import CONFIG_DIR
+    from tenon.core.contracts.messages import Message
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(CONFIG_DIR / "sessions")
     store.create("degraded")
@@ -146,7 +146,7 @@ def _scripted_sensitive_model(command: str = "rm -r data") -> Any:
     命令取 ``rm -r <不存在目录>``:分类为 ask(递归删除)但在隔离 cwd 下
     执行无副作用(目标不存在,仅报错退出),测试不会破坏真实文件。
     """
-    from codeagent.ai.providers.fake import FakeClient
+    from tenon.ai.providers.fake import FakeClient
 
     return FakeClient(
         steps=[
@@ -169,7 +169,7 @@ def test_headless_denies_sensitive_command_without_hanging(
     from unittest.mock import patch
 
     model = _scripted_sensitive_model()
-    with patch("codeagent.app.composition.model.selection.create_llm", return_value=model):
+    with patch("tenon.app.composition.model.selection.create_llm", return_value=model):
         main(["--prompt", "删除数据"])
     out = capsys.readouterr().out
     assert "你: 删除数据" in out
@@ -184,7 +184,7 @@ def test_headless_yes_mode_executes_sensitive_command(
     from unittest.mock import patch
 
     model = _scripted_sensitive_model()
-    with patch("codeagent.app.composition.model.selection.create_llm", return_value=model):
+    with patch("tenon.app.composition.model.selection.create_llm", return_value=model):
         main(["--yes", "--prompt", "删除数据"])
     out = capsys.readouterr().out
     assert "你: 删除数据" in out

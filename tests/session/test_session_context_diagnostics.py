@@ -1,11 +1,11 @@
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import AgentLoopConfig
-from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.core.context.preflight import ContextPreflightConfig, evaluate_context_preflight
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.persistence import MemoryStore
-from codeagent.session.runtime.state import SessionBudgetState
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import AgentLoopConfig
+from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.core.context.preflight import ContextPreflightConfig, evaluate_context_preflight
+from tenon.session import AgentSession, EventBus
+from tenon.session.persistence import MemoryStore
+from tenon.session.runtime.state import SessionBudgetState
 
 
 def _snapshot() -> ContextBudgetSnapshot:
@@ -142,8 +142,8 @@ async def test_agent_session_marks_uncertain_window_without_fake_percentage() ->
 
 
 def test_model_switch_clears_stale_budget_until_next_request() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import ChatModelPort
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import ChatModelPort
 
     session = AgentSession(
         AgentLoopConfig(

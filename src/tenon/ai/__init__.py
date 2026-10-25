@@ -1,0 +1,39 @@
+"""AI 基础设施包。
+
+AI 层只暴露模型契约、provider、transport 和 catalog。应用级模型选择与
+客户端装配位于 ``tenon.app.composition``，不由本包顶层导入。
+"""
+
+from tenon.ai.model import (
+    ChatClient,
+    ChatMessage,
+    ChatResponse,
+    Provider,
+    StreamEvent,
+    StreamEventType,
+    ToolCall,
+    ToolDefinition,
+    Transport,
+)
+from tenon.ai.errors import (
+    ProviderError,
+    ProviderErrorKind,
+    ProviderHTTPError,
+    classify_provider_error,
+)
+
+__all__ = [
+    "ChatClient",
+    "ChatMessage",
+    "ChatResponse",
+    "Provider",
+    "StreamEvent",
+    "StreamEventType",
+    "ToolCall",
+    "ToolDefinition",
+    "Transport",
+    "ProviderError",
+    "ProviderErrorKind",
+    "ProviderHTTPError",
+    "classify_provider_error",
+]

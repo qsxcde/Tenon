@@ -7,7 +7,7 @@
 内建 AtomicTool 和 MCP 工具仍可保留各自的 schema、进程和客户端实现，但进入 `AgentLoopConfig.tools` 前必须通过：
 
 ```python
-from codeagent.app.composition.tools.adapter import adapt_tools
+from tenon.app.composition.tools.adapter import adapt_tools
 
 config.tools = adapt_tools(raw_tools)
 ```

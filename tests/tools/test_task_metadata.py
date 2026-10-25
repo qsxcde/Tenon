@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 
-from codeagent.core import ToolCall, ToolExecutionRuntime
-from codeagent.tools.atomic.bash import BashArgs, BashInvocationResult, BashTool
+from tenon.core import ToolCall, ToolExecutionRuntime
+from tenon.tools.atomic.bash import BashArgs, BashInvocationResult, BashTool
 
 
 def test_bash_invocation_result_exposes_verification_metadata():
@@ -21,7 +21,7 @@ def test_bash_invocation_result_exposes_verification_metadata():
 
 
 async def test_tool_runtime_propagates_bash_metadata():
-    from codeagent.app.composition.tools.adapter import AgentToolAdapter
+    from tenon.app.composition.tools.adapter import AgentToolAdapter
 
     class FakeTool:
         name = "bash"

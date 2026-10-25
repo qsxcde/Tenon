@@ -22,7 +22,7 @@
 
 ## Impact
 
-- **代码**:仅 `src/codeagent/tools/atomic/bash.py` 的 `_bash_env()` 一处改动(约 1 行)。
+- **代码**:仅 `src/tenon/tools/atomic/bash.py` 的 `_bash_env()` 一处改动(约 1 行)。
 - **测试**:`tests/tools/test_tools.py` 需新增/调整断言,验证子进程环境含 `NO_COLOR`(离线可测,不依赖真实 conda)。
 - **API / 依赖**:无新增依赖、无对外接口变化。`_bash_env` 是私有方法,仅被 `BashTool._invoke` 消费。
 - **环境**:不触碰用户 `~/.bash_profile`、`.condarc`、conda 安装——纯工具侧缓解。同根的 `SSL_CERT_FILE` 指向不存在路径问题(导致 `test_client_reuses_connection_and_aclosable` 在 login-shell 场景失败)属环境层,不在本变更范围,见 design.md「范围外」。

@@ -1,6 +1,6 @@
 ## Why
 
-`src/codeagent/core` 已经承担了 Agent 编排、受控工具执行和上下文准备，但工具运行时仍直接识别 `Args`、`invoke`、`ainvoke` 等历史形态，且执行器、清理逻辑和 ReAct 循环超过仓库规定的文件/函数规模。需要收紧 core 的端口边界并完成职责拆分，避免核心层继续绑定具体工具实现约定。
+`src/tenon/core` 已经承担了 Agent 编排、受控工具执行和上下文准备，但工具运行时仍直接识别 `Args`、`invoke`、`ainvoke` 等历史形态，且执行器、清理逻辑和 ReAct 循环超过仓库规定的文件/函数规模。需要收紧 core 的端口边界并完成职责拆分，避免核心层继续绑定具体工具实现约定。
 
 ## What Changes
 
@@ -25,8 +25,8 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/ports.py`、`execution.py`、`loop.py`、`tool_result.py`、`model_request.py` 及其新拆分模块。
-- 影响 `src/codeagent/tools/` 的工具适配和 `src/codeagent/app/composition/` 的工具装配。
+- 影响 `src/tenon/core/ports.py`、`execution.py`、`loop.py`、`tool_result.py`、`model_request.py` 及其新拆分模块。
+- 影响 `src/tenon/tools/` 的工具适配和 `src/tenon/app/composition/` 的工具装配。
 - 影响 `tests/core/`、`tests/contracts/`、`tests/tools/` 和架构/规模检查。
 - 可能影响直接向 `run_agent_loop` 或 `AgentLoopConfig` 传入旧式 `Args/invoke` 工具的内部调用方；这些调用方必须迁移到 `AgentTool` 适配器。
 - 不新增运行时依赖，不改变 CLI/TUI 入口、事件字段、会话 JSONL、消息父子关系或已完成的上下文预算语义。

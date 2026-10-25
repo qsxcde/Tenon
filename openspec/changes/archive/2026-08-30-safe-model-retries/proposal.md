@@ -23,6 +23,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/ai/transport/` 的 OpenAI 兼容传输与流式请求策略。
-- 影响 `src/codeagent/session/runtime/` 的 Provider 错误到运行时失败映射，不改变 session 对 AI 具体实现的依赖边界。
+- 影响 `src/tenon/ai/transport/` 的 OpenAI 兼容传输与流式请求策略。
+- 影响 `src/tenon/session/runtime/` 的 Provider 错误到运行时失败映射，不改变 session 对 AI 具体实现的依赖边界。
 - 增加离线单元、传输集成和会话回归测试；不新增第三方依赖，不修改持久化格式或工具协议。

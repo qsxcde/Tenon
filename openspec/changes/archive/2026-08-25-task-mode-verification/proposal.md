@@ -30,7 +30,7 @@
 
 ## Impact
 
-- 主要影响 `src/codeagent/app/` 的命令解析、任务编排、CLI/TUI 集成，以及 `src/codeagent/tools/atomic/bash.py` 和工具结果事件模型。
-- `src/codeagent/core/loop.py` 保持通用 ReAct 职责；新增监督器通过现有会话事件和工具接口接入。
+- 主要影响 `src/tenon/app/` 的命令解析、任务编排、CLI/TUI 集成，以及 `src/tenon/tools/atomic/bash.py` 和工具结果事件模型。
+- `src/tenon/core/loop.py` 保持通用 ReAct 职责；新增监督器通过现有会话事件和工具接口接入。
 - 需要补充模式解析、权限拒绝、无变更不验证、验证成功/失败/超时/取消、重复失败和 TUI/CLI 展示的离线测试。
 - 默认行为采用 `auto`：允许只读探索，实际修改后才进入代码验证；用户可用显式模式覆盖该策略。

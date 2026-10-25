@@ -1,7 +1,7 @@
-from codeagent.app.context_diagnostics import format_context_diagnostics
-from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.core.context.diagnostics import ContextDiagnostics
-from codeagent.core.context.preflight import ContextPreflightConfig, evaluate_context_preflight
+from tenon.app.context_diagnostics import format_context_diagnostics
+from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.core.context.diagnostics import ContextDiagnostics
+from tenon.core.context.preflight import ContextPreflightConfig, evaluate_context_preflight
 
 
 def _diagnostics() -> ContextDiagnostics:
@@ -49,7 +49,7 @@ def test_context_diagnostics_formatter_marks_unknown_values() -> None:
 
 
 def test_main_context_flag_prints_diagnostics_without_running_model(monkeypatch, capsys):
-    from codeagent.app import main as main_module
+    from tenon.app import main as main_module
 
     class Session:
         context_diagnostics = ContextDiagnostics.empty()

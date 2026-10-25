@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 
-from codeagent.app.tui.benchmark.performance import MetricSummary
+from tenon.app.tui.benchmark.performance import MetricSummary
 
 
 def assert_control_latency(samples_ms: Iterable[float]) -> None:

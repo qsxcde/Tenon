@@ -6,11 +6,11 @@ import time
 
 import pytest
 
-from codeagent.core.contracts.messages import Message
-from codeagent.session.persistence.async_boundary import AsyncPersistenceBoundary
-from codeagent.session.persistence.memory_store import MemoryStore
-from codeagent.session.session_persistence import SessionPersistence
-from codeagent.session.persistence.models import UsageStats
+from tenon.core.contracts.messages import Message
+from tenon.session.persistence.async_boundary import AsyncPersistenceBoundary
+from tenon.session.persistence.memory_store import MemoryStore
+from tenon.session.session_persistence import SessionPersistence
+from tenon.session.persistence.models import UsageStats
 
 
 class _SlowMemoryStore(MemoryStore):

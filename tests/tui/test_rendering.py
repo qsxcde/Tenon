@@ -2,12 +2,12 @@
 
 import asyncio
 
-from codeagent.app.tui.presentation.primitives import Component, RichLine, Span
-from codeagent.app.tui.presentation.blocks import AssistantBlock
-from codeagent.app.tui.rendering.coordinator import TuiRenderCoordinator
-from codeagent.app.tui.rendering.scheduler import FrameScheduler, ResizeDebouncer
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.app.tui.state.transcript import Transcript
+from tenon.app.tui.presentation.primitives import Component, RichLine, Span
+from tenon.app.tui.presentation.blocks import AssistantBlock
+from tenon.app.tui.rendering.coordinator import TuiRenderCoordinator
+from tenon.app.tui.rendering.scheduler import FrameScheduler, ResizeDebouncer
+from tenon.app.tui.state.model import TuiModel
+from tenon.app.tui.state.transcript import Transcript
 from tests.fixtures.tui import FakeBackend
 
 

@@ -21,7 +21,7 @@
 | `ai/catalog/store.py` | 用户模型覆盖 | `ModelStore`（双拼写 upsert） |
 | `ai/catalog/registry.py` | 解析与查找 | `ModelRegistry`（精确 id → 别名两遍解析） |
 
-依赖方向：`providers → transport`、`providers → catalog`、`transport → errors`、`catalog → spec`。`ai` 不导入 `core`、`session`、`tools`、`app`；`ai/__init__.py` 只再导出模型契约与错误类型。core 的 `Message` 与 ai 的 `ChatMessage` 之间的转换发生在组合根 [`app/composition/model/port.py`](../../src/codeagent/app/composition/model/port.py) 的 `to_chat_message`，因此 ai 层对 core 零依赖。
+依赖方向：`providers → transport`、`providers → catalog`、`transport → errors`、`catalog → spec`。`ai` 不导入 `core`、`session`、`tools`、`app`；`ai/__init__.py` 只再导出模型契约与错误类型。core 的 `Message` 与 ai 的 `ChatMessage` 之间的转换发生在组合根 [`app/composition/model/port.py`](../../src/tenon/app/composition/model/port.py) 的 `to_chat_message`，因此 ai 层对 core 零依赖。
 
 ## 二、模型契约（ai/model）
 
@@ -176,7 +176,7 @@
 ### 6.2 builtin 目录与解析
 
 - `ai/catalog/builtin.py` 定义每个 provider 的静态模型字典（如 `DEEPSEEK_MODELS`）与汇总的 `BUILTIN_CATALOGS`。目录是静态的，不依赖 `/models` 探测（`/models` 只返回 id，不携带价格/窗口等元数据）。
-- `ai/catalog/store.py` 的 `ModelStore` 允许用户在 `~/.codeagent` 覆盖/新增模型，兼容 camelCase 与 snake_case 双拼写 upsert。
+- `ai/catalog/store.py` 的 `ModelStore` 允许用户在 `~/.tenon` 覆盖/新增模型，兼容 camelCase 与 snake_case 双拼写 upsert。
 - `ai/catalog/registry.py` 的 `ModelRegistry` 做**两遍解析**：先精确匹配 `id`，再匹配别名；仍未命中则按"未知能力"处理（构造一个仅含 id 的 `ModelSpec`）。
 
 ## 七、与其他层的关系

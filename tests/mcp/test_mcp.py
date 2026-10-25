@@ -14,12 +14,12 @@ from pathlib import Path
 
 import pytest
 
-from codeagent.tools.mcp.adapter import McpArgs, McpTool
-from codeagent.tools.mcp.budget import apply_budget, truncate_description
-from codeagent.tools.mcp.client import McpServerClient
-from codeagent.tools.mcp.content import McpToolInfo
-from codeagent.tools.mcp.loader import close_mcp_tools, load_mcp_tools
-from codeagent.tools.mcp.server_config import McpServerSpec, parse_mcp_config
+from tenon.tools.mcp.adapter import McpArgs, McpTool
+from tenon.tools.mcp.budget import apply_budget, truncate_description
+from tenon.tools.mcp.client import McpServerClient
+from tenon.tools.mcp.content import McpToolInfo
+from tenon.tools.mcp.loader import close_mcp_tools, load_mcp_tools
+from tenon.tools.mcp.server_config import McpServerSpec, parse_mcp_config
 
 MOCK_SERVER = str(Path(__file__).parent / "mock_server.py")
 
@@ -149,7 +149,7 @@ def test_mcp_tool_marks_truncated_output():
 
 
 def test_mcp_non_text_content_is_explicitly_reported():
-    from codeagent.tools.mcp.content import extract_result
+    from tenon.tools.mcp.content import extract_result
 
     class ImageBlock:
         type = "image"
@@ -325,7 +325,7 @@ def test_permissions_parse_from_config(tmp_path):
         ),
         encoding="utf-8",
     )
-    from codeagent.tools.mcp.permissions import parse_mcp_permissions
+    from tenon.tools.mcp.permissions import parse_mcp_permissions
 
     rules = parse_mcp_permissions(tmp_path)
     assert "mcp__db" in rules.deny
@@ -339,7 +339,7 @@ def test_permissions_missing_config_empty():
     """无配置文件 → 空规则(默认全部放行)。"""
     import tempfile
 
-    from codeagent.tools.mcp.permissions import parse_mcp_permissions
+    from tenon.tools.mcp.permissions import parse_mcp_permissions
 
     with tempfile.TemporaryDirectory() as td:
         rules = parse_mcp_permissions(td)
@@ -349,8 +349,8 @@ def test_permissions_missing_config_empty():
 
 def test_classify_mcp_rules():
     """安全分类器:deny/ask 命中;未命中与无规则 → 默认放行。"""
-    from codeagent.tools.security import classify_mcp
-    from codeagent.tools.mcp.permissions import McpPermissionRules
+    from tenon.tools.security import classify_mcp
+    from tenon.tools.mcp.permissions import McpPermissionRules
 
     rules = McpPermissionRules(deny=("mcp__db",), ask=("mcp__github",))
     denied = classify_mcp("mcp__db__query", rules)
@@ -365,12 +365,12 @@ def test_classify_mcp_rules():
 def test_policy_mcp_headless_deny(tmp_path, monkeypatch):
     """组合根策略:ask 规则在 headless(deny)下降级拒绝(fail closed)。"""
     monkeypatch.chdir(tmp_path)
-    (tmp_path / ".codeagent").mkdir(exist_ok=True)
-    (tmp_path / ".codeagent" / "mcp.json").write_text(
+    (tmp_path / ".tenon").mkdir(exist_ok=True)
+    (tmp_path / ".tenon" / "mcp.json").write_text(
         json.dumps({"permissions": {"ask": ["mcp__github"]}}),
         encoding="utf-8",
     )
-    from codeagent.app.container import _create_policy
+    from tenon.app.container import _create_policy
 
     policy = _create_policy(approval_mode="deny")
     decision = policy.decide("mcp__github__push", {})

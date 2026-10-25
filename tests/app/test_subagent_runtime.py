@@ -10,9 +10,9 @@ from unittest.mock import patch
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.core.contracts.messages import Message, ToolResult
-from codeagent.core.contracts.subagents import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.core.contracts.messages import Message, ToolResult
+from tenon.core.contracts.subagents import (
     SubagentArtifact,
     SubagentEvidence,
     SubagentFailure,
@@ -60,7 +60,7 @@ class _RaisingRunner(_RecordingRunner):
     ],
 )
 async def test_delegate_tool_maps_subagent_result_to_tool_result(status, error, reason):
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     failure = (
         SubagentFailure(
@@ -106,7 +106,7 @@ async def test_delegate_tool_maps_subagent_result_to_tool_result(status, error, 
 
 
 async def test_delegate_tool_exposes_structured_result_details_as_json_safe_values():
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     evidence = SubagentEvidence(
         evidence_id="evidence-1",
@@ -151,7 +151,7 @@ async def test_delegate_tool_exposes_structured_result_details_as_json_safe_valu
 
 
 async def test_delegate_tool_keeps_empty_structured_details_for_legacy_result():
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     result = (
         await DelegateTool(
@@ -174,7 +174,7 @@ async def test_delegate_tool_keeps_empty_structured_details_for_legacy_result():
 
 
 async def test_delegate_tool_rejects_invalid_arguments_without_starting_child():
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     runner = _RecordingRunner(
         SubagentResult(
@@ -196,7 +196,7 @@ async def test_delegate_tool_rejects_invalid_arguments_without_starting_child():
 
 
 async def test_delegate_tool_normalizes_unexpected_runner_failure():
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     result = (
         await DelegateTool(
@@ -273,7 +273,7 @@ class _FakeChildSession:
 
 
 async def test_serial_runner_queues_second_child_and_closes_each_session():
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     release = asyncio.Event()
     children: list[_FakeChildSession] = []
@@ -305,7 +305,7 @@ async def test_serial_runner_queues_second_child_and_closes_each_session():
 
 
 async def test_serial_runner_normalizes_failure_and_cleans_child():
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _FakeChildSession("failed", "unused", fail=RuntimeError("boom"))
     runner = SerialSubagentRunner(lambda request: child)
@@ -321,7 +321,7 @@ async def test_serial_runner_normalizes_failure_and_cleans_child():
 
 
 async def test_serial_runner_cancel_targets_only_active_child():
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _FakeChildSession("cancelled", "unused", block=asyncio.Event())
     runner = SerialSubagentRunner(lambda request: child)
@@ -357,10 +357,10 @@ async def test_real_parent_delegate_runs_isolated_child_and_returns_only_result(
     child_client = FakeClient(response="子 Agent 的只读结论")
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         await session.run("父上下文秘密：不要复制到子运行")
@@ -400,14 +400,14 @@ async def test_persisted_parent_keeps_bounded_subagent_record_without_child_sess
         ]
     )
     child_client = FakeClient(response="可恢复的子结论")
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(tmp_path / "sessions")
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=store, session_id="parent")
         await session.run("父级请求")
@@ -442,10 +442,10 @@ async def test_real_child_session_failure_is_not_reported_as_success():
     )
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, FailingClient()],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         await session.run("start")
@@ -475,10 +475,10 @@ async def test_session_manager_root_exposes_delegate_and_keeps_child_temporary()
     child_client = FakeClient(response="manager child result")
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_session_manager
+        from tenon.app.container import create_session_manager
 
         manager = create_session_manager(provider="fake", store=None)
         session = manager.create()

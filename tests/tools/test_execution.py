@@ -6,9 +6,9 @@ import subprocess
 
 import pytest
 
-from codeagent.tools.execution import ProcessRequest, ProcessRunner, bash_env, resolve_bash
-from codeagent.tools.execution.posix import PosixProcessBackend
-from codeagent.tools.execution.windows import WindowsProcessBackend
+from tenon.tools.execution import ProcessRequest, ProcessRunner, bash_env, resolve_bash
+from tenon.tools.execution.posix import PosixProcessBackend
+from tenon.tools.execution.windows import WindowsProcessBackend
 
 
 def test_process_request_and_result_boundary(tmp_path):

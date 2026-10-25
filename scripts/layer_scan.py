@@ -1,4 +1,4 @@
-"""扫描 src/codeagent 各层之间的 import 依赖，输出跨层矩阵与明细。
+"""扫描 src/tenon 各层之间的 import 依赖，输出跨层矩阵与明细。
 
 只做静态分析（ast），不执行任何项目代码。
 """
@@ -11,7 +11,7 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PKG = ROOT / "src" / "codeagent"
+PKG = ROOT / "src" / "tenon"
 
 LAYERS = ("app", "core", "session", "ai", "tools", "resources")
 
@@ -56,7 +56,7 @@ def main() -> int:
     edges: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     # detail[from][to] = [(文件, 行号, 模块, 名字)]
     detail: dict[tuple[str, str], list[tuple[str, int, str, str]]] = defaultdict(list)
-    # 外部（非 codeagent）依赖计数
+    # 外部（非 tenon）依赖计数
     external: dict[str, set[str]] = defaultdict(set)
     # TYPE_CHECKING / 函数内延迟导入标记
     lazy: dict[tuple[str, str], int] = defaultdict(int)
@@ -83,7 +83,7 @@ def main() -> int:
             pass
 
         for lineno, mod, name in extract_imports(path):
-            if mod.startswith("codeagent"):
+            if mod.startswith("tenon"):
                 parts = mod.split(".")
                 target = parts[1] if len(parts) > 1 else "root"
                 if target not in LAYERS:

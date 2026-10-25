@@ -23,6 +23,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/session/persistence/jsonl/writing.py` 的 `_append` 与 `src/codeagent/session/persistence/jsonl/indexing.py` 的包装方法。
+- 影响 `src/tenon/session/persistence/jsonl/writing.py` 的 `_append` 与 `src/tenon/session/persistence/jsonl/indexing.py` 的包装方法。
 - 不改变 JSONL 记录格式、索引文件格式、索引版本号与恢复语义。
 - 新增索引增量与并发回归测试;不需要网络,使用临时目录。

@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from codeagent.app.composition.model.factory import LlmSummarizer
+from tenon.app.composition.model.factory import LlmSummarizer
 
 pytestmark = pytest.mark.unit
 

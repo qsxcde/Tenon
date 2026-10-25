@@ -1,11 +1,11 @@
-"""文件级 checkpoint 与 `codeagent undo` 行为测试(离线,全部走 tmp_path)。"""
+"""文件级 checkpoint 与 `tenon undo` 行为测试(离线,全部走 tmp_path)。"""
 
 from __future__ import annotations
 
 import pytest
 
-from codeagent.tools.atomic import EditTool, WriteTool
-from codeagent.tools.shared import CheckpointStore
+from tenon.tools.atomic import EditTool, WriteTool
+from tenon.tools.shared import CheckpointStore
 
 
 def _write(tool: WriteTool, path: str, content: str) -> None:
@@ -115,11 +115,11 @@ def test_capture_failure_does_not_block_write(tmp_path):
 
 
 def test_undo_cli_lists_and_restores(tmp_path, capsys):
-    from codeagent.app.main import _undo_cli
+    from tenon.app.main import _undo_cli
 
     target = tmp_path / "cli.txt"
     target.write_text("keep", encoding="utf-8")
-    CheckpointStore(tmp_path / ".codeagent" / "checkpoints").capture(target)
+    CheckpointStore(tmp_path / ".tenon" / "checkpoints").capture(target)
     target.write_text("changed", encoding="utf-8")
 
     assert _undo_cli(["--list"]) == 0
@@ -135,7 +135,7 @@ def test_undo_cli_lists_and_restores(tmp_path, capsys):
 
 
 def test_undo_cli_without_checkpoints_reports_cleanly(tmp_path, capsys):
-    from codeagent.app.main import _undo_cli
+    from tenon.app.main import _undo_cli
 
     assert _undo_cli([]) == 1
     assert "没有可恢复" in capsys.readouterr().err

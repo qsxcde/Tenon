@@ -28,9 +28,9 @@
 
 ## Impact
 
-- 影响 `src/codeagent/tools/shared/`、各原子工具、MCP 适配器和进程输出采集。
-- 影响 `src/codeagent/core/contracts/`、工具执行归一化、ReAct turn 消息构造和生命周期事件映射。
-- 影响 `src/codeagent/session/persistence/` 的消息编码/解码及恢复投影，但保持旧 JSONL 文件可读取。
-- 影响 `src/codeagent/app/tui/` 的工具结果块、输出缓冲和 `/output` 命令。
+- 影响 `src/tenon/tools/shared/`、各原子工具、MCP 适配器和进程输出采集。
+- 影响 `src/tenon/core/contracts/`、工具执行归一化、ReAct turn 消息构造和生命周期事件映射。
+- 影响 `src/tenon/session/persistence/` 的消息编码/解码及恢复投影，但保持旧 JSONL 文件可读取。
+- 影响 `src/tenon/app/tui/` 的工具结果块、输出缓冲和 `/output` 命令。
 - 不新增依赖；不改变工具名称、输入参数、安全确认语义、工具调用顺序或既有模型 provider 接口。
 - 默认不保存完整原始工具输出；若工具层已经丢弃超限内容，调用方只能看到有界结果和明确的不可恢复诊断。

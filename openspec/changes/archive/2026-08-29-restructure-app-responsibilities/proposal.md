@@ -21,6 +21,6 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/`、`src/codeagent/app/composition/`、`src/codeagent/app/skills.py`、`skill_packages.py`、`task_supervisor.py`、`task_verification.py` 与相关入口模块。
+- `src/tenon/app/tui/`、`src/tenon/app/composition/`、`src/tenon/app/skills.py`、`skill_packages.py`、`task_supervisor.py`、`task_verification.py` 与相关入口模块。
 - `tests/app/`、`tests/tui/`、`tests/test_decoupling.py` 及必要的架构文档。
 - 不新增运行时依赖、不改变公共 CLI/TUI 入口或持久化格式。

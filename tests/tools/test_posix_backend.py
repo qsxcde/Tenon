@@ -10,7 +10,7 @@ import signal
 
 import pytest
 
-from codeagent.tools.execution.posix import PosixProcessBackend
+from tenon.tools.execution.posix import PosixProcessBackend
 
 pytestmark = [
     pytest.mark.unit,

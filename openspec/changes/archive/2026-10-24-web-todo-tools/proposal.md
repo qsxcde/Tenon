@@ -23,6 +23,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/tools/atomic/`(新增 3 个工具模块)、`tools/registry.py`、`tools/security/classifier.py`、`app/skills/runtime.py`。
+- 影响 `src/tenon/tools/atomic/`(新增 3 个工具模块)、`tools/registry.py`、`tools/security/classifier.py`、`app/skills/runtime.py`。
 - 不改动既有八工具行为、会话持久化格式、provider 协议和事件类型集合;`todo` 清单不落盘。
 - 测试全部离线:web 工具注入假 fetcher/searcher,不发起真实网络请求。

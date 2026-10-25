@@ -2,13 +2,13 @@
 
 ## Why
 
-v0.3 阶段 2(T-53~T-55,F-20):接入 MCP(Model Context Protocol)作为**外部工具通道**——插件系统已移出(E5),工具扩展的唯一通道就是 MCP。MCP 是 2026 年 agent 生态的事实标准(Claude/Codex/Qwen Code 全部支持,生态 4000+ server),codeagent 需要它来获得外部工具能力(数据库、GitHub、浏览器等),这是生态护城河(G10)的关键一块。
+v0.3 阶段 2(T-53~T-55,F-20):接入 MCP(Model Context Protocol)作为**外部工具通道**——插件系统已移出(E5),工具扩展的唯一通道就是 MCP。MCP 是 2026 年 agent 生态的事实标准(Claude/Codex/Qwen Code 全部支持,生态 4000+ server),tenon 需要它来获得外部工具能力(数据库、GitHub、浏览器等),这是生态护城河(G10)的关键一块。
 
 ## What Changes
 
 - **新增依赖**:官方 `mcp` Python SDK(Anthropic 维护,async-first)——协议正确性(版本协商/错误形状/通知)交给官方,不手写 JSON-RPC
 - **同步工具层保持**(Python 生态主流,与 langchain `run_in_executor`、openai-agents-python `asyncio.to_thread` 同构):MCP 客户端运行在**每 server 一个后台线程 + 独立事件循环**中,`McpTool.invoke`(同步)经 `run_coroutine_threadsafe(...).result(timeout)` 桥接
-- **配置**:`~/.codeagent/mcp.json`(用户级唯一配置源 = 信任边界;项目级 `.mcp.json` **不做**——仓库引导启动任意外部进程是恶意向量,比项目级技能危险一个量级)
+- **配置**:`~/.tenon/mcp.json`(用户级唯一配置源 = 信任边界;项目级 `.mcp.json` **不做**——仓库引导启动任意外部进程是恶意向量,比项目级技能危险一个量级)
 - **`tools/mcp/` 子包**:`client.py`(McpServerClient:后台线程 + initialize/tools/list/call_tool 同步桥)、`adapter.py`(McpTool:name = `{server}:{tool}`,Args extra=allow)、`config.py`(mcp.json 解析)、`budget.py`(分组预算纯函数)、`loader.py`(`load_mcp_tools(config_dir)` 装配入口)
 - **工具命名**:`mcp__<server>__<tool>`(对齐 Claude Code / CodeBuddy 共识;统一 `mcp__` 命名空间为权限通配规则提供书写面)
 - **权限规则**:CodeBuddy 式三级 **deny/ask/allow** + 通配(`mcp__github` server 级 / `mcp__github__tool` 工具级 / `mcp__*` 全部),优先级 deny > ask > allow;未命中默认放行(用户级配置即信任);headless 下 ask 降级 deny(fail closed,既有模式)

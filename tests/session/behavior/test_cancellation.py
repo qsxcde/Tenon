@@ -73,8 +73,8 @@ async def test_concurrent_session_close_waits_for_one_shared_close():
 
 
 async def test_session_cancel_propagates_uncertain_sync_tool_cleanup():
-    from codeagent.app.composition.tools.adapter import adapt_tools
-    from codeagent.core import ToolExecutionRuntime
+    from tenon.app.composition.tools.adapter import adapt_tools
+    from tenon.core import ToolExecutionRuntime
 
     started = threading.Event()
     release = threading.Event()

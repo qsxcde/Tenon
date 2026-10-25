@@ -23,9 +23,9 @@
 
 ## Impact
 
-- `src/codeagent/app/container.py`:`_usage_of()` 归一扩展(兼容双拼写,补 `cached_tokens`)。
-- `src/codeagent/session/store.py`:`SessionStore` 协议 + `JsonFileStore` / `MemoryStore` 两后端新增 `append_usage` / `load_usage`。
-- `src/codeagent/session/session.py`:`_on_internal_event` 累计 usage,`run()` 成功路径落库。
-- `src/codeagent/app/tui/view.py`:`/status` 区块扩展(用量行)。
-- `src/codeagent/app/main.py`:headless 尾部用量行。
+- `src/tenon/app/container.py`:`_usage_of()` 归一扩展(兼容双拼写,补 `cached_tokens`)。
+- `src/tenon/session/store.py`:`SessionStore` 协议 + `JsonFileStore` / `MemoryStore` 两后端新增 `append_usage` / `load_usage`。
+- `src/tenon/session/session.py`:`_on_internal_event` 累计 usage,`run()` 成功路径落库。
+- `src/tenon/app/tui/view.py`:`/status` 区块扩展(用量行)。
+- `src/tenon/app/main.py`:headless 尾部用量行。
 - 测试:usage 归一兼容、两后端落库/聚合、缓存命中率边界、展示断言(全部离线,mock/fake 注入)。

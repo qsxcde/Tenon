@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from codeagent.core import (
+from tenon.core import (
     Agent,
     AgentContext,
     AgentEvent,
@@ -13,7 +13,7 @@ from codeagent.core import (
     StreamEvent,
     run_agent_loop,
 )
-from codeagent.core.contracts.hooks import (
+from tenon.core.contracts.hooks import (
     HookDiagnostic,
     LifecycleHookEvent,
     to_lifecycle_hook_event,

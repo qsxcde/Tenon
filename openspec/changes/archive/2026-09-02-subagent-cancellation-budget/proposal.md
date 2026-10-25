@@ -26,7 +26,7 @@ V5-02/V5-03 已经能够启动隔离的只读子 Agent，但当前 `SubagentBudg
 
 ## Impact
 
-- 影响 `src/codeagent/app/composition/subagent/` 的 delegate 适配器、串行运行器、子 Session 工厂和清理辅助模块。
-- 影响 `src/codeagent/core/contracts/subagents.py` 的结果诊断字段，但保持现有构造参数和旧请求的向后兼容；未提供预算的调用使用默认策略。
+- 影响 `src/tenon/app/composition/subagent/` 的 delegate 适配器、串行运行器、子 Session 工厂和清理辅助模块。
+- 影响 `src/tenon/core/contracts/subagents.py` 的结果诊断字段，但保持现有构造参数和旧请求的向后兼容；未提供预算的调用使用默认策略。
 - 不新增第三方依赖，不改变父 Session 的持久化格式或普通单 Agent 行为；只读子 Agent 继续复用现有 ApprovalPolicy、工具资源限制和 Session 生命周期。
 - 新增/修改 `tests/app/`、`tests/core/` 的契约与集成回归，并更新 `docs/iteration/v0.5.md`。

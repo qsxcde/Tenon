@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-APP_ROOT = Path(__file__).resolve().parents[2] / "src" / "codeagent" / "app"
+APP_ROOT = Path(__file__).resolve().parents[2] / "src" / "tenon" / "app"
 
 LEGACY_FLAT_MODULES = frozenset(
     {
@@ -82,23 +82,23 @@ LEGACY_FLAT_MODULES = frozenset(
 @pytest.mark.contract
 def test_canonical_app_packages_expose_migrated_symbols() -> None:
     expected = {
-        "codeagent.app.context.agents": ("load_agents_files", "build_system_prompt"),
-        "codeagent.app.errors.reporting": ("report_unexpected_error",),
-        "codeagent.app.skills.discovery": ("discover_skills_in",),
-        "codeagent.app.skills.packages.registry": ("PackageRegistry",),
-        "codeagent.app.tasks.modes": ("TaskMode", "parse_mode_input"),
-        "codeagent.app.tasks.verification.runner": ("VerificationRunner",),
-        "codeagent.app.composition.model.factory": ("LlmSummarizer",),
-        "codeagent.app.composition.runtime.factory": ("create_agent_config",),
-        "codeagent.app.composition.tools.factory": ("create_tools",),
-        "codeagent.app.composition.tui.factory": ("create_tui_app",),
-        "codeagent.app.tui.ports.backend": ("TuiBackend",),
-        "codeagent.app.tui.state.model": ("TuiModel",),
-        "codeagent.app.tui.presentation.blocks": ("ErrorBlock",),
-        "codeagent.app.tui.commands.parser": ("parse",),
-        "codeagent.app.tui.session.coordinator": ("TuiSessionCoordinator",),
-        "codeagent.app.tui.rendering.coordinator": ("TuiRenderCoordinator",),
-        "codeagent.app.tui.benchmark.benchmark": ("run_benchmark",),
+        "tenon.app.context.agents": ("load_agents_files", "build_system_prompt"),
+        "tenon.app.errors.reporting": ("report_unexpected_error",),
+        "tenon.app.skills.discovery": ("discover_skills_in",),
+        "tenon.app.skills.packages.registry": ("PackageRegistry",),
+        "tenon.app.tasks.modes": ("TaskMode", "parse_mode_input"),
+        "tenon.app.tasks.verification.runner": ("VerificationRunner",),
+        "tenon.app.composition.model.factory": ("LlmSummarizer",),
+        "tenon.app.composition.runtime.factory": ("create_agent_config",),
+        "tenon.app.composition.tools.factory": ("create_tools",),
+        "tenon.app.composition.tui.factory": ("create_tui_app",),
+        "tenon.app.tui.ports.backend": ("TuiBackend",),
+        "tenon.app.tui.state.model": ("TuiModel",),
+        "tenon.app.tui.presentation.blocks": ("ErrorBlock",),
+        "tenon.app.tui.commands.parser": ("parse",),
+        "tenon.app.tui.session.coordinator": ("TuiSessionCoordinator",),
+        "tenon.app.tui.rendering.coordinator": ("TuiRenderCoordinator",),
+        "tenon.app.tui.benchmark.benchmark": ("run_benchmark",),
     }
 
     for module_name, symbols in expected.items():

@@ -23,8 +23,8 @@ TUI MVP(restore-tui)已恢复对话/流式渲染/打断,但斜杠命令、模糊
 
 ## Impact
 
-- `src/codeagent/app/container.py`:`create_tui_app` 改用 SessionManager 装配;`create_session_manager` 增 `replace_ports` 接线。
-- `src/codeagent/app/tui/view.py`:提交/打断路径适配 `manager.current`;命令分派入口。
-- `src/codeagent/app/tui/components.py`、`textual_backend.py`:命令输入拦截(补全激活时 ↑/↓/Tab/Enter 归属)、浮层渲染。
-- `src/codeagent/session/manager.py`:`replace_ports`;`session/store.py`:`model_change` entry 类型。
+- `src/tenon/app/container.py`:`create_tui_app` 改用 SessionManager 装配;`create_session_manager` 增 `replace_ports` 接线。
+- `src/tenon/app/tui/view.py`:提交/打断路径适配 `manager.current`;命令分派入口。
+- `src/tenon/app/tui/components.py`、`textual_backend.py`:命令输入拦截(补全激活时 ↑/↓/Tab/Enter 归属)、浮层渲染。
+- `src/tenon/session/manager.py`:`replace_ports`;`session/store.py`:`model_change` entry 类型。
 - `tests/tui/*`、`tests/session/test_session_manager.py`:命令解析/模糊匹配/选择器/热切换全量离线测试。

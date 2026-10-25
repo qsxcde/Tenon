@@ -8,7 +8,7 @@
 
 ### Requirement: SKILL.md 格式与发现
 
-技能 SHALL 以"一技能一目录"组织,技能定义文件名为 `SKILL.md`;`SKILL.md` SHALL 由 YAML frontmatter 与 Markdown 正文组成;frontmatter 的 `name` SHALL 缺省取所在目录名;`description` SHALL 缺省取正文第一段;frontmatter 解析失败或解析后缺少可用 name/description 时 SHALL 产生诊断且不加载该技能;技能发现 SHALL 覆盖三类来源:内建(包内 `resources/skills/`)、个人级(`<config_dir>/skills/`)、项目级(`<cwd>/.codeagent/skills/`);来源目录不存在 SHALL 静默跳过。
+技能 SHALL 以"一技能一目录"组织,技能定义文件名为 `SKILL.md`;`SKILL.md` SHALL 由 YAML frontmatter 与 Markdown 正文组成;frontmatter 的 `name` SHALL 缺省取所在目录名;`description` SHALL 缺省取正文第一段;frontmatter 解析失败或解析后缺少可用 name/description 时 SHALL 产生诊断且不加载该技能;技能发现 SHALL 覆盖三类来源:内建(包内 `resources/skills/`)、个人级(`<config_dir>/skills/`)、项目级(`<cwd>/.tenon/skills/`);来源目录不存在 SHALL 静默跳过。
 
 #### Scenario: 合法技能被加载
 

@@ -26,7 +26,7 @@ v0.4 的 Agent Runtime 只能稳定表达单个 Agent 的运行生命周期，�
 
 ## Impact
 
-- 影响 `src/codeagent/core/contracts/` 的公共类型、错误契约和事件形态，并同步 `codeagent.core` 公共门面导出。
+- 影响 `src/tenon/core/contracts/` 的公共类型、错误契约和事件形态，并同步 `tenon.core` 公共门面导出。
 - 增加 `tests/core/` 契约和状态机测试，更新 core 包结构测试。
 - 不新增第三方依赖；core 继续只依赖标准库和本包内部模块，不导入 `ai`、`tools`、`session` 或应用配置。
 - 后续 `app/composition/subagent/` 可以实现运行器，但本变更不会改变现有父 Agent 的执行路径。

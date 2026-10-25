@@ -10,7 +10,7 @@
 ## 2. 格式与加载器(T-49、T-50)
 
 - [x] 2.1 `app/skills.py`:`Skill(name, description, path)` 数据类与 `parse_skill_frontmatter(text)` 纯函数——YAML frontmatter 解析(仅消费 name/description,其余字段忽略),`name` 缺省取目录名、`description` 缺省取正文第一段,解析失败返回失败态
-- [x] 2.2 `load_skills(cwd, config_dir)` 纯函数:内建(importlib.resources)/ 个人级(`<config_dir>/skills/`)/ 项目级(`<cwd>/.codeagent/skills/`)三源发现,目录不存在静默跳过
+- [x] 2.2 `load_skills(cwd, config_dir)` 纯函数:内建(importlib.resources)/ 个人级(`<config_dir>/skills/`)/ 项目级(`<cwd>/.tenon/skills/`)三源发现,目录不存在静默跳过
 - [x] 2.3 去重与遮蔽:绝对路径去重;同名按 个人 > 项目 > 内建 遮蔽;诊断收集(解析失败/缺少可用名与描述/遮蔽关系),输出按 name 排序
 - [x] 2.4 `format_skill_invocation(skill)` 渲染块(对齐 Pi:`<skill name=... location=...>` + 相对路径基准说明 + 正文)与 `build_skills_prompt(skills)` 注入段(每技能一行,位于分层上下文之后,空集不产生空段)
 

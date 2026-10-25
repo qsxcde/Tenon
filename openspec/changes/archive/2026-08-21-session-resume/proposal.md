@@ -25,7 +25,7 @@ TUI 会话恢复体验差:启动恒新建会话(`manager.create()`),历史会话
 
 ## Impact
 
-- `src/codeagent/app/tui/commands.py`:`sessions` 注册为 picker + `recent` 语义(参数解析)。
-- `src/codeagent/app/tui/view.py`:`_picker_candidates` 为 sessions 提供会话候选;`_on_suggestion_confirm` 值确认分派 sessions 切换;`_cmd_sessions` 增加 `recent` 分支与无参走选择器。
-- `src/codeagent/session/manager.py`:`continue_recent()` 已存在(CLI 在用),本变更仅使其可经 TUI 到达——无改动或仅文档化。
+- `src/tenon/app/tui/commands.py`:`sessions` 注册为 picker + `recent` 语义(参数解析)。
+- `src/tenon/app/tui/view.py`:`_picker_candidates` 为 sessions 提供会话候选;`_on_suggestion_confirm` 值确认分派 sessions 切换;`_cmd_sessions` 增加 `recent` 分支与无参走选择器。
+- `src/tenon/session/manager.py`:`continue_recent()` 已存在(CLI 在用),本变更仅使其可经 TUI 到达——无改动或仅文档化。
 - 测试:命令分派(picker/recent/空态)、候选列表(含标题)、选择确认切换、无会话/无 store 边界。

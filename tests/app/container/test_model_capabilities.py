@@ -1,8 +1,8 @@
 """模型能力快照组合根契约测试。"""
 
-from codeagent.ai.catalog.registry import ModelRegistry
-from codeagent.ai.catalog.spec import ModelSpec
-from codeagent.app.composition.model.capabilities import (
+from tenon.ai.catalog.registry import ModelRegistry
+from tenon.ai.catalog.spec import ModelSpec
+from tenon.app.composition.model.capabilities import (
     resolve_model_capabilities,
 )
 

@@ -21,7 +21,7 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/view.py`:建议上下文判定(裸 `/`、选择器空参)、确认后抑制重弹、确认/提交语义
-- `src/codeagent/app/tui/textual_backend.py`:`_Composer` 高度计算计入建议条
+- `src/tenon/app/tui/view.py`:建议上下文判定(裸 `/`、选择器空参)、确认后抑制重弹、确认/提交语义
+- `src/tenon/app/tui/textual_backend.py`:`_Composer` 高度计算计入建议条
 - `tests/tui/test_view.py`、`tests/tui/test_commands.py` 等离线测试同步补回归用例
 - 不涉及 session/ai/tools/core 层;无破坏性变更

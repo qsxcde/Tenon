@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.core.orchestration.config import AgentLoopConfig
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.orchestration.config import AgentLoopConfig
 
 
 def test_run_state_enforces_lifecycle_transitions() -> None:
-    from codeagent.session.runtime.state import RunPhase, RunState
+    from tenon.session.runtime.state import RunPhase, RunState
 
     state = RunState(run_id="run-1", session_id="session-1")
 
@@ -24,8 +24,8 @@ def test_run_state_enforces_lifecycle_transitions() -> None:
 
 
 def test_session_runtime_exposes_phase_and_run_correlation() -> None:
-    from codeagent.session.runtime.controller import SessionRuntime
-    from codeagent.session.runtime.state import RunPhase
+    from tenon.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.state import RunPhase
 
     runtime = SessionRuntime(lambda event, run_id: None, session_id="session-1")
     run_id = runtime.start_run()
@@ -39,8 +39,8 @@ def test_session_runtime_exposes_phase_and_run_correlation() -> None:
 
 
 def test_session_runtime_suppresses_events_after_run_finalization() -> None:
-    from codeagent.session.runtime.controller import SessionRuntime
-    from codeagent.session.runtime.state import RunPhase
+    from tenon.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.state import RunPhase
 
     seen = []
     runtime = SessionRuntime(
@@ -56,9 +56,9 @@ def test_session_runtime_suppresses_events_after_run_finalization() -> None:
 
 
 def test_runtime_failure_classifies_recursion_limit_with_stable_fields() -> None:
-    from codeagent.core.orchestration.loop import RecursionLimitError
-    from codeagent.session.runtime.error_policy import classify_error
-    from codeagent.session.runtime.state import RunPhase
+    from tenon.core.orchestration.loop import RecursionLimitError
+    from tenon.session.runtime.error_policy import classify_error
+    from tenon.session.runtime.state import RunPhase
 
     failure = classify_error(
         RecursionLimitError(),
@@ -83,7 +83,7 @@ def test_runtime_failure_classifies_recursion_limit_with_stable_fields() -> None
     ],
 )
 def test_runtime_failure_classifies_non_model_phases(phase: str, expected_code: str) -> None:
-    from codeagent.session.runtime.error_policy import classify_error
+    from tenon.session.runtime.error_policy import classify_error
 
     failure = classify_error(RuntimeError("boom"), phase=phase)
 
@@ -93,7 +93,7 @@ def test_runtime_failure_classifies_non_model_phases(phase: str, expected_code: 
 
 
 async def test_session_runtime_preserves_all_agent_loop_configuration() -> None:
-    from codeagent.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.controller import SessionRuntime
 
     captured: list[AgentLoopConfig] = []
 
@@ -137,9 +137,9 @@ async def test_session_runtime_preserves_all_agent_loop_configuration() -> None:
 
 
 async def test_session_events_have_monotonic_run_sequences() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import ChatModelPort
-    from codeagent.session import AgentSession, EventBus
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import ChatModelPort
+    from tenon.session import AgentSession, EventBus
 
     session = AgentSession(
         AgentLoopConfig(model=ChatModelPort(FakeClient(response="ok"))),
@@ -156,9 +156,9 @@ async def test_session_events_have_monotonic_run_sequences() -> None:
 
 
 async def test_terminal_event_is_published_after_runtime_returns_idle() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import ChatModelPort
-    from codeagent.session import AgentSession, EventBus
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import ChatModelPort
+    from tenon.session import AgentSession, EventBus
 
     session = AgentSession(
         AgentLoopConfig(model=ChatModelPort(FakeClient(response="ok"))),
@@ -173,6 +173,6 @@ async def test_terminal_event_is_published_after_runtime_returns_idle() -> None:
     session.subscribe(observe)
     await session.run("hello")
 
-    from codeagent.session.runtime.state import RunPhase
+    from tenon.session.runtime.state import RunPhase
 
     assert observed_phases == [RunPhase.IDLE]

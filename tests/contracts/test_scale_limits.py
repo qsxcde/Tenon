@@ -35,7 +35,7 @@ def test_scale_limits_match_the_repository_contract() -> None:
 
 
 def test_gate_spans_every_layer_not_only_the_application_layer() -> None:
-    assert PRODUCTION_ROOT.name == "codeagent"
+    assert PRODUCTION_ROOT.name == "tenon"
     for layer in ("app", "core", "session", "ai", "tools"):
         assert (PRODUCTION_ROOT / layer).is_dir(), f"生产层 {layer} 缺失"
 

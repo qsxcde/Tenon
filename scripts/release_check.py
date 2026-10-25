@@ -19,9 +19,9 @@ from zipfile import BadZipFile, ZipFile
 
 
 REQUIRED_RESOURCES = (
-    "codeagent/resources/prompts/system.md",
-    "codeagent/resources/skills/commit-message/SKILL.md",
-    "codeagent/resources/skills/dependency-audit/SKILL.md",
+    "tenon/resources/prompts/system.md",
+    "tenon/resources/skills/commit-message/SKILL.md",
+    "tenon/resources/skills/dependency-audit/SKILL.md",
 )
 SENSITIVE_NAMES = {".env", ".envrc", "credentials.json", "secrets.json"}
 
@@ -158,7 +158,7 @@ def _write_text(path: Path, content: str) -> None:
 def run_release_check(*, root: Path, dist_dir: Path, report_path: Path) -> dict[str, Any]:
     """Run the complete release check and write its machine-readable report."""
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="codeagent-release-check-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="tenon-release-check-") as temporary:
         temporary_root = Path(temporary)
         build = _run(["uv", "build", "--out-dir", str(dist_dir)], cwd=root)
         _write_text(report_path.parent / "release-build.stdout.log", build.stdout)

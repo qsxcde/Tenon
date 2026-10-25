@@ -1,6 +1,6 @@
 # 05 · session 层：会话与持久化
 
-> 目录：`src/codeagent/session/`。定位：**单个对话的有状态外壳 + 会话生命周期 + JSONL 持久化 + 压缩 + 会话树**。不 import `ai` / `tools` / `config`；只依赖 core 的协议与事件。
+> 目录：`src/tenon/session/`。定位：**单个对话的有状态外壳 + 会话生命周期 + JSONL 持久化 + 压缩 + 会话树**。不 import `ai` / `tools` / `config`；只依赖 core 的协议与事件。
 
 ## 1. 三条核心不变量
 
@@ -132,7 +132,7 @@ class AgentSession(SessionEventMixin, SessionLifecycleMixin, SessionCompactionMi
 ### 7.1 磁盘布局
 
 ```text
-~/.codeagent/sessions/
+~/.tenon/sessions/
 ├── <session_id>.jsonl        # 权威数据（append-only）
 ├── <session_id>.index.json   # 派生索引（可重建）
 └── .<name>.lock              # 进程 + 线程锁（默认 30s 超时）

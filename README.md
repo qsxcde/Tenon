@@ -1,9 +1,9 @@
-# codeagent
+# tenon
 
 > 本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排，端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
 
-[![CI](https://github.com/qsxcde/codeAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/qsxcde/codeAgent/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/release-v0.7.0-blue)](https://github.com/qsxcde/codeAgent/releases/tag/v0.7.0)
+[![CI](https://github.com/qsxcde/tenon/actions/workflows/ci.yml/badge.svg)](https://github.com/qsxcde/tenon/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v0.7.0-blue)](https://github.com/qsxcde/tenon/releases/tag/v0.7.0)
 [![Python](https://img.shields.io/badge/python-3.12%2B-3776AB)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -25,7 +25,7 @@
 
 ## 项目简介
 
-多数 Agent 框架把编排、模型适配、工具实现和持久化揉在同一层：换模型要动业务代码、加工具要动核心循环、出问题只能看最终返回值。`codeagent` 把这四件事拆开——核心层是纯内存、可离线测试的运行时，模型/工具/存储全部通过端口注入，运行过程以事件流对外暴露，任何一层都能替换而不牵动其它层。
+多数 Agent 框架把编排、模型适配、工具实现和持久化揉在同一层：换模型要动业务代码、加工具要动核心循环、出问题只能看最终返回值。`tenon` 把这四件事拆开——核心层是纯内存、可离线测试的运行时，模型/工具/存储全部通过端口注入，运行过程以事件流对外暴露，任何一层都能替换而不牵动其它层。
 
 设计参考 [earendil-works/pi](https://github.com/earendil-works/pi) 的“三层协作 / 双层 loop / 事件驱动 / 会话即状态”思想，自 2026-08-14 起不再依赖 langgraph / langchain。
 
@@ -47,7 +47,7 @@
 - **可扩展工具层**：声明式 `ToolSpec` / `ToolRegistry`；MCP 客户端（`mcp__<server>__<tool>`）；扩展插件 v1（`ext__<id>__<tool>`）；Skills 三源发现与渐进式披露。
 - **会话层**：JSONL 树形持久化，支持恢复、切换、分叉、归档、删除与压缩；成功轮次才落盘，失败/取消内存回滚；`abort` / `steer` / `followup`。
 - **Subagent 委派**：`delegate` 默认串行，配置 `SUBAGENT_MAX_CONCURRENCY>1` 后启用有界并发；`explore` / `review` 只读、`implement` 受限可写，预算与输出有界、深度固定为 1。
-- **安全与回退**：审批结果封闭枚举且 fail-closed；三档 bash 沙箱（`read-only` / `workspace-write` / `danger-full-access`）；`write` / `edit` 写前快照，`codeagent undo` 逐级回退。
+- **安全与回退**：审批结果封闭枚举且 fail-closed；三档 bash 沙箱（`read-only` / `workspace-write` / `danger-full-access`）；`write` / `edit` 写前快照，`tenon undo` 逐级回退。
 - **可观测与治理**：token 用量归一见 `/status` 与 CLI；`--context` 输出预算、压缩与缓存命中诊断；离线评测 `python -m evals` 纳入 `contract` 门禁。
 
 ## 快速开始
@@ -60,8 +60,8 @@
 ### 安装
 
 ```bash
-git clone https://github.com/qsxcde/codeAgent.git
-cd codeAgent
+git clone https://github.com/qsxcde/tenon.git
+cd tenon
 
 uv sync --group dev   # 运行时 + 开发依赖
 uv sync               # 仅运行时依赖
@@ -69,7 +69,7 @@ uv sync               # 仅运行时依赖
 
 ### 配置模型
 
-密钥只写在固定目录 `~/.codeagent/.env`（首次启动幂等生成模板，已有文件不会被覆盖）。项目**有意不读取**当前目录下的 `.env`，避免在任意仓库运行时被其 `.env` 劫持流量与密钥。
+密钥只写在固定目录 `~/.tenon/.env`（首次启动幂等生成模板，已有文件不会被覆盖）。项目**有意不读取**当前目录下的 `.env`，避免在任意仓库运行时被其 `.env` 劫持流量与密钥。
 
 ```ini
 LLM_PROVIDER=deepseek
@@ -80,17 +80,17 @@ DEEPSEEK_MODEL=deepseek-v4-flash
 DEEPSEEK_REASONING_EFFORT=high
 ```
 
-换其它 provider 只需追加对应的 `*_API_KEY` 等键。自定义模型可编辑 `~/.codeagent/models.json`，按 `id` 与内置目录合并。
+换其它 provider 只需追加对应的 `*_API_KEY` 等键。自定义模型可编辑 `~/.tenon/models.json`，按 `id` 与内置目录合并。
 
 > 想零配置跑通？把 `LLM_PROVIDER` 设为 `fake`，即可在没有网络与密钥的情况下走完“对话 → 工具调用 → 事件流”闭环。
 
 ### 运行
 
 ```bash
-uv run codeagent --tui                                  # 交互式 TUI（新建会话）
-uv run codeagent --tui -c                               # 交互式 TUI 并恢复最近会话
-uv run codeagent --prompt "梳理登录流程的入口有哪些"     # 无头单次执行
-echo "列出本目录最大的 5 个文件" | uv run codeagent      # 从 stdin 逐行读取
+uv run tenon --tui                                  # 交互式 TUI（新建会话）
+uv run tenon --tui -c                               # 交互式 TUI 并恢复最近会话
+uv run tenon --prompt "梳理登录流程的入口有哪些"     # 无头单次执行
+echo "列出本目录最大的 5 个文件" | uv run tenon      # 从 stdin 逐行读取
 ```
 
 ## 使用方式
@@ -110,10 +110,10 @@ echo "列出本目录最大的 5 个文件" | uv run codeagent      # 从 stdin 
 ### 技能包与快照
 
 ```bash
-uv run codeagent skill install <source>   # 另有 update / remove / list / reload；--project 作用于当前项目
-uv run codeagent undo --list              # 查看写前快照
-uv run codeagent undo --dry-run           # 预览将恢复的文件
-uv run codeagent undo                     # LIFO 逐级恢复最近一次 write/edit 之前的文件
+uv run tenon skill install <source>   # 另有 update / remove / list / reload；--project 作用于当前项目
+uv run tenon undo --list              # 查看写前快照
+uv run tenon undo --dry-run           # 预览将恢复的文件
+uv run tenon undo                     # LIFO 逐级恢复最近一次 write/edit 之前的文件
 ```
 
 ### TUI 命令
@@ -131,7 +131,7 @@ uv run codeagent undo                     # LIFO 逐级恢复最近一次 write/
 
 ## 配置参考
 
-配置统一来自 `~/.codeagent/.env` 或同名环境变量（无前缀，全大写）。
+配置统一来自 `~/.tenon/.env` 或同名环境变量（无前缀，全大写）。
 
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
@@ -158,8 +158,8 @@ uv run codeagent undo                     # LIFO 逐级恢复最近一次 write/
 | `resources/` | 内建 prompts 与 skills | — |
 
 ```text
-codeAgent/
-├── src/codeagent/
+tenon/
+├── src/tenon/
 │   ├── app/          # 入口、组合根、composition、TUI、skills、context
 │   ├── core/         # Agent、contracts、orchestration、context、execution、subagent
 │   ├── session/      # 会话生命周期、persistence、compaction、navigation

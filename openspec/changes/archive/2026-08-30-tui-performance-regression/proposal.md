@@ -22,6 +22,6 @@ V4-20 与 V4-21 已经建立工具状态和长会话渲染能力，但当前 TUI
 
 ## Impact
 
-- 影响 `src/codeagent/app/tui/benchmark/`、TUI 渲染协调器的只读性能快照，以及 `scripts/benchmark_tui.py` 与 `scripts/compare_benchmark.py`。
+- 影响 `src/tenon/app/tui/benchmark/`、TUI 渲染协调器的只读性能快照，以及 `scripts/benchmark_tui.py` 与 `scripts/compare_benchmark.py`。
 - 影响 `tests/tui/` 性能与 Textual 集成测试、`.github/workflows/ci.yml` 性能 job、`docs/benchmarks/` 和 `docs/testing.md`。
 - 不新增运行时依赖，不改变会话 JSONL、模型请求协议或普通对话语义；性能采样只消费离线夹具和运行期计数器。

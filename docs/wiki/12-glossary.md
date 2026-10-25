@@ -58,7 +58,7 @@
 | 压缩 `trigger_headroom_tokens` | 2 048 | `session/compaction/policy.py` |
 | `max_resident_sessions` | 32（LRU） | `session/manager/manager.py` |
 | `recursion_limit` | 50 | `session/manager/manager.py` |
-| 磁盘布局 | `~/.codeagent/sessions/<id>.jsonl` + `<id>.index.json` + `.<name>.lock`（权限 600/700） | `session/persistence/*` |
+| 磁盘布局 | `~/.tenon/sessions/<id>.jsonl` + `<id>.index.json` + `.<name>.lock`（权限 600/700） | `session/persistence/*` |
 
 ### ai
 
@@ -89,7 +89,7 @@
 
 | 常量 | 值 | 位置 |
 | --- | --- | --- |
-| 配置目录 | `~/.codeagent` | `app/config.py` |
+| 配置目录 | `~/.tenon` | `app/config.py` |
 | `approval_mode` 默认（headless） | `deny` | `app/composition/runtime/factory.py` |
 | TUI 目标帧率 | 30 fps | `app/tui/rendering/coordinator.py` |
 | TUI 恢复后台阈值 | >1000 消息 或 >100k 字符 或 >1MB 工具输出 | `app/tui/session/restore.py` |

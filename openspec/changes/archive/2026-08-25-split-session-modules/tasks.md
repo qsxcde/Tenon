@@ -1,7 +1,7 @@
 ## 1. 存储模块边界和兼容入口
 
 - [x] 1.1 建立 `store_models.py`、`store_codec.py`、`json_file_store.py`、`memory_store.py` 和 `store_index.py` 的内部模块边界
-- [x] 1.2 记录现有 `codeagent.session.store`、`codeagent.session.session` 公共符号并建立导入兼容测试基线
+- [x] 1.2 记录现有 `tenon.session.store`、`tenon.session.session` 公共符号并建立导入兼容测试基线
 - [x] 1.3 在新模块中保留 session 层只依赖 core 与同层模块的分层约束
 
 ## 2. 存储模型与编解码拆分

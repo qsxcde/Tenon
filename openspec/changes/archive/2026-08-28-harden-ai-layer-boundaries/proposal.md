@@ -22,6 +22,6 @@ The AI infrastructure layer has correct top-level dependency direction, but seve
 
 ## Impact
 
-- Affects `src/codeagent/ai/model/`, `src/codeagent/ai/transport/`, and `src/codeagent/ai/catalog/`, plus the composition adapter that builds model-visible tool definitions.
+- Affects `src/tenon/ai/model/`, `src/tenon/ai/transport/`, and `src/tenon/ai/catalog/`, plus the composition adapter that builds model-visible tool definitions.
 - May remove or deprecate mutable `bind_tools()` behavior in favor of per-call `tools` parameters; existing public imports and provider selection remain compatible.
 - Adds offline regression tests for concurrent requests, diagnostic output, canonical import boundaries, and transport behavior; no new dependencies or real network calls are required.

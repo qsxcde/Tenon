@@ -23,7 +23,7 @@ async def run_all(cases: tuple[Case, ...] = CASES) -> list[CaseResult]:
     """串行执行全部用例;单个失败不阻塞其余用例。"""
     results: list[CaseResult] = []
     for case in cases:
-        with tempfile.TemporaryDirectory(prefix=f"codeagent-eval-{case.name}-") as raw:
+        with tempfile.TemporaryDirectory(prefix=f"tenon-eval-{case.name}-") as raw:
             workdir = Path(raw)
             try:
                 await run_case(case, workdir)

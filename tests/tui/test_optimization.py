@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from codeagent.app.tui.presentation.blocks import AssistantBlock, Component, ToolCallBlock
-from codeagent.app.tui.presentation.md_renderer import MAX_MD_RENDER_LEN
-from codeagent.app.tui.rendering.coordinator import TuiEventBuffer
-from codeagent.app.tui.state.transcript import Transcript
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.app.tui.presentation.blocks import AssistantBlock, Component, ToolCallBlock
+from tenon.app.tui.presentation.md_renderer import MAX_MD_RENDER_LEN
+from tenon.app.tui.rendering.coordinator import TuiEventBuffer
+from tenon.app.tui.state.transcript import Transcript
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 class _Block(Component):
@@ -152,8 +152,8 @@ def test_collapsed_legacy_tool_result_remains_compatible():
 
 
 def test_restore_cost_counts_large_content_even_when_message_count_is_small():
-    from codeagent.app.tui.session.coordinator import TuiSessionCoordinator
-    from codeagent.core.contracts.messages import Message
+    from tenon.app.tui.session.coordinator import TuiSessionCoordinator
+    from tenon.core.contracts.messages import Message
 
     cost = TuiSessionCoordinator._restore_cost([Message(role="assistant", content="x" * 200_000)])
     assert cost.message_count == 1

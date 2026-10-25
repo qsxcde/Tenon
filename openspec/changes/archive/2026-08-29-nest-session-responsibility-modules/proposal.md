@@ -8,7 +8,7 @@
 - 新增 `session/persistence/jsonl/` 子包，将 JSONL 存储外观、读取、写入、索引和分叉实现归并到同一职责目录。
 - 更新所有生产代码、测试和文档导入，公共包级导出保持可用，持久化格式、运行行为和错误语义不变。
 - 更新规模扫描和架构文档，防止新的管理器或 JSONL 细节重新散落到职责目录之外。
-- 仅职责子包内部模块路径调整；`codeagent.session`、`codeagent.session.persistence` 和 `codeagent.session.runtime` 的公开导出保持不变。
+- 仅职责子包内部模块路径调整；`tenon.session`、`tenon.session.persistence` 和 `tenon.session.runtime` 的公开导出保持不变。
 
 ## Capabilities
 
@@ -22,7 +22,7 @@
 
 ## Impact
 
-- 受影响代码：`src/codeagent/session/manager.py`、`src/codeagent/session/manager_operations.py`、`src/codeagent/session/manager_registry.py`、`src/codeagent/session/persistence/jsonl_*.py` 和相关导入。
+- 受影响代码：`src/tenon/session/manager.py`、`src/tenon/session/manager_operations.py`、`src/tenon/session/manager_registry.py`、`src/tenon/session/persistence/jsonl_*.py` 和相关导入。
 - 受影响文档与测试：session 架构说明、模块边界契约、持久化和管理器测试。
 - 不新增依赖，不改变 JSONL 文件格式、会话数据和外部运行行为。
 - 由于本变更只调整职责目录，按仓库约定跳过行为规格增量，使用 `skip_specs: true`。

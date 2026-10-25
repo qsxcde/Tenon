@@ -121,8 +121,8 @@ textual 后端用一个「显示行」的 widget 呈现组件渲染出的 ANSI �
 
 ## Migration Plan
 
-- 新增 `src/codeagent/app/tui/` + `tests/tui/`,pyproject 加 `textual`;现有 headless 与事件语义零改动;
-- 入口:`uv run codeagent --tui`(在 `app/main.py` 加 flag,headless 保持默认);
+- 新增 `src/tenon/app/tui/` + `tests/tui/`,pyproject 加 `textual`;现有 headless 与事件语义零改动;
+- 入口:`uv run tenon --tui`(在 `app/main.py` 加 flag,headless 保持默认);
 - 门槛:全量 `uv run pytest` 绿(现 224 + 新增);MVP 人工验收:可对话/可流式/可打断/状态栏正确/退出打印完整文档;
 - 回滚:`git revert`,移除依赖即可,无跨层耦合。
 

@@ -4,12 +4,12 @@ import asyncio
 
 import pytest
 
-from codeagent.core.agent import Agent
-from codeagent.core.context.model import AgentContext
-from codeagent.core.contracts.events import EventType
-from codeagent.core.contracts.messages import Message
-from codeagent.core.contracts.ports import StreamEvent
-from codeagent.core.orchestration.config import AgentLoopConfig
+from tenon.core.agent import Agent
+from tenon.core.context.model import AgentContext
+from tenon.core.contracts.events import EventType
+from tenon.core.contracts.messages import Message
+from tenon.core.contracts.ports import StreamEvent
+from tenon.core.orchestration.config import AgentLoopConfig
 
 
 class _Model:

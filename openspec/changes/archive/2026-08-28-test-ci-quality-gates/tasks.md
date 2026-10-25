@@ -22,7 +22,7 @@
 
 - [x] 4.1 构建 wheel 并检查构建产物内容
 - [x] 4.2 在临时虚拟环境中安装 wheel
-- [x] 4.3 执行 `codeagent --prompt` fake provider smoke 测试
+- [x] 4.3 执行 `tenon --prompt` fake provider smoke 测试
 - [x] 4.4 验证内建 prompt、skill 和其他 resources 在安装包中可用
 
 ## 5. 接入性能基线

@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from codeagent.core.contracts.subagents import (
+from tenon.core.contracts.subagents import (
     SubagentBudget,
     SubagentRequest,
     SubagentResult,
@@ -34,7 +34,7 @@ class _RecordingRunner:
 
 @pytest.mark.unit
 def test_effective_budget_uses_defaults_and_rejects_hard_limit_overflow() -> None:
-    from codeagent.app.composition.subagent.budget import (
+    from tenon.app.composition.subagent.budget import (
         DEFAULT_MAX_TOOL_CALLS,
         DEFAULT_MAX_TURNS,
         DEFAULT_MAX_OUTPUT_CHARS,
@@ -56,7 +56,7 @@ def test_effective_budget_uses_defaults_and_rejects_hard_limit_overflow() -> Non
 
 @pytest.mark.unit
 async def test_delegate_maps_budget_and_rejects_malformed_budget() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     runner = _RecordingRunner()
     tool = DelegateTool(runner).bind_parent_run_id("parent-run")
@@ -106,7 +106,7 @@ async def test_delegate_maps_budget_and_rejects_malformed_budget() -> None:
 
 @pytest.mark.unit
 async def test_delegate_enforces_four_accepted_children_per_parent_run() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     runner = _RecordingRunner()
     tool = DelegateTool(runner).bind_parent_run_id("parent-run")
@@ -124,9 +124,9 @@ async def test_delegate_enforces_four_accepted_children_per_parent_run() -> None
 @pytest.mark.integration
 @pytest.mark.parametrize("profile", ("explore", "review"))
 def test_child_factory_applies_profile_policy_and_effective_max_turns(profile: str) -> None:
-    from codeagent.app.composition.runtime.extensions import RuntimeExtensions
-    from codeagent.app.composition.subagent.factory import make_child_session_factory
-    from codeagent.app.composition.subagent.profiles import (
+    from tenon.app.composition.runtime.extensions import RuntimeExtensions
+    from tenon.app.composition.subagent.factory import make_child_session_factory
+    from tenon.app.composition.subagent.profiles import (
         READ_ONLY_TOOL_NAMES,
         prompt_for,
     )
@@ -176,7 +176,7 @@ def test_child_factory_applies_profile_policy_and_effective_max_turns(profile: s
 
 @pytest.mark.unit
 def test_delegate_schema_exposes_bounded_budget_fields() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     budget = DelegateTool.parameters["properties"]["budget"]
     assert budget["additionalProperties"] is False

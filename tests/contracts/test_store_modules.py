@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import importlib.util
 
-from codeagent.core.contracts.messages import Message
-from codeagent.session import session as session_module
-from codeagent.session.persistence import (
+from tenon.core.contracts.messages import Message
+from tenon.session import session as session_module
+from tenon.session.persistence import (
     CompactionEntry,
     CompactionState,
     JsonFileStore,
@@ -15,27 +15,27 @@ from codeagent.session.persistence import (
     SessionStore,
     UsageStats,
 )
-from codeagent.session.persistence.codec import _dict_to_message, _message_to_dict
-from codeagent.session.persistence.index import SessionIndex
-from codeagent.session.persistence.jsonl import JsonFileStore as JsonlStore
-from codeagent.session.persistence.memory_store import MemoryStore as InMemoryStore
-from codeagent.session.persistence.models import SessionRef as PersistenceSessionRef
-from codeagent.session.persistence.protocol import SessionStore as PersistenceSessionStore
-from codeagent.session.persistence.records import MessageRecord
-from codeagent.session.runtime import SessionRuntime
-from codeagent.session.session_persistence import SessionPersistence
+from tenon.session.persistence.codec import _dict_to_message, _message_to_dict
+from tenon.session.persistence.index import SessionIndex
+from tenon.session.persistence.jsonl import JsonFileStore as JsonlStore
+from tenon.session.persistence.memory_store import MemoryStore as InMemoryStore
+from tenon.session.persistence.models import SessionRef as PersistenceSessionRef
+from tenon.session.persistence.protocol import SessionStore as PersistenceSessionStore
+from tenon.session.persistence.records import MessageRecord
+from tenon.session.runtime import SessionRuntime
+from tenon.session.session_persistence import SessionPersistence
 
 
 LEGACY_MODULES = (
-    "codeagent.session.bus",
-    "codeagent.session.json_file_store",
-    "codeagent.session.memory_store",
-    "codeagent.session.session_runtime",
-    "codeagent.session.store",
-    "codeagent.session.store_codec",
-    "codeagent.session.store_index",
-    "codeagent.session.store_models",
-    "codeagent.session.tree",
+    "tenon.session.bus",
+    "tenon.session.json_file_store",
+    "tenon.session.memory_store",
+    "tenon.session.session_runtime",
+    "tenon.session.store",
+    "tenon.session.store_codec",
+    "tenon.session.store_index",
+    "tenon.session.store_models",
+    "tenon.session.tree",
 )
 
 
@@ -59,14 +59,14 @@ def test_legacy_session_modules_are_removed() -> None:
 
 
 def test_persistence_locking_shares_a_lock_per_path() -> None:
-    from codeagent.session.persistence.locking import path_lock
+    from tenon.session.persistence.locking import path_lock
 
     assert path_lock("sessions/a.jsonl") is path_lock("sessions/a.jsonl")
     assert path_lock("sessions/a.jsonl") is not path_lock("sessions/b.jsonl")
 
 
 def test_session_committer_only_writes_explicit_successful_payload() -> None:
-    from codeagent.session.persistence.commit import SessionCommitter
+    from tenon.session.persistence.commit import SessionCommitter
 
     store = MemoryStore()
     store.create("committed")

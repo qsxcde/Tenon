@@ -6,13 +6,13 @@ import json
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import AgentLoopConfig
-from codeagent.core.contracts.messages import Message
-from codeagent.session import SessionManager
-from codeagent.session.persistence import JsonFileStore, SessionQuery
-from codeagent.session.persistence.jsonl import store as jsonl_store
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import AgentLoopConfig
+from tenon.core.contracts.messages import Message
+from tenon.session import SessionManager
+from tenon.session.persistence import JsonFileStore, SessionQuery
+from tenon.session.persistence.jsonl import store as jsonl_store
 
 
 def _indexed_store(tmp_path, count: int = 8) -> JsonFileStore:

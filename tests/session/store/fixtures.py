@@ -6,8 +6,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import pytest
-from codeagent.core.contracts.messages import Message, ToolCall
-from codeagent.session.persistence import (
+from tenon.core.contracts.messages import Message, ToolCall
+from tenon.session.persistence import (
     CURRENT_VERSION,
     CompactionEntry,
     JsonFileStore,

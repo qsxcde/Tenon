@@ -2,9 +2,9 @@
 
 当前状态与约束(动机见 proposal.md):
 
-- `tests/tools/test_tools.py` 4 项失败,均为**测试自身问题**,产品代码 `src/codeagent/tools/atomic/bash.py` 行为正确;
+- `tests/tools/test_tools.py` 4 项失败,均为**测试自身问题**,产品代码 `src/tenon/tools/atomic/bash.py` 行为正确;
 - **cwd 失败根因**:pytest `tmp_path` 恒在 `%TEMP%` 下;Windows Git Bash(MSYS2)按挂载表把 `C:\Users\...\Temp` 显示为 `/tmp/...`。实测同一 bash 存在路径表示不对称:
-  - `D:\project\codeAgent` → `pwd` 输出 `D:/project/codeAgent`(Windows 形式);
+  - `D:\project\tenon` → `pwd` 输出 `D:/project/tenon`(Windows 形式);
   - `C:\...\AppData\Local\Temp` → `pwd` 输出 `/tmp`(POSIX 形式)。
   - 挂载表行为还依赖 `noumount`/`usertemp` 等逐机配置,字符串断言路径在 Windows 上本质脆弱;
 - **PIPESTATUS 失败根因**:工具豁免逻辑(bash.py `_last_segment_first_token`)按**最后一个逻辑段的首 token** 判定;`ps aux | grep x; exit ${PIPESTATUS[1]}` 末段是 `exit` → 不在 `SEMANTIC_OK_PREFIXES`("grep")→ 判失败符合当前语义,测试本身过期(P2-13 语义收窄前遗留)。
@@ -54,7 +54,7 @@ assert "CWD_OK" in out and "命令失败" not in out
 **方案**:删除 `; exit ${PIPESTATUS[1]}` 后缀:
 
 ```python
-out = _invoke(BashTool(), command="ps aux | grep codeagent-zzz-nonexistent")
+out = _invoke(BashTool(), command="ps aux | grep tenon-zzz-nonexistent")
 assert "命令失败" not in out and "退出码: 1" in out
 ```
 

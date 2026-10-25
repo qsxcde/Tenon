@@ -3,12 +3,12 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from codeagent.ai.transport.openai_compat import OpenAICompatClient
-from codeagent.app.composition.model.port import ChatModelPort
-from codeagent.core.context.model import AgentContext
-from codeagent.core.contracts.messages import ToolResult
-from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.core.orchestration.loop import run_agent_loop
+from tenon.ai.transport.openai_compat import OpenAICompatClient
+from tenon.app.composition.model.port import ChatModelPort
+from tenon.core.context.model import AgentContext
+from tenon.core.contracts.messages import ToolResult
+from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.loop import run_agent_loop
 
 
 class _CountingTool:

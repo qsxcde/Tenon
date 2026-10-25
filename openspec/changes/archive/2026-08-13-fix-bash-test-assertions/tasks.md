@@ -6,7 +6,7 @@
 
 ## 2. 修复 PIPESTATUS 测试命令(B1)
 
-- [x] 2.1 `test_bash_pipeline_grep_exit_one_not_failure`:命令精简为 `ps aux | grep codeagent-zzz-nonexistent`,断言 `"命令失败" not in out and "退出码: 1" in out`
+- [x] 2.1 `test_bash_pipeline_grep_exit_one_not_failure`:命令精简为 `ps aux | grep tenon-zzz-nonexistent`,断言 `"命令失败" not in out and "退出码: 1" in out`
 
 ## 3. 验证
 

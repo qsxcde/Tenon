@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.session.runtime.controller import SessionRuntime
-from codeagent.session.runtime.state import RunPhase
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.session.runtime.controller import SessionRuntime
+from tenon.session.runtime.state import RunPhase
 
 
 @pytest.mark.contract

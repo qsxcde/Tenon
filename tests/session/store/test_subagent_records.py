@@ -7,11 +7,11 @@ import json
 
 import pytest
 
-from codeagent.core.contracts.messages import Message
+from tenon.core.contracts.messages import Message
 
 
 def _record(**overrides):
-    module = importlib.import_module("codeagent.session.persistence.models")
+    module = importlib.import_module("tenon.session.persistence.models")
     record_type = getattr(module, "SubagentRunRecord", None)
     assert record_type is not None, "session persistence must expose SubagentRunRecord"
     values = {
@@ -29,7 +29,7 @@ def _record(**overrides):
 
 @pytest.mark.parametrize("backend", ["jsonl", "memory"])
 def test_subagent_records_roundtrip_without_activity_or_title_side_effect(tmp_path, backend):
-    from codeagent.session.persistence import JsonFileStore, MemoryStore
+    from tenon.session.persistence import JsonFileStore, MemoryStore
 
     store = JsonFileStore(tmp_path / "sessions") if backend == "jsonl" else MemoryStore()
     store.create("parent")
@@ -76,7 +76,7 @@ def test_subagent_records_roundtrip_without_activity_or_title_side_effect(tmp_pa
 
 
 def test_nonterminal_record_becomes_abandoned_and_terminal_is_first_wins(tmp_path):
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(tmp_path / "sessions")
     store.create("parent")
@@ -144,7 +144,7 @@ def test_record_payload_is_bounded_and_does_not_keep_transcript_fields():
 
 
 def test_old_jsonl_without_subagent_entries_returns_empty_records(tmp_path):
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(tmp_path / "sessions")
     store.create("parent")

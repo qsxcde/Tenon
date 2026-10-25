@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
 
-from codeagent.ai.catalog.spec import ModelSpec
-from codeagent.app.composition.tui.admin import model_override_record
-from codeagent.app.tui.application import TuiApp
-from codeagent.app.tui.commands.parser import Command
-from codeagent.app.tui.presentation.primitives import rich_to_plain
-from codeagent.app.tui.presentation.status import FooterInfo
+from tenon.ai.catalog.spec import ModelSpec
+from tenon.app.composition.tui.admin import model_override_record
+from tenon.app.tui.application import TuiApp
+from tenon.app.tui.commands.parser import Command
+from tenon.app.tui.presentation.primitives import rich_to_plain
+from tenon.app.tui.presentation.status import FooterInfo
 from tests.fixtures.tui import FakeBackend
 from tests.tui.view.fixtures import FakeManager
 

@@ -26,7 +26,7 @@
 ## 2. 配置与信任(D3)
 
 ```json
-// ~/.codeagent/mcp.json(用户级唯一配置源)
+// ~/.tenon/mcp.json(用户级唯一配置源)
 {
   "servers": [
     {"name": "github", "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"]},
@@ -56,7 +56,7 @@ McpTool(AtomicTool):
 ### 3.5 MCP 权限规则(主流修订,CodeBuddy 式三级)
 
 ```
-~/.codeagent/mcp.json 增 permissions 段:
+~/.tenon/mcp.json 增 permissions 段:
 {"permissions": {"allow": [...], "ask": [...], "deny": [...]}}
 
 规则粒度:全部(mcp__*) / server 级(mcp__github,mcp__github__*) / 工具级(mcp__github__get_issue)

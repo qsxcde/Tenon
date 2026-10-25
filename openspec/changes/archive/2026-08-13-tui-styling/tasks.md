@@ -1,6 +1,6 @@
 ## 1. 主题与段模型
 
-- [x] 1.1 新建 `src/codeagent/app/tui/theme.py`:`StyleTag` 词表 + `PALETTE` 色值(design D2;hex,非 ANSI;`user_bg` 为背景色)
+- [x] 1.1 新建 `src/tenon/app/tui/theme.py`:`StyleTag` 词表 + `PALETTE` 色值(design D2;hex,非 ANSI;`user_bg` 为背景色)
 - [x] 1.2 `components.py` 升级渲染契约:`Segment = tuple[StyleTag, str]`、`RichLine = list[Segment]`,组件 `render(width) -> list[RichLine]`;`_wrap` 改为对纯文本换行产出单样式行(`_wrap_rich`)(design D1)
 
 ## 2. 组件样式化

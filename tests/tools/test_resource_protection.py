@@ -7,7 +7,7 @@ import pytest
 
 
 def test_resource_limits_validate_and_derive_effective_output_cap() -> None:
-    from codeagent.tools.shared import ToolResourceLimits
+    from tenon.tools.shared import ToolResourceLimits
 
     limits = ToolResourceLimits.from_config(
         SimpleNamespace(
@@ -33,7 +33,7 @@ def test_resource_limits_validate_and_derive_effective_output_cap() -> None:
 
 
 def test_process_runner_never_materializes_more_than_memory_cap(tmp_path) -> None:
-    from codeagent.tools.execution import ProcessRequest, ProcessRunner, bash_env, resolve_bash
+    from tenon.tools.execution import ProcessRequest, ProcessRunner, bash_env, resolve_bash
 
     try:
         executable = resolve_bash()
@@ -59,8 +59,8 @@ def test_process_runner_never_materializes_more_than_memory_cap(tmp_path) -> Non
 
 
 def test_bash_passes_resource_limits_to_process_request(tmp_path) -> None:
-    from codeagent.tools.atomic.bash import BashTool
-    from codeagent.tools.shared import ToolResourceLimits
+    from tenon.tools.atomic.bash import BashTool
+    from tenon.tools.shared import ToolResourceLimits
 
     captured = []
 
@@ -93,7 +93,7 @@ def test_bash_passes_resource_limits_to_process_request(tmp_path) -> None:
         max_memory_bytes=40,
         cleanup_timeout=0.2,
     )
-    with patch("codeagent.tools.atomic.bash.resolve_bash", return_value="/bin/bash"):
+    with patch("tenon.tools.atomic.bash.resolve_bash", return_value="/bin/bash"):
         result = BashTool(cwd=str(tmp_path), runner=StubRunner(), resource_limits=limits).invoke(
             BashTool.Args(command="echo ok")
         )
@@ -108,7 +108,7 @@ def test_bash_passes_resource_limits_to_process_request(tmp_path) -> None:
 
 
 def test_process_timeout_marks_cleanup_uncertain_when_bounded_wait_expires(monkeypatch, tmp_path):
-    from codeagent.tools.execution import ProcessRequest, ProcessRunner
+    from tenon.tools.execution import ProcessRequest, ProcessRunner
 
     class StuckProcess:
         pid = 123

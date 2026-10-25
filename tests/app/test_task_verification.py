@@ -3,9 +3,9 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-from codeagent.app.tasks.verification.models import TaskStatus, VerificationResult
-from codeagent.app.tasks.verification.runner import VerificationRunner
-from codeagent.app.tasks.verification.workspace import (
+from tenon.app.tasks.verification.models import TaskStatus, VerificationResult
+from tenon.app.tasks.verification.runner import VerificationRunner
+from tenon.app.tasks.verification.workspace import (
     VerificationCommandResolver,
     WorkspaceInspector,
 )

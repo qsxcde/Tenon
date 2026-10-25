@@ -123,5 +123,5 @@ agent_end
 
 ## Open Questions
 
-- 当前外部调用方是否存在直接导入 `codeagent.core.run_turn` 的仓库外使用者;若存在,需要在破坏性迁移说明中明确版本边界。
+- 当前外部调用方是否存在直接导入 `tenon.core.run_turn` 的仓库外使用者;若存在,需要在破坏性迁移说明中明确版本边界。
 - 是否需要把 Python async generator 直接作为公开事件流,还是由现有 EventBus 继续提供宿主订阅;该选择不影响核心 hook 和消息契约,可在实现阶段根据 TUI 迁移成本确定。

@@ -19,7 +19,7 @@
 ## 4. 组合根与 CLI 入口
 
 - [x] 4.1 `app/container.py` 新增 `create_session_manager`(ports 工厂装配一次 + store 注入 + header model/effort 解析)
-- [x] 4.2 `app/main.py`:`-c` / `--session <id>` / `--list-sessions`(store 目录 `~/.codeagent/sessions/`);默认行为不变(新建会话)
+- [x] 4.2 `app/main.py`:`-c` / `--session <id>` / `--list-sessions`(store 目录 `~/.tenon/sessions/`);默认行为不变(新建会话)
 - [x] 4.3 测试:`tests/test_cli.py` 补三个入口的离线测试(注入 MemoryStore / 临时目录);分层断言(test_decoupling)保持绿
 
 ## 5. 文档与验收

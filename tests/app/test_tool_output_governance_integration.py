@@ -4,17 +4,17 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.composition.model.port import ChatModelPort
-from codeagent.app.composition.tools.adapter import adapt_tools
-from codeagent.app.tui.presentation.blocks import ToolCallBlock
-from codeagent.app.tui.presentation.output import OutputBuffer
-from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.core.contracts.events import EventType
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.persistence.jsonl import JsonFileStore
-from codeagent.tools.base import AtomicTool
-from codeagent.tools.shared import OutputPolicy, GovernedText, govern_text
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.composition.model.port import ChatModelPort
+from tenon.app.composition.tools.adapter import adapt_tools
+from tenon.app.tui.presentation.blocks import ToolCallBlock
+from tenon.app.tui.presentation.output import OutputBuffer
+from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.contracts.events import EventType
+from tenon.session import AgentSession, EventBus
+from tenon.session.persistence.jsonl import JsonFileStore
+from tenon.tools.base import AtomicTool
+from tenon.tools.shared import OutputPolicy, GovernedText, govern_text
 
 
 class _ReportArgs(BaseModel):

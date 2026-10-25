@@ -27,7 +27,7 @@ v0.4 已具备手动压缩和基于最近一次 provider usage 的阈值压缩�
 
 ## Impact
 
-- 影响 `src/codeagent/session/compaction/`、`compaction_runtime.py`、`run_coordinator.py` 和 `session.py` 的运行时策略与状态管理。
-- 影响 `src/codeagent/core/context/` 的预算视图/接口，但不把压缩逻辑引入 core，也不绑定 provider、工具或持久化实现。
+- 影响 `src/tenon/session/compaction/`、`compaction_runtime.py`、`run_coordinator.py` 和 `session.py` 的运行时策略与状态管理。
+- 影响 `src/tenon/core/context/` 的预算视图/接口，但不把压缩逻辑引入 core，也不绑定 provider、工具或持久化实现。
 - 影响 TUI 的结构化事件消费和状态栏/活动提示；现有手动 `/compact` 入口保持兼容。
 - 需要补充 session、context budget、恢复/分叉、取消/失败、TUI 事件和回归测试；不新增第三方依赖，不改变 JSONL 历史的追加式格式。

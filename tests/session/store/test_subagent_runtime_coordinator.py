@@ -11,9 +11,9 @@ from typing import Any
 
 import pytest
 
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.session.persistence import subagent_runtime as runtime_mod
-from codeagent.session.persistence.subagent_runtime import SubagentRecordCoordinator
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.session.persistence import subagent_runtime as runtime_mod
+from tenon.session.persistence.subagent_runtime import SubagentRecordCoordinator
 
 pytestmark = pytest.mark.unit
 

@@ -153,7 +153,7 @@ def test_edit_without_read_is_allowed(tmp_path):
 
 def test_all_which_returns_all_path_hits(tmp_path, monkeypatch):
     """PATH 中多个同名可执行文件全部返回(回归:shutil.which 只取第一个,会命中 WSL shim)。"""
-    from codeagent.tools.execution.shell import all_which
+    from tenon.tools.execution.shell import all_which
 
     d1, d2 = tmp_path / "a", tmp_path / "b"
     d1.mkdir()

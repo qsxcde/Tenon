@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from codeagent.app.skills.packages.manager import PackageManager
-from codeagent.app.skills.packages.registry import (
+from tenon.app.skills.packages.manager import PackageManager
+from tenon.app.skills.packages.registry import (
     PackageRegistry,
     PackageValidationError,
     parse_package_manifest,
@@ -20,7 +20,7 @@ def _write_package(root: Path, *, package_id: str = "demo", with_manifest: bool 
         "---\nname: fmt\ndescription: 格式化\n---\n正文", encoding="utf-8"
     )
     if with_manifest:
-        (root / "codeagent-package.json").write_text(
+        (root / "tenon-package.json").write_text(
             json.dumps(
                 {
                     "id": package_id,
@@ -28,7 +28,7 @@ def _write_package(root: Path, *, package_id: str = "demo", with_manifest: bool 
                     "version": "1.2.3",
                     "skills": "skills",
                     "bootstrap": "using-superpowers",
-                    "toolMapping": "references/codeagent-tools.md",
+                    "toolMapping": "references/tenon-tools.md",
                 }
             ),
             encoding="utf-8",
@@ -51,7 +51,7 @@ def test_parse_package_manifest_reads_metadata_and_defaults(tmp_path):
 def test_parse_package_manifest_rejects_missing_skill_root(tmp_path):
     root = tmp_path / "pkg"
     root.mkdir()
-    (root / "codeagent-package.json").write_text(
+    (root / "tenon-package.json").write_text(
         json.dumps({"id": "broken", "skills": "missing"}), encoding="utf-8"
     )
 

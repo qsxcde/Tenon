@@ -4,15 +4,15 @@ import json
 import subprocess
 import sys
 
-from codeagent.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.app.tui.benchmark.performance import (
+from tenon.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.app.tui.benchmark.performance import (
     BenchmarkResult,
     MetricSummary,
     PerformanceRecorder,
 )
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.app.tui.benchmark.benchmark import BenchmarkConfig, build_fixture, run_benchmark
+from tenon.app.tui.state.model import TuiModel
+from tenon.app.tui.benchmark.benchmark import BenchmarkConfig, build_fixture, run_benchmark
 from tests.tui.performance_helpers import assert_control_latency, assert_frame_budget
 
 
@@ -208,7 +208,7 @@ def test_benchmark_marks_non_stream_latency_metrics_not_applicable() -> None:
 
 
 def test_benchmark_uses_coordinator_frame_diagnostics(monkeypatch) -> None:
-    from codeagent.app.tui.rendering.coordinator import TuiRenderCoordinator
+    from tenon.app.tui.rendering.coordinator import TuiRenderCoordinator
 
     original = TuiRenderCoordinator.performance_snapshot
 

@@ -44,7 +44,7 @@ def test_edit_no_change_rejected(tmp_path):
 
 def test_edit_with_injected_memory_fsops(memory_fsops):
     """注入内存 FsOps:编辑完全离线可测(design D1 可测性收益)。"""
-    from codeagent.tools.shared import resolve_to_cwd
+    from tenon.tools.shared import resolve_to_cwd
 
     path = resolve_to_cwd("a.txt", "/w")  # 与工具同一路径解析,跨平台一致
     memory_fsops.write_bytes(path, b"hello world")

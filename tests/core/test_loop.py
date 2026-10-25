@@ -14,10 +14,10 @@ import pytest
 
 pytestmark = pytest.mark.contract
 
-from codeagent.app.composition.tools.adapter import adapt_tools
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import (
+from tenon.app.composition.tools.adapter import adapt_tools
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import (
     AgentContext,
     AgentLoopConfig,
     EventType,
@@ -26,7 +26,7 @@ from codeagent.core import (
     ToolExecutionRuntime,
     run_agent_loop,
 )
-from codeagent.tools.atomic import BashTool, ReadTool
+from tenon.tools.atomic import BashTool, ReadTool
 
 
 def _config(model: FakeClient, *, before_tool_calls=(), tool_timeout=None):
@@ -119,13 +119,11 @@ async def test_before_tool_call_blocks_without_side_effect():
 
 
 async def test_continue_does_not_duplicate_user_message():
-    from codeagent.core import run_agent_loop_continue
+    from tenon.core import run_agent_loop_continue
 
     context = AgentContext(
         messages=[
-            __import__("codeagent.core", fromlist=["Message"]).Message(
-                role="user", content="已有问题"
-            )
+            __import__("tenon.core", fromlist=["Message"]).Message(role="user", content="已有问题")
         ]
     )
     messages = await run_agent_loop_continue(context, _config(FakeClient(response="继续")))
@@ -144,7 +142,7 @@ async def test_runtime_timeout_is_a_structured_tool_result():
             await asyncio.Event().wait()
             return "late"
 
-    from codeagent.core.contracts.ports import AgentTool
+    from tenon.core.contracts.ports import AgentTool
 
     assert isinstance(SlowTool(), AgentTool)
     model = FakeClient(

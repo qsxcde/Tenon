@@ -4,7 +4,7 @@ import importlib.util
 from pathlib import Path
 
 
-CORE_DIR = Path(__file__).parents[2] / "src" / "codeagent" / "core"
+CORE_DIR = Path(__file__).parents[2] / "src" / "tenon" / "core"
 
 EXPECTED_FILES = {
     "agent.py",
@@ -73,7 +73,7 @@ def test_old_flat_core_modules_are_not_compatibility_entries() -> None:
         old_path = CORE_DIR / f"{module_name}.py"
         assert not old_path.exists(), old_path
 
-        qualified_name = f"codeagent.core.{module_name}"
+        qualified_name = f"tenon.core.{module_name}"
         try:
             module_spec = importlib.util.find_spec(qualified_name)
         except ModuleNotFoundError:
@@ -82,30 +82,30 @@ def test_old_flat_core_modules_are_not_compatibility_entries() -> None:
 
 
 def test_core_facade_preserves_public_object_identity() -> None:
-    import codeagent.core as public
+    import tenon.core as public
 
-    from codeagent.core.agent import Agent
-    from codeagent.core.context.budget import ContextBudgetInput
-    from codeagent.core.context.contracts import (
+    from tenon.core.agent import Agent
+    from tenon.core.context.budget import ContextBudgetInput
+    from tenon.core.context.contracts import (
         ContextBudgetPort,
         ContextPreparationRequest,
         ContextPreparer,
         ContextToolDefinition,
     )
-    from codeagent.core.context.model import AgentContext
-    from codeagent.core.contracts.errors import AgentRuntimeError
-    from codeagent.core.contracts.events import AgentEvent
-    from codeagent.core.contracts.messages import Message
-    from codeagent.core.contracts.ports import AgentTool, ModelPort
-    from codeagent.core.contracts.subagent_state import SubagentState
-    from codeagent.core.contracts.subagents import (
+    from tenon.core.context.model import AgentContext
+    from tenon.core.contracts.errors import AgentRuntimeError
+    from tenon.core.contracts.events import AgentEvent
+    from tenon.core.contracts.messages import Message
+    from tenon.core.contracts.ports import AgentTool, ModelPort
+    from tenon.core.contracts.subagent_state import SubagentState
+    from tenon.core.contracts.subagents import (
         SubagentRequest,
         SubagentResult,
         SubagentRunner,
         SubagentStatus,
     )
-    from codeagent.core.execution.runtime import ToolExecutionRuntime
-    from codeagent.core.orchestration.config import AgentLoopConfig
+    from tenon.core.execution.runtime import ToolExecutionRuntime
+    from tenon.core.orchestration.config import AgentLoopConfig
 
     expected = {
         "Agent": Agent,

@@ -4,13 +4,13 @@ import math
 
 import pytest
 
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 def _public(name: str):
-    import codeagent.core as public
+    import tenon.core as public
 
-    assert hasattr(public, name), f"codeagent.core is missing {name}"
+    assert hasattr(public, name), f"tenon.core is missing {name}"
     return getattr(public, name)
 
 
@@ -655,8 +655,8 @@ def test_agent_event_hydrates_correlation_from_legacy_metadata() -> None:
 
 @pytest.mark.contract
 def test_core_facade_exports_subagent_contract_identity() -> None:
-    import codeagent.core.contracts as contracts
-    import codeagent.core as public
+    import tenon.core.contracts as contracts
+    import tenon.core as public
 
     for name in (
         "SubagentStatus",

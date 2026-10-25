@@ -22,7 +22,7 @@ V4-19 的状态栏三栏布局已经能够固定区域边界，但验证阶段�
 
 ## Impact
 
-- 影响 `src/codeagent/app/tui/presentation/status.py`、TUI 状态模型和渲染协调器的状态投影与刷新调度。
+- 影响 `src/tenon/app/tui/presentation/status.py`、TUI 状态模型和渲染协调器的状态投影与刷新调度。
 - 增加 TUI 状态栏单元/契约测试，必要时增加基于 `TuiRenderCoordinator` 的异步集成测试。
 - 更新 `docs/iteration/v0.4.md` 和 `openspec/specs/tui/spec.md` 对应契约。
 - 不修改 `core`、`session`、`ai`、`tools`，不新增依赖，不改变事件和后端公开接口。

@@ -1,6 +1,6 @@
 ## Context
 
-See `proposal.md` for the motivation and scope. 当前 `src/codeagent/core` 已经完成若干行为层面的拆分，但实现仍以多个平铺模块存在；其中 `ports.py` 同时包含外部端口、上下文契约和编排配置，形成了不清晰的依赖方向。现有 `codeagent.core` 根包被 app、session、tools 和测试作为稳定公共 façade 使用，且工作区已经包含前一项 core 运行时重构的未提交修改。
+See `proposal.md` for the motivation and scope. 当前 `src/tenon/core` 已经完成若干行为层面的拆分，但实现仍以多个平铺模块存在；其中 `ports.py` 同时包含外部端口、上下文契约和编排配置，形成了不清晰的依赖方向。现有 `tenon.core` 根包被 app、session、tools 和测试作为稳定公共 façade 使用，且工作区已经包含前一项 core 运行时重构的未提交修改。
 
 本设计只调整物理路径和内部导入，不修改消息、事件、工具协议、会话格式或运行时语义。所有迁移都必须在当前工作树上增量完成，不能回退或覆盖已有修改。
 
@@ -10,7 +10,7 @@ See `proposal.md` for the motivation and scope. 当前 `src/codeagent/core` 已�
 
 - 让每个 core 模块只落在一个可解释的职责子包中。
 - 建立单向依赖：契约层不依赖上下文实现，编排层依赖领域服务，根包只负责公共导出。
-- 保持 `from codeagent.core import ...` 的现有公共导出和对象身份不变。
+- 保持 `from tenon.core import ...` 的现有公共导出和对象身份不变。
 - 删除旧的平铺内部模块路径，避免新旧路径长期并存。
 - 用结构、导出和边界测试防止重新出现循环依赖或跨层导入。
 
@@ -18,7 +18,7 @@ See `proposal.md` for the motivation and scope. 当前 `src/codeagent/core` 已�
 
 - 不重新设计 `Agent` 的执行行为、工具协议或上下文预算算法。
 - 不改变 `AgentLoopConfig`、消息和事件的字段、序列化形态或默认值。
-- 不保留 `codeagent.core.context`、`codeagent.core.ports` 等旧内部模块作为兼容别名。
+- 不保留 `tenon.core.context`、`tenon.core.ports` 等旧内部模块作为兼容别名。
 - 不新增第三方依赖，也不顺手重构 `app`、`session`、`ai` 或 `tools` 的职责。
 
 ## Decisions
@@ -28,7 +28,7 @@ See `proposal.md` for the motivation and scope. 当前 `src/codeagent/core` 已�
 目标结构如下：
 
 ```text
-src/codeagent/core/
+src/tenon/core/
 ├── __init__.py                 # 稳定公共 re-export façade
 ├── agent.py                    # Agent 公共运行时外壳
 ├── contracts/
@@ -122,7 +122,7 @@ agent
 - `execution` 依赖 `contracts`，必要时使用 `context` 的中立数据类型。
 - `orchestration` 依赖 `contracts`、`context`、`model` 和 `execution`。
 - `agent` 只组装 `orchestration` 的公开运行函数和配置。
-- `core/__init__.py` 可以导入各子包公开符号，但任何子包内部不得导入 `codeagent.core` 根 façade。
+- `core/__init__.py` 可以导入各子包公开符号，但任何子包内部不得导入 `tenon.core` 根 façade。
 
 所有子包的 `__init__.py` 保持最小化，不做跨子包的 eager re-export；公共符号统一由 `core/__init__.py` 显式导出。这样既避免包初始化期间的隐式循环，也让内部依赖能直接反映真实模块边界。
 
@@ -137,16 +137,16 @@ agent
 测试分为三类：
 
 1. 包结构测试：检查目标子包和文件存在、旧平铺文件不存在、根 façade 导出不变。
-2. 导入边界测试：扫描 core 生产文件的导入，拒绝 `config`、`ai`、`tools`、`session`，拒绝子包反向导入 `codeagent.core`，并验证核心模块可在干净导入顺序下加载。
+2. 导入边界测试：扫描 core 生产文件的导入，拒绝 `config`、`ai`、`tools`、`session`，拒绝子包反向导入 `tenon.core`，并验证核心模块可在干净导入顺序下加载。
 3. 行为回归测试：复用现有 core、contract、session、app integration 测试，确认路径迁移没有改变执行、预算、事件和取消语义。
 
 测试应优先在新结构的最小导入契约完成后再迁移实现，失败时按“结构 → 导入 → 行为”顺序定位。
 
 ## Risks / Trade-offs
 
-- [内部导入遗漏] → 先以 `rg` 盘点所有 `codeagent.core.<old_module>` 引用，再由 Ruff、窄测试和完整测试共同覆盖；完成后对旧路径做负向导入检查。
+- [内部导入遗漏] → 先以 `rg` 盘点所有 `tenon.core.<old_module>` 引用，再由 Ruff、窄测试和完整测试共同覆盖；完成后对旧路径做负向导入检查。
 - [拆分 `ports.py` 引入循环依赖] → 先把上下文契约和编排配置提取到各自模块，保持子包 `__init__.py` 不做 eager import，并执行多种导入顺序测试。
-- [外部用户依赖旧内部路径] → proposal 明确这是 breaking change；公共 `codeagent.core` façade 不变，并在架构文档中记录迁移后的推荐路径。
+- [外部用户依赖旧内部路径] → proposal 明确这是 breaking change；公共 `tenon.core` façade 不变，并在架构文档中记录迁移后的推荐路径。
 - [工作区已有未提交改动被误覆盖] → 修改前后检查 `git status` 与相关 diff，只使用精确的文件迁移和补丁，不回退前一变更。
 - [大规模重命名降低审查可读性] → 将纯路径迁移与 `ports.py` 的职责提取分开提交式步骤，保持每一步可运行并及时更新任务勾选状态。
 

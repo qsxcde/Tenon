@@ -6,7 +6,7 @@ from tests.tui.view.fixtures import *  # noqa: F401,F403
 def test_status_usage_formatter_is_independent_of_command_dispatch() -> None:
     """用量格式化可脱离命令协调器测试，避免状态展示耦合命令分派。"""
     try:
-        from codeagent.app.tui.commands.status import TuiStatusCommandCoordinator
+        from tenon.app.tui.commands.status import TuiStatusCommandCoordinator
     except ImportError:
         TuiStatusCommandCoordinator = None
 
@@ -15,8 +15,8 @@ def test_status_usage_formatter_is_independent_of_command_dispatch() -> None:
 
 
 def test_context_command_shows_full_diagnostics_without_running_session() -> None:
-    from codeagent.core.context.budget import ContextBudgetSnapshot
-    from codeagent.core.context.diagnostics import ContextDiagnostics
+    from tenon.core.context.budget import ContextBudgetSnapshot
+    from tenon.core.context.diagnostics import ContextDiagnostics
 
     app, backend, manager = _make_app()
     manager.current.context_diagnostics = ContextDiagnostics.from_budget(
@@ -116,7 +116,7 @@ def test_status_command_includes_runtime_and_render_diagnostics():
 
 
 def test_status_shows_model_capabilities_and_unknown_state():
-    from codeagent.app.composition.model.capabilities import ModelCapabilities
+    from tenon.app.composition.model.capabilities import ModelCapabilities
 
     app, backend, manager = _make_app()
     app.model.status.model = "diagnostic-model"
@@ -141,7 +141,7 @@ def test_status_shows_model_capabilities_and_unknown_state():
 
 
 def test_status_separates_cache_capability_from_observed_usage():
-    from codeagent.app.composition.model.capabilities import ModelCapabilities
+    from tenon.app.composition.model.capabilities import ModelCapabilities
 
     app, backend, manager = _make_app()
     app.model.status.model_capabilities = ModelCapabilities(
@@ -252,7 +252,7 @@ def test_status_shows_skills_and_diagnostics():
 
 def test_status_shows_package_and_bootstrap_metadata():
     """/status 显示 Package 来源、revision 和 Bootstrap 状态。"""
-    from codeagent.app.skills.models import Skill
+    from tenon.app.skills.models import Skill
 
     skill = Skill(
         "using-superpowers",
@@ -283,7 +283,7 @@ def test_status_shows_mcp_diagnostics():
 
 def test_status_shows_tool_capability_diagnostics():
     """/status 展示工具环境能力，而不是等到调用失败后才暴露问题。"""
-    from codeagent.tools.capabilities import ToolCapabilities, ToolCapability
+    from tenon.tools.capabilities import ToolCapabilities, ToolCapability
 
     app, backend, manager = _make_app()
     manager.tool_capabilities = ToolCapabilities(

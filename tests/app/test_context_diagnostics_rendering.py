@@ -10,7 +10,7 @@ from typing import Any
 
 import pytest
 
-from codeagent.app.context_diagnostics import format_context_diagnostics
+from tenon.app.context_diagnostics import format_context_diagnostics
 
 pytestmark = pytest.mark.unit
 

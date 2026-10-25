@@ -1,7 +1,7 @@
 # 代码全面评审报告
 
 - **评审日期**：2026-08-28
-- **评审范围**：`src/codeagent/` 全部 264 个 Python 文件（20,115 行），`tests/`（15,364 行）用于交叉验证
+- **评审范围**：`src/tenon/` 全部 264 个 Python 文件（20,115 行），`tests/`（15,364 行）用于交叉验证
 - **评审方法**：分层并行静态审查 + **安全分类器实测验证**（41 条攻击载荷）+ 关键结论逐条源码复核 + 全量测试套件运行
 - **测试基线**：`1022 passed, 3 failed`（3 条失败见 M18，均由宿主 bash 环境触发，但暴露了真实设计缺陷）
 
@@ -29,8 +29,8 @@
 ## S1. 安全分类器存在多条可绕过的执行路径（实测 `allow`）
 
 **文件**：
-- `src/codeagent/tools/security/classifier.py:23-36, 73-145, 161-191`
-- `src/codeagent/tools/security/bash_rules.py:11-22, 188-222`
+- `src/tenon/tools/security/classifier.py:23-36, 73-145, 161-191`
+- `src/tenon/tools/security/bash_rules.py:11-22, 188-222`
 
 **问题描述**：
 对分类器注入 41 条攻击载荷实测。DENY 判定**实质依赖字面量正则** `\brm\s+(-[a-zA-Z]*f[a-zA-Z]*\s+)+/`。凡是绕过该字面字符串的表达，保护即失效。`perl -e`/`ruby -e`/`awk`/`ssh`/`git config` 几条被拒，仅仅是因为载荷里恰好含有 `rm -rf /` 这一子串。
@@ -62,15 +62,15 @@
 
 ## S2. 敏感文件读取无实质边界，SSH/云凭据可直接读取
 
-**文件**：`src/codeagent/tools/security/filesystem.py:11-13, 56-70`
+**文件**：`src/tenon/tools/security/filesystem.py:11-13, 56-70`
 
 **问题描述**：
 ```python
 _SECRET_PATH_RE = re.compile(
-    r"(^|[/\\])\.env([^a-z0-9]|$)|\.codeagent(/|$)", re.IGNORECASE
+    r"(^|[/\\])\.env([^a-z0-9]|$)|\.tenon(/|$)", re.IGNORECASE
 )
 ```
-敏感路径仅覆盖 `.env` 与 `.codeagent` 两项。而 `classify_file` 对读操作越界**固定放行**：
+敏感路径仅覆盖 `.env` 与 `.tenon` 两项。而 `classify_file` 对读操作越界**固定放行**：
 ```python
 if tool_name in _READ_TOOLS:
     return SecurityDecision(ALLOW, f"越界读取: {path}", warning=True)
@@ -82,7 +82,7 @@ if tool_name in _READ_TOOLS:
 | `read` | `C:/Users/<user>/.ssh/id_rsa` | **allow** |
 | `read` | `C:/Users/<user>/.aws/credentials` | **allow** |
 | `read` | `.git-credentials` | **allow** |
-| `read` | `D:/project/codeAgent/../../Windows/win.ini` | **allow** |
+| `read` | `D:/project/tenon/../../Windows/win.ini` | **allow** |
 
 `warning=True` 只是给人类看的提示，**不产生任何阻断**。SSH 私钥、AWS 凭据、Git 凭据均可被模型直接读入上下文，并可能随会话持久化写入磁盘、或被后续工具调用带出。
 
@@ -95,13 +95,13 @@ if tool_name in _READ_TOOLS:
 
 ## S3. 会话持久化锁仅进程内有效，跨进程完全无保护
 
-**文件**：`src/codeagent/session/persistence/locking.py:8-22`（已复核确认）
+**文件**：`src/tenon/session/persistence/locking.py:8-22`（已复核确认）
 
 ```python
 _path_locks: dict[str, threading.RLock] = {}
 def path_lock(path: str | Path) -> threading.RLock:
 ```
-锁是**纯进程内 `threading.RLock`**，无任何 OS 级锁（`fcntl.flock` / `msvcrt.locking` / 独立 lock 文件）。两个 `codeagent` 进程（例如 TUI 与后台任务、或两个终端窗口）操作同一 `~/.codeagent/sessions/<id>.jsonl` 时，追加写入会交错，索引与数据文件分叉。
+锁是**纯进程内 `threading.RLock`**，无任何 OS 级锁（`fcntl.flock` / `msvcrt.locking` / 独立 lock 文件）。两个 `tenon` 进程（例如 TUI 与后台任务、或两个终端窗口）操作同一 `~/.tenon/sessions/<id>.jsonl` 时，追加写入会交错，索引与数据文件分叉。
 
 **改进建议**：改为独立 `.lock` 文件 + `fcntl.flock(LOCK_EX|LOCK_NB)`（POSIX）/ `msvcrt.locking`（Windows），保留 `RLock` 做进程内串行；锁获取必须带超时与陈旧锁清理，避免死锁。
 
@@ -109,7 +109,7 @@ def path_lock(path: str | Path) -> threading.RLock:
 
 ## S4. `commit_turn` 回滚采用整文件重写，可擦除其它进程的合法写入
 
-**文件**：`src/codeagent/session/persistence/jsonl_store.py:304, 329-335`（已复核确认）
+**文件**：`src/tenon/session/persistence/jsonl_store.py:304, 329-335`（已复核确认）
 
 ```python
 original = path.read_bytes()          # 每轮全量读入内存
@@ -129,8 +129,8 @@ except BaseException:
 ## S5. 会话压缩可清空全部历史，并导致上下文「双重生效」
 
 **文件**：
-- `src/codeagent/session/session.py:315-352`
-- `src/codeagent/session/compaction/policy.py:30-33`
+- `src/tenon/session/session.py:315-352`
+- `src/tenon/session/compaction/policy.py:30-33`
 
 **问题描述**：
 `session.py` 只挡了 `cut <= 0`，**未挡 `cut >= len(history)`**：
@@ -155,7 +155,7 @@ kept   = self._history[cut:]          # cut == len → kept == []
 
 ## S6. 非流式 HTTP 读超时为无限，可导致永久挂起
 
-**文件**：`src/codeagent/ai/transport/openai_compat.py:64`（已复核确认）
+**文件**：`src/tenon/ai/transport/openai_compat.py:64`（已复核确认）
 
 ```python
 self._timeout: httpx.Timeout = httpx.Timeout(connect=10.0, read=None, write=30.0, pool=10.0)
@@ -168,7 +168,7 @@ self._timeout: httpx.Timeout = httpx.Timeout(connect=10.0, read=None, write=30.0
 
 ## S7. 主对话路径完全没有异常捕获，错误静默消失
 
-**文件**：`src/codeagent/app/tui/conversation_coordinator.py:134-140`
+**文件**：`src/tenon/app/tui/conversation_coordinator.py:134-140`
 
 ```python
 async def _run() -> None:
@@ -185,7 +185,7 @@ async def _run() -> None:
 
 ## S8. TUI 事件循环内执行无超时的同步 `git clone`
 
-**文件**：`src/codeagent/app/skill_packages.py:341-346`（已复核确认）
+**文件**：`src/tenon/app/skill_packages.py:341-346`（已复核确认）
 
 ```python
 result = subprocess.run(
@@ -292,7 +292,7 @@ return {"size": stat.st_size, "mtime_ns": stat.st_mtime_ns}
 ```python
 if os.name != "nt": os.chmod(tmp, 0o600)
 ```
-本项目主平台为 Windows，写有 `*_API_KEY` 的 `~/.codeagent/.env` 落到默认 ACL，同机其他用户可读。
+本项目主平台为 Windows，写有 `*_API_KEY` 的 `~/.tenon/.env` 落到默认 ACL，同机其他用户可读。
 **建议**：Windows 分支用 `icacls` 或 `win32security` 显式裁剪继承的 ACL。
 
 ## M10. `.env` 值转义未处理换行，可注入任意行
@@ -357,7 +357,7 @@ if os.name != "nt": os.chmod(tmp, 0o600)
 if decision.action == "ask" and approval_mode == "allow":
     return PolicyDecision("allow", decision.reason)
 ```
-`codeagent --yes` 会把 `sudo`、`curl|sh`、`rm -r`、`python -c`、`chmod -R`、`find -delete`、`dd of=/dev/...` 全部自动放行。帮助文本已声明「显式承担风险」，属设计意图，但**在 S1/S2 修复前，该标志的实际风险面远大于文档描述**（因为本应 ASK 之外的命令还有 7 类被判 allow）。
+`tenon --yes` 会把 `sudo`、`curl|sh`、`rm -r`、`python -c`、`chmod -R`、`find -delete`、`dd of=/dev/...` 全部自动放行。帮助文本已声明「显式承担风险」，属设计意图，但**在 S1/S2 修复前，该标志的实际风险面远大于文档描述**（因为本应 ASK 之外的命令还有 7 类被判 allow）。
 **建议**：S1/S2 修复前，考虑在 `--yes` 下对 DENY 级危险模式以外的「高危但当前被 allow 的组合」（`tee /etc`、`docker -v`、`base64|sh`）补一层硬拦截；至少在帮助文本中列出具体放行范围。
 
 ---
@@ -386,7 +386,7 @@ if decision.action == "ask" and approval_mode == "allow":
 评审中也确认了若干**质量明显高于平均**的实现，建议作为后续重构的参考范式：
 
 1. **MCP 客户端生命周期管理**（`tools/mcp/client.py`）——`_active_calls` 集合跟踪在途 Future、`close()` 逐个 cancel、`async with` 保证会话与 stdio 传输收尾、线程 `join(timeout=5.0)` 防子进程泄漏、`acall_tool` 在 `CancelledError` 时用 `asyncio.shield` 做优雅取消后**正确 re-raise**。这是全项目资源释放做得最扎实的模块。
-2. **依赖方向约束零违规**——`core/` 仅 import `codeagent.core.*`，`session/` 仅 import `core.*` 与 `session.*`，`AGENTS.md` 声明的架构规则被严格遵守。
+2. **依赖方向约束零违规**——`core/` 仅 import `tenon.core.*`，`session/` 仅 import `core.*` 与 `session.*`，`AGENTS.md` 声明的架构规则被严格遵守。
 3. **凭据处理**——全链路 `SecretStr`，API key 从不进入 `Settings`（`Settings` 仅含 `llm_provider`），`configured_providers()` 只返回 provider 名；全仓零硬编码密钥。
 4. **JSONL 部分写入容错**（`jsonl_store.py:119-122`）——解析时跳过 `JSONDecodeError` 行而非中断整个文件，崩溃恢复设计得当。
 5. **索引原子写入**（`index.py:280-288`）——temp + rename + fsync，是教科书式实现（可惜数据文件没跟上，见 S4/M2）。

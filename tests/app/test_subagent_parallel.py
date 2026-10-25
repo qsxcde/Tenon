@@ -6,12 +6,12 @@ import asyncio
 
 import pytest
 
-from codeagent.app.composition.subagent.factory import create_subagent_runner
-from codeagent.app.composition.subagent.runner import (
+from tenon.app.composition.subagent.factory import create_subagent_runner
+from tenon.app.composition.subagent.runner import (
     ParallelSubagentRunner,
     SerialSubagentRunner,
 )
-from codeagent.core.contracts.subagents import SubagentRequest, SubagentStatus
+from tenon.core.contracts.subagents import SubagentRequest, SubagentStatus
 
 
 class _FakeChild:

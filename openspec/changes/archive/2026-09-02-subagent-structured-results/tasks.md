@@ -3,7 +3,7 @@
 - [x] 1.1 在 core 契约测试中覆盖 finding、evidence、usage、artifact 的构造、JSON-safe 序列化、默认值和非法输入拒绝。
 - [x] 1.2 在 core 契约测试中覆盖结果数量/字符/token 边界、evidence id 唯一性及 finding 引用完整性。
 - [x] 1.3 新增四类 frozen provider-neutral 结果值对象和固定边界常量，提供 `to_dict()` 并使用 `invalid_result` 归一错误。
-- [x] 1.4 扩展 `SubagentResult` 的结构化字段、归一化逻辑和 `to_dict()`，更新 `core.contracts` 与 `codeagent.core` 公共导出。
+- [x] 1.4 扩展 `SubagentResult` 的结构化字段、归一化逻辑和 `to_dict()`，更新 `core.contracts` 与 `tenon.core` 公共导出。
 
 ## 2. 子运行事实提取
 

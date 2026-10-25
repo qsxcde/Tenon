@@ -55,7 +55,7 @@ def test_load_messages_roundtrip_with_parent_chain(tmp_path):
 
 
 def test_tool_output_metadata_roundtrips_without_raw_unbounded_payload(tmp_path):
-    from codeagent.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
+    from tenon.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
 
     store = _store(tmp_path)
     store.create("s1")
@@ -86,7 +86,7 @@ def test_tool_output_metadata_roundtrips_without_raw_unbounded_payload(tmp_path)
 
 
 def test_unrecoverable_truncation_is_incomplete_after_restore(tmp_path):
-    from codeagent.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
+    from tenon.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
 
     store = _store(tmp_path)
     store.create("s1")
@@ -238,7 +238,7 @@ def test_legacy_file_without_activity_uses_creation_timestamp(tmp_path):
 
 def test_message_activity_timestamp_survives_reopen(tmp_path, monkeypatch):
     """消息活动时间写入 JSONL 并可在索引失效后重建。"""
-    from codeagent.session.persistence.jsonl import store as jsonl_store
+    from tenon.session.persistence.jsonl import store as jsonl_store
 
     clock = iter(
         (

@@ -23,9 +23,9 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/components.py`: 消息、活动和工具差异组件，以及 transcript 间距与行映射。
-- `src/codeagent/app/tui/theme.py`: 新增消息背景、差异和活动提示的受控样式标签。
-- `src/codeagent/app/tui/view.py` 与 `src/codeagent/app/tui/backend.py`: 活动动画的事件驱动调度接口。
-- `src/codeagent/app/tui/textual_backend.py`: 在 Textual 生命周期内刷新活动提示。
-- `src/codeagent/session/session.py` 与 `src/codeagent/core/events.py`: 工具结果携带 tool call ID 元数据。
+- `src/tenon/app/tui/components.py`: 消息、活动和工具差异组件，以及 transcript 间距与行映射。
+- `src/tenon/app/tui/theme.py`: 新增消息背景、差异和活动提示的受控样式标签。
+- `src/tenon/app/tui/view.py` 与 `src/tenon/app/tui/backend.py`: 活动动画的事件驱动调度接口。
+- `src/tenon/app/tui/textual_backend.py`: 在 Textual 生命周期内刷新活动提示。
+- `src/tenon/session/session.py` 与 `src/tenon/core/events.py`: 工具结果携带 tool call ID 元数据。
 - `tests/tui/`、`tests/session/` 与 `openspec/specs/tui/spec.md`: 覆盖并发归属、差异渲染、活动提示和更新后的视觉契约。

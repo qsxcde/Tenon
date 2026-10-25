@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
-from codeagent.core.contracts.ports import PolicyDecision, ToolDecision
-from codeagent.core.context.model import AgentContext
-from codeagent.core.execution.runtime import ToolExecutionRuntime
-from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.core.orchestration.tool_call import new_tool_result
-from codeagent.core.orchestration.tool_hooks import run_pre_chain
+from tenon.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
+from tenon.core.contracts.ports import PolicyDecision, ToolDecision
+from tenon.core.context.model import AgentContext
+from tenon.core.execution.runtime import ToolExecutionRuntime
+from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.tool_call import new_tool_result
+from tenon.core.orchestration.tool_hooks import run_pre_chain
 
 
 class _EchoTool:
@@ -157,7 +157,7 @@ async def test_invalid_hook_return_fails_closed():
 
 async def test_policy_gate_receives_rewritten_args():
     """策略门禁位于链尾并对改参后的调用判定(session 装配接线)。"""
-    from codeagent.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.controller import SessionRuntime
 
     captured: list = []
 

@@ -422,7 +422,7 @@
 
 ### Requirement: 插件目录发现与加载
 
-系统 SHALL 从用户插件目录(`~/.codeagent/extensions/<目录>/`)发现插件:每个插件目录 SHALL 含 `codeagent-plugin.json` manifest(id/name/version/module/tools)与 manifest 声明的 Python 模块;插件模块 SHALL 导出 `TOOL_SPECS`(与内建 `BUILTIN_TOOL_SPECS` 同构的工具注册项)。插件工具 SHALL 以 `ext__<插件id>__<工具名>` 命名空间注册,插件 id 与工具名 SHALL 匹配 `^[a-z][a-z0-9_]*$` 且不含 `__`;manifest 的 `module` 路径解析后 SHALL 仍在插件目录内,越界 SHALL 拒绝加载。单插件的任何失败(manifest 非法、import 失败、导出缺失、构建异常、id 冲突)SHALL 产生诊断并跳过该插件,不得阻塞其它插件与内建工具装配;插件目录缺失 SHALL 装配空插件集且不产生诊断。插件代码与内建工具同进程执行,SHALL 由目录放置即信任模型覆盖(用户放入插件目录 = 授权执行)。
+系统 SHALL 从用户插件目录(`~/.tenon/extensions/<目录>/`)发现插件:每个插件目录 SHALL 含 `tenon-plugin.json` manifest(id/name/version/module/tools)与 manifest 声明的 Python 模块;插件模块 SHALL 导出 `TOOL_SPECS`(与内建 `BUILTIN_TOOL_SPECS` 同构的工具注册项)。插件工具 SHALL 以 `ext__<插件id>__<工具名>` 命名空间注册,插件 id 与工具名 SHALL 匹配 `^[a-z][a-z0-9_]*$` 且不含 `__`;manifest 的 `module` 路径解析后 SHALL 仍在插件目录内,越界 SHALL 拒绝加载。单插件的任何失败(manifest 非法、import 失败、导出缺失、构建异常、id 冲突)SHALL 产生诊断并跳过该插件,不得阻塞其它插件与内建工具装配;插件目录缺失 SHALL 装配空插件集且不产生诊断。插件代码与内建工具同进程执行,SHALL 由目录放置即信任模型覆盖(用户放入插件目录 = 授权执行)。
 
 #### Scenario: 插件工具装配
 
@@ -451,7 +451,7 @@
 
 ### Requirement: 扩展工具安全分类
 
-安全分类器 SHALL 对 `ext__` 前缀的插件工具实施独立分类:默认 SHALL 为 ask(需用户确认,无确认通道时 fail-closed 拒绝);`~/.codeagent/extensions.json` 的 `permissions.deny/ask/allow` 三级规则(glob,优先级 deny > ask > allow)SHALL 可显式放行或拒绝;规则匹配语义 SHALL 与 MCP 权限规则一致(`ext__*`、`ext__<插件id>__*`、精确名)。插件工具 SHALL 不得通过命名或参数绕过该分类。
+安全分类器 SHALL 对 `ext__` 前缀的插件工具实施独立分类:默认 SHALL 为 ask(需用户确认,无确认通道时 fail-closed 拒绝);`~/.tenon/extensions.json` 的 `permissions.deny/ask/allow` 三级规则(glob,优先级 deny > ask > allow)SHALL 可显式放行或拒绝;规则匹配语义 SHALL 与 MCP 权限规则一致(`ext__*`、`ext__<插件id>__*`、精确名)。插件工具 SHALL 不得通过命名或参数绕过该分类。
 
 #### Scenario: 默认需确认
 
@@ -494,7 +494,7 @@
 
 ### Requirement: 写前 checkpoint 与恢复
 
-`write` 与 `edit` SHALL 在覆盖文件前记录原文快照(写入前文件不存在时记录"不存在"),快照 SHALL 在路径锁内、实际写入前完成,保证快照内容就是即将被覆盖的内容。快照 SHALL 持久化在用户配置目录下,不进入会话 JSONL,也不改变会话提交语义。系统 SHALL 提供 LIFO 恢复入口(`codeagent undo`),支持列出最近快照、预览与恢复;恢复一次消耗一条快照,连续调用可逐级回退;快照条数 SHALL 有上限并淘汰最旧条目。无快照时恢复 SHALL 返回明确错误而不是静默成功。快照记录失败 SHALL 不阻塞正常写入。
+`write` 与 `edit` SHALL 在覆盖文件前记录原文快照(写入前文件不存在时记录"不存在"),快照 SHALL 在路径锁内、实际写入前完成,保证快照内容就是即将被覆盖的内容。快照 SHALL 持久化在用户配置目录下,不进入会话 JSONL,也不改变会话提交语义。系统 SHALL 提供 LIFO 恢复入口(`tenon undo`),支持列出最近快照、预览与恢复;恢复一次消耗一条快照,连续调用可逐级回退;快照条数 SHALL 有上限并淘汰最旧条目。无快照时恢复 SHALL 返回明确错误而不是静默成功。快照记录失败 SHALL 不阻塞正常写入。
 
 #### Scenario: 覆盖前保存原文
 

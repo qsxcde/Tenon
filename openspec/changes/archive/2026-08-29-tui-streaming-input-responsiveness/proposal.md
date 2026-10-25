@@ -23,6 +23,6 @@ v4-18 的目标是让 TUI 在模型持续输出、工具执行和长 Markdown �
 
 ## Impact
 
-- 主要影响 `src/codeagent/app/tui/rendering/`、`src/codeagent/app/tui/presentation/blocks/`、必要的 TUI 状态/布局代码和 Textual 适配测试。
+- 主要影响 `src/tenon/app/tui/rendering/`、`src/tenon/app/tui/presentation/blocks/`、必要的 TUI 状态/布局代码和 Textual 适配测试。
 - 扩展 `tests/tui/` 的事件循环回归覆盖及 TUI 性能夹具，可能增加开发期诊断指标，但不引入新的运行时依赖。
 - 需要同步 `openspec/specs/tui/spec.md` 的 delta；不改变已有公共 core/session API 和持久化格式。

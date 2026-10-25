@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.ai.providers.all import (
+from tenon.ai.providers.all import (
     BUILTIN_PROVIDERS,
     PROVIDERS,
     provider_definition,
     provider_definitions,
     register_provider,
 )
-from codeagent.ai.providers.base import ProviderDefinition
-from codeagent.ai.transport.shapes import (
+from tenon.ai.providers.base import ProviderDefinition
+from tenon.ai.transport.shapes import (
     DEFAULT_API_SHAPE,
     ApiShape,
     register_api_shape,
@@ -62,14 +62,14 @@ def test_register_custom_provider_and_reject_duplicates():
         with pytest.raises(ValueError, match="不能重复注册"):
             register_provider(ProviderDefinition(provider_id="deepseek", factory=_factory))
     finally:
-        from codeagent.ai.providers.all import _PROVIDER_DEFINITIONS
+        from tenon.ai.providers.all import _PROVIDER_DEFINITIONS
 
         _PROVIDER_DEFINITIONS.pop("acme-gateway", None)
         PROVIDERS.pop("acme-gateway", None)
 
 
 def test_register_new_shape_is_idempotent_guarded():
-    shape = ApiShape(name="test-shape", transport="codeagent.ai.transport.test")
+    shape = ApiShape(name="test-shape", transport="tenon.ai.transport.test")
     register_api_shape(shape)
     assert resolve_api_shape("test-shape") is shape
     with pytest.raises(ValueError, match="重复登记"):

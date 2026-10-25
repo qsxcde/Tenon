@@ -23,7 +23,7 @@
 
 ## Impact
 
-- 主要影响 `src/codeagent/ai/`、`src/codeagent/app/composition/` 及其对应测试导入路径。
+- 主要影响 `src/tenon/ai/`、`src/tenon/app/composition/` 及其对应测试导入路径。
 - 可能需要为旧导入保留短期兼容 re-export，或同步更新内部调用方与测试。
 - provider 配置类仍属于 AI 层，但环境文件路径和应用配置对象不再由 AI 层自行取得。
 - 模型目录仍支持内置目录与用户 `models.json` 合并；目录文件路径改由组合根显式传入。

@@ -80,12 +80,12 @@ def _isolate_config_dir(tmp_path, monkeypatch):
     """把 ensure_config_files 的写入位置重定向到临时目录。
 
     避免走启动路径的测试(container/session_client)在用户真实
-    ``~/.codeagent`` 里生成模板文件;读取路径(Settings/ModelStore)
+    ``~/.tenon`` 里生成模板文件;读取路径(Settings/ModelStore)
     仍只读,无副作用。
     """
-    import codeagent.app.config as config_mod
+    import tenon.app.config as config_mod
 
-    monkeypatch.setattr(config_mod, "CONFIG_DIR", tmp_path / ".codeagent")
+    monkeypatch.setattr(config_mod, "CONFIG_DIR", tmp_path / ".tenon")
 
 
 @pytest_asyncio.fixture(autouse=True)

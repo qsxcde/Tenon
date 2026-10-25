@@ -7,23 +7,23 @@ from dataclasses import dataclass
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.composition.model.port import ChatModelPort
-from codeagent.app.composition.subagent.runner import SerialSubagentRunner
-from codeagent.core import AgentLoopConfig
-from codeagent.core.contracts.messages import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.composition.model.port import ChatModelPort
+from tenon.app.composition.subagent.runner import SerialSubagentRunner
+from tenon.core import AgentLoopConfig
+from tenon.core.contracts.messages import (
     Message,
     ToolCall,
     ToolExecutionStatus,
     ToolOutputMetadata,
     ToolResult,
 )
-from codeagent.core.contracts.subagents import (
+from tenon.core.contracts.subagents import (
     SubagentBudget,
     SubagentRequest,
     SubagentUsage,
 )
-from codeagent.session import AgentSession, EventBus
+from tenon.session import AgentSession, EventBus
 
 
 @dataclass
@@ -57,7 +57,7 @@ class _ArtifactTool:
 
 @pytest.mark.unit
 def test_extract_child_facts_keeps_bounded_tool_evidence_and_first_artifact() -> None:
-    from codeagent.app.composition.subagent.result_extraction import extract_child_facts
+    from tenon.app.composition.subagent.result_extraction import extract_child_facts
 
     child = _Child(
         history=[
@@ -108,7 +108,7 @@ def test_extract_child_facts_keeps_bounded_tool_evidence_and_first_artifact() ->
 
 @pytest.mark.unit
 def test_extract_child_facts_limits_evidence_without_copying_transcript() -> None:
-    from codeagent.app.composition.subagent.result_extraction import extract_child_facts
+    from tenon.app.composition.subagent.result_extraction import extract_child_facts
 
     history: list[Message] = []
     for index in range(40):
@@ -143,7 +143,7 @@ def test_extract_child_facts_limits_evidence_without_copying_transcript() -> Non
 
 @pytest.mark.unit
 def test_child_usage_prefers_run_total_and_falls_back_to_legacy_views() -> None:
-    from codeagent.app.composition.subagent.result_extraction import child_usage
+    from tenon.app.composition.subagent.result_extraction import child_usage
 
     child = _Child([], run_usage=SubagentUsage(input_tokens=30, output_tokens=12))
     child.last_actual_usage = SubagentUsage(input_tokens=3, output_tokens=1)  # type: ignore[attr-defined]
@@ -156,10 +156,10 @@ def test_child_usage_prefers_run_total_and_falls_back_to_legacy_views() -> None:
 
 @pytest.mark.unit
 def test_runner_result_contains_extracted_child_facts() -> None:
-    from codeagent.app.composition.subagent.active import ActiveDelegation
-    from codeagent.app.composition.subagent.budget import effective_budget
-    from codeagent.app.composition.subagent.runner_execution import _result_from_child
-    from codeagent.core.contracts.subagents import SubagentStatus
+    from tenon.app.composition.subagent.active import ActiveDelegation
+    from tenon.app.composition.subagent.budget import effective_budget
+    from tenon.app.composition.subagent.runner_execution import _result_from_child
+    from tenon.core.contracts.subagents import SubagentStatus
 
     child = _Child(
         history=[

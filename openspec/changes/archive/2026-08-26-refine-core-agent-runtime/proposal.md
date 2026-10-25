@@ -25,7 +25,7 @@
 
 ## Impact
 
-- 受影响代码：`src/codeagent/core/`、`src/codeagent/session/`、`src/codeagent/app/composition/`、`src/codeagent/tools/` 及相关测试。
+- 受影响代码：`src/tenon/core/`、`src/tenon/session/`、`src/tenon/app/composition/`、`src/tenon/tools/` 及相关测试。
 - 受影响接口：`AgentPorts`、`ModelPort`、`StreamEvent`、`run_turn`、工具执行端口和 AgentEvent 类型；这是仓库内部 API 的破坏性重构。
 - 不改变 AI 层的职责边界：`ai/` 继续只提供模型、Provider、Transport 和 Catalog，模型适配由组合根完成。
 - 不要求引入新的第三方编排框架；实现继续保持离线可测和标准库依赖方向。

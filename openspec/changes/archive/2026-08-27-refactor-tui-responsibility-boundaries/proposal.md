@@ -22,7 +22,7 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/view.py`、`components.py` 及新增的同层职责模块。
-- `src/codeagent/app/tui/backend.py`、`textual_backend.py`、`md_renderer.py` 的导入边界。
-- `src/codeagent/app/composition/tui_factory.py` 的装配方式。
+- `src/tenon/app/tui/view.py`、`components.py` 及新增的同层职责模块。
+- `src/tenon/app/tui/backend.py`、`textual_backend.py`、`md_renderer.py` 的导入边界。
+- `src/tenon/app/composition/tui_factory.py` 的装配方式。
 - `tests/tui/` 和 `tests/test_decoupling.py`。

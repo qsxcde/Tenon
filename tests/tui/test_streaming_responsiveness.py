@@ -6,10 +6,10 @@ import asyncio
 
 import pytest
 
-from codeagent.app.tui.adapters.textual.backend import TextualBackend
-from codeagent.app.tui.application import TuiApp
-from codeagent.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.app.tui.adapters.textual.backend import TextualBackend
+from tenon.app.tui.application import TuiApp
+from tenon.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock
+from tenon.core.contracts.events import AgentEvent, EventType
 from tests.tui.view.fixtures import FakeManager, FakeSession
 from tests.tui.performance_helpers import (
     assert_control_latency,

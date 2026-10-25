@@ -24,7 +24,7 @@
 
 ## Impact
 
-- 代码:`src/codeagent/app/tui/textual_backend.py`(过滤器与背景设置、App 按键分派、_InputArea 键位拦截)、`src/codeagent/app/tui/components.py`(stderr 空标签)。
+- 代码:`src/tenon/app/tui/textual_backend.py`(过滤器与背景设置、App 按键分派、_InputArea 键位拦截)、`src/tenon/app/tui/components.py`(stderr 空标签)。
 - 规范:`openspec/specs/tui/spec.md` 三个 Requirement 的增量同步。
 - 测试:`tests/tui/` 相关单测(按键分派、确认键拦截条件、背景过滤器)。
 - 无 API/依赖变更;不改变滚轮滚动、点击折叠、Esc 打断等已验证正常的行为。

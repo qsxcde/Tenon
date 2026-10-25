@@ -15,8 +15,8 @@
 ```
 来源(布局统一为 <root>/skills/<name>/SKILL.md,一技能一目录):
   内建    resources/skills/            (包内资源,importlib.resources)
-  个人级  <config_dir>/skills/         (= ~/.codeagent/skills/,与 ~/.claude/skills/ 同构)
-  项目级  <cwd>/.codeagent/skills/     (用户定案;不兼容 .claude/skills,但文件本身复制即用)
+  个人级  <config_dir>/skills/         (= ~/.tenon/skills/,与 ~/.claude/skills/ 同构)
+  项目级  <cwd>/.tenon/skills/     (用户定案;不兼容 .claude/skills,但文件本身复制即用)
 
 同名优先级:个人 > 项目 > 内建(Claude 官方语义:personal overrides project;任意级覆盖 bundled)
 ```

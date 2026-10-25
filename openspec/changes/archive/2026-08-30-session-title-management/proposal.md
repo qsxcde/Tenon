@@ -23,6 +23,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/session/persistence/`、`src/codeagent/session/manager/` 和 `src/codeagent/app/tui/commands/`。
+- 影响 `src/tenon/session/persistence/`、`src/tenon/session/manager/` 和 `src/tenon/app/tui/commands/`。
 - 影响 `openspec/specs/sessions`、`openspec/specs/tui`、Session/TUI 测试和 v0.4 迭代文档。
 - 不新增依赖；不改变 JSONL 历史消息格式，标题继续以独立 `meta` entry 追加保存。

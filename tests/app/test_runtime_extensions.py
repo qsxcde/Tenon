@@ -7,7 +7,7 @@ import pytest
 
 
 def _extension_set():
-    from codeagent.app.composition.runtime.extensions import RuntimeExtensions
+    from tenon.app.composition.runtime.extensions import RuntimeExtensions
 
     transformer = object()
     preparer = object()
@@ -30,7 +30,7 @@ def _extension_set():
 
 
 def test_runtime_extensions_are_immutable_and_normalize_hook_order() -> None:
-    from codeagent.app.composition.runtime.extensions import RuntimeExtensions
+    from tenon.app.composition.runtime.extensions import RuntimeExtensions
 
     first = lambda event: None
     second = lambda event: None
@@ -42,12 +42,12 @@ def test_runtime_extensions_are_immutable_and_normalize_hook_order() -> None:
 
 
 def test_create_agent_config_injects_every_runtime_extension() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import create_agent_config
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import create_agent_config
 
     extensions, values = _extension_set()
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         return_value=FakeClient(response="ok"),
     ):
         config = create_agent_config(provider="fake", extensions=extensions)
@@ -63,13 +63,13 @@ def test_create_agent_config_injects_every_runtime_extension() -> None:
 
 
 def test_explicit_extensions_take_priority_over_legacy_lifecycle_hooks() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import RuntimeExtensions, create_agent_config
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import RuntimeExtensions, create_agent_config
 
     explicit = lambda event: None
     legacy = lambda event: None
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         return_value=FakeClient(response="ok"),
     ):
         config = create_agent_config(
@@ -82,15 +82,15 @@ def test_explicit_extensions_take_priority_over_legacy_lifecycle_hooks() -> None
 
 
 def test_session_restore_reuses_the_same_runtime_extensions() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import create_session_manager
-    from codeagent.session.persistence import MemoryStore
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import create_session_manager
+    from tenon.session.persistence import MemoryStore
 
     extensions, values = _extension_set()
     store = MemoryStore()
     store.create("saved", model="fake-model", effort="high")
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         return_value=FakeClient(response="ok"),
     ):
         manager = create_session_manager(
@@ -112,12 +112,12 @@ def test_session_restore_reuses_the_same_runtime_extensions() -> None:
 
 
 def test_tui_rebuild_keeps_runtime_extensions() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import create_tui_app
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import create_tui_app
 
     extensions, values = _extension_set()
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         return_value=FakeClient(response="ok"),
     ):
         app = create_tui_app(
@@ -140,10 +140,10 @@ def test_tui_rebuild_keeps_runtime_extensions() -> None:
 
 
 async def test_session_runtime_runs_injected_before_tool_hook() -> None:
-    from codeagent.core import AgentContext, ToolDecision
-    from codeagent.core.contracts.messages import ToolCall
-    from codeagent.core.orchestration.config import AgentLoopConfig
-    from codeagent.session.runtime.controller import SessionRuntime
+    from tenon.core import AgentContext, ToolDecision
+    from tenon.core.contracts.messages import ToolCall
+    from tenon.core.orchestration.config import AgentLoopConfig
+    from tenon.session.runtime.controller import SessionRuntime
 
     captured = []
     seen = []

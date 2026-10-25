@@ -1,4 +1,4 @@
-# codeagent 需求分析文档(完整版)
+# tenon 需求分析文档(完整版)
 
 > 版本: v0.4 当前代码树同步版(保留 v0.3 需求基线与历史快照)
 > 更新日期: 2026-08-30(当前状态、测试/CI 门禁和发布检查复核;正文中的历史需求分析数据保留为历史快照)
@@ -93,7 +93,7 @@
 - marker 分层修正（2026-10-18）：`tests/conftest.py` 让显式主分类优先于目录兜底，`tests/app/container/test_assembly.py` 整体标 `contract`（其 MCP 子进程用例单独标 `integration`），使 `app/composition/policy.py` 的快速口径覆盖率由 20% 升至 84%，三个安全决策分支与文件边界回归进入每次 `quality-fast`；覆盖率硬下限同步由 77.9% 上调至 80%。
 - 规格与发布检查：`openspec validate --specs` 为 **24/24**（新增 `subagent-contract` / `subagent-runtime` / `subagent-observability` / `subagent-run-records`）；`openspec/changes/` 无未归档变更；`uv run ruff check src tests scripts` 通过；release check 以 `0.5.0` 通过 wheel/sdist、版本、资源、敏感文件、干净环境安装和 fake provider CLI 检查。
 - 包版本已统一为 `0.5.0`，CHANGELOG 已补齐 `[0.5.0]` 使用者条目；annotated `v0.4.0` 标签指向纯 v0.4 提交 `b981534`，`v0.5.0` 标签由发布流程创建。
-- 架构边界复核：`src/codeagent/core/` 的 40 个模块零跨层 import（`tests/test_decoupling.py` AST 扫描在全量测试中通过）；`scripts/scale_scan.py` 扫描全部生产层，**无任何文件超过 300 行、无函数超过 80 行**（v0.5.0 收口时超限的 `tools/security/classifier.py` 310 行与 `tools/mcp/client.py` 307 行已分别拆分至 128 / 250 行）。
+- 架构边界复核：`src/tenon/core/` 的 40 个模块零跨层 import（`tests/test_decoupling.py` AST 扫描在全量测试中通过）；`scripts/scale_scan.py` 扫描全部生产层，**无任何文件超过 300 行、无函数超过 80 行**（v0.5.0 收口时超限的 `tools/security/classifier.py` 310 行与 `tools/mcp/client.py` 307 行已分别拆分至 128 / 250 行）。
 - 已知门禁局限：Ruff 仅启用 `E9` / `F821` / `F841` 阻塞级正确性检查，Black 与完整 Ruff 规则集尚未接入 CI；mypy 已以分层棘轮接入 `quality-fast`（`scripts/type_scan.py` + `docs/type-baseline.json`，当前 ai 0 / core 0 / tools 0 / session 5 / app 17，合计 22），但 pyright 未接入；TUI schema v2 正式基线仍待 CI artifact 与人工复核。
 - 范围更新(2026-10-24,v0.7):**并行子 Agent(有界并发,默认串行)、子 Agent 受限可写 profile(`implement`,禁 `delegate`/MCP)、插件系统(v1 仅贡献工具)、执行时沙箱(三档策略)已落地**;跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件订阅、工作区合并、自动化任务与 Web UI 仍不属于当前版本。
 - 版本与发布(2026-10-24):包版本提升为 `0.7.0`,v0.6 正确性修复与 v0.7 能力同版交付;本机复核为全量 **1870 passed**、快速集 **1718 passed**、`python -m evals` 4/4、OpenSpec **25/25**,`release_check` 以 `0.7.0` 通过 wheel/sdist、资源、敏感文件、干净安装与 fake provider CLI;发布说明与升级指南见 [`docs/releases/`](../releases/)。
@@ -102,7 +102,7 @@
 
 ### 1.1 编写目的
 
-本文档是 codeagent 项目的**唯一完整需求基线**,目的:
+本文档是 tenon 项目的**唯一完整需求基线**,目的:
 
 1. 合并 `docs/design/` 下四份文档(需求分析报告、架构设计、功能表 GAP 分析、编排自研蓝图)中的需求信息,消除文档间的不一致(如测试数 219 vs 304、provider 数 3 vs 6、TUI 状态等,见附录 B);
 2. 为 v0.2(会话完善)及后续版本提供可追踪、可验收的需求依据;
@@ -138,7 +138,7 @@
 | [architecture.md](architecture.md) | 架构设计文档 v0.4(2026-08-30) |
 | 本文 §4.10~§4.11 | 功能表全面分析 / 竞品对标 GAP 的合并结果 |
 | [self-built-orchestration-blueprint.md](self-built-orchestration-blueprint.md) | 编排引擎自研决策与收益记录(第二步已落地,2026-08-30 校准) |
-| README.md / pyproject.toml / src/codeagent/ | 项目现状(2026-08-30 复核) |
+| README.md / pyproject.toml / src/tenon/ | 项目现状(2026-08-30 复核) |
 
 ---
 
@@ -146,7 +146,7 @@
 
 ### 2.1 项目背景
 
-`codeagent` 是基于**自研编排**(2026-08-14 起,已弃用 langgraph/langchain)的编程 Agent,采用 Pi-Agent 设计哲学(三层协作 / 双层 loop / 事件驱动 / 会话即状态)+ 端口-适配器(hexagonal)横切解耦。v0.1 已打通"可对话 + 可调用工具 + 事件流可订阅"的最小闭环,v0.2 完成会话完善(持久化/分叉/安全确认/TUI 命令体系),v0.3 已完成 Skills、MCP、token 用量透明、会话树及全量验收。
+`tenon` 是基于**自研编排**(2026-08-14 起,已弃用 langgraph/langchain)的编程 Agent,采用 Pi-Agent 设计哲学(三层协作 / 双层 loop / 事件驱动 / 会话即状态)+ 端口-适配器(hexagonal)横切解耦。v0.1 已打通"可对话 + 可调用工具 + 事件流可订阅"的最小闭环,v0.2 完成会话完善(持久化/分叉/安全确认/TUI 命令体系),v0.3 已完成 Skills、MCP、token 用量透明、会话树及全量验收。
 
 ### 2.2 产品愿景
 
@@ -172,7 +172,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 
 **一句话定位**:
 
-> codeagent —— 一个可替换、可测试、可嵌入的编程 Agent 工程底座。
+> tenon —— 一个可替换、可测试、可嵌入的编程 Agent 工程底座。
 
 不正面竞争"谁的 Agent 更强",而是竞争"**谁的 Agent 更工程化、更可嵌入、更不锁死**"。战场:国内 DeepSeek 生态、企业私有化/自研底座、教育/教学/二次开发。
 
@@ -198,7 +198,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 
 ### 3.1 竞品画像总览
 
-| 维度 | **codeagent** | **CodeBuddy CLI** | **Claude Code** | **Codex CLI / App** |
+| 维度 | **tenon** | **CodeBuddy CLI** | **Claude Code** | **Codex CLI / App** |
 |---|---|---|---|---|
 | 出品方 | 个人/开源项目 | 腾讯云 | Anthropic | OpenAI |
 | 主要形态 | 终端(headless CLI 当前形态) | 插件 / IDE / CLI | 终端 CLI | 终端 CLI(开源)+ macOS App |
@@ -218,7 +218,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 
 **CodeBuddy Code 2.0(腾讯云)**:1.0 于 2025-09 发布,2026 升级 2.0(99.9% 代码自生成);腾讯内部超 1.2 万名工程师;ACP 协议集成;强在国内生态与企业级落地。
 
-**其他竞品**:Gemini CLI 三线日更;OpenCode 核心突破=**会话快照 + 回滚控制**;Qwen Code 中文支持、低成本;Copilot CLI 企业托管 + 认证管控 + OpenTelemetry;Pi 引入 `pi-orchestrator` 守护进程(IPC 多实例);DeepSeek TUI 更名 CodeWhale、品牌混乱(对 codeagent 反而是入局机会)。
+**其他竞品**:Gemini CLI 三线日更;OpenCode 核心突破=**会话快照 + 回滚控制**;Qwen Code 中文支持、低成本;Copilot CLI 企业托管 + 认证管控 + OpenTelemetry;Pi 引入 `pi-orchestrator` 守护进程(IPC 多实例);DeepSeek TUI 更名 CodeWhale、品牌混乱(对 tenon 反而是入局机会)。
 
 ### 3.3 行业共性趋势(agents-radar 2026-06-26)
 
@@ -231,11 +231,11 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 7. **成本透明度/配额控制**成为三款工具共同需求;
 8. **无障碍/本地化**:Claude Code 日语本地化、Codex VoiceOver。
 
-### 3.4 竞品功能矩阵 vs codeagent
+### 3.4 竞品功能矩阵 vs tenon
 
 > ✅=已有/已设计;🔲=待实现(规划);⬜=未规划/差距
 
-| 功能域 | Claude Code | Codex | CodeBuddy | OpenCode | codeagent 现状 | 差距 |
+| 功能域 | Claude Code | Codex | CodeBuddy | OpenCode | tenon 现状 | 差距 |
 |---|---|---|---|---|---|---|
 | 多供应商中立 | ⬜ | ⬜ | ⬜ | ✅ | ✅ deepseek/openai/qwen/glm/kimi/minimax/fake | ✅ 领先 |
 | 离线可测(fake 模型) | ⬜ | ⬜ | ⬜ | ⬜ | ✅ | ✅ 领先 |
@@ -257,7 +257,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 | SDK 编程接入 | ✅ | ✅ | ✅ | 部分 | ✅ 事件流天然适配 | P2/P3 |
 | 平台部署 | ✅ | ✅ | ✅ | 部分 | ⚠️ `langgraph.json` 废弃,改写为 HTTP/事件订阅(F-27);**2026-08-22 移出 v0.3(E12),远期按需重估** | P2/P3 |
 
-### 3.5 codeagent 的机会空间与劣势
+### 3.5 tenon 的机会空间与劣势
 
 **机会空间**(市场切点):
 
@@ -302,7 +302,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 | FR-1.9 | Headless 模式 | 一次性 `--prompt` 与 stdin 逐行两种输入 | P0 | ✅ 当前唯一保留形态(`app/main.py`) |
 | FR-1.10 | 多轮上下文 | 同一会话内多轮对话携带上下文(会话维度 thread 累积) | P0 | ✅ |
 
-> **FR-1 状态说明**:TUI 在 2026-08 曾完成重设计(内容块树 + TranscriptView + 增量渲染,提交 d21ba41~e4deca2),但于 2026-08-13 在提交 876d106 中随模型层自研重构整体移除(`src/codeagent/tui/` 与 `tests/tui/` 全部删除,pyproject 同步移除 textual)。当前入口为 headless(`app/main.py`,`--prompt` / stdin 双路径),事件聚合语义为:text_delta 增量累积 → tool_call 前文本清零 → agent_message 兜底去重。**TUI 恢复于 2026-08-13 由 restore-tui 落地 MVP**(`app/tui/`:纯组件 render + TuiBackend 端口 + textual 后端,`--tui` 进入):对话/流式渲染/Esc 打断/状态栏/alt 屏/退出完整文档;斜杠命令体系、模糊补全、选择器、`//` 转义、Tab 补全、Ctrl+L 导航拆下一迭代(FR-1.3~1.6/1.8 部分)。
+> **FR-1 状态说明**:TUI 在 2026-08 曾完成重设计(内容块树 + TranscriptView + 增量渲染,提交 d21ba41~e4deca2),但于 2026-08-13 在提交 876d106 中随模型层自研重构整体移除(`src/tenon/tui/` 与 `tests/tui/` 全部删除,pyproject 同步移除 textual)。当前入口为 headless(`app/main.py`,`--prompt` / stdin 双路径),事件聚合语义为:text_delta 增量累积 → tool_call 前文本清零 → agent_message 兜底去重。**TUI 恢复于 2026-08-13 由 restore-tui 落地 MVP**(`app/tui/`:纯组件 render + TuiBackend 端口 + textual 后端,`--tui` 进入):对话/流式渲染/Esc 打断/状态栏/alt 屏/退出完整文档;斜杠命令体系、模糊补全、选择器、`//` 转义、Tab 补全、Ctrl+L 导航拆下一迭代(FR-1.3~1.6/1.8 部分)。
 
 ### 4.3 FR-2 模型配置与管理
 
@@ -311,7 +311,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 | FR-2.1 | 多 provider 支持 | deepseek / openai / qwen / glm / kimi / minimax / fake,每 provider 一个自包含文件(配置+工厂) | P0 | ✅(7 个,`ai/providers/`) |
 | FR-2.2 | 统一模型创建入口 | `app.composition.model_selection.create_llm()` 按 provider+model 解析并构造未绑定工具的模型 | P0 | ✅ |
 | FR-2.3 | 内置模型目录 | 模型元数据(id/别名/reasoning/maxTokens)静态登记(`catalog/builtin.py`) | P0 | ✅ |
-| FR-2.4 | 用户模型覆盖 | `~/.codeagent/models.json` 按 id **upsert 合并**(同 id 覆盖、新 id 追加、内置保留) | P1 | ✅ |
+| FR-2.4 | 用户模型覆盖 | `~/.tenon/models.json` 按 id **upsert 合并**(同 id 覆盖、新 id 追加、内置保留) | P1 | ✅ |
 | FR-2.5 | 运行时思考强度切换 | `model:effort` 内联 / `/effort` 命令,优先级:内联>参数>配置默认 | P0 | ✅(`app/composition/model_selection.py` 单一解析实现) |
 | FR-2.6 | 缺失密钥可操作报错 | 缺 API Key 报"请配置 DEEPSEEK_API_KEY"而非 SDK 原始错误 | P0 | ✅ |
 | FR-2.7 | 模型列表探测 | 调用供应商 `/models` 自动发现模型(当前目录静态兜底) | P2 | 📝 |
@@ -426,7 +426,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 | F-18 | `resources/skills/` 技能系统 | ✅ 已落地(v0.3 阶段 1,skills-system:三源发现 + 渐进式披露 + `/skills`) | Claude/Codex Skills |
 | F-19 | `extensions/` 插件系统 | 📝 已移出 v0.3（Skills + MCP 覆盖当前需求），远期重估 | Claude 本地插件 |
 | F-20 | MCP 客户端适配 `[竞品对标]` | ✅ 已落地（`tools/list` / `tools/call`、命名空间化、分组预算、权限规则） | 竞品标配 |
-| F-21 | 轻量记忆 `~/.codeagent/memory` `[竞品对标]` | 📝 已移出 v0.3，远期按需重估 | Codex Memories |
+| F-21 | 轻量记忆 `~/.tenon/memory` `[竞品对标]` | 📝 已移出 v0.3，远期按需重估 | Codex Memories |
 | F-22 | 成本透明 `[竞品对标]` | ✅ token 用量归一、落库与可见；费用估算按范围调整移出 | 信任赤字诉求 |
 | F-23 | 分支会话 fork | ✅ fork 已于 v0.2 落地；会话树导航已于 v0.3 落地 | Pi fork 语义 |
 | F-24 | 平台部署 `langgraph.json` | ⚠️ **永久调整**(v0.2 定案):随自研编排废弃,改写为 HTTP/事件订阅入口(F-27);**2026-08-22 移出 v0.3(E12),远期按需重估** | — |
@@ -551,7 +551,7 @@ class AgentSession:
 |---|---|---|---|---|
 | NFR-P1 | 冷启动 | ≤ 1.5s | 进程启动到可输入(含配置/模型目录加载,不含网络请求) | 🔲 待实测(headless 形态) |
 | NFR-P2 | 启动期网络请求 | 0 次 | 配置加载、provider 构造阶段不发起任何网络调用 | ✅ 设计保证 |
-| NFR-P3 | LLM 调用附加开销 | < 50ms | codeagent 自身在模型调用外引入的本地开销上限 | 🔲 待实测 |
+| NFR-P3 | LLM 调用附加开销 | < 50ms | tenon 自身在模型调用外引入的本地开销上限 | 🔲 待实测 |
 | NFR-P4 | 首回复感知延迟 | 由供应商决定 | 流式场景下首个 token 到达即开始渲染 | ✅ 事件流支持 |
 | NFR-P5 | 流式渲染帧率 | ≥ 30 fps | 增量更新聊天区 UI 不阻塞、不闪烁 | ⚠️ 随 TUI 移除,恢复时生效 |
 | NFR-P6 | 模糊命令匹配 | < 10ms(≤ 50 命令) | `fuzzy_match` 纯函数耗时上限 | ⚠️ 随 TUI 移除,恢复时生效 |
@@ -643,8 +643,8 @@ class AgentSession:
 | DR-1 | 会话状态 | 自研 `Message`(role/content/tool_calls/tool_call_id/id/parentId,uuid7),会话维度累积 | 会话内累积;v0.1 内存,进程退出即失;v0.2 起落盘 DR-3 | ✅ |
 | DR-2 | 事件流 | `AgentEvent`(type + payload + metadata)**11 类**,发射即弃(订阅制) | 单轮对话生命周期 | ✅ |
 | DR-3 | 会话存储 | v0.2 定案:**JSONL 树形**(每轮 append,按 id/parentId,天然支持分叉/回放;替代 checkpointer) | 跨进程持久 | ✅ 已落地(v0.2,含 fork) |
-| DR-4 | 模型目录 | 内置目录(代码静态)+ `~/.codeagent/models.json` 用户覆盖,**upsert 合并**(同 id 覆盖、新 id 追加、内置保留) | 启动加载,可运行时重建(缓存 M11) | ✅ |
-| DR-5 | 配置 | `~/.codeagent/.env` 命名空间隔离(全局 `LLM_PROVIDER` 与各 `PROVIDER_*`);首次启动幂等生成模板 | 启动加载 | ✅ |
+| DR-4 | 模型目录 | 内置目录(代码静态)+ `~/.tenon/models.json` 用户覆盖,**upsert 合并**(同 id 覆盖、新 id 追加、内置保留) | 启动加载,可运行时重建(缓存 M11) | ✅ |
+| DR-5 | 配置 | `~/.tenon/.env` 命名空间隔离(全局 `LLM_PROVIDER` 与各 `PROVIDER_*`);首次启动幂等生成模板 | 启动加载 | ✅ |
 | DR-6 | token 用量 | 模型 `usage_metadata` 透传为 `usage` 事件;v0.3 会话级 append-only 落库并在 `/status` 与 CLI 展示 | 每轮产生 | ✅ 已落地（输入 / 输出 / 推理 / 缓存命中；不做费用估算） |
 | DR-7 | 技能/提示词资源 | `resources/skills/` markdown 文件,按需加载(渐进式披露:描述入 prompt,正文经 skill 工具) | v0.3 阶段 1 启用 | ✅ 已落地(三源发现,同名遮蔽 个人>项目>内建) |
 
@@ -662,7 +662,7 @@ class AgentSession:
 | IR-6 | `create_llm(cfg, *, registry, reasoning_effort, provider, model)` | provider+model 解析,返回未绑定工具的 ChatClient | container | ✅ |
 | IR-7 | `ChatClient` 协议 + `SSEParser` | 框架无关消息/流协议;thinking/usage 全量透传 | ai/model + ai/transport/sse | ✅ |
 | IR-8 | `make_tools(cfg) -> list[BaseTool]` | 原子工具注册表枚举 | container | ✅ |
-| IR-9 | CLI(headless) | `codeagent [--prompt P]`;无 `--prompt` 时 stdin 逐行;输出事件聚合文本 | 终端用户 / 脚本 | ✅ |
+| IR-9 | CLI(headless) | `tenon [--prompt P]`;无 `--prompt` 时 stdin 逐行;输出事件聚合文本 | 终端用户 / 脚本 | ✅ |
 | IR-10 | ~~`langgraph.json` 平台入口~~ | ⚠️ 随自研编排废弃(v0.2 定案);改写为 HTTP/事件订阅入口(F-27);**2026-08-22 移出 v0.3(E12),远期按需重估** | Web/HTTP | 📝 远期 |
 | IR-11 | `SessionManager` | `create / fork / switch / dispose` + `replace_config` 热切换 | CLI / TUI | ✅ 已落地(v0.2) |
 | IR-12 | `SessionStore` | JSONL 树形 `append(entry)`(按 id/parentId)/ 恢复加载 | SessionManager | ✅ 已落地(v0.2) |
@@ -905,7 +905,7 @@ v0.4(✅ 已发布基线 2026-09-02): V4-01~V4-38 Runtime 可靠性+上下文治
  - 本地 Windows 全量：`uv run pytest -q` **1000 passed**（116.02s）。
 - GitHub CI：`quality-fast` **846 passed**；Ubuntu、Windows、macOS 矩阵各 **114 passed**，均无 failure/error/skip。
 - 快速质量集覆盖率：**78.90%**（7534/9549 statements）。
-- package smoke：已生成 `codeagent-0.3.0-py3-none-any.whl` 与 sdist；安装后 smoke 的 stdout 不在 artifact 中，最终结果以 Job 日志为准。
+- package smoke：已生成 `tenon-0.3.0-py3-none-any.whl` 与 sdist；安装后 smoke 的 stdout 不在 artifact 中，最终结果以 Job 日志为准。
  - TUI 性能：history / restore / stream / tool-output 四场景均已生成 JSON，并以 `docs/benchmarks/tui-baseline.json` 作为 Linux/Python 3.12 正式比较基线；当前性能仍为非阻塞告警。
 
 ### B.5 2026-08-30 代码树基线快照（v0.4，当前性已被 §0.3 / B.6 取代）
@@ -922,7 +922,7 @@ v0.4(✅ 已发布基线 2026-09-02): V4-01~V4-38 Runtime 可靠性+上下文治
 - 本地快速质量集（unit / contract）：**1525 passed，3 skipped，170 deselected**，含覆盖率插桩 98.64s；覆盖率 **84.40%**（15232/18048 statements），CI 硬下限为 77.9%。
 - 跨边界集合（integration / e2e / platform / compatibility）：**212 passed**（26.38s）。
 - OpenSpec：`openspec validate --specs` **24/24**；`openspec/changes/` 无未归档变更（V5-00～V5-10 已全部归档）。
-- 静态检查与版本一致性：`uv run ruff check src tests scripts` 通过；`pyproject.toml` 与 `codeagent.__version__` 均为 `0.5.0`。
+- 静态检查与版本一致性：`uv run ruff check src tests scripts` 通过；`pyproject.toml` 与 `tenon.__version__` 均为 `0.5.0`。
 - release check（本地复跑）：wheel 与 sdist 构建、成员与内建资源检查、敏感文件检查、干净环境安装和 fake provider CLI（`cli_returncode: 0`）均为 `passed`。
 - 发布状态：V5-00～V5-10 功能与主规格已落地，包版本已统一为 `0.5.0`，CHANGELOG 已补齐 `[0.5.0]` 使用者条目；`v0.5.0` annotated 标签与发布产物推送由发布流程执行。
 - 遗留待办：TUI schema v2 正式基线仍待 CI artifact 与人工复核后替换；pyright 尚未接入 CI 门禁（统一格式化已由 `ruff format` 接入，mypy 已由 `scripts/type_scan.py` 分层棘轮接入）。

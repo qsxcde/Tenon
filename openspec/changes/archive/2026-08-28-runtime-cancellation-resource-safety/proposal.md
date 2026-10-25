@@ -25,7 +25,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/execution.py`、`src/codeagent/core/loop.py`、`src/codeagent/core/agent.py`、`src/codeagent/session/runtime/controller.py`、`src/codeagent/session/runtime/confirmation.py` 和 `src/codeagent/session/manager.py`。
+- 影响 `src/tenon/core/execution.py`、`src/tenon/core/loop.py`、`src/tenon/core/agent.py`、`src/tenon/session/runtime/controller.py`、`src/tenon/session/runtime/confirmation.py` 和 `src/tenon/session/manager.py`。
 - 影响 MCP、bash/subprocess 和模型客户端的关闭适配，但不改变各工具的业务功能。
 - 可能新增异步生命周期 API；现有快速 `abort()` 保留为请求入口，调用方需要在切换或关闭时等待完成。
 - 不引入自动重试；不把“取消请求已发出”展示为“资源已经清理完毕”。

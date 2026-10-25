@@ -9,8 +9,8 @@ from __future__ import annotations
 import asyncio
 from types import SimpleNamespace
 
-from codeagent.app.tui.commands.parser import Command
-from codeagent.session.persistence import (
+from tenon.app.tui.commands.parser import Command
+from tenon.session.persistence import (
     RecoveryDiagnostic,
     SessionRecoveryError,
     SessionRecoveryReport,

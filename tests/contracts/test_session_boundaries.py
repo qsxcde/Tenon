@@ -7,11 +7,11 @@ import importlib
 
 
 TARGET_MODULES = (
-    "codeagent.session.runtime",
-    "codeagent.session.events",
-    "codeagent.session.persistence",
-    "codeagent.session.compaction",
-    "codeagent.session.navigation",
+    "tenon.session.runtime",
+    "tenon.session.events",
+    "tenon.session.persistence",
+    "tenon.session.compaction",
+    "tenon.session.navigation",
 )
 
 
@@ -23,8 +23,8 @@ def test_target_session_packages_are_importable() -> None:
 def test_session_subpackages_do_not_import_forbidden_layers() -> None:
     from pathlib import Path
 
-    session_root = Path(__file__).resolve().parents[2] / "src" / "codeagent" / "session"
-    forbidden = ("codeagent.ai", "codeagent.tools", "codeagent.config")
+    session_root = Path(__file__).resolve().parents[2] / "src" / "tenon" / "session"
+    forbidden = ("tenon.ai", "tenon.tools", "tenon.config")
     for path in session_root.rglob("*.py"):
         if "__pycache__" in path.parts:
             continue

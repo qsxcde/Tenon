@@ -21,9 +21,9 @@ Agent 回复目前是纯文本渲染:代码块、列表、标题、行内代码�
 
 ## Impact
 
-- `src/codeagent/app/tui/backend.py`:`on_scroll` 端口与 `ScrollHandler` 类型。
-- `src/codeagent/app/tui/textual_backend.py`:`_Transcript` 滚轮转发、`_InputArea` 按键归属、App 层 PageUp/PageDown 绑定。
-- `src/codeagent/app/tui/components.py`:`AssistantBlock` Markdown 渲染(注入 `md_renderer`)、`Transcript` 无改动(滚动语义已就位)。
-- `src/codeagent/app/tui/view.py`:滚动分派。
-- `src/codeagent/app/tui/theme.py`:样式标签词表扩展。
+- `src/tenon/app/tui/backend.py`:`on_scroll` 端口与 `ScrollHandler` 类型。
+- `src/tenon/app/tui/textual_backend.py`:`_Transcript` 滚轮转发、`_InputArea` 按键归属、App 层 PageUp/PageDown 绑定。
+- `src/tenon/app/tui/components.py`:`AssistantBlock` Markdown 渲染(注入 `md_renderer`)、`Transcript` 无改动(滚动语义已就位)。
+- `src/tenon/app/tui/view.py`:滚动分派。
+- `src/tenon/app/tui/theme.py`:样式标签词表扩展。
 - `tests/tui/test_components.py`、`test_view.py`:Markdown 标签序列断言、滚动分派与 follow 翻转断言。

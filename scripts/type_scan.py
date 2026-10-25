@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SOURCE_ROOT = REPO_ROOT / "src" / "codeagent"
+SOURCE_ROOT = REPO_ROOT / "src" / "tenon"
 BASELINE_PATH = REPO_ROOT / "docs" / "type-baseline.json"
 LAYER_ROOTS = ("core", "ai", "tools", "session", "app")
 SCHEMA_VERSION = 1

@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.context.model import AgentContext
-from codeagent.core.contracts.errors import AgentContinueError
-from codeagent.core.contracts.ports import AgentTool, ToolDecision
-from codeagent.core.contracts.messages import Message
-from codeagent.core.orchestration.config import AgentLoopConfig
+from tenon.core.context.model import AgentContext
+from tenon.core.contracts.errors import AgentContinueError
+from tenon.core.contracts.ports import AgentTool, ToolDecision
+from tenon.core.contracts.messages import Message
+from tenon.core.orchestration.config import AgentLoopConfig
 
 
 class _Tool:

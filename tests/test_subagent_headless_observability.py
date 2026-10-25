@@ -6,8 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from codeagent.app import headless
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.app import headless
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 def _event(
@@ -36,7 +36,7 @@ def _event(
 
 @pytest.mark.unit
 def test_headless_projector_emits_stable_bounded_lines_and_deduplicates_terminal() -> None:
-    from codeagent.app.subagent_observability import SubagentLineProjector
+    from tenon.app.subagent_observability import SubagentLineProjector
 
     projector = SubagentLineProjector()
     events = [

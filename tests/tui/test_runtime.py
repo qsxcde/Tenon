@@ -1,13 +1,13 @@
 """Runtime lifecycle and snapshot tests for the observable TUI state."""
 
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.app.tui.state.runtime import (
+from tenon.app.tui.state.model import TuiModel
+from tenon.app.tui.state.runtime import (
     RuntimePhase,
     RuntimeReducer,
     RuntimeSnapshot,
 )
-from codeagent.app.tui.presentation.status import StatusBar
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.app.tui.presentation.status import StatusBar
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 def test_runtime_reducer_tracks_phase_and_elapsed_operation() -> None:

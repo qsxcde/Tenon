@@ -12,8 +12,8 @@ from typing import Any
 
 import pytest
 
-from codeagent.tools.mcp import client as client_mod
-from codeagent.tools.mcp.client import McpServerClient
+from tenon.tools.mcp import client as client_mod
+from tenon.tools.mcp.client import McpServerClient
 
 pytestmark = pytest.mark.unit
 

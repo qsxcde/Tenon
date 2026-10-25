@@ -4,14 +4,14 @@ import math
 
 import pytest
 
-from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.core.context import preflight as context_preflight
-from codeagent.core.context.model import AgentContext
-from codeagent.core.contracts.errors import ContextPreflightError
-from codeagent.core.contracts.events import EventType
-from codeagent.core.orchestration.loop import run_agent_loop
-from codeagent.core.contracts.ports import StreamEvent
-from codeagent.core.orchestration.config import AgentLoopConfig
+from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.core.context import preflight as context_preflight
+from tenon.core.context.model import AgentContext
+from tenon.core.contracts.errors import ContextPreflightError
+from tenon.core.contracts.events import EventType
+from tenon.core.orchestration.loop import run_agent_loop
+from tenon.core.contracts.ports import StreamEvent
+from tenon.core.orchestration.config import AgentLoopConfig
 
 
 def _snapshot(*, headroom: int, status: str = "estimate") -> ContextBudgetSnapshot:

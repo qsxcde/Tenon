@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from codeagent.session.persistence import JsonFileStore, SessionRecoveryError
+from tenon.session.persistence import JsonFileStore, SessionRecoveryError
 
 
 async def test_followup_continues_history():

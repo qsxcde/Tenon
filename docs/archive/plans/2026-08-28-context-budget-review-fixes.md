@@ -23,9 +23,9 @@
 ### Task 1: 预算保留量和模型请求契约
 
 **Files:**
-- Modify: `src/codeagent/app/composition/model_factory.py`
-- Modify: `src/codeagent/app/composition/runtime_factory.py`
-- Modify: `src/codeagent/core/loop.py`
+- Modify: `src/tenon/app/composition/model_factory.py`
+- Modify: `src/tenon/app/composition/runtime_factory.py`
+- Modify: `src/tenon/core/loop.py`
 - Test: `tests/ai/test_model_types.py`
 - Test: `tests/app/container/test_assembly.py`
 - Test: `tests/core/test_context_budget.py`
@@ -74,9 +74,9 @@ Expected: all selected tests pass.
 ### Task 2: 错误分类和不确定预算策略
 
 **Files:**
-- Modify: `src/codeagent/session/runtime/error_policy.py`
-- Modify: `src/codeagent/core/loop.py`
-- Modify: `src/codeagent/core/errors.py` only if a new controlled error is required
+- Modify: `src/tenon/session/runtime/error_policy.py`
+- Modify: `src/tenon/core/loop.py`
+- Modify: `src/tenon/core/errors.py` only if a new controlled error is required
 - Test: `tests/session/behavior/test_context_budget.py`
 - Test: `tests/core/test_context_budget.py`
 
@@ -119,9 +119,9 @@ Expected: all selected tests pass and no model stream starts after a controlled 
 ### Task 3: 上下文扩展组合与隔离
 
 **Files:**
-- Modify: `src/codeagent/core/ports.py`
-- Modify: `src/codeagent/core/loop.py`
-- Modify: `src/codeagent/core/context.py` or add a focused neutral tool-definition type under `src/codeagent/core/`
+- Modify: `src/tenon/core/ports.py`
+- Modify: `src/tenon/core/loop.py`
+- Modify: `src/tenon/core/context.py` or add a focused neutral tool-definition type under `src/tenon/core/`
 - Test: `tests/core/test_context_budget.py`
 - Test: `tests/contracts/test_agent_contracts.py`
 
@@ -165,9 +165,9 @@ Expected: all selected tests pass and the original context remains unchanged.
 ### Task 4: Session 模型恢复与窗口一致性
 
 **Files:**
-- Modify: `src/codeagent/session/manager.py`
-- Modify: `src/codeagent/session/session.py`
-- Modify: `src/codeagent/app/composition/session_factory.py` only if model restoration belongs at the composition boundary
+- Modify: `src/tenon/session/manager.py`
+- Modify: `src/tenon/session/session.py`
+- Modify: `src/tenon/app/composition/session_factory.py` only if model restoration belongs at the composition boundary
 - Test: `tests/session/test_session_manager.py`
 - Test: `tests/session/behavior/test_context_budget.py`
 

@@ -9,9 +9,9 @@ from typing import Any
 
 import pytest
 
-from codeagent.core.contracts.messages import Message
-from codeagent.session.persistence.commit import SessionCommitter
-from codeagent.session.persistence.models import UsageStats
+from tenon.core.contracts.messages import Message
+from tenon.session.persistence.commit import SessionCommitter
+from tenon.session.persistence.models import UsageStats
 
 pytestmark = pytest.mark.unit
 

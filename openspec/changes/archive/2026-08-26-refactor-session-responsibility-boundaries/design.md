@@ -2,7 +2,7 @@
 
 当前 `session` 层已经完成基础职责分离，但边界仍不完整：`AgentSession` 同时协调运行、事件、回滚、压缩和持久化；`SessionRuntime` 同时负责 core Agent 适配、确认响应和事件转换；`JsonFileStore` 同时负责 JSONL、记录解析、文件锁、索引、用量和分叉。现有公共行为与 JSONL v1 格式由会话、存储和回归测试共同约束。
 
-本设计只做内部模块重组。保留 `codeagent.session` 与 `codeagent.session.store` 的稳定导出，避免在结构迁移过程中扩大 API 变更范围。
+本设计只做内部模块重组。保留 `tenon.session` 与 `tenon.session.store` 的稳定导出，避免在结构迁移过程中扩大 API 变更范围。
 
 ## Goals / Non-Goals
 
@@ -30,7 +30,7 @@
 目标结构为：
 
 ```text
-src/codeagent/session/
+src/tenon/session/
 ├── __init__.py
 ├── manager.py
 ├── session.py

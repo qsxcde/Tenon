@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 def _event(event_type: str, *, status: str, parent_run_id: str = "parent-run") -> AgentEvent:
@@ -35,7 +35,7 @@ def _event(event_type: str, *, status: str, parent_run_id: str = "parent-run") -
 
 @pytest.mark.asyncio
 async def test_parent_events_are_persisted_in_order_and_drained(session_factory, tmp_path):
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(tmp_path / "sessions")
     session = session_factory(store=store, session_id="parent")
@@ -63,7 +63,7 @@ async def test_parent_events_are_persisted_in_order_and_drained(session_factory,
 
 @pytest.mark.asyncio
 async def test_wrong_parent_event_is_not_persisted(session_factory, tmp_path):
-    from codeagent.session.persistence import JsonFileStore
+    from tenon.session.persistence import JsonFileStore
 
     store = JsonFileStore(tmp_path / "sessions")
     session = session_factory(store=store, session_id="parent")
@@ -76,7 +76,7 @@ async def test_wrong_parent_event_is_not_persisted(session_factory, tmp_path):
 
 @pytest.mark.asyncio
 async def test_record_write_failure_is_isolated_from_parent_event(session_factory):
-    from codeagent.session.persistence import MemoryStore
+    from tenon.session.persistence import MemoryStore
 
     class FailingStore(MemoryStore):
         def append_subagent_record(self, session_id, record):

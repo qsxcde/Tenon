@@ -8,7 +8,7 @@
 - 在 CI 中增加 Windows、Linux、macOS 平台矩阵。
 - 增加测试超时、覆盖率报告和逐步收紧的覆盖率门槛。
 - 增加 Ruff 等基础静态检查，并保持检查结果可在本地复现。
-- 增加 wheel 构建、临时虚拟环境安装和 `codeagent --prompt` smoke 测试。
+- 增加 wheel 构建、临时虚拟环境安装和 `tenon --prompt` smoke 测试。
 - 将 MCP、跨平台 bash、性能基线和端到端测试纳入合适的 CI 阶段。
 - 对性能测试采用基线与告警机制，避免不稳定的绝对耗时阈值直接阻塞普通 PR。
 

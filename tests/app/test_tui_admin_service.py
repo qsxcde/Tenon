@@ -10,8 +10,8 @@ from typing import Any
 
 import pytest
 
-from codeagent.ai.catalog.spec import ModelSpec
-from codeagent.app.composition.tui.admin import TuiAdminService, model_override_record
+from tenon.ai.catalog.spec import ModelSpec
+from tenon.app.composition.tui.admin import TuiAdminService, model_override_record
 
 pytestmark = pytest.mark.unit
 
@@ -81,7 +81,7 @@ def test_list_checkpoints_delegates_to_store(monkeypatch, tmp_path):
             seen["limit"] = limit
             return ["entry-1"]
 
-    monkeypatch.setattr("codeagent.tools.shared.CheckpointStore", _Store)
+    monkeypatch.setattr("tenon.tools.shared.CheckpointStore", _Store)
     service, _ = _service(checkpoints_root=tmp_path)
 
     assert service.list_checkpoints(limit=5) == ["entry-1"]
@@ -99,7 +99,7 @@ def test_restore_checkpoint_delegates_to_store(monkeypatch):
         def restore_last(self) -> object:
             return marker
 
-    monkeypatch.setattr("codeagent.tools.shared.CheckpointStore", _Store)
+    monkeypatch.setattr("tenon.tools.shared.CheckpointStore", _Store)
     service, _ = _service()
 
     assert service.restore_checkpoint() is marker

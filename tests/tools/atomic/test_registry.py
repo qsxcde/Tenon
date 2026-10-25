@@ -4,15 +4,15 @@ from tests.tools.atomic.fixtures import *  # noqa: F401,F403
 
 from pydantic import BaseModel
 
-from codeagent.tools.atomic import SkillTool, TodoTool, WebFetchTool, WebSearchTool
-from codeagent.tools.registry import (
+from tenon.tools.atomic import SkillTool, TodoTool, WebFetchTool, WebSearchTool
+from tenon.tools.registry import (
     BUILTIN_TOOL_SPECS,
     ToolBuildContext,
     ToolSpec,
     builtin_tool_registry,
     make_tools,
 )
-from codeagent.tools.shared import ToolResourceLimits
+from tenon.tools.shared import ToolResourceLimits
 
 BUILTIN_ORDER = (
     "read",
@@ -77,7 +77,7 @@ def test_make_tools_returns_all_atomic_tools():
         "web_search",
         "todo",
     }
-    from codeagent.tools.base import AtomicTool
+    from tenon.tools.base import AtomicTool
 
     assert all(isinstance(t, AtomicTool) for t in tools)
 

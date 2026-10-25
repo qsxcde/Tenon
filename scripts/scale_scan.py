@@ -1,6 +1,6 @@
 """扫描生产代码的文件与函数规模，把 AGENTS.md 的规模约束变成可执行门禁。
 
-历史版本只扫描 ``src/codeagent/app``，因此 ``tools/`` 与 ``ai/`` 的超限文件从未
+历史版本只扫描 ``src/tenon/app``，因此 ``tools/`` 与 ``ai/`` 的超限文件从未
 被任何自动检查发现。这里改为扫描整个生产包，并由
 ``tests/contracts/test_scale_limits.py`` 纳入 ``unit or contract`` 质量门禁。
 """
@@ -14,7 +14,7 @@ from pathlib import Path
 MAX_FILE_LINES = 300
 MAX_FUNCTION_LINES = 80
 
-PRODUCTION_ROOT = Path(__file__).resolve().parents[1] / "src" / "codeagent"
+PRODUCTION_ROOT = Path(__file__).resolve().parents[1] / "src" / "tenon"
 
 # 兼容外观在迁移收口后不再允许；确需豁免时必须逐项登记书面理由。
 COMPATIBILITY_EXCEPTIONS: dict[str, str] = {}

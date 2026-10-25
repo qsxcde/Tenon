@@ -1,6 +1,6 @@
 ## Why
 
-`src/codeagent/session` 已经同时承载会话生命周期、ReAct 运行控制、事件转换、确认响应、JSONL 存储、索引、压缩和 fork 导航。功能契约基本稳定，但 `session.py` 与 `json_file_store.py` 仍是大型协调器，存储记录解析也分散在多个实现中，继续增加能力会放大耦合和迁移成本。
+`src/tenon/session` 已经同时承载会话生命周期、ReAct 运行控制、事件转换、确认响应、JSONL 存储、索引、压缩和 fork 导航。功能契约基本稳定，但 `session.py` 与 `json_file_store.py` 仍是大型协调器，存储记录解析也分散在多个实现中，继续增加能力会放大耦合和迁移成本。
 
 现在按职责重新归并，可以在不改变用户可见会话行为和文件格式的前提下，为运行控制、持久化和上下文能力建立清晰边界。
 
@@ -26,7 +26,7 @@
 
 ## Impact
 
-- 受影响代码：`src/codeagent/session/` 全部模块、`app/composition` 中的会话装配、会话相关测试和内部导入路径。
-- 公共 API：短期保留 `codeagent.session`、`codeagent.session.store` 等稳定入口；内部模块迁移完成后再删除未使用的兼容入口。
+- 受影响代码：`src/tenon/session/` 全部模块、`app/composition` 中的会话装配、会话相关测试和内部导入路径。
+- 公共 API：短期保留 `tenon.session`、`tenon.session.store` 等稳定入口；内部模块迁移完成后再删除未使用的兼容入口。
 - 数据兼容：不改变现有 JSONL v1 文件、消息 parent 链、压缩记录、usage 记录和索引重建语义。
 - 依赖边界：session 继续不依赖 `ai`、`tools`、`config`；持久化只依赖消息模型和标准库，具体 core Agent 装配由组合根负责。

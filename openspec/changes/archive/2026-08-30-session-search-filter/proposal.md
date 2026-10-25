@@ -23,6 +23,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/session/persistence/`、`src/codeagent/session/manager/`、`src/codeagent/app/tui/session/` 和命令解析/展示测试。
+- 影响 `src/tenon/session/persistence/`、`src/tenon/session/manager/`、`src/tenon/app/tui/session/` 和命令解析/展示测试。
 - 扩展 `SessionStore.list`、`SessionManager.list` 和 `SessionRef` 的只读查询语义，不新增运行时依赖，不修改 JSONL entry 格式。
 - 更新 `openspec/specs/sessions`、`openspec/specs/tui`、v0.4 状态、测试指南和架构文档。

@@ -4,10 +4,12 @@ import os
 
 import pytest
 
-from codeagent.app.config import (
+from tenon.app import config as config_module
+from tenon.app.config import (
     Settings,
     configured_providers,
     ensure_config_files,
+    migrate_legacy_config,
     write_env_key,
 )
 
@@ -40,7 +42,7 @@ def test_ensure_config_files_creates_templates(tmp_path):
     assert sorted(p.name for p in created) == [".env", "models.json"]
 
     env = (tmp_path / ".env").read_text(encoding="utf-8")
-    assert env.startswith("# codeagent 配置")
+    assert env.startswith("# tenon 配置")
     assert "LLM_PROVIDER=deepseek" in env
     assert "DEEPSEEK_API_KEY=" in env
     assert (tmp_path / "models.json").exists()
@@ -136,3 +138,33 @@ def test_configured_providers_parses_nonempty_keys(tmp_path):
 def test_configured_providers_missing_file(tmp_path):
     """env 文件不存在 → 空集,不抛错。"""
     assert configured_providers(tmp_path / ".env") == set()
+
+
+def test_migrate_legacy_config_moves_legacy_dir(tmp_path, monkeypatch):
+    """旧配置目录在新目录缺失时整体迁移,已有内容原样保留。"""
+    legacy = tmp_path / ".legacy"
+    current = tmp_path / ".current"
+    legacy.mkdir()
+    (legacy / ".env").write_text("LLM_PROVIDER=fake", encoding="utf-8")
+    monkeypatch.setattr(config_module, "CONFIG_DIR", current)
+    monkeypatch.setattr(config_module, "LEGACY_CONFIG_DIR", legacy)
+
+    assert migrate_legacy_config(current, legacy) == current
+    assert (current / ".env").read_text(encoding="utf-8") == "LLM_PROVIDER=fake"
+    assert not legacy.exists()
+
+
+def test_migrate_legacy_config_keeps_existing_current(tmp_path, monkeypatch):
+    """新旧目录并存时不动作,避免覆盖已经写好的新配置。"""
+    legacy = tmp_path / ".legacy"
+    current = tmp_path / ".current"
+    legacy.mkdir()
+    current.mkdir()
+    (legacy / ".env").write_text("old", encoding="utf-8")
+    (current / ".env").write_text("new", encoding="utf-8")
+    monkeypatch.setattr(config_module, "CONFIG_DIR", current)
+    monkeypatch.setattr(config_module, "LEGACY_CONFIG_DIR", legacy)
+
+    assert migrate_legacy_config(current, legacy) is None
+    assert (current / ".env").read_text(encoding="utf-8") == "new"
+    assert (legacy / ".env").read_text(encoding="utf-8") == "old"

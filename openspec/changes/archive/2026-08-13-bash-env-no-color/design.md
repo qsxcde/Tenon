@@ -33,7 +33,7 @@
 stdout/stderr 无论 Windows/Linux/macOS 都落文件、非 tty,`NO_COLOR` 的语义在所有平台一致;设置它只是把"本就没有颜色"的既成事实显式化。做条件特判反而增加不可测试的分支。
 
 **D4: `_bash_env` 的返回值仍是 `os.environ.copy()` 的浅拷贝,注入对其无副作用**
-子进程环境是独立 dict,不污染 codeagent 进程自身的 `os.environ`,符合"依赖显式传入、不隐式改全局"的规范。
+子进程环境是独立 dict,不污染 tenon 进程自身的 `os.environ`,符合"依赖显式传入、不隐式改全局"的规范。
 
 ## Risks / Trade-offs
 

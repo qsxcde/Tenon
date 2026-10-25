@@ -23,7 +23,7 @@
 
 - `quality-fast`：静态检查、OpenSpec、快速单元/契约测试。
 - `test-matrix`：Linux、Windows、macOS 上的完整离线测试和平台测试。
-- `package-smoke`：构建 wheel、安装到临时环境、执行 `codeagent --prompt`。
+- `package-smoke`：构建 wheel、安装到临时环境、执行 `tenon --prompt`。
 
 性能基线单独运行或作为非阻塞告警 job，避免普通 PR 受共享 runner 波动影响。
 

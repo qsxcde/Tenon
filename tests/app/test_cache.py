@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.app.composition.model.cache import (
+from tenon.app.composition.model.cache import (
     CACHE_COLD,
     CACHE_EFFECTIVE,
     CACHE_UNKNOWN,
@@ -56,7 +56,7 @@ def test_volatile_markers_detect_timestamps_and_temp_paths():
 @pytest.mark.contract
 def test_base_system_prompt_prefix_is_cache_friendly():
     """契约:基础系统提示词不得含时间戳/临时路径(否则缓存永远不命中)。"""
-    from codeagent.app.context.agents import build_system_prompt, read_base_prompt
+    from tenon.app.context.agents import build_system_prompt, read_base_prompt
 
     prompt = build_system_prompt(read_base_prompt(), [])
     assert volatile_prefix_markers(prompt) == ()

@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from codeagent.tools.plugins.manifest import parse_plugin_manifest
+from tenon.tools.plugins.manifest import parse_plugin_manifest
 from tests.tools.plugins.fixtures import make_plugin
 
 pytestmark = pytest.mark.contract
@@ -32,9 +32,9 @@ def test_invalid_id_rejected(tmp_path):
 
 def test_missing_module_field_rejected(tmp_path):
     plugin_dir = make_plugin(tmp_path, "demo")
-    raw = json.loads((plugin_dir / "codeagent-plugin.json").read_text(encoding="utf-8"))
+    raw = json.loads((plugin_dir / "tenon-plugin.json").read_text(encoding="utf-8"))
     raw.pop("module")
-    (plugin_dir / "codeagent-plugin.json").write_text(json.dumps(raw), encoding="utf-8")
+    (plugin_dir / "tenon-plugin.json").write_text(json.dumps(raw), encoding="utf-8")
     manifest, diags = parse_plugin_manifest(plugin_dir)
     assert manifest is None
     assert any("缺少 module" in diag for diag in diags)
@@ -58,7 +58,7 @@ def test_invalid_tool_declaration_warns_but_parses(tmp_path):
 def test_broken_json_reports_diagnostic(tmp_path):
     plugin_dir = tmp_path / "demo"
     plugin_dir.mkdir()
-    (plugin_dir / "codeagent-plugin.json").write_text("{oops", encoding="utf-8")
+    (plugin_dir / "tenon-plugin.json").write_text("{oops", encoding="utf-8")
     manifest, diags = parse_plugin_manifest(plugin_dir)
     assert manifest is None
     assert any("manifest 读取失败" in diag for diag in diags)

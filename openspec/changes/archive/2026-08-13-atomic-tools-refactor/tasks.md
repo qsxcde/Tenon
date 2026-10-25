@@ -1,16 +1,16 @@
 ## 1. 共享层 `tools/shared/`
 
-- [x] 1.1 新建 `src/codeagent/tools/shared/fsops.py`:定义 `FsOps` Protocol(read_bytes / write_bytes / exists / is_file / is_dir / mkdir / readdir / walk)+ `LocalFsOps` 默认实现(基于 pathlib/os);模块 docstring 注明分层约束与职责(design D1)
-- [x] 1.2 新建 `src/codeagent/tools/shared/paths.py`:`resolve_to_cwd(path, cwd)`、`normalize_path`(`~` 展开、`@` 前缀剥离)、`format_posix`(统一正斜杠);所有工具统一经此解析相对路径(对应 spec「路径解析」)
-- [x] 1.3 新建 `src/codeagent/tools/shared/textfile.py`:`strip_bom` / `detect_line_ending` / `normalize_to_lf` / `restore_line_endings`(design D5;对应 spec「edit 保留原始换行约定」)
-- [x] 1.4 新建 `src/codeagent/tools/shared/truncate.py`:`truncate_head(text, max_lines, max_bytes)` 与 `truncate_tail(text, ...)`,返回 (text, TruncationResult);统一字节+行双上限(对应 spec「输出截断」)
-- [x] 1.5 新建 `src/codeagent/tools/shared/mutation_queue.py`:`with_path_lock(path)` 上下文管理器,内部 `dict[path, threading.Lock]`;线程安全(对应 spec「并行写串行化」)
-- [x] 1.6 `src/codeagent/tools/shared/__init__.py` 显式导出 5 个模块的公共符号
+- [x] 1.1 新建 `src/tenon/tools/shared/fsops.py`:定义 `FsOps` Protocol(read_bytes / write_bytes / exists / is_file / is_dir / mkdir / readdir / walk)+ `LocalFsOps` 默认实现(基于 pathlib/os);模块 docstring 注明分层约束与职责(design D1)
+- [x] 1.2 新建 `src/tenon/tools/shared/paths.py`:`resolve_to_cwd(path, cwd)`、`normalize_path`(`~` 展开、`@` 前缀剥离)、`format_posix`(统一正斜杠);所有工具统一经此解析相对路径(对应 spec「路径解析」)
+- [x] 1.3 新建 `src/tenon/tools/shared/textfile.py`:`strip_bom` / `detect_line_ending` / `normalize_to_lf` / `restore_line_endings`(design D5;对应 spec「edit 保留原始换行约定」)
+- [x] 1.4 新建 `src/tenon/tools/shared/truncate.py`:`truncate_head(text, max_lines, max_bytes)` 与 `truncate_tail(text, ...)`,返回 (text, TruncationResult);统一字节+行双上限(对应 spec「输出截断」)
+- [x] 1.5 新建 `src/tenon/tools/shared/mutation_queue.py`:`with_path_lock(path)` 上下文管理器,内部 `dict[path, threading.Lock]`;线程安全(对应 spec「并行写串行化」)
+- [x] 1.6 `src/tenon/tools/shared/__init__.py` 显式导出 5 个模块的公共符号
 
 ## 2. 基类与装配改造
 
-- [x] 2.1 改造 `src/codeagent/tools/base.py`:`AtomicTool.__init__(cwd=None, ops=None)`,内部存 `self._cwd` / `self._ops`(默认 `LocalFsOps()`);`name/description/Args/_invoke/to_langchain` 契约不变(design D2)
-- [x] 2.2 改造 `src/codeagent/tools/registry.py`:`make_tools(cfg)` 把 `cfg.cwd` 注入全部 7 个工具构造;更新 docstring(design D2;对应 spec「装配时注入工作目录」)
+- [x] 2.1 改造 `src/tenon/tools/base.py`:`AtomicTool.__init__(cwd=None, ops=None)`,内部存 `self._cwd` / `self._ops`(默认 `LocalFsOps()`);`name/description/Args/_invoke/to_langchain` 契约不变(design D2)
+- [x] 2.2 改造 `src/tenon/tools/registry.py`:`make_tools(cfg)` 把 `cfg.cwd` 注入全部 7 个工具构造;更新 docstring(design D2;对应 spec「装配时注入工作目录」)
 
 ## 3. 既有四工具重构
 
@@ -21,13 +21,13 @@
 
 ## 4. 新增三工具
 
-- [x] 4.1 新建 `src/codeagent/tools/atomic/ls.py`:Args(`path` 可选 / `limit` 可选);`ops.readdir` + `ops.is_dir`(目录加 `/`)+ 大小写不敏感排序 + limit + 截断;路径不存在/非目录报错;默认不显示隐藏条目(对应 spec「ls」)
-- [x] 4.2 新建 `src/codeagent/tools/atomic/find.py`:Args(`pattern` 必填 / `path` 可选 / `limit` 可选);模块级纯函数 `find_files(ops, cwd, pattern, path, limit)`(升级缝,design D3)——`ops.walk`(os.walk 风格)遍历 + 调用方剪枝 `dirs[:]` + limit 早停;glob→regex 匹配(自写,** 递归;fnmatch 的 `*` 跨分隔符故不直接用);输出正斜杠路径 + 截断;`_invoke` 只做解析/格式化(对应 spec「find」)
-- [x] 4.3 新建 `src/codeagent/tools/atomic/grep.py`:Args(`pattern` 必填 / `path` 可选 / `glob` 可选 / `ignore_case` / `literal` / `context` / `limit`);模块级纯函数 `grep_files(ops, cwd, pattern, ...)`(升级缝,design D3)——`ops.walk` 枚举候选(剪枝)+ 逐文件 `ops.read_bytes` 后**字节级整块匹配**:编译 `bytes` 正则 + 整块 buffer `finditer`(C 速度)+ 换行偏移数组 `bisect` 映射行号;二进制探测查前缀 `\x00`;字面量 `re.escape(term.encode())`;非 ASCII 模式回退 str 逐行;输出 `relative_path:行号: 内容`、context 行用 `-` 区分;limit 早停;`_invoke` 只做解析/格式化(对应 spec「grep」)
+- [x] 4.1 新建 `src/tenon/tools/atomic/ls.py`:Args(`path` 可选 / `limit` 可选);`ops.readdir` + `ops.is_dir`(目录加 `/`)+ 大小写不敏感排序 + limit + 截断;路径不存在/非目录报错;默认不显示隐藏条目(对应 spec「ls」)
+- [x] 4.2 新建 `src/tenon/tools/atomic/find.py`:Args(`pattern` 必填 / `path` 可选 / `limit` 可选);模块级纯函数 `find_files(ops, cwd, pattern, path, limit)`(升级缝,design D3)——`ops.walk`(os.walk 风格)遍历 + 调用方剪枝 `dirs[:]` + limit 早停;glob→regex 匹配(自写,** 递归;fnmatch 的 `*` 跨分隔符故不直接用);输出正斜杠路径 + 截断;`_invoke` 只做解析/格式化(对应 spec「find」)
+- [x] 4.3 新建 `src/tenon/tools/atomic/grep.py`:Args(`pattern` 必填 / `path` 可选 / `glob` 可选 / `ignore_case` / `literal` / `context` / `limit`);模块级纯函数 `grep_files(ops, cwd, pattern, ...)`(升级缝,design D3)——`ops.walk` 枚举候选(剪枝)+ 逐文件 `ops.read_bytes` 后**字节级整块匹配**:编译 `bytes` 正则 + 整块 buffer `finditer`(C 速度)+ 换行偏移数组 `bisect` 映射行号;二进制探测查前缀 `\x00`;字面量 `re.escape(term.encode())`;非 ASCII 模式回退 str 逐行;输出 `relative_path:行号: 内容`、context 行用 `-` 区分;limit 早停;`_invoke` 只做解析/格式化(对应 spec「grep」)
 
 ## 5. 导出与噪声目录常量
 
-- [x] 5.1 更新 `src/codeagent/tools/atomic/__init__.py` 与 `src/codeagent/tools/__init__.py`:`GrepTool / FindTool / LsTool` 加入导出
+- [x] 5.1 更新 `src/tenon/tools/atomic/__init__.py` 与 `src/tenon/tools/__init__.py`:`GrepTool / FindTool / LsTool` 加入导出
 - [x] 5.2 在 `tools/shared/`(或 `tools/`)定义 `NOISE_DIRS` 常量(`.git / node_modules / __pycache__ / .venv / dist / build`),find/grep 共用(design D4;对应 spec「跳过噪声目录」)(实现于 `shared/ignore.py`)`
 
 ## 6. 测试

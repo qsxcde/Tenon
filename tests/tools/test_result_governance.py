@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codeagent.tools.shared.governance import (
+from tenon.tools.shared.governance import (
     OutputPolicy,
     GovernedText,
     govern_text,

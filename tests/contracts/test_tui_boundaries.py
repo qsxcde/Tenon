@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 
-TUI_ROOT = Path(__file__).resolve().parents[2] / "src" / "codeagent" / "app" / "tui"
+TUI_ROOT = Path(__file__).resolve().parents[2] / "src" / "tenon" / "app" / "tui"
 
 
 def _imports(path: Path) -> set[str]:
@@ -28,46 +28,46 @@ def _imports(path: Path) -> set[str]:
         (
             "presentation/primitives.py",
             {
-                "codeagent.app.tui.presentation.blocks",
-                "codeagent.app.tui.state.transcript",
-                "codeagent.app.tui.presentation.status",
-                "codeagent.app.tui.state.model",
-                "codeagent.app.tui.application",
+                "tenon.app.tui.presentation.blocks",
+                "tenon.app.tui.state.transcript",
+                "tenon.app.tui.presentation.status",
+                "tenon.app.tui.state.model",
+                "tenon.app.tui.application",
                 "textual",
             },
         ),
         (
             "presentation/blocks/__init__.py",
             {
-                "codeagent.app.tui.state.transcript",
-                "codeagent.app.tui.presentation.status",
-                "codeagent.app.tui.state.model",
-                "codeagent.app.tui.application",
+                "tenon.app.tui.state.transcript",
+                "tenon.app.tui.presentation.status",
+                "tenon.app.tui.state.model",
+                "tenon.app.tui.application",
                 "textual",
             },
         ),
         (
             "state/transcript.py",
             {
-                "codeagent.app.tui.presentation.status",
-                "codeagent.app.tui.state.model",
-                "codeagent.app.tui.application",
+                "tenon.app.tui.presentation.status",
+                "tenon.app.tui.state.model",
+                "tenon.app.tui.application",
                 "textual",
             },
         ),
         (
             "presentation/status.py",
             {
-                "codeagent.app.tui.presentation.blocks",
-                "codeagent.app.tui.state.transcript",
-                "codeagent.app.tui.state.model",
-                "codeagent.app.tui.application",
+                "tenon.app.tui.presentation.blocks",
+                "tenon.app.tui.state.transcript",
+                "tenon.app.tui.state.model",
+                "tenon.app.tui.application",
                 "textual",
             },
         ),
         (
             "state/model.py",
-            {"codeagent.app.tui.application", "textual"},
+            {"tenon.app.tui.application", "textual"},
         ),
     ),
 )

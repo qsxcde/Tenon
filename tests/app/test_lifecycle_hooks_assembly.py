@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from codeagent.core import AgentLoopConfig, LifecycleHookEvent
-from codeagent.session.manager import SessionManager
+from tenon.core import AgentLoopConfig, LifecycleHookEvent
+from tenon.session.manager import SessionManager
 
 
 def test_composition_factory_preserves_lifecycle_hooks() -> None:
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.composition.runtime.factory import create_agent_config
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.composition.runtime.factory import create_agent_config
 
     hook = lambda event: None
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         return_value=FakeClient(response="ok"),
     ):
         config = create_agent_config(provider="fake", lifecycle_hooks=[hook])

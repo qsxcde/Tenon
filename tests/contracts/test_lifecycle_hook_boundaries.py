@@ -8,14 +8,7 @@ import pytest
 
 @pytest.mark.contract
 def test_core_lifecycle_hook_contract_has_no_concrete_layer_imports() -> None:
-    path = (
-        Path(__file__).resolve().parents[2]
-        / "src"
-        / "codeagent"
-        / "core"
-        / "contracts"
-        / "hooks.py"
-    )
+    path = Path(__file__).resolve().parents[2] / "src" / "tenon" / "core" / "contracts" / "hooks.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     imported: list[str] = []
     for node in ast.walk(tree):
@@ -24,5 +17,5 @@ def test_core_lifecycle_hook_contract_has_no_concrete_layer_imports() -> None:
         elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
             imported.append(node.module)
 
-    forbidden = ("codeagent.ai", "codeagent.tools", "codeagent.session", "codeagent.app")
+    forbidden = ("tenon.ai", "tenon.tools", "tenon.session", "tenon.app")
     assert not [module for module in imported if module.startswith(forbidden)]

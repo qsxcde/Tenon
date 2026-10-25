@@ -24,7 +24,7 @@
 
 ## Impact
 
-- **新增代码**:`src/codeagent/app/tui/`(components / backend / textual_backend / view / main);`tests/tui/` 镜像;
+- **新增代码**:`src/tenon/app/tui/`(components / backend / textual_backend / view / main);`tests/tui/` 镜像;
 - **依赖**:`pyproject.toml` 加 `textual`(dev 组或主依赖——入口运行时需要,归主依赖);
 - **消费的既有设施**(零改动):`AgentSession.subscribe/run/abort`、`EventBus`、10 类 `AgentEvent`、`FakeClient.steps` 脚本化事件流(组件离线测试注入点);
 - **不受影响**:`core/`、`session/`、`tools/`、`ai/` 与 headless `app/main.py` 全部零改动;

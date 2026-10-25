@@ -6,10 +6,10 @@
 
 import unicodedata
 
-from codeagent.app.tui.presentation.blocks import AssistantBlock
-from codeagent.app.tui.presentation.md_renderer import MAX_MD_RENDER_LEN, md_renderer
-from codeagent.app.tui.presentation.primitives import Span, rich_to_plain
-from codeagent.app.tui.presentation.theme import (
+from tenon.app.tui.presentation.blocks import AssistantBlock
+from tenon.app.tui.presentation.md_renderer import MAX_MD_RENDER_LEN, md_renderer
+from tenon.app.tui.presentation.primitives import Span, rich_to_plain
+from tenon.app.tui.presentation.theme import (
     ASSISTANT_PROMPT,
     BLOCK_MARK,
     BOLD,

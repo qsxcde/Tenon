@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.app.composition.subagent import budget as app_budget
-from codeagent.app.composition.subagent import runner_support
-from codeagent.core.contracts.subagents import (
+from tenon.app.composition.subagent import budget as app_budget
+from tenon.app.composition.subagent import runner_support
+from tenon.core.contracts.subagents import (
     SubagentBudget,
     SubagentFailurePhase,
     SubagentReasonCode,
     SubagentRequest,
     SubagentStatus,
 )
-from codeagent.core.subagent import (
+from tenon.core.subagent import (
     DEFAULT_MAX_OUTPUT_CHARS,
     DEFAULT_MAX_TURNS,
     DEFAULT_TIMEOUT_SECONDS,
@@ -159,7 +159,7 @@ def test_slot_registry_capacity_is_opt_in_and_validated() -> None:
 
 
 def test_application_layer_delegates_limits_and_cleanup_to_core_policy() -> None:
-    from codeagent.core.subagent import policy as core_policy
+    from tenon.core.subagent import policy as core_policy
 
     assert app_budget.EffectiveSubagentBudget is core_policy.EffectiveSubagentBudget
     assert app_budget.effective_budget(SubagentBudget()) == resolve_budget(SubagentBudget())

@@ -1,6 +1,6 @@
 ## Context
 
-当前 session 层已经有 `bus.py`、`compaction.py`、`manager.py` 和 `tree.py` 等边界，但 `store.py` 仍同时包含存储契约、记录格式、文件后端、索引和内存后端，`session.py` 则同时管理 AgentSession 的状态、异步运行、持久化和压缩。现有调用方直接从 `codeagent.session.store` 和 `codeagent.session.session` 导入公共符号；JSONL、索引和事件语义已经由现有测试固定下来。
+当前 session 层已经有 `bus.py`、`compaction.py`、`manager.py` 和 `tree.py` 等边界，但 `store.py` 仍同时包含存储契约、记录格式、文件后端、索引和内存后端，`session.py` 则同时管理 AgentSession 的状态、异步运行、持久化和压缩。现有调用方直接从 `tenon.session.store` 和 `tenon.session.session` 导入公共符号；JSONL、索引和事件语义已经由现有测试固定下来。
 
 本设计是内部模块重组，不迁移持久化数据，不引入新的外部依赖，也不改变公共行为。
 
@@ -10,7 +10,7 @@
 
 - 将存储模型、JSONL 编解码、文件后端和内存后端分离，降低单文件耦合。
 - 将 AgentSession 的运行控制和持久化协调隔离，同时保留 AgentSession 作为稳定公共门面。
-- 保持 `codeagent.session.store`、`codeagent.session.session.AgentSession` 和 `DEFAULT_CONTEXT_WINDOW` 的现有导入路径。
+- 保持 `tenon.session.store`、`tenon.session.session.AgentSession` 和 `DEFAULT_CONTEXT_WINDOW` 的现有导入路径。
 - 保持 JSONL/索引格式、文件权限、锁、原子写入、压缩恢复、分叉、延迟持久化和失败回滚语义。
 - 让每个新模块可以在不启动模型或终端的情况下进行单元测试。
 
@@ -71,7 +71,7 @@
 - [索引一致性回归] 抽取索引后可能遗漏路径锁、mtime/size 指纹或失败失效 → 保留 `_append` 的一致性边界，增加损坏、过期、更新失败和并发追加测试。
 - [异步运行状态丢失] `SessionRuntime` 拆分可能改变取消、确认和 cleanup 状态传播 → 通过现有 session 回归测试并增加运行结果/事件关联断言。
 - [延迟持久化回归] 协作者拆分可能提前创建空会话或写入失败轮次 → 保持 `defer_persistence` 和 `_ensure_persisted` 的单一入口，覆盖空会话、成功、失败和取消路径。
-- [公共导入破坏] 调用方仍直接导入 `codeagent.session.store` 的符号 → `store.py` 作为兼容重导出层，增加公共导入契约测试。
+- [公共导入破坏] 调用方仍直接导入 `tenon.session.store` 的符号 → `store.py` 作为兼容重导出层，增加公共导入契约测试。
 - [文件数量增加] 模块数量增多会增加导航成本 → 每个模块只保留单一职责，并在模块 docstring 中注明层级和依赖约束。
 
 ## Migration Plan

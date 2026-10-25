@@ -27,6 +27,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/tools/security/`(`bash_rules`、`ask_rules`、`filesystem`、`classifier`)与 `core/contracts/ports.py`、`core/orchestration/tool_call.py`、`session/runtime/execution.py` 的警告传递路径。
+- 影响 `src/tenon/tools/security/`(`bash_rules`、`ask_rules`、`filesystem`、`classifier`)与 `core/contracts/ports.py`、`core/orchestration/tool_call.py`、`session/runtime/execution.py` 的警告传递路径。
 - 不改动工具参数 schema、会话持久化格式、provider 协议和事件类型集合。
 - 新增纯函数回归测试(绕过 8 例、误杀 5 例、边界 3 例、警告送达 1 例);不需要网络、密钥或真实子进程。

@@ -4,12 +4,12 @@ import asyncio
 
 import pytest
 
-from codeagent.core import AgentEvent, AgentLoopConfig, EventType, LifecycleHookEvent
-from codeagent.app.container import ChatModelPort
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.persistence import MemoryStore
-from codeagent.session.runtime.state import RunPhase
+from tenon.core import AgentEvent, AgentLoopConfig, EventType, LifecycleHookEvent
+from tenon.app.container import ChatModelPort
+from tenon.ai.providers.fake import FakeClient
+from tenon.session import AgentSession, EventBus
+from tenon.session.persistence import MemoryStore
+from tenon.session.runtime.state import RunPhase
 
 
 class _EchoTool:

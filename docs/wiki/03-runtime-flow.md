@@ -3,28 +3,28 @@
 ## 1. 安装与前置
 
 - Python 3.12+，已安装 [uv](https://docs.astral.sh/uv/)。
-- 项目采用 `src/` 布局，包名 `codeagent`，构建后端 `uv_build`。
+- 项目采用 `src/` 布局，包名 `tenon`，构建后端 `uv_build`。
 
 ```bash
-git clone https://github.com/qsxcde/codeAgent.git && cd codeAgent
+git clone https://github.com/qsxcde/tenon.git && cd tenon
 uv sync --group dev      # 运行时 + 开发依赖（推荐开发时用）
 uv sync                  # 只装运行时依赖
 ```
 
 ## 2. 配置
 
-### 2.1 配置目录 `~/.codeagent`
+### 2.1 配置目录 `~/.tenon`
 
 首次启动由 `app/config.py` 的 `ensure_config_files()` **幂等生成**模板（已存在的文件绝不覆盖）：
 
 | 路径 | 用途 |
 | --- | --- |
-| `~/.codeagent/.env` | provider 选择与各 provider 密钥（唯一密钥来源） |
-| `~/.codeagent/models.json` | 自定义模型元数据，按 `id` 与内置目录 upsert 合并 |
-| `~/.codeagent/sessions/` | JSONL 会话存储（`<id>.jsonl` + 索引 + 锁） |
-| `~/.codeagent/mcp.json` | MCP server 与权限规则 |
-| `~/.codeagent/packages/` + `registry.json` + `skills.lock.json` | Skill Package 存储 / 注册表 / 锁 |
-| `~/.codeagent/AGENTS.md` | 全局 AGENTS.md（分层加载的最高层） |
+| `~/.tenon/.env` | provider 选择与各 provider 密钥（唯一密钥来源） |
+| `~/.tenon/models.json` | 自定义模型元数据，按 `id` 与内置目录 upsert 合并 |
+| `~/.tenon/sessions/` | JSONL 会话存储（`<id>.jsonl` + 索引 + 锁） |
+| `~/.tenon/mcp.json` | MCP server 与权限规则 |
+| `~/.tenon/packages/` + `registry.json` + `skills.lock.json` | Skill Package 存储 / 注册表 / 锁 |
+| `~/.tenon/AGENTS.md` | 全局 AGENTS.md（分层加载的最高层） |
 
 **项目有意不读取当前目录下的 `.env`**（H10 安全决策），避免在任意仓库内运行时被其 `.env` 劫持流量与密钥；`Settings` 会对 CWD `.env` 一次性告警。
 
@@ -57,17 +57,17 @@ DEEPSEEK_REASONING_EFFORT=high
 
 ```bash
 # 交互式 TUI
-uv run codeagent --tui
+uv run tenon --tui
 
 # 无头单次执行
-uv run codeagent --prompt "梳理登录流程的入口有哪些"
+uv run tenon --prompt "梳理登录流程的入口有哪些"
 
 # 从 stdin 逐行读取
-echo "列出本目录最大的 5 个文件" | uv run codeagent
+echo "列出本目录最大的 5 个文件" | uv run tenon
 
 # 继续最近会话 / 恢复指定会话
-uv run codeagent -c
-uv run codeagent --session <id>
+uv run tenon -c
+uv run tenon --session <id>
 ```
 
 ### 3.1 CLI 参数（`app/main.py`）
@@ -87,19 +87,19 @@ uv run codeagent --session <id>
 | 码 | 含义 |
 | --- | --- |
 | `0` | 正常结束 |
-| `2` | 会话不可恢复（`SessionRecoveryError`）或 `codeagent skill` 操作失败；stderr 打印恢复报告 |
+| `2` | 会话不可恢复（`SessionRecoveryError`）或 `tenon skill` 操作失败；stderr 打印恢复报告 |
 
 ### 3.3 Skill Package 子命令
 
 ```bash
-uv run codeagent skill install <source> [--project]
-uv run codeagent skill update  <package_id> [--project]
-uv run codeagent skill remove  <package_id> [--project]
-uv run codeagent skill list    [--project]
-uv run codeagent skill reload  [--project]
+uv run tenon skill install <source> [--project]
+uv run tenon skill update  <package_id> [--project]
+uv run tenon skill remove  <package_id> [--project]
+uv run tenon skill list    [--project]
+uv run tenon skill reload  [--project]
 ```
 
-`--project` 作用于当前项目（`<cwd>/.codeagent`），缺省作用于用户级 `~/.codeagent`。实现见 `app/skills/packages/`（`PackageManager`）。
+`--project` 作用于当前项目（`<cwd>/.tenon`），缺省作用于用户级 `~/.tenon`。实现见 `app/skills/packages/`（`PackageManager`）。
 
 ### 3.4 TUI 内命令
 
@@ -111,7 +111,7 @@ uv run codeagent skill reload  [--project]
 
 ```text
 main()
- → ensure_config_files()                    # 幂等生成 ~/.codeagent 模板
+ → ensure_config_files()                    # 幂等生成 ~/.tenon 模板
  → _prepare_session(args)                   # 无 --continue/--session 时直接建会话
      或 JsonFileStore(CONFIG_DIR/"sessions") + create_session_manager(...)
         → manager.switch(id) / manager.continue_recent()   # 不可恢复 → 报告 + 退出码 2

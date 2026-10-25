@@ -91,7 +91,7 @@ ai/
 
 ### 4. Provider 只处理 provider 差异，配置来源由外部注入
 
-每个 provider 模块保留其配置模型、默认模型、API 端点和 provider 特有请求参数，并实现统一的 provider 构造协议。provider 可以依赖 `catalog` 和 `transport`，但不得导入 `codeagent.app.config`。
+每个 provider 模块保留其配置模型、默认模型、API 端点和 provider 特有请求参数，并实现统一的 provider 构造协议。provider 可以依赖 `catalog` 和 `transport`，但不得导入 `tenon.app.config`。
 
 环境文件路径、配置目录、API key 和用户覆盖文件路径由组合根显式传入。对于现有 Pydantic Settings 配置，优先让构造函数接收 `_env_file` 或已经解析的配置对象；不要在 provider 模块顶层导入 `CONFIG_ENV_FILE`。`ModelStore` 同样不再使用 app 配置常量作为默认参数，而是要求组合根传入路径，必要时由组合根提供默认路径。
 
@@ -127,7 +127,7 @@ app.composition → ai.model / catalog / providers / transport
     core.ModelPort 适配
 ```
 
-`ai` 内部不得导入 `codeagent.app`、`codeagent.core`、`codeagent.session` 或 `codeagent.tools`。`app.composition` 可以依赖这些层并负责适配。`ai/__init__.py` 只导出稳定的模型契约、目录类型或明确的公共 API；应用级 `create_llm` 和 provider 选择入口不再从这里导出。
+`ai` 内部不得导入 `tenon.app`、`tenon.core`、`tenon.session` 或 `tenon.tools`。`app.composition` 可以依赖这些层并负责适配。`ai/__init__.py` 只导出稳定的模型契约、目录类型或明确的公共 API；应用级 `create_llm` 和 provider 选择入口不再从这里导出。
 
 ### 8. 采用分阶段迁移并保留兼容导出
 
@@ -142,7 +142,7 @@ app.composition → ai.model / catalog / providers / transport
 
 ## Risks / Trade-offs
 
-- [Risk] 旧代码或外部调用方直接导入 `codeagent.ai.factory` / `codeagent.ai.protocol`。→ 分阶段保留 re-export，并为兼容入口增加弃用说明；在所有内部调用方迁移后再删除。
+- [Risk] 旧代码或外部调用方直接导入 `tenon.ai.factory` / `tenon.ai.protocol`。→ 分阶段保留 re-export，并为兼容入口增加弃用说明；在所有内部调用方迁移后再删除。
 - [Risk] provider 配置初始化依赖隐式环境文件路径，迁移后可能出现默认值变化。→ 先为组合根建立等价的默认路径，再用 FakeClient 与 provider 配置测试覆盖显式路径和默认路径。
 - [Risk] AI 工具定义与 core/tool 实例转换不完整，导致 tool schema 或调用参数行为变化。→ 引入中立 `ToolDefinition`，保留现有请求快照、工具调用和参数错误测试，逐 provider 验证 schema。
 - [Risk] SSE 事件从具体解析器迁移到中立模型事件时字段语义漂移。→ 先保持字段和事件顺序不变，再将解析实现替换到新路径；现有 SSE/transport 测试作为回归门槛。

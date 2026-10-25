@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import AgentLoopConfig, EventType
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.persistence.models import UsageStats
-from codeagent.session.persistence import MemoryStore
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import AgentLoopConfig, EventType
+from tenon.session import AgentSession, EventBus
+from tenon.session.persistence.models import UsageStats
+from tenon.session.persistence import MemoryStore
 
 
 def _session(model: ChatModelPort, store: MemoryStore) -> AgentSession:

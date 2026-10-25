@@ -6,7 +6,7 @@
 
 现状约束(决定本设计的关键事实):
 
-- key 读取链:`~/.codeagent/.env`(`CONFIG_ENV_FILE`,H10 固定目录)→ 各 provider `Config`(pydantic-settings,`env_prefix` + `env_file`)→ `make_llm` 非空校验。**没有写回机制**,模板注释要求"填入后重启生效"。
+- key 读取链:`~/.tenon/.env`(`CONFIG_ENV_FILE`,H10 固定目录)→ 各 provider `Config`(pydantic-settings,`env_prefix` + `env_file`)→ `make_llm` 非空校验。**没有写回机制**,模板注释要求"填入后重启生效"。
 - **pydantic-settings 每次实例化 Config 都会重读 `.env`(无进程级缓存)**;`make_llm` 每次 `cfg = cfg or DeepSeekConfig()` 新建实例 → 写文件后重新走装配链即可拿到新 key,无需任何缓存失效代码(已验证 `ai/factory.py` / `ai/providers/deepseek.py` 调用链)。
 - TUI 分层:`app/tui/view.py` 不读配置、不跨层(design 决策);跨层动作(热切换)经组合根注入回调 `rebuild_ports`。输入区为 textual `TextArea`(`_InputArea`,多行),**无内置 password 掩码**。
 - 命令体系:`commands.py` 纯函数注册表(parse/help),`/provider /model /effort` 已有 picker 浮层 + 模糊补全基础设施(选择器命令填 `/kind ` 弹候选、值确认即生效)。
@@ -29,7 +29,7 @@
 
 ## Decisions
 
-### 1. 存储:写回 `~/.codeagent/.env`(行级替换),不做独立 credentials 文件
+### 1. 存储:写回 `~/.tenon/.env`(行级替换),不做独立 credentials 文件
 
 - 写入函数 `write_env_key(provider, key)` 放 `app/config.py`(该层本就管理 `.env` 与 H10 安全模型):
   - 按 `<PREFIX>_API_KEY` 行级替换;不存在则追加;保留注释与其它的行;

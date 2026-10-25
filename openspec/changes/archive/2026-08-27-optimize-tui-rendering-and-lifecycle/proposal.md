@@ -23,7 +23,7 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/` 的 Transcript、消息块、渲染协调和会话恢复逻辑。
-- `src/codeagent/app/composition/runtime_factory.py` 与 TUI 运行时关闭装配。
+- `src/tenon/app/tui/` 的 Transcript、消息块、渲染协调和会话恢复逻辑。
+- `src/tenon/app/composition/runtime_factory.py` 与 TUI 运行时关闭装配。
 - `tests/tui/`、运行时生命周期测试和性能基准。
 - 不改变会话 append-only 语义、工具确认语义、TUI 视觉语义或 Textual 作为具体引擎的边界。

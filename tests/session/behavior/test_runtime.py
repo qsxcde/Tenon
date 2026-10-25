@@ -173,7 +173,7 @@ def test_run_sync_graph_error_becomes_error_event():
 
 
 def test_friendly_error_classifies_http_and_network_errors():
-    from codeagent.session.session import AgentSession
+    from tenon.session.session import AgentSession
 
     def friendly(exc: Exception) -> str:
         return AgentSession._friendly_error(exc)
@@ -204,7 +204,7 @@ def test_event_bus_multiple_subscribers():
     a, b = [], []
     bus.subscribe(a.append)
     bus.subscribe(b.append)
-    from codeagent.core.contracts.events import AgentEvent
+    from tenon.core.contracts.events import AgentEvent
 
     bus.emit(AgentEvent("x"))
     assert len(a) == 1 and len(b) == 1
@@ -215,7 +215,7 @@ def test_event_bus_unsubscribe():
     seen: list = []
     unsub = bus.subscribe(seen.append)
     unsub()
-    from codeagent.core.contracts.events import AgentEvent
+    from tenon.core.contracts.events import AgentEvent
 
     bus.emit(AgentEvent("x"))
     assert seen == []
@@ -226,7 +226,7 @@ def test_event_bus_subscriber_exception_does_not_break_others():
     seen: list = []
     bus.subscribe(lambda ev: (_ for _ in ()).throw(RuntimeError("订阅方炸了")))
     bus.subscribe(seen.append)
-    from codeagent.core.contracts.events import AgentEvent
+    from tenon.core.contracts.events import AgentEvent
 
     bus.emit(AgentEvent("x"))
     assert len(seen) == 1
@@ -235,7 +235,7 @@ def test_event_bus_subscriber_exception_does_not_break_others():
 
 def test_event_bus_clear_resets_errors():
     bus = EventBus()
-    from codeagent.core.contracts.events import AgentEvent
+    from tenon.core.contracts.events import AgentEvent
 
     bus.subscribe(lambda ev: (_ for _ in ()).throw(RuntimeError("炸")))
     bus.emit(AgentEvent("x"))

@@ -25,6 +25,6 @@
 
 ## Impact
 
-- 主要影响 `src/codeagent/app/tui/state/transcript*.py`、TUI 渲染协调器、表现层工具结果分页和 TUI 性能基准。
+- 主要影响 `src/tenon/app/tui/state/transcript*.py`、TUI 渲染协调器、表现层工具结果分页和 TUI 性能基准。
 - 需要新增或调整 TUI 单元、Textual 集成和 performance marker 测试，并更新长会话性能基线及相关文档。
 - 不新增第三方依赖，不改变对外 Python API、会话持久化格式或工具结果协议；现有 `Transcript`、`Component.revision`、`TuiBackend` 和退出完整文档接口保持兼容。

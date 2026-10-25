@@ -13,7 +13,7 @@ class _EchoTool:
     parameters = {"type": "object", "properties": {}}
 
     async def execute(self, tool_call_id, arguments, *, signal=None, on_update=None):
-        from codeagent.core.contracts.messages import ToolExecutionStatus, ToolResult
+        from tenon.core.contracts.messages import ToolExecutionStatus, ToolResult
 
         return ToolResult(
             tool_call_id,
@@ -24,15 +24,15 @@ class _EchoTool:
 
 
 def _config(model, **kwargs):
-    from codeagent.app.container import ChatModelPort
-    from codeagent.core import AgentLoopConfig
+    from tenon.app.container import ChatModelPort
+    from tenon.core import AgentLoopConfig
 
     return AgentLoopConfig(model=ChatModelPort(model), tools=[_EchoTool()], **kwargs)
 
 
 async def test_multiple_lifecycle_hooks_keep_order_and_ignore_return_values():
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.core import Agent, AgentContext
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.core import Agent, AgentContext
 
     seen: list[str] = []
 
@@ -56,8 +56,8 @@ async def test_multiple_lifecycle_hooks_keep_order_and_ignore_return_values():
 
 
 async def test_context_extensions_modify_only_the_temporary_model_view():
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.core import AgentContext, Message, run_agent_loop
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.core import AgentContext, Message, run_agent_loop
 
     model = FakeClient(response="done")
     source = AgentContext(messages=[Message(role="user", content="history")])
@@ -89,8 +89,8 @@ async def test_context_extensions_modify_only_the_temporary_model_view():
 
 
 async def test_after_tool_hook_result_is_sent_to_next_model_request():
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.core import AgentContext, run_agent_loop
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.core import AgentContext, run_agent_loop
 
     model = FakeClient(
         steps=[
@@ -119,8 +119,8 @@ async def test_after_tool_hook_result_is_sent_to_next_model_request():
 
 @pytest.mark.parametrize("phase", ["before", "after"])
 async def test_tool_extension_failure_stops_the_turn_with_error_event(phase):
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.core import AgentContext, run_agent_loop
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.core import AgentContext, run_agent_loop
 
     model = FakeClient(
         steps=[
@@ -148,8 +148,8 @@ async def test_tool_extension_failure_stops_the_turn_with_error_event(phase):
 
 
 async def test_cancelled_tool_extension_propagates_and_publishes_abort():
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.core import AgentContext, run_agent_loop
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.core import AgentContext, run_agent_loop
 
     model = FakeClient(
         steps=[

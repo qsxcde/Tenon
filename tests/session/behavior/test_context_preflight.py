@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from codeagent.core import (
+from tenon.core import (
     AgentLoopConfig,
     ContextBudgetSnapshot,
     ContextPreflightConfig,
     EventType,
     StreamEvent,
 )
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.persistence import MemoryStore
+from tenon.session import AgentSession, EventBus
+from tenon.session.persistence import MemoryStore
 
 
 def _snapshot(headroom: int) -> ContextBudgetSnapshot:

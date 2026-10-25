@@ -7,8 +7,8 @@ import os
 
 import pytest
 
-from codeagent.core.contracts.messages import Message
-from codeagent.session.persistence import JsonFileStore, MemoryStore, SessionQuery
+from tenon.core.contracts.messages import Message
+from tenon.session.persistence import JsonFileStore, MemoryStore, SessionQuery
 
 
 @pytest.fixture(params=("jsonl", "memory"), ids=("jsonl", "memory"))

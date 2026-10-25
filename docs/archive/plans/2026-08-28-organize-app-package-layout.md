@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将 `src/codeagent/app/` 的实现按职责归并为规范子包，删除迁移期兼容入口，让规范路径成为唯一真实入口并保持运行时行为不变。
+**Goal:** 将 `src/tenon/app/` 的实现按职责归并为规范子包，删除迁移期兼容入口，让规范路径成为唯一真实入口并保持运行时行为不变。
 
 **Architecture:** 根层只保留 CLI 入口、组合根和全局配置。技能/任务/错误处理各自形成应用子包；`composition/` 按装配对象分包；`tui/` 按端口、适配器、状态、展示和工作流分包。新包承载真实实现，旧迁移入口最终删除。
 
@@ -20,7 +20,7 @@
 
 ## File Map
 
-- Create: `src/codeagent/app/context/`, `errors/`, `skills/`, `tasks/`, `composition/{model,runtime,session,tools,tui}/`, `tui/{ports,adapters,textual,state,presentation,commands,session,rendering,benchmark}/`
+- Create: `src/tenon/app/context/`, `errors/`, `skills/`, `tasks/`, `composition/{model,runtime,session,tools,tui}/`, `tui/{ports,adapters,textual,state,presentation,commands,session,rendering,benchmark}/`
 - Modify: delete old flat compatibility modules; update `container.py`, `main.py`, TUI imports, architecture tests, scale scanner, docs.
 - Test: add package-layout import contract; update `tests/contracts/test_app_architecture.py`, TUI and app tests as needed.
 
@@ -32,7 +32,7 @@
 - Modify: `tests/contracts/test_app_architecture.py`, `scripts/scale_scan.py`
 
 **Interfaces:**
-- The contract imports canonical paths such as `codeagent.app.skills.discovery`, `codeagent.app.tasks.verification.runner`, `codeagent.app.composition.model.factory`, and `codeagent.app.tui.ports.backend`.
+- The contract imports canonical paths such as `tenon.app.skills.discovery`, `tenon.app.tasks.verification.runner`, `tenon.app.composition.model.factory`, and `tenon.app.tui.ports.backend`.
 - The contract rejects `textual` imports outside `app/tui/adapters/textual/`.
 
 - [x] Write the import and boundary assertions first.

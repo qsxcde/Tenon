@@ -42,7 +42,7 @@
 
 - [x] 5.1 Create `mcp/server_config.py` for `McpServerSpec` and `parse_mcp_config`, preserving diagnostics and malformed-entry handling.
 - [x] 5.2 Create `mcp/permissions.py` for `McpPermissionRules` and `parse_mcp_permissions`, preserving normalization, wildcard matching and deny/ask/allow precedence.
-- [x] 5.3 Reduce `mcp/config.py` to a deliberate public export surface, update loader and policy composition imports, and keep existing `codeagent.tools.mcp.config` public imports working.
+- [x] 5.3 Reduce `mcp/config.py` to a deliberate public export surface, update loader and policy composition imports, and keep existing `tenon.tools.mcp.config` public imports working.
 - [x] 5.4 Run MCP configuration, permission, loader and adapter tests to verify server startup behavior, permission matching, tool naming, cleanup behavior and platform-specific command/env handling remain unchanged.
 
 ## 6. Final integration and verification

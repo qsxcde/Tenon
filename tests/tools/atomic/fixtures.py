@@ -5,8 +5,8 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import pytest
-from codeagent.app.container import create_tools
-from codeagent.tools.atomic import (
+from tenon.app.container import create_tools
+from tenon.tools.atomic import (
     BashTool,
     EditTool,
     FindTool,
@@ -15,9 +15,9 @@ from codeagent.tools.atomic import (
     ReadTool,
     WriteTool,
 )
-from codeagent.tools.atomic.bash import DANGEROUS_PATTERNS, _semantically_ok
-from codeagent.tools.base import AtomicTool
-from codeagent.core import ToolCall, ToolExecutionRuntime
+from tenon.tools.atomic.bash import DANGEROUS_PATTERNS, _semantically_ok
+from tenon.tools.base import AtomicTool
+from tenon.core import ToolCall, ToolExecutionRuntime
 
 
 def _invoke(tool: AtomicTool, **kwargs: object) -> str:

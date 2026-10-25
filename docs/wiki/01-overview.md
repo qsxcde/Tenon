@@ -2,7 +2,7 @@
 
 ## 1. 定位
 
-`codeagent` 是一个**本地、单用户、可离线验证**的编程 Agent。它把"编排、模型适配、工具实现、持久化"四件事彻底拆开：
+`tenon` 是一个**本地、单用户、可离线验证**的编程 Agent。它把"编排、模型适配、工具实现、持久化"四件事彻底拆开：
 
 - 核心层是纯内存、全异步、零外部依赖的可测试运行时；
 - 模型 / 工具 / 存储全部通过**端口（Protocol）**注入，实现在组合根装配；
@@ -29,14 +29,14 @@
 | Headless CLI | `--prompt` 一次性 / stdin 逐行；事件聚合输出最终回复；敏感操作默认 fail closed |
 | 自研编排 | `core/agent.py` 有状态外壳 + `core/orchestration/loop.py` ReAct 主循环（模型 → 工具 → 继续/结束） |
 | 11 个内建工具 | `read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill` / `web_fetch` / `web_search` / `todo`；无状态 `AtomicTool` + `FsOps` 抽象缝；`grep`/`find` 把 `rg`/`fd` 当可选加速，失败回退纯 Python；web 工具网络经注入、出站进确认环 |
-| MCP 客户端 | 按 `~/.codeagent/mcp.json` 接入 `tools/list` / `tools/call`；工具名 `mcp__<server>__<tool>` 命名空间化并实施分组预算 |
-| Skills | `SKILL.md` 三源发现（内建 / 个人 / 项目）+ 渐进式披露（描述入 system prompt，正文经 `skill` 工具按需取）；`codeagent skill` 子命令管理技能包 |
+| MCP 客户端 | 按 `~/.tenon/mcp.json` 接入 `tools/list` / `tools/call`；工具名 `mcp__<server>__<tool>` 命名空间化并实施分组预算 |
+| Skills | `SKILL.md` 三源发现（内建 / 个人 / 项目）+ 渐进式披露（描述入 system prompt，正文经 `skill` 工具按需取）；`tenon skill` 子命令管理技能包 |
 | 会话层 | JSONL 树形持久化；恢复 / 切换 / 分叉 / 归档 / 删除 / 压缩；标题、搜索、筛选、恢复诊断；成功轮次才落盘；`abort` / `steer` / `followup` |
 | Subagent 委派 | `delegate` 默认串行（`subagent_max_concurrency>1` 时启用有界并发）；profile `explore` / `review` 只读、`implement` 受限可写（禁止 `delegate`）；预算与输出有界；深度固定 1；父级收回有界摘要与结构化证据 |
 | 安全确认环 | 执行前 `ApprovalPolicy` 三档 deny / ask / allow（危险命令黑名单 + shlex 语义检测 + 文件访问边界） |
 | 用量透明 | 归一累计输入 / 输出 / 推理 / 缓存命中 token；`/status` 与 CLI 可见（**不做费用估算**） |
 | 上下文治理 | token 预算、preflight、自动压缩与恢复回归；`--context` 只读输出治理诊断（含缓存命中率与冷/暖诊断码） |
-| 运行期安全 | 三档 bash 沙箱（默认 `danger-full-access`，受限策略无后端 fail-closed）；写前 checkpoint + `codeagent undo` 逐级回退 |
+| 运行期安全 | 三档 bash 沙箱（默认 `danger-full-access`，受限策略无后端 fail-closed）；写前 checkpoint + `tenon undo` 逐级回退 |
 | 离线评测 | `python -m evals` 用 fake 模型驱动真实 Agent 循环，覆盖工具流/未知工具/审批阻断/改参；纳入 `contract` 门禁 |
 
 **明确不做**：费用估算、Web / HTTP 事件订阅、轻量记忆、自动化任务调度、跨进程恢复与自动重试、`tester` profile 与子 Agent 命令执行；**Web UI 暂不规划**（TUI + headless CLI 为唯一交付形态）。已交付但需注意边界的：插件系统（v1 仅贡献工具、同进程执行）、Subagent 有界并发（默认串行）、`implement` 受限可写 profile（禁止 `delegate`/MCP）。
@@ -80,7 +80,7 @@
 ## 6. 顶层目录结构
 
 ```text
-codeAgent/
+tenon/
 ├── pyproject.toml / uv.lock     # 依赖、CLI 入口、ruff / mypy / pytest 配置
 ├── AGENTS.md                    # 仓库开发与协作规范（权威快速参考）
 ├── CHANGELOG.md                 # 面向使用者的版本记录
@@ -95,7 +95,7 @@ codeAgent/
 ├── openspec/                    # 25 份主规格 + 已归档变更
 ├── evals/                       # 离线评测框架（python -m evals）
 ├── scripts/                     # scale_scan / type_scan / layer_scan / release_check / benchmark_tui ...
-├── src/codeagent/
+├── src/tenon/
 │   ├── app/                     # 入口 + 组合根（唯一跨层装配点）
 │   ├── core/                    # 纯内存 Agent Runtime
 │   ├── session/                 # 会话状态、持久化、压缩、导航

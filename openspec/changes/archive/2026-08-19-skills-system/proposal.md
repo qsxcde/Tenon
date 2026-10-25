@@ -6,7 +6,7 @@ v0.3 阶段 1(F-18,对齐 Claude Code / OpenAI Codex / Pi 的 Skills 体系)需�
 
 ## What Changes
 
-- **SKILL.md 格式与目录约定**:一技能一目录,`SKILL.md` 含 YAML frontmatter(`name` 缺省=目录名,`description` 缺省=正文第一段,对齐 Claude Code);目录布局 `.codeagent/skills/<name>/SKILL.md`(项目级 `<cwd>/`、个人级 `<config_dir>/`)+ 内建 `resources/skills/`;生态 SKILL.md 文件复制即用
+- **SKILL.md 格式与目录约定**:一技能一目录,`SKILL.md` 含 YAML frontmatter(`name` 缺省=目录名,`description` 缺省=正文第一段,对齐 Claude Code);目录布局 `.tenon/skills/<name>/SKILL.md`(项目级 `<cwd>/`、个人级 `<config_dir>/`)+ 内建 `resources/skills/`;生态 SKILL.md 文件复制即用
 - **新增依赖 pyyaml**:frontmatter 稳健解析(生态文件含块标量/引号,手写子集解析会静默误读);解析失败 → 诊断 + 跳过该技能,不中断加载
 - **加载器与注册表**:`load_skills(cwd, config_dir)` 纯函数(镜像 `app/agents.py`),多源发现、绝对路径去重、**同名遮蔽**(个人 > 项目 > 内建,Claude 式优先级,与信任方向同向)、诊断收集(缺字段/解析失败/被遮蔽)、按 name 排序
 - **渐进式披露注入**:技能名 + 描述 + 来源路径注入 system prompt(组合根 `_build_system_prompt` 扩展,追加在 project_context 之后);正文不预载

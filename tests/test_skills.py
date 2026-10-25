@@ -7,17 +7,17 @@
 
 from pathlib import Path
 
-from codeagent.app.skills.prompt import (
+from tenon.app.skills.prompt import (
     build_skills_prompt,
     format_skill_invocation,
     load_skills,
 )
-from codeagent.app.skills.models import (
+from tenon.app.skills.models import (
     parse_skill_frontmatter,
     Skill,
 )
-from codeagent.app.skills.packages.manager import PackageManager
-from codeagent.tools.atomic import SkillTool
+from tenon.app.skills.packages.manager import PackageManager
+from tenon.tools.atomic import SkillTool
 
 _BLOCK_HEAD = "<skill name="
 
@@ -81,7 +81,7 @@ def test_discover_name_defaults_to_dirname(tmp_path):
     """name 缺省取目录名;description 缺省取正文第一段(不产生诊断)。"""
     config_dir, cwd, builtin = _tree(tmp_path)
     _write_skill(
-        tmp_path / "proj" / ".codeagent" / "skills" / "my-skill", body="第一段说明。\n其余正文"
+        tmp_path / "proj" / ".tenon" / "skills" / "my-skill", body="第一段说明。\n其余正文"
     )
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert not diagnostics
@@ -94,10 +94,10 @@ def test_parse_failure_skipped_with_diagnostic(tmp_path):
     """frontmatter 解析失败 → 诊断 + 跳过,其它技能照常。"""
     config_dir, cwd, builtin = _tree(tmp_path)
     _write_skill(
-        tmp_path / "proj" / ".codeagent" / "skills" / "broken", frontmatter="name: [unclosed\n"
+        tmp_path / "proj" / ".tenon" / "skills" / "broken", frontmatter="name: [unclosed\n"
     )
     _write_skill(
-        tmp_path / "proj" / ".codeagent" / "skills" / "good",
+        tmp_path / "proj" / ".tenon" / "skills" / "good",
         frontmatter="description: 好的技能。\n",
     )
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
@@ -108,7 +108,7 @@ def test_parse_failure_skipped_with_diagnostic(tmp_path):
 def test_missing_name_and_description_skipped(tmp_path):
     """既无 name/description 也无可用正文 → 诊断 + 跳过。"""
     config_dir, cwd, builtin = _tree(tmp_path)
-    _write_skill(tmp_path / "proj" / ".codeagent" / "skills" / "empty", body="")
+    _write_skill(tmp_path / "proj" / ".tenon" / "skills" / "empty", body="")
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert skills == []
     assert any(d.code == "invalid_metadata" for d in diagnostics)
@@ -126,7 +126,7 @@ def test_three_sources_all_discovered(tmp_path):
     config_dir, cwd, builtin = _tree(tmp_path)
     _write_skill(builtin / "b-in", frontmatter="description: 内建。\n")
     _write_skill(config_dir / "skills" / "u-fmt", frontmatter="description: 个人。\n")
-    _write_skill(cwd / ".codeagent" / "skills" / "p-fmt", frontmatter="description: 项目。\n")
+    _write_skill(cwd / ".tenon" / "skills" / "p-fmt", frontmatter="description: 项目。\n")
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert not diagnostics
     assert {s.name for s in skills} == {"b-in", "u-fmt", "p-fmt"}
@@ -149,7 +149,7 @@ def test_user_shadows_project(tmp_path):
     """同名技能:个人级覆盖项目级,被遮蔽者产生诊断(标注遮蔽关系)。"""
     config_dir, cwd, builtin = _tree(tmp_path)
     user_skill = config_dir / "skills" / "fmt"
-    project_skill = cwd / ".codeagent" / "skills" / "fmt"
+    project_skill = cwd / ".tenon" / "skills" / "fmt"
     _write_skill(user_skill, frontmatter="description: 用户版。\n", body="用户正文")
     _write_skill(project_skill, frontmatter="description: 项目版。\n")
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
@@ -165,7 +165,7 @@ def test_any_level_shadows_builtin(tmp_path):
     """项目级技能覆盖同名内建技能。"""
     config_dir, cwd, builtin = _tree(tmp_path)
     _write_skill(builtin / "fmt", frontmatter="description: 内建版。\n")
-    _write_skill(cwd / ".codeagent" / "skills" / "fmt", frontmatter="description: 项目版。\n")
+    _write_skill(cwd / ".tenon" / "skills" / "fmt", frontmatter="description: 项目版。\n")
     skills, diagnostics = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert skills[0].description == "项目版。"
     assert any(d.code == "shadowed" for d in diagnostics)
@@ -184,9 +184,9 @@ def test_same_path_not_loaded_twice(tmp_path):
     if os.name == "nt":
         return
     (config_dir / "skills").mkdir(parents=True)
-    (cwd / ".codeagent" / "skills").mkdir(parents=True)
+    (cwd / ".tenon" / "skills").mkdir(parents=True)
     os.symlink(str(skill_dir), str(config_dir / "skills" / "fmt"))
-    os.symlink(str(skill_dir), str(cwd / ".codeagent" / "skills" / "fmt"))
+    os.symlink(str(skill_dir), str(cwd / ".tenon" / "skills" / "fmt"))
     skills, _ = load_skills(cwd, config_dir, builtin_dir=builtin)
     assert len(skills) == 1
 
@@ -197,7 +197,7 @@ def test_package_skills_are_discovered_recursively_with_metadata(tmp_path):
     package_root = tmp_path / "package-source"
     nested = package_root / "skills" / "category" / "nested-skill"
     _write_skill(nested, frontmatter="description: 包内技能。\n")
-    (package_root / "codeagent-package.json").write_text(
+    (package_root / "tenon-package.json").write_text(
         '{"id":"demo","name":"Demo","version":"1.2.3","skills":"skills"}',
         encoding="utf-8",
     )
@@ -217,7 +217,7 @@ def test_skill_source_priority_is_direct_then_package_then_project(tmp_path):
     config_dir, cwd, builtin = _tree(tmp_path)
     _write_skill(config_dir / "skills" / "shared", frontmatter="description: 用户直接。\n")
     _write_skill(
-        cwd / ".codeagent" / "skills" / "project-only", frontmatter="description: 项目直接。\n"
+        cwd / ".tenon" / "skills" / "project-only", frontmatter="description: 项目直接。\n"
     )
 
     package_root = tmp_path / "package-source"
@@ -225,7 +225,7 @@ def test_skill_source_priority_is_direct_then_package_then_project(tmp_path):
     _write_skill(
         package_root / "skills" / "package-only", frontmatter="description: 用户包独有。\n"
     )
-    (package_root / "codeagent-package.json").write_text(
+    (package_root / "tenon-package.json").write_text(
         '{"id":"demo","version":"1.0.0","skills":"skills"}', encoding="utf-8"
     )
     PackageManager(config_dir, cwd).install(package_root, scope="user")
@@ -239,7 +239,7 @@ def test_skill_source_priority_is_direct_then_package_then_project(tmp_path):
 
 
 def test_package_using_superpowers_is_inferred_as_bootstrap(tmp_path):
-    """无 CodeAgent 清单时按约定识别 using-superpowers Bootstrap。"""
+    """无 Tenon 清单时按约定识别 using-superpowers Bootstrap。"""
     config_dir, cwd, builtin = _tree(tmp_path)
     package_root = tmp_path / "package-source"
     _write_skill(
@@ -247,7 +247,7 @@ def test_package_using_superpowers_is_inferred_as_bootstrap(tmp_path):
         frontmatter="description: 启动引导。\n",
         body="检查相关技能。",
     )
-    (package_root / "codeagent-package.json").write_text(
+    (package_root / "tenon-package.json").write_text(
         '{"id":"superpowers","version":"6.3.0","skills":"skills"}', encoding="utf-8"
     )
     PackageManager(config_dir, cwd).install(package_root, scope="user")

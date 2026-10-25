@@ -1,6 +1,6 @@
-# codeagent 功能点完整清单
+# tenon 功能点完整清单
 
-> 分析日期：2026-09-08 · 版本：`v0.4.0`（`pyproject.toml`）· 分析范围：`src/codeagent/` 全量 + `tests/` + `scripts/` + `openspec/`
+> 分析日期：2026-09-08 · 版本：`v0.4.0`（`pyproject.toml`）· 分析范围：`src/tenon/` 全量 + `tests/` + `scripts/` + `openspec/`
 > 数据来源：六个独立调研代理分头逐文件通读 `core/`、`session/`、`ai/`+config、`tools/`、`app/`(非 TUI)、`app/tui/`，以及测试与工程化体系。
 
 ---
@@ -21,8 +21,8 @@
 | 依赖（仅 5 个） | `httpx`、`mcp`（官方 SDK）、`pydantic-settings`、`pyyaml`、`textual` |
 | 包管理 / 构建 | `uv` + `uv_build` |
 | 终端 UI | Textual 2.x |
-| 入口 | `codeagent = codeagent.app.main:main` |
-| 配置目录 | `~/.codeagent/`（`.env`、`models.json`、`mcp.json`、`skills/`、`packages/`） |
+| 入口 | `tenon = tenon.app.main:main` |
+| 配置目录 | `~/.tenon/`（`.env`、`models.json`、`mcp.json`、`skills/`、`packages/`） |
 
 ### 1.3 代码规模
 
@@ -113,7 +113,7 @@ core/        领域模型 + 协议 + 编排     ← 不 import 任何外层
 |---|---|---|---|---|
 | E1 | **三态审批决策** | 每次工具调用先过安全闸门 | `ALLOW` / `ASK` / `DENY`；`classify_tool` 按工具类型分发：bash→`classify_bash`，read/write/edit→`classify_file`，`mcp__*`→`classify_mcp`，其余 ALLOW | `tools/security/decision.py`、`classifier.py:290` |
 | E2 | **bash 危险命令识别** | 挡住破坏性命令 | 判定顺序：① `_dangerous_hit` 字面正则 →DENY（仅 6 条：rm -f /、fork bomb、mkfs、dd if=/dev/*、`>/dev/sd*`）；② **`_dangerous_intent` 结构递归分析**（eval、嵌套解释器 `-c`、`rm -rf` 命中 `/`/`~`/cwd、未闭合 `$(...)`）→DENY；③ 敏感路径 →DENY；④ 约 20 条 ASK 规则（`git push`/`reset --hard`/`clean -f`、`sudo`、`chmod -R`、`rm -r`、`find -delete`、`docker` 挂根、`kill`、`curl\|sh` 等）；⑤ 白名单（ls/cat/grep/git status 等）→ALLOW | `tools/security/classifier.py:254`、`bash_rules.py:15` |
-| E3 | **敏感文件保护** | 不让代理读到密钥 | 正则已覆盖 `.ssh/.aws/.gnupg/.netrc/.npmrc/.pypirc`、`.env`、`.codeagent`、各类 `id_rsa/ed25519`、`*.pem/*.key/*.pfx`、`credentials`/`secrets`/`tokens` 配置文件 | `tools/security/filesystem.py:11` |
+| E3 | **敏感文件保护** | 不让代理读到密钥 | 正则已覆盖 `.ssh/.aws/.gnupg/.netrc/.npmrc/.pypirc`、`.env`、`.tenon`、各类 `id_rsa/ed25519`、`*.pem/*.key/*.pfx`、`credentials`/`secrets`/`tokens` 配置文件 | `tools/security/filesystem.py:11` |
 | E4 | **Shell 语法分析** | 为安全判定提供可靠输入 | 基于 `shlex` 分词 + 按管道/控制符分段；**解析失败即拒绝**（fail-closed） | `tools/security/shell_parse.py` |
 | E5 | **MCP 工具权限** | 第三方工具也要过审 | `mcp.json` 支持 `deny > ask > allow` 三级通配规则（`mcp__*`、`mcp__<srv>__*`） | `tools/mcp/permissions.py` |
 
@@ -161,22 +161,22 @@ core/        领域模型 + 协议 + 编排     ← 不 import 任何外层
 | H5 | **重试策略** | 抗网络抖动与限流 | 指数退避 `min(2**attempt, 10s)`，默认 3 次（上限 5）；优先尊重响应头 `Retry-After`；**流式仅在吐出首帧前重试**（避免重复消费）；可重试 = 网络/超时/408/429/5xx | `ai/transport/retry.py`、`streaming.py` |
 | H6 | **分级超时** | 既不假死也不误杀慢请求 | 默认 connect=10 / read=120 / write=30 / pool=10；**流式 read=None**（防服务端 accept 后永不返回导致 TUI 假死） | `ai/transport/openai_compat.py` |
 | H7 | **错误归一化** | 上层不必认识 httpx | `classify_provider_error` 输出 8 类 `kind`（network/timeout/rate_limit/authentication/invalid_request/unsupported_parameter/server/unknown）+ `retryable` 标志；detail 自动脱敏并提取 `x-request-id` | `ai/errors.py` |
-| H8 | **模型能力目录** | 知道每个模型能干什么 | `ModelSpec`（reasoning/max_tokens/context_window/tool_calling/prompt_cache/aliases）frozen 值对象；内置静态目录 + 用户 `~/.codeagent/models.json` 按 id upsert；解析用**两遍法**（先精确 id 再别名）消除顺序依赖 | `ai/catalog/{spec,builtin,store,registry}.py` |
+| H8 | **模型能力目录** | 知道每个模型能干什么 | `ModelSpec`（reasoning/max_tokens/context_window/tool_calling/prompt_cache/aliases）frozen 值对象；内置静态目录 + 用户 `~/.tenon/models.json` 按 id upsert；解析用**两遍法**（先精确 id 再别名）消除顺序依赖 | `ai/catalog/{spec,builtin,store,registry}.py` |
 | H9 | **Fake Provider** | 离线可测 | 可脚本化 `response`/`steps`/`tool_calls`/`usage`/`thinking` 的 `FakeClient`，不联网不耗 key | `ai/providers/fake.py` |
-| H10 | **安全凭据管理** | 防止在任意仓库被 `.env` 劫持 | 固定 `CONFIG_DIR=~/.codeagent`，**刻意不读仓库本地 `.env`**；`ensure_config_files` 幂等生成模板不覆盖；`write_env_key` 原子行级替换 + 权限 0600 + 防换行注入；`warn_cwd_env` 检测 CWD `.env` 仅告警一次 | `app/config.py` |
-| H11 | **全局配置** | Provider 无关的运行时参数 | `llm_provider`(默认 deepseek)、`tool_max_concurrency=4`、`tool_timeout=None`、`tool_max_timeout=600`、`tool_max_output_bytes=30000`、`tool_max_output_lines=2000`、`tool_max_memory_bytes=1MB`、`tool_cleanup_timeout=10`；优先级 **CLI > 环境变量 > `~/.codeagent/.env` > 代码默认** | `app/config.py::Settings` |
+| H10 | **安全凭据管理** | 防止在任意仓库被 `.env` 劫持 | 固定 `CONFIG_DIR=~/.tenon`，**刻意不读仓库本地 `.env`**；`ensure_config_files` 幂等生成模板不覆盖；`write_env_key` 原子行级替换 + 权限 0600 + 防换行注入；`warn_cwd_env` 检测 CWD `.env` 仅告警一次 | `app/config.py` |
+| H11 | **全局配置** | Provider 无关的运行时参数 | `llm_provider`(默认 deepseek)、`tool_max_concurrency=4`、`tool_timeout=None`、`tool_max_timeout=600`、`tool_max_output_bytes=30000`、`tool_max_output_lines=2000`、`tool_max_memory_bytes=1MB`、`tool_cleanup_timeout=10`；优先级 **CLI > 环境变量 > `~/.tenon/.env` > 代码默认** | `app/config.py::Settings` |
 
 ### I. 组合根与应用层（app/ 非 TUI）
 
 | # | 功能点 | 用途 | 核心逻辑概要 | 代码位置 |
 |---|---|---|---|---|
 | I1 | **依赖注入容器** | 集中装配，杜绝全局可变状态 | `container.py` 是纯 façade（71 行），实际装配在 `composition/*`；资源所有权委托 `AgentRuntime`，通过 `setattr(config,"_runtime_owner",self)` 挂在配置上，避免进程级单例 | `app/container.py`、`composition/runtime/factory.py` |
-| I2 | **CLI 入口** | 命令行可用 | `--prompt`、`--tui`、`-c/--continue`、`--session <id>`、`--list-sessions`、`--context`（只读诊断）、`--yes`（放行敏感操作，headless 缺省一律 deny）；另有 `codeagent skill` 子命令：`install/update/remove/list/reload`（支持 `--project` 项目级） | `app/main.py` |
+| I2 | **CLI 入口** | 命令行可用 | `--prompt`、`--tui`、`-c/--continue`、`--session <id>`、`--list-sessions`、`--context`（只读诊断）、`--yes`（放行敏感操作，headless 缺省一律 deny）；另有 `tenon skill` 子命令：`install/update/remove/list/reload`（支持 `--project` 项目级） | `app/main.py` |
 | I3 | **无头模式** | 管道化/脚本化调用 | 订阅事件队列与 `TaskSupervisor` 协程竞速，聚合文本增量、usage、子代理状态行；支持单行与 stdin 逐行循环；输出成本透明行（输入/输出/缓存命中率） | `app/headless.py` |
 | I4 | **模型端口适配** | 把 ai 层接到 core 端口 | `ChatModelPort` 适配 `ai.ChatClient` → core `ModelPort`（流式、usage 归一、预算估计）；`LlmSummarizer` 复用同一通道做压缩摘要 | `composition/model/{port,factory,budget,capabilities,selection}.py` |
 | I5 | **运行时资源所有者** | 统一关闭，不漏资源 | `AgentRuntime` 持有模型客户端 + MCP 工具 + `ToolExecutionRuntime`，统一 `close()`（取消工具→关闭 MCP→释放客户端）；`_Lazy*` 延迟构造 | `composition/runtime/factory.py` |
 | I6 | **工具适配** | legacy/MCP 工具统一为 core 契约 | `AgentToolAdapter` 适配取消、结果元数据；`tool_definition_for` 生成供应商中立 schema | `composition/tools/{adapter,definitions}.py` |
-| I7 | **技能系统** | 可扩展的能力包 | `SKILL.md` = YAML frontmatter + 正文；五源优先级发现：`~/.codeagent/skills` > user-package > `.codeagent/skills` > project-package > `resources/skills`(builtin)，按名去重并报告 `shadowed`；**只把技能清单注入提示词，模型需要时经 `skill` 工具拉取正文**（省上下文） | `app/skills/{models,discovery,prompt,runtime}.py` |
+| I7 | **技能系统** | 可扩展的能力包 | `SKILL.md` = YAML frontmatter + 正文；五源优先级发现：`~/.tenon/skills` > user-package > `.tenon/skills` > project-package > `resources/skills`(builtin)，按名去重并报告 `shadowed`；**只把技能清单注入提示词，模型需要时经 `skill` 工具拉取正文**（省上下文） | `app/skills/{models,discovery,prompt,runtime}.py` |
 | I8 | **技能包管理** | 安装第三方技能 | `PackageManager` 支持 git URL 或本地目录安装、更新、删除、列表、重载；`PackageRegistry` JSON 注册表含越界/符号链接校验 | `app/skills/packages/{manager,registry}.py` |
 | I9 | **任务模式** | 控制代理能动什么 | `TaskMode(ask/plan/code/auto)` + `/mode` 粘性切换（`//` 转义）；ask/plan 下拒绝变更型工具与变更型 shell 命令 | `app/tasks/modes.py` |
 | I10 | **任务监督与自动修复** | 改完代码自动验证、失败自动修 | `TaskSupervisor.run`：基线快照 → Agent 回合 → 工作区 diff → 验证命令 → 失败自动修复；`max_repairs` 默认 1（≤3），用输出指纹去重防死循环 | `app/tasks/supervisor.py`、`lifecycle.py` |
@@ -226,7 +226,7 @@ core/        领域模型 + 协议 + 编排     ← 不 import 任何外层
 | L3 | **规模守卫** | 文件/函数不失控 | `scale_scan.py` 检查 app 层文件 >300 行、函数 >80 行；`test_core_scale`/`test_app_scale`/`test_session_scale` | `scripts/scale_scan.py`、`tests/contracts/` |
 | L4 | **依赖矩阵扫描** | 可视化跨层耦合 | `layer_scan.py` 输出 app/core/session/ai/tools 跨层 import 矩阵 + 第三方依赖 | `scripts/layer_scan.py` |
 | L5 | **异步泄漏检测** | 防止 task 泄漏 | autouse 夹具 `_assert_async_tasks_are_clean` 自动让泄漏 asyncio 任务的测试失败 | `tests/conftest.py` |
-| L6 | **配置隔离夹具** | 测试不碰真实 `~/.codeagent` | autouse `_isolate_config_dir` 重定向 `CONFIG_DIR` 到 tmp_path | `tests/conftest.py` |
+| L6 | **配置隔离夹具** | 测试不碰真实 `~/.tenon` | autouse `_isolate_config_dir` 重定向 `CONFIG_DIR` 到 tmp_path | `tests/conftest.py` |
 | L7 | **OpenSpec 规格驱动** | 24 份规格覆盖能力域 | 六类：AI/Provider(6)、上下文治理(3)、会话持久化(3)、运行时/子代理(7)、工具/MCP/技能(4)、TUI(1)；CI 跑 `openspec validate --specs` | `openspec/specs/` |
 | L8 | **CI 四 Job** | 自动化质量门禁 | `quality-fast`（Ruff E9/F821/F841 + unit/contract + **覆盖率 ≥77.9%** + 版本一致性 + `git diff --check` + openspec 校验）；`test-matrix`（ubuntu/windows/macos 离线，`LLM_PROVIDER=fake`）；`package-smoke`（release_check）；`performance`（continue-on-error） | `.github/workflows/ci.yml` |
 | L9 | **发布校验** | 产物可复现、干净 | `release_check.py`：`uv build` → 解包查敏感文件/版本/必需资源 → venv 干净安装 → fake provider 冒烟 → 输出 JSON + sha256 | `scripts/release_check.py`、`package_smoke.py` |

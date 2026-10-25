@@ -34,12 +34,12 @@
 
 | 旧入口 | 规范入口 |
 | --- | --- |
-| `codeagent.ai.factory.create_llm` | `codeagent.app.composition.model_selection.create_llm` |
-| `codeagent.ai.factory.get_available_providers` | `codeagent.app.composition.model_selection.get_available_providers` |
-| `codeagent.ai.factory._split_pattern` / `split_model_pattern` | `codeagent.app.composition.model_selection.split_model_pattern` |
-| `codeagent.ai.model_pattern.KNOWN_EFFORTS` | `codeagent.app.composition.model_selection.KNOWN_EFFORTS` |
-| `codeagent.ai.protocol.*` 消息与协议 | `codeagent.ai.model.*` |
-| `codeagent.ai.protocol.sse.SSEParser` | `codeagent.ai.transport.sse.SSEParser` |
+| `tenon.ai.factory.create_llm` | `tenon.app.composition.model_selection.create_llm` |
+| `tenon.ai.factory.get_available_providers` | `tenon.app.composition.model_selection.get_available_providers` |
+| `tenon.ai.factory._split_pattern` / `split_model_pattern` | `tenon.app.composition.model_selection.split_model_pattern` |
+| `tenon.ai.model_pattern.KNOWN_EFFORTS` | `tenon.app.composition.model_selection.KNOWN_EFFORTS` |
+| `tenon.ai.protocol.*` 消息与协议 | `tenon.ai.model.*` |
+| `tenon.ai.protocol.sse.SSEParser` | `tenon.ai.transport.sse.SSEParser` |
 
 不会在 `ai/__init__.py` 增加新的应用级导出；顶层只继续暴露 AI 层中立契约。
 

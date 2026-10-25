@@ -21,6 +21,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/ai/transport/`、`src/codeagent/ai/providers/` 和 AI 顶层导出。
+- 影响 `src/tenon/ai/transport/`、`src/tenon/ai/providers/` 和 AI 顶层导出。
 - 增加错误分类单元测试及流式/非流式传输回归测试，不引入新依赖。
 - 上层可捕获新的 Provider 错误并读取结构化诊断字段；HTTP 错误仍保持 `httpx.HTTPStatusError` 的类型兼容。

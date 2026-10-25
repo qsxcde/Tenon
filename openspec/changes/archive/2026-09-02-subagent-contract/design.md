@@ -101,7 +101,7 @@ CREATED -> QUEUED -> STARTING -> RUNNING
 
 ### 6. 保持公共门面和 core 依赖边界
 
-新契约从 `codeagent.core` 公共门面导出，并在包结构测试中固定路径和对象身份。错误类型放在 core contracts 中，不复用位于 session 的 `RuntimeFailure`，避免反向依赖；后续可以在应用层把两者转换为各自的事件诊断。
+新契约从 `tenon.core` 公共门面导出，并在包结构测试中固定路径和对象身份。错误类型放在 core contracts 中，不复用位于 session 的 `RuntimeFailure`，避免反向依赖；后续可以在应用层把两者转换为各自的事件诊断。
 
 ## Risks / Trade-offs
 

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import importlib
 
-from codeagent.app.tui.presentation.blocks import SubagentBlock
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.core.contracts.messages import Message
+from tenon.app.tui.presentation.blocks import SubagentBlock
+from tenon.app.tui.state.model import TuiModel
+from tenon.core.contracts.messages import Message
 
 
 def _record(**overrides):
-    module = importlib.import_module("codeagent.session.persistence.models")
+    module = importlib.import_module("tenon.session.persistence.models")
     record_type = getattr(module, "SubagentRunRecord", None)
     assert record_type is not None, "session persistence must expose SubagentRunRecord"
     values = {

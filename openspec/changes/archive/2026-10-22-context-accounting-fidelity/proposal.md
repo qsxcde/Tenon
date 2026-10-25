@@ -24,6 +24,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/tools/atomic/bash.py`、`src/codeagent/core/context/budget.py`、`src/codeagent/session/compaction/policy.py`。
+- 影响 `src/tenon/tools/atomic/bash.py`、`src/tenon/core/context/budget.py`、`src/tenon/session/compaction/policy.py`。
 - 不改动工具参数 schema、provider 协议、事件类型集合与 JSONL 格式。
 - 新增纯函数与工具级回归测试;不需要网络或真实 provider。

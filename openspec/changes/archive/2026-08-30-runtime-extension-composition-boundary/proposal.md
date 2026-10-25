@@ -22,6 +22,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/app/composition/runtime/`、`app/composition/session/`、`app/composition/tui/` 的工厂参数和恢复链路。
+- 影响 `src/tenon/app/composition/runtime/`、`app/composition/session/`、`app/composition/tui/` 的工厂参数和恢复链路。
 - 新增 app 组合对象及其公开导出；现有直接构造 Agent/AgentSession 的嵌入和测试路径保持可用。
 - 增加 app/contract 回归测试与架构文档说明，不新增依赖，不改变事件或持久化格式。

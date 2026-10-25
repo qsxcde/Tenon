@@ -10,9 +10,9 @@ from typing import Any
 
 import pytest
 
-from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.core.contracts.messages import Message
-from codeagent.session.compaction_runtime_budget import SessionCompactionBudgetMixin
+from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.core.contracts.messages import Message
+from tenon.session.compaction_runtime_budget import SessionCompactionBudgetMixin
 
 pytestmark = pytest.mark.unit
 

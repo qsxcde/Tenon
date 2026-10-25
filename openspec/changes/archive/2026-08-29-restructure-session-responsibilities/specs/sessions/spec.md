@@ -31,7 +31,7 @@
 #### Scenario: 使用职责子包入口
 
 - **WHEN** 应用需要访问事件总线、持久化存储、会话树或运行时组件
-- **THEN** 应用从 `codeagent.session.events`、`codeagent.session.persistence`、`codeagent.session.navigation` 或 `codeagent.session.runtime` 导入对应能力
+- **THEN** 应用从 `tenon.session.events`、`tenon.session.persistence`、`tenon.session.navigation` 或 `tenon.session.runtime` 导入对应能力
 
 #### Scenario: 旧兼容模块被移除
 

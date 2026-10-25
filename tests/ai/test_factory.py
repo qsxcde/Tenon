@@ -3,8 +3,8 @@
 测试直接使用自研客户端接口(``generate``/``bind_tools``),不依赖 langchain。
 """
 
-from codeagent.ai.providers import FakeClient
-from codeagent.ai.model.types import ChatMessage
+from tenon.ai.providers import FakeClient
+from tenon.ai.model.types import ChatMessage
 
 
 def _msgs(*contents: str) -> list[ChatMessage]:
@@ -43,7 +43,7 @@ async def test_fake_can_emit_tool_calls():
 
 def test_fake_bind_tools_records_then_runs_via_model_port():
     """bind_tools 记录工具名;经组合根 ChatModelPort 适配后自研循环可消费。"""
-    from codeagent.app.container import ChatModelPort
+    from tenon.app.container import ChatModelPort
 
     model = FakeClient(response="绑定测试")
 

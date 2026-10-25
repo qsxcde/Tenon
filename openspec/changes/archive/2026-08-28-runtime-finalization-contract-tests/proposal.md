@@ -23,7 +23,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/session/session.py` 的 run 收尾和持久化顺序，以及 `tests/core`、`tests/contracts`、`tests/session` 的测试组织。
+- 影响 `src/tenon/session/session.py` 的 run 收尾和持久化顺序，以及 `tests/core`、`tests/contracts`、`tests/session` 的测试组织。
 - 可能新增 RunOutcome、提交状态和测试 fixture，但不改变记忆、MCP、Skill 等扩展职责。
 - 测试默认离线、跨平台，不依赖真实 provider、密钥或网络。
 

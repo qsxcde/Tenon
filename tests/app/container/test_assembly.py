@@ -17,12 +17,12 @@ pytestmark = pytest.mark.contract
 
 def test_create_agent_config_returns_config():
     """用 fake provider 注入,零网络装配自研端口(模型端口 + 工具)。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_agent_config
-        from codeagent.core.orchestration.config import AgentLoopConfig
+        from tenon.app.container import create_agent_config
+        from tenon.core.orchestration.config import AgentLoopConfig
 
         config = create_agent_config()
     assert isinstance(config, AgentLoopConfig)
@@ -39,10 +39,10 @@ def test_create_agent_config_returns_config():
 
 
 def test_create_agent_config_passes_context_preflight_policy():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_config
-        from codeagent.core import ContextPreflightConfig
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_config
+        from tenon.core import ContextPreflightConfig
 
         mock_llm.return_value = FakeClient(response="测试回复")
         policy = ContextPreflightConfig(warning_headroom_tokens=321)
@@ -59,12 +59,12 @@ def test_create_agent_config_passes_context_preflight_policy():
 def test_create_agent_config_injects_one_resource_limits_bundle():
     from types import SimpleNamespace
 
-    from codeagent.tools.shared import ToolResourceLimits
+    from tenon.tools.shared import ToolResourceLimits
 
     limits = ToolResourceLimits(max_concurrency=2, timeout=1.0, max_timeout=2.0)
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_config
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_config
 
         mock_llm.return_value = FakeClient(response="测试回复")
         config = create_agent_config(provider="fake", resource_limits=limits)
@@ -79,11 +79,11 @@ def test_create_agent_config_injects_one_resource_limits_bundle():
 
 def test_create_agent_session_returns_session():
     """create_agent_session 返回可订阅的 AgentSession。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         sess = create_agent_session()
     assert hasattr(sess, "run")
@@ -94,11 +94,11 @@ def test_create_agent_session_returns_session():
 
 def test_create_tui_app_assembles_with_stub_backend():
     """create_tui_app 装配 session + backend,不依赖 textual(design D5)。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="fake", backend=_StubBackend())
     assert hasattr(app, "start")
@@ -110,11 +110,11 @@ def test_create_tui_app_assembles_with_stub_backend():
 
 def test_create_tui_app_resolves_footer_info():
     """状态栏装配数据的 model · effort 优先级:model 内联后缀 > provider 配置默认(design D5)。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(
             provider="deepseek", model="deepseek-v4-pro:low", backend=_StubBackend()
@@ -129,12 +129,12 @@ def test_create_tui_app_resolves_footer_info():
 
 def test_create_tui_app_injects_rebuild_config():
     """组合根注入 rebuild 回调:/provider /model /effort 热切换链路(T-44)。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.session.persistence import MemoryStore
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.session.persistence import MemoryStore
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         store = MemoryStore()
         app = create_tui_app(provider="fake", backend=_StubBackend(), store=store)
@@ -167,10 +167,10 @@ async def test_tui_async_rebuild_waits_for_old_runtime_close():
         return client
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=make_client,
     ):
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="fake", backend=_StubBackend())
         _ = app._manager.tools
@@ -184,11 +184,11 @@ async def test_tui_async_rebuild_waits_for_old_runtime_close():
 
 
 def test_rebuild_config_syncs_model_context_window():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.app.container import create_tui_app
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.app.container import create_tui_app
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -205,12 +205,12 @@ def test_rebuild_config_syncs_model_context_window():
 
 
 def test_create_agent_config_binds_catalog_window_to_model_budget():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_config
-        from codeagent.core.contracts.messages import Message
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_config
+        from tenon.core.contracts.messages import Message
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -227,11 +227,11 @@ def test_create_agent_config_binds_catalog_window_to_model_budget():
 
 
 def test_create_agent_config_injects_model_capabilities():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_config
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_config
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -255,11 +255,11 @@ def test_create_agent_config_injects_model_capabilities():
 
 
 def test_create_tui_app_injects_model_capabilities_and_refreshes_after_rebuild():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_tui_app
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_tui_app
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -291,11 +291,11 @@ def test_create_tui_app_injects_model_capabilities_and_refreshes_after_rebuild()
 
 
 def test_create_agent_config_keeps_tiny_catalog_window_budget_valid():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_config
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_config
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -313,16 +313,16 @@ def test_create_agent_config_keeps_tiny_catalog_window_budget_valid():
 def test_create_tui_app_uses_provider_default_model_context_window():
     """TUI 初始未显式传 model 时,按 provider 默认模型读取窗口。"""
     with (
-        patch("codeagent.app.composition.model.selection.create_llm") as mock_llm,
+        patch("tenon.app.composition.model.selection.create_llm") as mock_llm,
         patch(
-            "codeagent.app.composition.model.factory._provider_config",
+            "tenon.app.composition.model.factory._provider_config",
             return_value=SimpleNamespace(model="configured-model", reasoning_effort="high"),
         ),
     ):
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_tui_app
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_tui_app
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -336,11 +336,11 @@ def test_create_tui_app_uses_provider_default_model_context_window():
 
 def test_create_agent_session_uses_model_context_window():
     """headless AgentSession 使用显式模型的上下文窗口,而非固定默认值。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_session
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_session
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -355,16 +355,16 @@ def test_create_agent_session_uses_model_context_window():
 def test_create_agent_session_uses_provider_default_context_window():
     """headless 未显式传 model 时,按 provider 默认模型读取窗口。"""
     with (
-        patch("codeagent.app.composition.model.selection.create_llm") as mock_llm,
+        patch("tenon.app.composition.model.selection.create_llm") as mock_llm,
         patch(
-            "codeagent.app.composition.model.factory._provider_config",
+            "tenon.app.composition.model.factory._provider_config",
             return_value=SimpleNamespace(model="configured-model", reasoning_effort="high"),
         ),
     ):
-        from codeagent.ai.catalog.registry import ModelRegistry
-        from codeagent.ai.catalog.spec import ModelSpec
-        from codeagent.ai.providers.fake import FakeClient
-        from codeagent.app.container import create_agent_session
+        from tenon.ai.catalog.registry import ModelRegistry
+        from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_agent_session
 
         mock_llm.return_value = FakeClient(response="测试回复")
         registry = ModelRegistry()
@@ -372,7 +372,7 @@ def test_create_agent_session_uses_provider_default_context_window():
             id="configured-model", context_window=64_000
         )
         with patch(
-            "codeagent.app.composition.model.factory._get_default_registry",
+            "tenon.app.composition.model.factory._get_default_registry",
             return_value=registry,
         ):
             session = create_agent_session(provider="deepseek")
@@ -382,11 +382,11 @@ def test_create_agent_session_uses_provider_default_context_window():
 
 def test_create_tui_app_injects_selector_candidates():
     """选择器候选经组合根注入(T-45):provider/model/effort 各一份。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="fake", backend=_StubBackend())
     candidates = app._candidates
@@ -426,7 +426,7 @@ def test_policy_file_boundary_modes(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     (tmp_path / "ws").mkdir()
     (tmp_path / "secret.txt").write_text("x")
-    monkeypatch.setenv("CODEAGENT_CWD", str(tmp_path))
+    monkeypatch.setenv("TENON_CWD", str(tmp_path))
 
     _, interactive = _config_with_mode("interactive")
     decision = interactive.decide("write", {"file_path": "ws/a.py"})
@@ -441,8 +441,8 @@ def test_policy_file_boundary_modes(tmp_path, monkeypatch):
 
 def test_tui_app_gets_compaction_capable_manager():
     """create_tui_app 装配 Summarizer:/compact 可经 current 会话执行。"""
-    from codeagent.app.container import create_tui_app
-    from codeagent.app.tui.ports.backend import TuiBackend
+    from tenon.app.container import create_tui_app
+    from tenon.app.tui.ports.backend import TuiBackend
 
     class StubBackend(TuiBackend):
         def run(self):
@@ -499,8 +499,8 @@ def test_tui_app_gets_compaction_capable_manager():
         def stop(self):
             pass
 
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
         app = create_tui_app(backend=StubBackend())
@@ -510,15 +510,15 @@ def test_tui_app_gets_compaction_capable_manager():
 
 def test_create_tui_app_injects_save_key(tmp_path, monkeypatch):
     """组合根注入 save_key:/login 写 .env(<PREFIX>_API_KEY)并热切换。"""
-    from codeagent.app import config as app_config
+    from tenon.app import config as app_config
 
-    env_file = tmp_path / ".codeagent" / ".env"
+    env_file = tmp_path / ".tenon" / ".env"
     monkeypatch.setattr(app_config, "CONFIG_ENV_FILE", env_file)
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="deepseek", backend=_StubBackend())
         # _save_key 会热切换重建端口(再走 create_llm),必须留在 mock 作用域内,
@@ -539,7 +539,7 @@ def test_create_tui_app_without_api_key_starts_lazy():
     穿透 run_tui,/login 首启流(鸡生蛋)不可达;延迟后 /login 写回 .env
     (create_llm 每次重读配置)自然生效。
     """
-    from codeagent.app.container import _LazyConfig, _LazySummarizer, create_tui_app
+    from tenon.app.container import _LazyConfig, _LazySummarizer, create_tui_app
 
     app = create_tui_app(provider="deepseek", backend=_StubBackend())
     assert isinstance(app._manager._config, _LazyConfig)
@@ -550,14 +550,14 @@ def test_create_tui_app_without_api_key_starts_lazy():
 
 def test_save_key_unknown_provider_raises(tmp_path, monkeypatch):
     """save_key 对未知 provider 抛 ValueError(视图就地提示)。"""
-    from codeagent.app import config as app_config
+    from tenon.app import config as app_config
 
     monkeypatch.setattr(app_config, "CONFIG_ENV_FILE", tmp_path / ".env")
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="fake", backend=_StubBackend())
     import pytest
@@ -568,7 +568,7 @@ def test_save_key_unknown_provider_raises(tmp_path, monkeypatch):
 
 def test_create_tui_app_injects_configured_providers(tmp_path, monkeypatch):
     """configured_providers 从 .env 解析:仅非空 key 的 provider 进入登录 ✓ 集。"""
-    from codeagent.app import config as app_config
+    from tenon.app import config as app_config
 
     env_file = tmp_path / ".env"
     env_file.write_text(
@@ -576,11 +576,11 @@ def test_create_tui_app_injects_configured_providers(tmp_path, monkeypatch):
         encoding="utf-8",
     )
     monkeypatch.setattr(app_config, "CONFIG_ENV_FILE", env_file)
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="fake", backend=_StubBackend())
     assert app._configured_providers == {"deepseek", "kimi"}
@@ -590,8 +590,8 @@ def test_create_tui_app_injects_configured_providers(tmp_path, monkeypatch):
 
 def test_create_tui_app_continue_recent_restores_instead_of_creating():
     """``continue_recent=True`` 走恢复路径,空存储时退化为新建(-c/TUI)。"""
-    from codeagent.app.container import create_tui_app
-    from codeagent.session.persistence import MemoryStore
+    from tenon.app.container import create_tui_app
+    from tenon.session.persistence import MemoryStore
 
     app = create_tui_app(
         provider="deepseek",
@@ -605,8 +605,8 @@ def test_create_tui_app_continue_recent_restores_instead_of_creating():
 
 def test_run_tui_forwards_continue_recent(monkeypatch):
     """``run_tui(continue_recent=True)`` 把标志透传给 TUI 工厂并启动。"""
-    from codeagent.app import container
-    from codeagent.app.tui import main as tui_main
+    from tenon.app import container
+    from tenon.app.tui import main as tui_main
 
     calls: dict[str, object] = {}
 

@@ -4,12 +4,12 @@
 
 ## 项目结构
 
-- `src/codeagent/app/`：程序入口、CLI、TUI 和依赖组装。跨层组装逻辑放在 `app/container.py` 或 `app/main.py`。
-- `src/codeagent/core/`：依赖较少的领域模型、协议和核心编排，不直接依赖具体 UI、网络、工具或持久化实现。
-- `src/codeagent/session/`：会话状态、生命周期、JSONL 持久化、压缩和会话树。
-- `src/codeagent/ai/`：模型提供商、客户端和传输层。
-- `src/codeagent/tools/`：内置工具、MCP 工具、外部命令和基础设施适配。
-- `src/codeagent/resources/`：打包内置的提示词和技能。
+- `src/tenon/app/`：程序入口、CLI、TUI 和依赖组装。跨层组装逻辑放在 `app/container.py` 或 `app/main.py`。
+- `src/tenon/core/`：依赖较少的领域模型、协议和核心编排，不直接依赖具体 UI、网络、工具或持久化实现。
+- `src/tenon/session/`：会话状态、生命周期、JSONL 持久化、压缩和会话树。
+- `src/tenon/ai/`：模型提供商、客户端和传输层。
+- `src/tenon/tools/`：内置工具、MCP 工具、外部命令和基础设施适配。
+- `src/tenon/resources/`：打包内置的提示词和技能。
 - `tests/`：测试代码，通常与源代码包结构对应；共享 pytest 夹具位于 `tests/conftest.py` 和 `tests/fixtures/`。
 - `docs/`：架构、测试和迭代文档；`openspec/`：规格说明和变更产物。
 
@@ -30,8 +30,8 @@
 
 ```bash
 uv sync --group dev                                      # 安装运行时和开发依赖
-uv run codeagent --prompt "你好"                         # 运行无头 CLI
-uv run codeagent --tui                                   # 运行交互式终端 UI
+uv run tenon --prompt "你好"                         # 运行无头 CLI
+uv run tenon --tui                                   # 运行交互式终端 UI
 uv run pytest -m "unit or contract" -q --strict-markers  # 快速质量测试
 uv run pytest -m "integration or e2e or platform or compatibility" -q --strict-markers
 uv run pytest -m "not slow" -q                          # 排除慢测试的日常反馈集
@@ -41,7 +41,7 @@ uv run ruff check src tests evals scripts                      # 当前 CI 的�
 uv run ruff format --check src tests evals scripts             # 当前 CI 的统一格式化门禁
 uv run python scripts/type_scan.py                       # 当前 CI 的类型债务棘轮
 uv run python scripts/scale_scan.py                      # 全生产层规模门禁(也被 contract 测试覆盖)
-uv run pytest -m "unit or contract" -q --cov=codeagent --cov-report=term-missing
+uv run pytest -m "unit or contract" -q --cov=tenon --cov-report=term-missing
 uv build                                                 # 构建发行产物
 openspec validate --specs                                # 验证 OpenSpec 规格说明
 ```
@@ -106,7 +106,7 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - 定期检查依赖的过期版本和安全漏洞，避免引入职责重复或无法维护的库。
 - 配置通过环境变量或配置文件注入，不在代码中硬编码环境差异。
 - 明确区分开发、测试、预发布和生产环境；默认配置必须安全。
-- 凭据仅存储在 `~/.codeagent/.env`；应用有意不读取仓库本地 `.env`。
+- 凭据仅存储在 `~/.tenon/.env`；应用有意不读取仓库本地 `.env`。
 - 切勿提交密钥、令牌、生成的机密、用户会话数据、临时产物或本地配置。
 - 涉及凭据、用户数据或外部命令时，必须进行输入校验、权限边界检查和敏感信息脱敏。
 - 不执行可能删除、覆盖大量文件或破坏用户环境的命令，除非目标明确、范围已核对并获得确认。

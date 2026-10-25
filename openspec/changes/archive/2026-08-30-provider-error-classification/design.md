@@ -21,7 +21,7 @@
 
 ### 统一分类器位于 AI 层
 
-新增独立的 `codeagent.ai.errors` 模块，接收原始异常并返回稳定的 `ProviderError`。选择集中分类而不是在每个 Provider 中复制判断，是因为所有内置 Provider 都使用 OpenAI 兼容传输，集中规则可以保证流式和非流式一致；未来非兼容 Provider 也可以复用公共错误模型。
+新增独立的 `tenon.ai.errors` 模块，接收原始异常并返回稳定的 `ProviderError`。选择集中分类而不是在每个 Provider 中复制判断，是因为所有内置 Provider 都使用 OpenAI 兼容传输，集中规则可以保证流式和非流式一致；未来非兼容 Provider 也可以复用公共错误模型。
 
 ### HTTP 错误保留类型兼容
 

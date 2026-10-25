@@ -96,7 +96,7 @@ async def run(thread, text):
   abort():      break + 保存已产出状态
 ```
 
-这是 Pi 对比里 codeagent 最落后的地方(Pi 原生支持 steer/followup/Esc abort),自研编排是补上它的最短路。
+这是 Pi 对比里 tenon 最落后的地方(Pi 原生支持 steer/followup/Esc abort),自研编排是补上它的最短路。
 
 ### 收益 3:会话树/分叉从「不可能」变「一个字典」
 
@@ -170,7 +170,7 @@ for call in msg.tool_calls:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              自研后的 codeagent 核心                          │
+│              自研后的 tenon 核心                          │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ModelRuntime(第一步)         ReActLoop(第二步)              │

@@ -1,9 +1,9 @@
-"""CodeAgent Skill Adapter / Bootstrap runtime tests."""
+"""Tenon Skill Adapter / Bootstrap runtime tests."""
 
-from codeagent.app.skills.models import Skill
-from codeagent.app.skills.runtime import (
+from tenon.app.skills.models import Skill
+from tenon.app.skills.runtime import (
     BOOTSTRAP_TAG,
-    CodeAgentAdapter,
+    TenonAdapter,
     SkillRuntimeState,
     build_bootstrap_prompt,
 )
@@ -22,10 +22,10 @@ def _bootstrap_skill() -> Skill:
     )
 
 
-def test_codeagent_adapter_maps_available_and_missing_capabilities():
-    from codeagent.tools.registry import builtin_tool_registry
+def test_tenon_adapter_maps_available_and_missing_capabilities():
+    from tenon.tools.registry import builtin_tool_registry
 
-    adapter = CodeAgentAdapter(tool_names=builtin_tool_registry().names())
+    adapter = TenonAdapter(tool_names=builtin_tool_registry().names())
 
     mapping = adapter.tool_mapping()
     capabilities = adapter.capabilities()
@@ -41,17 +41,17 @@ def test_codeagent_adapter_maps_available_and_missing_capabilities():
 
 def test_capabilities_derive_from_injected_tool_names():
     """能力声明由注入的工具名派生:缺 todo 时能力与提示自动降级。"""
-    from codeagent.tools.registry import builtin_tool_registry
+    from tenon.tools.registry import builtin_tool_registry
 
     trimmed = [name for name in builtin_tool_registry().names() if name != "todo"]
-    adapter = CodeAgentAdapter(tool_names=trimmed)
+    adapter = TenonAdapter(tool_names=trimmed)
     capabilities = adapter.capabilities()
 
     assert capabilities["todo"] is False
     assert capabilities["web"] is True
     assert "当前不可用" in adapter.tool_mapping()
 
-    conservative = CodeAgentAdapter()
+    conservative = TenonAdapter()
     assert conservative.capabilities()["todo"] is False
     assert conservative.capabilities()["web"] is False
 
@@ -75,7 +75,7 @@ def test_bootstrap_absent_does_not_change_base_prompt():
 
 
 def test_runtime_state_injects_once_until_context_resets():
-    state = SkillRuntimeState(adapter_version="codeagent-v1", bootstrap_name="using-superpowers")
+    state = SkillRuntimeState(adapter_version="tenon-v1", bootstrap_name="using-superpowers")
 
     assert state.claim("session-1") is True
     assert state.claim("session-1") is False
@@ -84,12 +84,12 @@ def test_runtime_state_injects_once_until_context_resets():
     assert state.claim("session-1") is True
 
     status = state.status()
-    assert status["adapter"] == "codeagent-v1"
+    assert status["adapter"] == "tenon-v1"
     assert status["bootstrap"] == "using-superpowers"
 
 
 def test_container_system_prompt_places_bootstrap_before_skill_catalog():
-    from codeagent.app.container import _build_system_prompt
+    from tenon.app.container import _build_system_prompt
 
     prompt = _build_system_prompt(
         skills=[_bootstrap_skill(), Skill("fmt", "格式化", "/fmt/SKILL.md", "UNIQUE-ORDINARY-BODY")]

@@ -24,8 +24,8 @@
 
 ## Impact
 
-- 主要影响 `src/codeagent/app/tui/status.py` 及其相关渲染测试。
-- 可能调整 `src/codeagent/app/tui/theme.py` 中状态栏使用的样式标签，但不改变后端接口。
-- 可能补充 `src/codeagent/app/tui/primitives.py` 的固定 cell 宽度排版辅助逻辑。
+- 主要影响 `src/tenon/app/tui/status.py` 及其相关渲染测试。
+- 可能调整 `src/tenon/app/tui/theme.py` 中状态栏使用的样式标签，但不改变后端接口。
+- 可能补充 `src/tenon/app/tui/primitives.py` 的固定 cell 宽度排版辅助逻辑。
 - 不修改 core、session、ai、tools 的事件和业务行为。
 - 不改变 `TuiBackend.set_status()` 的公开契约，仍由渲染协调器提交单行状态栏内容。

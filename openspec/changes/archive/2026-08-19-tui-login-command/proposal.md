@@ -1,6 +1,6 @@
 ## Why
 
-provider API key 目前只能手动编辑 `~/.codeagent/.env` 并重启生效;TUI 内 `/provider` 切到未配置 key 的 provider 会直接报错,没有任何引导闭环。参照 pi-agent(LoginDialogComponent + auth-guidance)与 opencode(`opencode auth login` / TUI `/login`)的做法,在 TUI 内完成「选 provider → 输 key → 保存 + 热切换」一次到位,消除手动改文件与重启。
+provider API key 目前只能手动编辑 `~/.tenon/.env` 并重启生效;TUI 内 `/provider` 切到未配置 key 的 provider 会直接报错,没有任何引导闭环。参照 pi-agent(LoginDialogComponent + auth-guidance)与 opencode(`opencode auth login` / TUI `/login`)的做法,在 TUI 内完成「选 provider → 输 key → 保存 + 热切换」一次到位,消除手动改文件与重启。
 
 ## What Changes
 
@@ -8,7 +8,7 @@ provider API key 目前只能手动编辑 `~/.codeagent/.env` 并重启生效;TU
   - 无参 → provider 选择器(复用现有 picker 浮层 / 模糊补全);带参 `/login <provider>` 直通;
   - fake provider 提示"无需密钥",不进入输入态。
 - 掩码输入态:provider 确认后,输入框清空并进入掩码模式(输入显示为 `●`,内部保留原文,提交取原文),placeholder 提示「输入 `XXX_API_KEY`,Enter 保存 / Esc 取消」;输入态期间禁用建议浮层;Esc 取消回空闲;空 key 提交提示并停留。
-- 保存:写回 `~/.codeagent/.env`(行级替换 `<PROVIDER>_API_KEY` 一行,保留注释与其它键;写入后收紧权限 0600,Windows 跳过);不覆盖用户已有配置。
+- 保存:写回 `~/.tenon/.env`(行级替换 `<PROVIDER>_API_KEY` 一行,保留注释与其它键;写入后收紧权限 0600,Windows 跳过);不覆盖用户已有配置。
 - 热生效:保存成功后重建 LLM 端口并切换到该 provider(复用 `/provider` 热切换路径),状态栏与反馈更新;保存失败就地提示、不切换。
 - 引导闭环(对齐 pi 的 auth-guidance):会话 401「API Key 无效或未配置」错误文案追加「可用 /login 配置密钥」;登录选择器中已配置 key 的 provider 打 `✓` 标记。
 - 密钥安全:掩码显示,key 不进 transcript / 会话历史 / 日志。

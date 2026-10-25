@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.tools.atomic import TodoTool, WebFetchTool, WebSearchTool
-from codeagent.tools.atomic.todo import MAX_TODOS, TodoItem, TodoState
+from tenon.tools.atomic import TodoTool, WebFetchTool, WebSearchTool
+from tenon.tools.atomic.todo import MAX_TODOS, TodoItem, TodoState
 
 
 def _invoke(tool, **kwargs):
@@ -72,18 +72,18 @@ def test_web_fetch_truncates_large_content():
 def test_web_search_without_searcher_returns_unavailable():
     tool = WebSearchTool()
 
-    out = _invoke(tool, query="codeagent")
+    out = _invoke(tool, query="tenon")
 
     assert "不可用" in out and "未配置搜索提供方" in out
 
 
 def test_web_search_renders_numbered_results_with_limit():
     def searcher(query: str, limit: int) -> list[str]:
-        assert query == "codeagent" and limit == 2
+        assert query == "tenon" and limit == 2
         return ["a https://a.example", "b https://b.example", "c https://c.example"]
 
     tool = WebSearchTool(searcher=searcher)
-    out = _invoke(tool, query="codeagent", limit=2)
+    out = _invoke(tool, query="tenon", limit=2)
 
     assert "1. a https://a.example" in out
     assert "2. b https://b.example" in out

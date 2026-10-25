@@ -8,7 +8,7 @@
 
 ### Requirement: SKILL.md 格式与发现
 
-技能 SHALL 以"一技能一目录"组织,技能定义文件名为 SKILL.md;SKILL.md SHALL 由 YAML frontmatter 与 Markdown 正文组成;frontmatter 的 name SHALL 缺省取所在目录名;description SHALL 缺省取正文第一段;frontmatter 解析失败或解析后缺少可用 name/description 时 SHALL 产生诊断且不加载该技能;技能发现 SHALL 覆盖内建来源、个人级直接目录(<config_dir>/skills/)、项目级直接目录(<cwd>/.codeagent/skills/)以及已安装用户级和项目级 Package 的 Skill 根目录;Package Skill 根目录 SHALL 递归发现 skills/**/SKILL.md;来源目录不存在 SHALL 静默跳过。
+技能 SHALL 以"一技能一目录"组织,技能定义文件名为 SKILL.md;SKILL.md SHALL 由 YAML frontmatter 与 Markdown 正文组成;frontmatter 的 name SHALL 缺省取所在目录名;description SHALL 缺省取正文第一段;frontmatter 解析失败或解析后缺少可用 name/description 时 SHALL 产生诊断且不加载该技能;技能发现 SHALL 覆盖内建来源、个人级直接目录(<config_dir>/skills/)、项目级直接目录(<cwd>/.tenon/skills/)以及已安装用户级和项目级 Package 的 Skill 根目录;Package Skill 根目录 SHALL 递归发现 skills/**/SKILL.md;来源目录不存在 SHALL 静默跳过。
 
 #### Scenario: 合法技能被加载
 
@@ -86,7 +86,7 @@ system 提示词 SHALL 追加技能段:每个已注册的普通技能 SHALL 以�
 #### Scenario: Bootstrap 作为例外注入
 
 - **WHEN** 已安装 Package 声明一个会话 Bootstrap Skill
-- **THEN** 系统可以注入该 Bootstrap 的正文和 CodeAgent 工具映射,并不得把其它普通 Skill 正文全部预载
+- **THEN** 系统可以注入该 Bootstrap 的正文和 Tenon 工具映射,并不得把其它普通 Skill 正文全部预载
 
 #### Scenario: 无技能不产生空段
 
@@ -141,9 +141,9 @@ system 提示词 SHALL 追加技能段:每个已注册的普通技能 SHALL 以�
 - **WHEN** 用户显式加载未注册的技能名
 - **THEN** 反馈明确错误,列出可用技能名,不注入任何内容
 
-### Requirement: CodeAgent Bootstrap 自动触发
+### Requirement: Tenon Bootstrap 自动触发
 
-当已安装 Package 提供 CodeAgent Bootstrap 时,系统 SHALL 在每个新会话开始时向模型上下文注入一次 Bootstrap 和工具映射;普通用户轮次 SHALL 不重复注入相同 Bootstrap。会话恢复、端口重建或上下文压缩完成后,系统 SHALL 在新上下文中重新注入 Bootstrap;Bootstrap SHALL 指示模型在开始任务前检查可用 Skill,但具体 Skill 调用 SHALL 仅在模型判断任务相关时发生。
+当已安装 Package 提供 Tenon Bootstrap 时,系统 SHALL 在每个新会话开始时向模型上下文注入一次 Bootstrap 和工具映射;普通用户轮次 SHALL 不重复注入相同 Bootstrap。会话恢复、端口重建或上下文压缩完成后,系统 SHALL 在新上下文中重新注入 Bootstrap;Bootstrap SHALL 指示模型在开始任务前检查可用 Skill,但具体 Skill 调用 SHALL 仅在模型判断任务相关时发生。
 
 #### Scenario: 新会话自动注入
 
@@ -162,16 +162,16 @@ system 提示词 SHALL 追加技能段:每个已注册的普通技能 SHALL 以�
 
 #### Scenario: 无 Bootstrap Package 的兼容模式
 
-- **WHEN** Package 只有普通 SKILL.md 且未声明 CodeAgent Bootstrap
+- **WHEN** Package 只有普通 SKILL.md 且未声明 Tenon Bootstrap
 - **THEN** Skill 仍可被列出、手动加载和经 skill 工具调用,但系统不声称其具备自动触发保证
 
 ### Requirement: 工具映射与能力降级
 
-Bootstrap 或 Package Adapter SHALL 将 Skill 使用的抽象动作映射到 CodeAgent 当前可用工具;当 subagent、todo、web 等能力不存在时,系统 SHALL 将缺失能力明确告知模型并使用 Skill 已定义的降级语义,不得注册或伪造不存在的工具。
+Bootstrap 或 Package Adapter SHALL 将 Skill 使用的抽象动作映射到 Tenon 当前可用工具;当 subagent、todo、web 等能力不存在时,系统 SHALL 将缺失能力明确告知模型并使用 Skill 已定义的降级语义,不得注册或伪造不存在的工具。
 
 #### Scenario: 已有工具被映射
 
-- **WHEN** Bootstrap 注入 CodeAgent 工具映射
+- **WHEN** Bootstrap 注入 Tenon 工具映射
 - **THEN** 模型能够将读写、编辑、命令执行、搜索和 Skill 调用映射到实际可用工具名
 
 #### Scenario: 缺失能力可见

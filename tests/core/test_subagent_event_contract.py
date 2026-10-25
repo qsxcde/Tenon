@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.context.model import AgentContext
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.core.contracts.messages import ToolCall, ToolResult
-from codeagent.core.execution.runtime import ToolExecutionRuntime
-from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.core.orchestration.tool_call import new_tool_result
-from codeagent.core.contracts.errors import SubagentStateError
-from codeagent.core.contracts.subagent_state import SubagentState
-from codeagent.core.contracts.subagents import (
+from tenon.core.context.model import AgentContext
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.messages import ToolCall, ToolResult
+from tenon.core.execution.runtime import ToolExecutionRuntime
+from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.tool_call import new_tool_result
+from tenon.core.contracts.errors import SubagentStateError
+from tenon.core.contracts.subagent_state import SubagentState
+from tenon.core.contracts.subagents import (
     SubagentRequest,
     SubagentResult,
     SubagentStatus,

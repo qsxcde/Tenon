@@ -1,5 +1,5 @@
 [project]
-name = "codeagent"
+name = "tenon"
 version = "0.7.0"
 description = "本地、单用户、可离线验证的编程 Agent（自研 ReAct 编排；TUI + 无头 CLI）"
 readme = "README.md"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-codeagent = "codeagent.app.main:main"
+tenon = "tenon.app.main:main"
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]

@@ -8,7 +8,7 @@
 | --- | --- |
 | `app/main.py` | CLI 入口：参数解析、会话准备、headless 运行、`skill` 子命令 |
 | `app/headless.py` | 无 TUI 的运行与事件消费（含聚合输出） |
-| `app/config.py` | `~/.codeagent` 配置目录、模板生成、`.env` 读写、`Settings` |
+| `app/config.py` | `~/.tenon` 配置目录、模板生成、`.env` 读写、`Settings` |
 | `app/container.py` | 组合根 façade：只导出装配 API，不承载实现 |
 | `app/composition/model/*` | 模型端口、预算元数据、能力解析、provider 选择 |
 | `app/composition/runtime/*` | `AgentRuntime`、`AgentLoopConfig` 装配、扩展点归一 |
@@ -41,7 +41,7 @@
 ### 2.2 启动顺序与退出码
 
 1. 若首个参数是 `skill` → 转入 `_skill_cli`（install / update / remove / list / reload，均支持 `--project` 作用域）。
-2. `ensure_config_files()`：首次启动生成 `~/.codeagent` 模板（幂等，不覆盖）。
+2. `ensure_config_files()`：首次启动生成 `~/.tenon` 模板（幂等，不覆盖）。
 3. `--tui` / `--list-sessions` 提前返回；否则 `_prepare_session(args)` 创建会话，失败时返回退出码 **2**。
 4. 恢复非 healthy 会话时向 stderr 打印 `format_recovery_report(...)`。
 5. 执行 headless 运行（一次或循环）；`finally` 中按所有权关闭 manager 或 session。
@@ -51,7 +51,7 @@
 
 | 项 | 说明 |
 | --- | --- |
-| `CONFIG_DIR` | `~/.codeagent`（应用有意不读取仓库本地 `.env`） |
+| `CONFIG_DIR` | `~/.tenon`（应用有意不读取仓库本地 `.env`） |
 | `ensure_config_files(cfg_dir=None)` | 生成 `.env` 模板与 `models.json` 模板等，幂等 |
 | `write_env_key(provider, key, env_file=None)` | 安全写入 API key（值带引号转义） |
 | `configured_providers(env_file=None)` | 扫描已配置 key 的 provider 集合 |
@@ -59,7 +59,7 @@
 | `warn_cwd_env()` | 检测危险的环境变量用法并告警 |
 | `package_paths(...)` | 内置资源（提示词/技能）路径解析 |
 
-凭据只存于 `~/.codeagent/.env`；`Settings` 的工具资源字段经 `ToolResourceLimits.from_config` 形成不可变限制对象注入 tools 层。
+凭据只存于 `~/.tenon/.env`；`Settings` 的工具资源字段经 `ToolResourceLimits.from_config` 形成不可变限制对象注入 tools 层。
 
 ## 四、组合根（app/composition）
 
@@ -120,11 +120,11 @@
 | `discovery.py` | `discover_skills_in`、`parse_skill_file`（frontmatter 解析）、`builtin_skills_dir`、`package_records`、`path_inside` |
 | `models.py` | `Skill` 等领域模型 |
 | `prompt.py` | `load_skills`、`build_skills_prompt`、`format_skill_invocation`：渐进披露——系统提示只放技能名与触发说明，正文由 `skill` 工具按需返回 |
-| `runtime.py` | `CodeAgentAdapter`、`build_bootstrap_prompt`、`SkillRuntimeState` |
+| `runtime.py` | `TenonAdapter`、`build_bootstrap_prompt`、`SkillRuntimeState` |
 | `packages/manager.py` | 包安装/更新/删除（Git URL 或本地目录；用户级与 `--project` 级） |
 | `packages/registry.py` | 已安装包注册表 |
 
-三源发现顺序：内置 `resources/skills`（打包）+ 用户 `~/.codeagent/skills` + 项目级技能（含包管理器安装的）。组合根预渲染技能块注入 `make_tools(skills=...)`，模型通过 `skill` 工具获取正文。
+三源发现顺序：内置 `resources/skills`（打包）+ 用户 `~/.tenon/skills` + 项目级技能（含包管理器安装的）。组合根预渲染技能块注入 `make_tools(skills=...)`，模型通过 `skill` 工具获取正文。
 
 ## 六、任务系统（app/tasks）
 
@@ -163,7 +163,7 @@
 2. **领域规则不下沉也不上浮**：subagent 预算、会话提交、压缩策略只在各自领域层；app 只装配。
 3. **资源所有权显式**：模型客户端、MCP 客户端、工具运行时的关闭路径集中在 `AgentRuntime`，幂等且可同步/异步调用。
 4. **延迟装配是默认**：TUI 与恢复路径用 `_Lazy*` 避免无谓的模型客户端/摘要器创建。
-5. **配置与密钥边界**：凭据只从 `~/.codeagent/.env` 读取；配置模板生成幂等且不覆盖用户文件。
+5. **配置与密钥边界**：凭据只从 `~/.tenon/.env` 读取；配置模板生成幂等且不覆盖用户文件。
 
 ## 相关阅读
 

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 import asyncio
 
-from codeagent.core.context.model import AgentContext
-from codeagent.core.execution.runtime import ToolExecutionRuntime
-from codeagent.core.contracts.events import EventType
-from codeagent.core.orchestration.loop import run_agent_loop, run_agent_loop_continue
-from codeagent.core.contracts.messages import (
+from tenon.core.context.model import AgentContext
+from tenon.core.execution.runtime import ToolExecutionRuntime
+from tenon.core.contracts.events import EventType
+from tenon.core.orchestration.loop import run_agent_loop, run_agent_loop_continue
+from tenon.core.contracts.messages import (
     Message,
     OutputCompleteness,
     ToolOutputMetadata,
     ToolResult,
 )
-from codeagent.core.contracts.ports import StreamEvent, ToolDecision
-from codeagent.core.orchestration.config import AgentLoopConfig
+from tenon.core.contracts.ports import StreamEvent, ToolDecision
+from tenon.core.orchestration.config import AgentLoopConfig
 
 
 class _Model:
@@ -286,7 +286,7 @@ async def test_rejected_tool_keeps_operation_correlation_without_fake_start() ->
     events = []
 
     async def before_tool_call(_call, _context):
-        from codeagent.core.contracts.ports import ToolDecision
+        from tenon.core.contracts.ports import ToolDecision
 
         return ToolDecision.block("blocked")
 

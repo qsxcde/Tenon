@@ -20,7 +20,7 @@
 
 ## 4. 任务监督器与验证命令
 
-- [x] 4.1 在 `src/codeagent/app/` 新增任务监督器，订阅 AgentSession 事件并维护 planning/editing/verifying/repairing 状态
+- [x] 4.1 在 `src/tenon/app/` 新增任务监督器，订阅 AgentSession 事件并维护 planning/editing/verifying/repairing 状态
 - [x] 4.2 定义 `TaskEvent`、`VerificationResult` 和 `TaskResult`，明确 verified/unverified/failed/cancelled/no_changes 终态
 - [x] 4.3 实现验证命令解析，按显式命令、项目配置、常见项目文件探测的优先级选择命令并记录来源
 - [x] 4.4 实现有界输出、超时、取消和安全策略下的验证运行器；无命令时返回 unverified

@@ -6,18 +6,18 @@ import asyncio
 
 import pytest
 
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 def test_runtime_entrypoint_is_the_canonical_controller() -> None:
-    from codeagent.session.runtime import SessionRuntime
-    from codeagent.session.runtime.controller import SessionRuntime as Controller
+    from tenon.session.runtime import SessionRuntime
+    from tenon.session.runtime.controller import SessionRuntime as Controller
 
     assert SessionRuntime is Controller
 
 
 def test_runtime_accepts_an_injected_agent_factory() -> None:
-    from codeagent.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.controller import SessionRuntime
 
     runtime = SessionRuntime(lambda event, run_id: None, agent_factory=lambda *args: None)
 
@@ -25,7 +25,7 @@ def test_runtime_accepts_an_injected_agent_factory() -> None:
 
 
 def test_runtime_rejects_a_second_active_run() -> None:
-    from codeagent.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.controller import SessionRuntime
 
     runtime = SessionRuntime(lambda event, run_id: None)
     runtime.start_run()
@@ -35,7 +35,7 @@ def test_runtime_rejects_a_second_active_run() -> None:
 
 
 def test_runtime_clears_confirmation_responses_when_a_run_finishes() -> None:
-    from codeagent.session.runtime.controller import SessionRuntime
+    from tenon.session.runtime.controller import SessionRuntime
 
     runtime = SessionRuntime(lambda event, run_id: None)
     runtime.start_run()
@@ -46,7 +46,7 @@ def test_runtime_clears_confirmation_responses_when_a_run_finishes() -> None:
 
 
 async def test_confirmation_waits_for_matching_request_id() -> None:
-    from codeagent.session.runtime.confirmation import ConfirmationCoordinator
+    from tenon.session.runtime.confirmation import ConfirmationCoordinator
 
     async def scenario() -> None:
         coordinator = ConfirmationCoordinator()
@@ -62,7 +62,7 @@ async def test_confirmation_waits_for_matching_request_id() -> None:
 
 
 def test_event_mapper_preserves_tool_start_mapping() -> None:
-    from codeagent.session.runtime.event_mapper import EventMapper
+    from tenon.session.runtime.event_mapper import EventMapper
 
     mapped = EventMapper.map_agent_event(
         AgentEvent(
@@ -80,7 +80,7 @@ def test_event_mapper_preserves_tool_start_mapping() -> None:
 
 
 def test_event_mapper_maps_core_queue_to_session_queue_with_correlation() -> None:
-    from codeagent.session.runtime.event_mapper import EventMapper
+    from tenon.session.runtime.event_mapper import EventMapper
 
     mapped = EventMapper.map_agent_event(
         AgentEvent(
@@ -111,7 +111,7 @@ def test_event_mapper_maps_core_queue_to_session_queue_with_correlation() -> Non
 
 
 def test_event_mapper_preserves_structured_runtime_correlation() -> None:
-    from codeagent.session.runtime.event_mapper import EventMapper
+    from tenon.session.runtime.event_mapper import EventMapper
 
     mapped = EventMapper.map_agent_event(
         AgentEvent(
@@ -132,8 +132,8 @@ def test_event_mapper_preserves_structured_runtime_correlation() -> None:
 
 
 def test_event_mapper_assigns_stable_tool_error_code() -> None:
-    from codeagent.core.contracts.messages import ToolExecutionStatus, ToolResult
-    from codeagent.session.runtime.event_mapper import EventMapper
+    from tenon.core.contracts.messages import ToolExecutionStatus, ToolResult
+    from tenon.session.runtime.event_mapper import EventMapper
 
     mapped = EventMapper.map_agent_event(
         AgentEvent(
@@ -154,8 +154,8 @@ def test_event_mapper_assigns_stable_tool_error_code() -> None:
 
 
 def test_event_mapper_keeps_synthetic_cancellation_terminal_without_result() -> None:
-    from codeagent.core.contracts.messages import CleanupStatus, ToolExecutionStatus, ToolResult
-    from codeagent.session.runtime.event_mapper import EventMapper
+    from tenon.core.contracts.messages import CleanupStatus, ToolExecutionStatus, ToolResult
+    from tenon.session.runtime.event_mapper import EventMapper
 
     mapped = EventMapper.map_agent_event(
         AgentEvent(
@@ -183,12 +183,12 @@ def test_event_mapper_keeps_synthetic_cancellation_terminal_without_result() -> 
 
 
 def test_event_mapper_propagates_structured_tool_output_facts() -> None:
-    from codeagent.core.contracts.messages import (
+    from tenon.core.contracts.messages import (
         OutputCompleteness,
         ToolOutputMetadata,
         ToolResult,
     )
-    from codeagent.session.runtime.event_mapper import EventMapper
+    from tenon.session.runtime.event_mapper import EventMapper
 
     metadata = ToolOutputMetadata(
         completeness=OutputCompleteness.TRUNCATED,
@@ -212,6 +212,6 @@ def test_event_mapper_propagates_structured_tool_output_facts() -> None:
 
 
 def test_error_policy_preserves_plain_exception_text() -> None:
-    from codeagent.session.runtime.error_policy import friendly_error
+    from tenon.session.runtime.error_policy import friendly_error
 
     assert friendly_error(RuntimeError("boom")) == "boom"

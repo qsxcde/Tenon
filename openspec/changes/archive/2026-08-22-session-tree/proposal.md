@@ -22,7 +22,7 @@
 
 ## Impact
 
-- `src/codeagent/session/`:`build_tree` 纯函数(新模块或 store 扩展,建议独立纯函数模块,零跨层)。
-- `src/codeagent/app/tui/view.py`:`/tree` 命令注册与 handler、`/sessions list` 树形渲染(复用 `build_tree`)、切换节点分派。
-- `src/codeagent/app/tui/commands.py`:`tree` 命令注册(带可选 `session-id` 参数)。
+- `src/tenon/session/`:`build_tree` 纯函数(新模块或 store 扩展,建议独立纯函数模块,零跨层)。
+- `src/tenon/app/tui/view.py`:`/tree` 命令注册与 handler、`/sessions list` 树形渲染(复用 `build_tree`)、切换节点分派。
+- `src/tenon/app/tui/commands.py`:`tree` 命令注册(带可选 `session-id` 参数)。
 - 测试:`build_tree` 纯函数(含孤儿/循环/排序边界)、`/tree` 展示与切换、`/sessions list` 缩进断言(更新既有平铺断言)。

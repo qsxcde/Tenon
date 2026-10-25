@@ -6,12 +6,12 @@
 - 命中 > 输入:钳制 100%。
 """
 
-from codeagent.app.main import _format_usage_line
+from tenon.app.main import _format_usage_line
 
 
 def test_skill_cli_dispatches_package_lifecycle(monkeypatch, capsys):
     """skill 子命令应调用 PackageManager 并返回可脚本化错误码。"""
-    from codeagent.app import main as main_module
+    from tenon.app import main as main_module
 
     calls = []
 

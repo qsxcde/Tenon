@@ -60,7 +60,7 @@ Thought for 3s · 1 tool call     ← DIM 元信息标题
 不改工具 schema、不动 core 事件。`ToolCallBlock` 构造改为收结构化 `args: dict`,header 渲染:
 
 ```
-▶ · read src/codeagent/app/tui/components.py     ← 折叠态
+▶ · read src/tenon/app/tui/components.py     ← 折叠态
 ▼ ✓ bash uv run pytest -q · exit 0 · 12.3s       ← 展开态(尾部附结果摘要)
 ```
 

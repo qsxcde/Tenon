@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.tools.execution.sandbox import (
+from tenon.tools.execution.sandbox import (
     SANDBOX_DANGER_FULL_ACCESS,
     SANDBOX_READ_ONLY,
     SANDBOX_WORKSPACE_WRITE,
@@ -120,8 +120,8 @@ def test_unsupported_platform_is_unavailable():
 
 def test_bash_tool_fails_closed_when_backend_missing(monkeypatch, tmp_path):
     """受限策略无后端时在派生子进程前就拒绝,错误可诊断。"""
-    from codeagent.tools.atomic import bash as bash_module
-    from codeagent.tools.execution.sandbox import SandboxPlan
+    from tenon.tools.atomic import bash as bash_module
+    from tenon.tools.execution.sandbox import SandboxPlan
 
     monkeypatch.setattr(
         bash_module,
@@ -140,7 +140,7 @@ def test_bash_tool_fails_closed_when_backend_missing(monkeypatch, tmp_path):
 
 def test_bash_tool_default_policy_still_runs(tmp_path):
     """默认 danger-full-access 保持原行为(回归)。"""
-    from codeagent.tools.atomic import BashTool
+    from tenon.tools.atomic import BashTool
 
     tool = BashTool(cwd=str(tmp_path))
     assert "ok" in tool.invoke(tool.Args(command="echo ok"))
@@ -148,7 +148,7 @@ def test_bash_tool_default_policy_still_runs(tmp_path):
 
 def test_config_choices_match_tool_policies():
     """契约:app/config 的取值清单与 tools 的沙箱策略定义保持一致(防漂移)。"""
-    from codeagent.app.config import SANDBOX_POLICY_CHOICES
-    from codeagent.tools.execution.sandbox import SANDBOX_POLICIES
+    from tenon.app.config import SANDBOX_POLICY_CHOICES
+    from tenon.tools.execution.sandbox import SANDBOX_POLICIES
 
     assert SANDBOX_POLICY_CHOICES == SANDBOX_POLICIES

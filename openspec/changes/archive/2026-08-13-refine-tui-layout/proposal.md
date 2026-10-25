@@ -25,9 +25,9 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/textual_backend.py`:`_InputBox` 布局重构、composer 分隔线、footer 双端渲染、`set_status`/`set_footer` 富样式实现。
-- `src/codeagent/app/tui/components.py`:`UserBlock` / `AssistantBlock` / `ToolCallBlock` / `StatusLine` 渲染逻辑与摘要 formatter。
-- `src/codeagent/app/tui/backend.py`:`TuiBackend` 端口契约(`set_status(text: str)` → `RichLine`)。
-- `src/codeagent/app/tui/view.py`:`_flush_render` 传值修正。
-- `src/codeagent/app/tui/theme.py`:新增样式标签(折叠符、结果摘要、footer 等)。
+- `src/tenon/app/tui/textual_backend.py`:`_InputBox` 布局重构、composer 分隔线、footer 双端渲染、`set_status`/`set_footer` 富样式实现。
+- `src/tenon/app/tui/components.py`:`UserBlock` / `AssistantBlock` / `ToolCallBlock` / `StatusLine` 渲染逻辑与摘要 formatter。
+- `src/tenon/app/tui/backend.py`:`TuiBackend` 端口契约(`set_status(text: str)` → `RichLine`)。
+- `src/tenon/app/tui/view.py`:`_flush_render` 传值修正。
+- `src/tenon/app/tui/theme.py`:新增样式标签(折叠符、结果摘要、footer 等)。
 - `tests/tui/test_components.py`、`tests/tui/test_view.py`:断言随新样式标签与布局更新,保持全量测试通过。

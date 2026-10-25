@@ -22,6 +22,6 @@ V4-38 需要让用户在真正发起请求前知道当前模型的上下文窗�
 
 ## Impact
 
-- 影响 `src/codeagent/ai/catalog`、`src/codeagent/app/composition/model`、运行时配置和 TUI 状态/命令展示。
+- 影响 `src/tenon/ai/catalog`、`src/tenon/app/composition/model`、运行时配置和 TUI 状态/命令展示。
 - 增加模型目录字段的严格解析和组合根注入，不改变 core 依赖方向、Provider 请求格式或 JSONL 会话格式。
 - 增加目录解析、组合根、模型切换、状态文本和未知/缓存观测边界的离线回归测试。

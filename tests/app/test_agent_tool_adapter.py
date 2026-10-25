@@ -4,8 +4,8 @@ import logging
 
 from pydantic import BaseModel
 
-from codeagent.app.composition.tools.adapter import AgentToolAdapter
-from codeagent.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
+from tenon.app.composition.tools.adapter import AgentToolAdapter
+from tenon.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
 
 
 class _Args(BaseModel):
@@ -85,7 +85,7 @@ async def test_agent_tool_adapter_logs_unexpected_execution_failure(caplog) -> N
     """返回模型可见失败时，应用仍必须记录完整的原始异常。"""
     adapter = AgentToolAdapter(_FailingTool())
 
-    with caplog.at_level(logging.ERROR, logger="codeagent.app"):
+    with caplog.at_level(logging.ERROR, logger="tenon.app"):
         result = await adapter.execute("c1", {"text": "hello"})
 
     assert result.error is True

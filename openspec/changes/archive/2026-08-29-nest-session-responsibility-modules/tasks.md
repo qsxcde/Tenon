@@ -1,9 +1,9 @@
 ## 1. 目录结构与导入迁移
 
-- [x] 1.1 新增目录结构契约测试，验证 `codeagent.session.manager` 和 `codeagent.session.persistence.jsonl` 的真实入口，并先锁定旧的平铺 JSONL 模块应被移除。
+- [x] 1.1 新增目录结构契约测试，验证 `tenon.session.manager` 和 `tenon.session.persistence.jsonl` 的真实入口，并先锁定旧的平铺 JSONL 模块应被移除。
 - [x] 1.2 将 `session/manager.py`、`manager_operations.py` 和 `manager_registry.py` 归并为 `session/manager/` 子包，设置 `manager/__init__.py` 的 `SessionManager` 导出，并迁移内部相对导入。
 - [x] 1.3 将 `persistence/jsonl_store.py`、`jsonl_reading.py`、`jsonl_writing.py`、`jsonl_indexing.py` 和 `jsonl_forking.py` 归并为 `persistence/jsonl/` 子包，保持 mixin 顺序、模块级 `_now` 测试缝隙和锁/索引调用顺序。
-- [x] 1.4 将生产代码、测试和文档中的直接模块导入迁移到 `codeagent.session.persistence` 或 `codeagent.session.persistence.jsonl`，同步更新 monkeypatch 路径和 `persistence/__init__.py` 导出。
+- [x] 1.4 将生产代码、测试和文档中的直接模块导入迁移到 `tenon.session.persistence` 或 `tenon.session.persistence.jsonl`，同步更新 monkeypatch 路径和 `persistence/__init__.py` 导出。
 - [x] 1.5 删除旧的 `persistence.jsonl_store`、`persistence.jsonl_reading`、`persistence.jsonl_writing`、`persistence.jsonl_indexing` 和 `persistence.jsonl_forking` 平铺模块，确认旧路径不可导入且包级公开入口仍可用。
 
 ## 2. 文档与质量约束

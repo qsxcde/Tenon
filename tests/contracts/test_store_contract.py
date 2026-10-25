@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.contracts.messages import Message
-from codeagent.session.persistence.jsonl import JsonFileStore
-from codeagent.session.persistence.memory_store import MemoryStore
+from tenon.core.contracts.messages import Message
+from tenon.session.persistence.jsonl import JsonFileStore
+from tenon.session.persistence.memory_store import MemoryStore
 
 
 @pytest.fixture(params=("jsonl", "memory"), ids=("jsonl", "memory"))
@@ -47,9 +47,9 @@ def test_store_activity_timestamp_contract(store, monkeypatch):
         )
     )
     module = (
-        "codeagent.session.persistence.jsonl.store"
+        "tenon.session.persistence.jsonl.store"
         if isinstance(store, JsonFileStore)
-        else "codeagent.session.persistence.memory_store"
+        else "tenon.session.persistence.memory_store"
     )
     monkeypatch.setattr(module + "._now", lambda: next(clock))
 
@@ -72,9 +72,9 @@ def test_store_recent_activity_sort_contract(store, monkeypatch):
         )
     )
     module = (
-        "codeagent.session.persistence.jsonl.store"
+        "tenon.session.persistence.jsonl.store"
         if isinstance(store, JsonFileStore)
-        else "codeagent.session.persistence.memory_store"
+        else "tenon.session.persistence.memory_store"
     )
     monkeypatch.setattr(module + "._now", lambda: next(clock))
 

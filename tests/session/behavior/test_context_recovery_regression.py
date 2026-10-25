@@ -9,20 +9,20 @@ from typing import Any
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import (
     AgentLoopConfig,
     Message,
     OutputCompleteness,
     ToolCall,
     ToolOutputMetadata,
 )
-from codeagent.core.context.diagnostics import ContextDiagnostics
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.compaction import CompactionPolicyConfig
-from codeagent.session.persistence import CompactionEntry, JsonFileStore, MemoryStore
-from codeagent.session.persistence.models import SessionStore, UsageStats
+from tenon.core.context.diagnostics import ContextDiagnostics
+from tenon.session import AgentSession, EventBus
+from tenon.session.compaction import CompactionPolicyConfig
+from tenon.session.persistence import CompactionEntry, JsonFileStore, MemoryStore
+from tenon.session.persistence.models import SessionStore, UsageStats
 
 
 @pytest.fixture(params=("memory", "jsonl"), ids=("memory-store", "jsonl-store"))

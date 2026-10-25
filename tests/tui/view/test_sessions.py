@@ -2,12 +2,12 @@
 
 from tests.tui.view.fixtures import *  # noqa: F401,F403
 
-from codeagent.session.persistence import (
+from tenon.session.persistence import (
     RecoveryDiagnostic,
     SessionRecoveryError,
     SessionRecoveryReport,
 )
-from codeagent.app.tui.presentation.blocks import SubagentBlock
+from tenon.app.tui.presentation.blocks import SubagentBlock
 
 
 def test_session_switch_refreshes_skill_registry_and_diagnostics():
@@ -75,7 +75,7 @@ async def test_large_restore_moves_persisted_subagent_projection_with_history():
     app, _, manager = _make_app()
     session = manager.current
     session.history = [Message(role="user", content=f"old-{i}") for i in range(1001)]
-    from codeagent.session.persistence import SubagentRunRecord
+    from tenon.session.persistence import SubagentRunRecord
 
     session.subagent_records = [
         SubagentRunRecord(

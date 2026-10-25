@@ -35,7 +35,7 @@
 
 ### 4. Session 采用最小结构化兼容识别
 
-`session/runtime/error_classification.py` 不导入 `codeagent.ai`，而是读取 Provider 错误公开的 `kind`、`retryable`、`provider` 等属性，并对未知对象保持旧的 httpx/运行时映射。这遵守 session 不依赖 AI 具体实现的架构约束，同时允许 Provider 错误向用户呈现稳定的错误代码。
+`session/runtime/error_classification.py` 不导入 `tenon.ai`，而是读取 Provider 错误公开的 `kind`、`retryable`、`provider` 等属性，并对未知对象保持旧的 httpx/运行时映射。这遵守 session 不依赖 AI 具体实现的架构约束，同时允许 Provider 错误向用户呈现稳定的错误代码。
 
 ## Risks / Trade-offs
 

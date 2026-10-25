@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from codeagent.app.tasks.verification.models import WorkspaceSnapshot
-from codeagent.app.tasks.verification.workspace import (
+from tenon.app.tasks.verification.models import WorkspaceSnapshot
+from tenon.app.tasks.verification.workspace import (
     VerificationCommandResolver,
     WorkspaceInspector,
 )
@@ -157,9 +157,9 @@ def test_resolve_uses_configured_command(tmp_path):
 
 
 def test_project_config_from_pyproject_verify(tmp_path):
-    """pyproject 的 tool.codeagent.verify 被采纳。"""
+    """pyproject 的 tool.tenon.verify 被采纳。"""
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.codeagent]\nverify = "uv run pytest -q"\n', encoding="utf-8"
+        '[tool.tenon]\nverify = "uv run pytest -q"\n', encoding="utf-8"
     )
 
     resolved = _resolver(tmp_path).resolve()
@@ -171,7 +171,7 @@ def test_project_config_from_pyproject_verify(tmp_path):
 def test_project_config_falls_back_to_test_command(tmp_path):
     """verify 缺失时使用 test_command 键。"""
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.codeagent]\ntest_command = "make check"\n', encoding="utf-8"
+        '[tool.tenon]\ntest_command = "make check"\n', encoding="utf-8"
     )
 
     resolved = _resolver(tmp_path).resolve()

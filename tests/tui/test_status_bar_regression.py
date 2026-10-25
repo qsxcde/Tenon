@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import asyncio
 
-from codeagent.app.tui.presentation.primitives import _cell_width
-from codeagent.app.tui.presentation.status import StatusBar
-from codeagent.app.tui.rendering.coordinator import TuiRenderCoordinator
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.app.tui.state.runtime import RuntimePhase, RuntimeSnapshot
-from codeagent.core.contracts.events import AgentEvent, EventType
+from tenon.app.tui.presentation.primitives import _cell_width
+from tenon.app.tui.presentation.status import StatusBar
+from tenon.app.tui.rendering.coordinator import TuiRenderCoordinator
+from tenon.app.tui.state.model import TuiModel
+from tenon.app.tui.state.runtime import RuntimePhase, RuntimeSnapshot
+from tenon.core.contracts.events import AgentEvent, EventType
 
 
 class FakeClock:

@@ -25,7 +25,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core` 的工具执行事件与状态契约、`src/codeagent/session` 的事件翻译，以及 `src/codeagent/app/tui` 的运行时归约、工具块和状态展示。
+- 影响 `src/tenon/core` 的工具执行事件与状态契约、`src/tenon/session` 的事件翻译，以及 `src/tenon/app/tui` 的运行时归约、工具块和状态展示。
 - 需要扩展或兼容现有工具状态值（包括当前 `ok` 到用户可见“已完成”的映射），不改变工具执行顺序、并发上限、模型回填顺序或确认安全策略。
 - 主要是事件 metadata 和 TUI 展示行为的增强；JSONL 中已有结构化字段应保持可读取，旧事件/旧结果缺少新字段时需有安全兼容默认值。
 - 不新增第三方依赖，不重新设计 ReAct 主循环或底部状态栏布局。

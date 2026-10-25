@@ -1,6 +1,6 @@
-from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.core.context.diagnostics import ContextDiagnostics
-from codeagent.core.context.preflight import ContextPreflightConfig, evaluate_context_preflight
+from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.core.context.diagnostics import ContextDiagnostics
+from tenon.core.context.preflight import ContextPreflightConfig, evaluate_context_preflight
 
 
 def _snapshot(*, status: str = "estimate", source: str = "catalog") -> ContextBudgetSnapshot:

@@ -22,9 +22,9 @@
 ### Task 1: 安全命令与敏感路径判定
 
 **Files:**
-- Modify: `src/codeagent/tools/security/bash_rules.py`
-- Modify: `src/codeagent/tools/security/classifier.py`
-- Modify: `src/codeagent/tools/security/filesystem.py`
+- Modify: `src/tenon/tools/security/bash_rules.py`
+- Modify: `src/tenon/tools/security/classifier.py`
+- Modify: `src/tenon/tools/security/filesystem.py`
 - Test: `tests/tools/security/`
 
 **Interfaces:**
@@ -39,9 +39,9 @@
 ### Task 2: JSONL durability and concurrency
 
 **Files:**
-- Modify: `src/codeagent/session/persistence/locking.py`
-- Modify: `src/codeagent/session/persistence/jsonl_store.py`
-- Modify: `src/codeagent/session/persistence/index.py`
+- Modify: `src/tenon/session/persistence/locking.py`
+- Modify: `src/tenon/session/persistence/jsonl_store.py`
+- Modify: `src/tenon/session/persistence/index.py`
 - Test: `tests/session/persistence/`
 
 **Interfaces:**
@@ -56,11 +56,11 @@
 ### Task 3: Compaction and model transport safety
 
 **Files:**
-- Modify: `src/codeagent/session/compaction/policy.py`
-- Modify: `src/codeagent/session/session.py`
-- Modify: `src/codeagent/ai/transport/openai_compat.py`
-- Modify: `src/codeagent/ai/catalog/store.py`
-- Modify: `src/codeagent/app/config.py`
+- Modify: `src/tenon/session/compaction/policy.py`
+- Modify: `src/tenon/session/session.py`
+- Modify: `src/tenon/ai/transport/openai_compat.py`
+- Modify: `src/tenon/ai/catalog/store.py`
+- Modify: `src/tenon/app/config.py`
 - Test: `tests/session/behavior/`, `tests/ai/`, `tests/app/`
 
 - [x] **Step 1: Write failing tests** for empty compaction cuts, single oversized turns, finite non-streaming read timeouts, URL/effort/catalog validation, and newline-safe env values.
@@ -71,13 +71,13 @@
 ### Task 4: TUI and async lifecycle error boundaries
 
 **Files:**
-- Modify: `src/codeagent/app/tui/conversation_coordinator.py`
-- Modify: `src/codeagent/app/tui/interaction.py`
-- Modify: `src/codeagent/app/tui/session_coordinator.py`
-- Modify: `src/codeagent/app/tui/render_coordinator.py`
-- Modify: `src/codeagent/app/skill_packages.py`
-- Modify: `src/codeagent/app/composition/runtime_factory.py`
-- Modify: `src/codeagent/core/agent.py`
+- Modify: `src/tenon/app/tui/conversation_coordinator.py`
+- Modify: `src/tenon/app/tui/interaction.py`
+- Modify: `src/tenon/app/tui/session_coordinator.py`
+- Modify: `src/tenon/app/tui/render_coordinator.py`
+- Modify: `src/tenon/app/skill_packages.py`
+- Modify: `src/tenon/app/composition/runtime_factory.py`
+- Modify: `src/tenon/core/agent.py`
 - Test: `tests/tui/`, `tests/app/`, `tests/core/`
 
 - [x] **Step 1: Write failing tests** for visible conversation errors, async command errors, git clone off the event loop, cancellation propagation, supervisor identity, and listener task cleanup.
@@ -88,12 +88,12 @@
 ### Task 5: Core and session responsibility split
 
 **Files:**
-- Create: `src/codeagent/core/model_request.py`
-- Create: `src/codeagent/core/tool_invocation.py`
-- Modify: `src/codeagent/core/loop.py`
-- Create: `src/codeagent/session/turn_runner.py`
-- Create: `src/codeagent/session/compaction/service.py`
-- Modify: `src/codeagent/session/session.py`
+- Create: `src/tenon/core/model_request.py`
+- Create: `src/tenon/core/tool_invocation.py`
+- Modify: `src/tenon/core/loop.py`
+- Create: `src/tenon/session/turn_runner.py`
+- Create: `src/tenon/session/compaction/service.py`
+- Modify: `src/tenon/session/session.py`
 - Test: `tests/core/`, `tests/session/`
 
 - [ ] **Step 1: Add import/size guard tests** that define the intended module boundaries without changing runtime behavior.

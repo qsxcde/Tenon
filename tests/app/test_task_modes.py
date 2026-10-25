@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codeagent.app.tasks.modes import (
+from tenon.app.tasks.modes import (
     TaskMode,
     mode_policy,
     parse_mode_input,
@@ -37,17 +37,17 @@ def test_read_only_mode_denies_mutation_and_allows_reads():
 
 async def test_plan_policy_is_enforced_by_react_tool_boundary():
 
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import ChatModelPort
-    from codeagent.app.composition.tools.adapter import adapt_tools
-    from codeagent.core import (
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import ChatModelPort
+    from tenon.app.composition.tools.adapter import adapt_tools
+    from tenon.core import (
         AgentContext,
         AgentLoopConfig,
         EventType,
         ToolDecision,
         run_agent_loop,
     )
-    from codeagent.tools.atomic import EditTool, ReadTool, WriteTool
+    from tenon.tools.atomic import EditTool, ReadTool, WriteTool
 
     model = FakeClient(
         steps=[

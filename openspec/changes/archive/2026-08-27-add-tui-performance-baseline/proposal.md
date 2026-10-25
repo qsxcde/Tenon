@@ -22,7 +22,7 @@
 
 ## Impact
 
-- `src/codeagent/app/tui/` 的渲染统计与测试注入点。
+- `src/tenon/app/tui/` 的渲染统计与测试注入点。
 - `tests/tui/` 的离线 fixture、基准和回归断言。
 - `docs/iteration/v0.4.md` 与项目开发命令文档。
 - 不引入联网依赖、常驻服务或生产期遥测。

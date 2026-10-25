@@ -23,7 +23,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/context/contracts.py`、`core/model/request.py`、`core/orchestration/config.py` 及错误导出。
+- 影响 `src/tenon/core/context/contracts.py`、`core/model/request.py`、`core/orchestration/config.py` 及错误导出。
 - 影响 AgentLoopConfig 的公开配置类型，新增可选的上下文扩展超时配置。
 - 增加 core、contract 和 session 回归测试；同步 context-budget 与 core 的 OpenSpec 主规格及 v0.4 进度文档。
 - 不新增第三方依赖，不改变持久化消息格式。

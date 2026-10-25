@@ -1,12 +1,12 @@
 # 贡献指南
 
-感谢参与 `codeagent`。提交代码前请先阅读 [AGENTS.md](AGENTS.md) 中的分层约束、编码规范与完成标准；本文件只列出最短协作路径。
+感谢参与 `tenon`。提交代码前请先阅读 [AGENTS.md](AGENTS.md) 中的分层约束、编码规范与完成标准；本文件只列出最短协作路径。
 
 ## 开发环境
 
 ```bash
-git clone https://github.com/qsxcde/codeAgent.git
-cd codeAgent
+git clone https://github.com/qsxcde/tenon.git
+cd tenon
 uv sync --group dev
 ```
 

@@ -10,16 +10,16 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.composition.model.port import ChatModelPort
-from codeagent.app.composition.tools.adapter import adapt_tools
-from codeagent.core.context.model import AgentContext
-from codeagent.core.contracts.messages import ToolCall
-from codeagent.core.contracts.ports import ToolDecision
-from codeagent.core.execution.runtime import ToolExecutionRuntime
-from codeagent.core.orchestration.config import AgentLoopConfig
-from codeagent.core.orchestration.loop import run_agent_loop
-from codeagent.tools.atomic import ReadTool
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.composition.model.port import ChatModelPort
+from tenon.app.composition.tools.adapter import adapt_tools
+from tenon.core.context.model import AgentContext
+from tenon.core.contracts.messages import ToolCall
+from tenon.core.contracts.ports import ToolDecision
+from tenon.core.execution.runtime import ToolExecutionRuntime
+from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.loop import run_agent_loop
+from tenon.tools.atomic import ReadTool
 
 __all__ = ["CASES", "Case", "run_case"]
 

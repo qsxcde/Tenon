@@ -122,7 +122,7 @@ def test_bare_slash_shows_all_commands():
     排名截断会把排后命令(如 /quit /fork /compact /skills /mcp)永久隐藏;
     渲染层用固定窗口裁剪视口,但候选本身不截断(浮层可滚动到达全部)。
     """
-    from codeagent.app.tui.commands.parser import default_registry
+    from tenon.app.tui.commands.parser import default_registry
 
     app, backend, _ = _make_app()
     backend.input_changed("/")

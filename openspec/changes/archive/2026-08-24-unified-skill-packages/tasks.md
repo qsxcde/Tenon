@@ -1,26 +1,26 @@
 ## 1. Package 数据模型与配置路径
 
 - [x] 1.1 定义用户级/项目级 Package 记录、锁定记录、来源类型、revision 和安装状态的数据模型
-- [x] 1.2 在 `src/codeagent/app/config.py` 增加 Package Store、Registry 和 Lock 文件路径解析，保持现有 `CONFIG_DIR` 行为不变
+- [x] 1.2 在 `src/tenon/app/config.py` 增加 Package Store、Registry 和 Lock 文件路径解析，保持现有 `CONFIG_DIR` 行为不变
 - [x] 1.3 为注册记录实现稳定的读写、版本校验和损坏文件诊断，确保写入失败时保留旧记录
 
 ## 2. Package 安装与生命周期
 
 - [x] 2.1 新增 Git URL 和本地目录 Package Source，实现临时目录下载/复制、Git revision 解析和安装根路径校验
 - [x] 2.2 实现 Package install/update/remove/list/reload 服务，采用校验成功后原子替换，失败时不破坏已有 Package
-- [x] 2.3 实现可选 `codeagent-package.json` 清单解析，支持 `skills` 根目录、Bootstrap Skill 和工具映射声明
+- [x] 2.3 实现可选 `tenon-package.json` 清单解析，支持 `skills` 根目录、Bootstrap Skill 和工具映射声明
 - [x] 2.4 实现 Package 路径穿越、非法 id、重复 id 和缺失 Skill 根目录的安全诊断
 
 ## 3. Skill Registry 扩展
 
-- [x] 3.1 扩展 `src/codeagent/app/skills.py`，递归发现 Package `skills/**/SKILL.md`，并保留直接目录的一层发现语义
+- [x] 3.1 扩展 `src/tenon/app/skills.py`，递归发现 Package `skills/**/SKILL.md`，并保留直接目录的一层发现语义
 - [x] 3.2 按个人直接目录 > 个人 Package > 项目直接目录 > 项目 Package > 内建的优先级合并来源、去重和同名遮蔽
 - [x] 3.3 扩展 `Skill`/诊断及列表视图的来源元数据，显示 Package id、版本或 revision 和安装作用域
 - [x] 3.4 为无清单但包含 `skills/using-superpowers/SKILL.md` 的 Package 实现 Bootstrap 约定推断，并提供可见诊断
 
-## 4. CodeAgent Adapter 与 Bootstrap Runtime
+## 4. Tenon Adapter 与 Bootstrap Runtime
 
-- [x] 4.1 新增 CodeAgent Adapter，生成 `using-superpowers` Bootstrap、工具映射和能力声明
+- [x] 4.1 新增 Tenon Adapter，生成 `using-superpowers` Bootstrap、工具映射和能力声明
 - [x] 4.2 将现有 `read`、`write`、`edit`、`bash`、`grep`、`find`、`ls`、`skill` 工具映射到抽象动作，并声明 subagent/todo/web 等缺失能力
 - [x] 4.3 新增 Bootstrap Runtime 状态，记录 Bootstrap 标识、Adapter 版本和当前上下文已加载 Skill，支持去重
 - [x] 4.4 修改组合根端口装配，使 Bootstrap、工具映射和普通 `available_skills` 按规定顺序生成，普通 Skill 正文仍按需加载
@@ -34,8 +34,8 @@
 
 ## 6. CLI 与 TUI 入口
 
-- [x] 6.1 在 `src/codeagent/app/main.py` 增加 Skill Package 的 install/list/update/remove/reload CLI 入口和错误码
-- [x] 6.2 扩展 `src/codeagent/app/tui/commands.py` 与 `src/codeagent/app/tui/view.py`，支持 `/skills` 的 Package 子命令并保持 `/skills <name>` 手动加载兼容
+- [x] 6.1 在 `src/tenon/app/main.py` 增加 Skill Package 的 install/list/update/remove/reload CLI 入口和错误码
+- [x] 6.2 扩展 `src/tenon/app/tui/commands.py` 与 `src/tenon/app/tui/view.py`，支持 `/skills` 的 Package 子命令并保持 `/skills <name>` 手动加载兼容
 - [x] 6.3 在 TUI 技能列表、Package 列表和诊断中显示来源、作用域、版本/revision、Bootstrap 状态和未执行扩展提示
 
 ## 7. 测试与验收

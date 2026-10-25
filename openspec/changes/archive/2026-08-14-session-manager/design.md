@@ -69,7 +69,7 @@ append-only 下可变元数据不能回写 header(它是第一个 entry)。新�
 - `--session <id>`:恢复指定会话;
 - `--list-sessions`:纯文本表格(标识/标题/时间/模型);
 - 默认(无参数)保持新建会话(headless 既有行为);
-- store 目录:`~/.codeagent/sessions/`(与配置目录一致,`app/config.py` 的 `CONFIG_DIR` 派生);
+- store 目录:`~/.tenon/sessions/`(与配置目录一致,`app/config.py` 的 `CONFIG_DIR` 派生);
 - TUI 斜杠命令不在此实现(T-44)。
 
 ### D6 `AgentPorts.store` 死字段移除
@@ -78,7 +78,7 @@ core 循环从不落盘(store 只被 `AgentSession` 消费),`AgentPorts.store` �
 
 ### D7 存储组织与版本策略
 
-- 保持平铺 `~/.codeagent/sessions/<session_id>.jsonl`(v0.2 列表量级为个人使用);Pi 式按 cwd 分目录(`--<path>--/<ts>_<uuid>.jsonl`)留 v0.3(fork 场景);
+- 保持平铺 `~/.tenon/sessions/<session_id>.jsonl`(v0.2 列表量级为个人使用);Pi 式按 cwd 分目录(`--<path>--/<ts>_<uuid>.jsonl`)留 v0.3(fork 场景);
 - 新字段/新 entry 类型均为可选 → 版本号保持 v1;
 - 未来破坏性演进:学 Pi 的"加载时自动迁移"(v1→v2→v3),届时 bump 版本 + 迁移逻辑。
 

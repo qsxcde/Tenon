@@ -31,7 +31,7 @@
 
 ## Impact
 
-- 主要代码：`src/codeagent/core/loop.py`、`src/codeagent/core/ports.py`、`src/codeagent/core/events.py`、`src/codeagent/app/container.py`、`src/codeagent/session/session.py`、`src/codeagent/session/manager.py`、`src/codeagent/ai/transport/openai_compat.py`、`src/codeagent/tools/atomic/bash.py`、`src/codeagent/tools/mcp/client.py`、`src/codeagent/tools/mcp/loader.py`。
+- 主要代码：`src/tenon/core/loop.py`、`src/tenon/core/ports.py`、`src/tenon/core/events.py`、`src/tenon/app/container.py`、`src/tenon/session/session.py`、`src/tenon/session/manager.py`、`src/tenon/ai/transport/openai_compat.py`、`src/tenon/tools/atomic/bash.py`、`src/tenon/tools/mcp/client.py`、`src/tenon/tools/mcp/loader.py`。
 - 主要测试：`tests/core/test_loop.py`、`tests/session/test_session.py`、`tests/session/test_session_manager.py`、`tests/tools/test_tools.py`、`tests/mcp/test_mcp.py`、`tests/test_container.py`。
 - 可能新增轻量运行时协议或资源句柄，但不改变现有 `AgentPorts` 的核心调用方式；如需异步关闭，将在组合根和生命周期入口处理，避免 `core` 依赖具体模型或工具实现。
 - 不新增第三方运行时依赖；继续使用现有 `asyncio`、`subprocess`、MCP SDK 和 HTTP 客户端。

@@ -23,7 +23,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/session/persistence/`、`SessionPersistence`、`AgentSession` 的恢复状态，以及 `src/codeagent/app/tui/` 的历史恢复投影。
+- 影响 `src/tenon/session/persistence/`、`SessionPersistence`、`AgentSession` 的恢复状态，以及 `src/tenon/app/tui/` 的历史恢复投影。
 - 扩展 `SessionStore` 端口和公开恢复快照字段；既有注入式旧 store 通过能力探测保持兼容。
 - 不新增第三方依赖，不改变 core Agent 的工具调用语义，不把 child session 写入用户 SessionStore。
 - 新增 session、应用集成和 TUI 恢复回归测试，并更新 v0.5 迭代与架构文档。

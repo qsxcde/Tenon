@@ -23,6 +23,6 @@ V5-06 已经把子 Agent 的排队、启动、进度和唯一终态以有界的�
 
 ## Impact
 
-- 影响 `src/codeagent/app/tui/state/`、`src/codeagent/app/tui/presentation/`、TUI 事件桥接/渲染协调器和 `src/codeagent/app/headless.py`。
+- 影响 `src/tenon/app/tui/state/`、`src/tenon/app/tui/presentation/`、TUI 事件桥接/渲染协调器和 `src/tenon/app/headless.py`。
 - 新增展示层内部状态对象和组件，不改变 `AgentEvent`、`SubagentResult` 或 `delegate` 的公共输入契约。
 - 需要更新 TUI 与 headless 的行为测试、快照/样式断言、性能 fixture 和 v0.5 迭代记录；不引入新依赖，不改变 JSONL 持久化格式。

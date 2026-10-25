@@ -27,7 +27,7 @@ V4-11 至 V4-14 已分别实现上下文预算、请求前检查、自动压缩�
 
 ## Impact
 
-- 主要影响 `src/codeagent/session/persistence/`、`src/codeagent/session/compaction*`、`src/codeagent/session/run_coordinator.py` 和 `src/codeagent/session/manager/` 的集成测试与必要修复。
-- 影响 `src/codeagent/app/tui/session/restore.py`、TUI 状态投影及工具结果恢复展示测试。
+- 主要影响 `src/tenon/session/persistence/`、`src/tenon/session/compaction*`、`src/tenon/session/run_coordinator.py` 和 `src/tenon/session/manager/` 的集成测试与必要修复。
+- 影响 `src/tenon/app/tui/session/restore.py`、TUI 状态投影及工具结果恢复展示测试。
 - 新增或扩展 `tests/session/behavior/`、`tests/session/store/`、`tests/tui/` 中的离线回归测试，使用 `FakeClient`、确定性 summarizer、`tmp_path` 和双 Store 参数化。
 - 不新增依赖，不改变现有 JSONL 文件格式的兼容读取，不删除物理历史，不改变工具调用协议或模型 provider 接口。

@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-import codeagent.app.context.agents as agents_module
-from codeagent.app.context.agents import (
+import tenon.app.context.agents as agents_module
+from tenon.app.context.agents import (
     AGENTS_CANDIDATES,
     build_system_prompt,
     load_agents_files,
@@ -136,7 +136,7 @@ def test_base_prompt_readable():
     """包内基础提示词存在且非空(资源打包生效)。"""
     prompt = read_base_prompt()
     assert len(prompt) > 100
-    assert "codeagent" in prompt
+    assert "tenon" in prompt
 
 
 def test_candidates_include_claude_compat():

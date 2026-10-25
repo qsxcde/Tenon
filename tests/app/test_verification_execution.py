@@ -11,8 +11,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from codeagent.app.tasks.verification.models import TaskStatus
-from codeagent.app.tasks.verification.runner import VerificationRunner
+from tenon.app.tasks.verification.models import TaskStatus
+from tenon.app.tasks.verification.runner import VerificationRunner
 
 pytestmark = pytest.mark.integration
 

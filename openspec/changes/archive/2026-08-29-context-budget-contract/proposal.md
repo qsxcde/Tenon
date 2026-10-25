@@ -23,8 +23,8 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/ports.py`、`src/codeagent/core/loop.py` 的上下文准备契约，以及 `src/codeagent/core/context.py` 的中立上下文类型。
-- 影响 `src/codeagent/session/` 中上下文状态和压缩策略的输入，但不删除 JSONL 历史、不改变现有父级链语义。
-- 影响 `src/codeagent/ai/catalog/` 与 `src/codeagent/app/composition/` 的模型窗口元数据解析和装配。
+- 影响 `src/tenon/core/ports.py`、`src/tenon/core/loop.py` 的上下文准备契约，以及 `src/tenon/core/context.py` 的中立上下文类型。
+- 影响 `src/tenon/session/` 中上下文状态和压缩策略的输入，但不删除 JSONL 历史、不改变现有父级链语义。
+- 影响 `src/tenon/ai/catalog/` 与 `src/tenon/app/composition/` 的模型窗口元数据解析和装配。
 - 需要新增预算估算、模型目录解析、模型适配器请求组成和端口边界测试；不依赖真实 API key 或网络。
 - 可能新增一个可选的上下文准备端口；现有简单转换器应通过明确的适配路径继续可用，避免把 provider/session 细节泄漏到 `core`。

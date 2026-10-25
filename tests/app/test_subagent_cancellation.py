@@ -8,11 +8,11 @@ from typing import Any
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.core.contracts.messages import Message
-from codeagent.core.contracts.ports import PolicyDecision
-from codeagent.core.contracts.subagents import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.messages import Message
+from tenon.core.contracts.ports import PolicyDecision
+from tenon.core.contracts.subagents import (
     SubagentBudget,
     SubagentReasonCode,
     SubagentRequest,
@@ -96,7 +96,7 @@ class _EventChild:
 
 @pytest.mark.integration
 async def test_runner_applies_tool_call_budget_and_preserves_reason() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild(
         "budget",
@@ -123,7 +123,7 @@ async def test_runner_applies_tool_call_budget_and_preserves_reason() -> None:
 
 @pytest.mark.integration
 async def test_runner_applies_turn_budget_and_preserves_reason() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild(
         "turn-budget",
@@ -146,7 +146,7 @@ async def test_runner_applies_turn_budget_and_preserves_reason() -> None:
 
 @pytest.mark.integration
 async def test_runner_timeout_covers_active_child_and_returns_timeout() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild("timeout", block=asyncio.Event())
     runner = SerialSubagentRunner(lambda request: child, cleanup_timeout=0.05)
@@ -164,7 +164,7 @@ async def test_runner_timeout_covers_active_child_and_returns_timeout() -> None:
 
 @pytest.mark.integration
 async def test_runner_timeout_covers_serial_queue_wait() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     release = asyncio.Event()
     created = asyncio.Event()
@@ -196,7 +196,7 @@ async def test_runner_timeout_covers_serial_queue_wait() -> None:
 
 @pytest.mark.integration
 async def test_runner_marks_cleanup_uncertain_after_close_failure() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild("close-failure", close_error=RuntimeError("close failed"))
     runner = SerialSubagentRunner(lambda request: child, cleanup_timeout=0.05)
@@ -212,7 +212,7 @@ async def test_runner_marks_cleanup_uncertain_after_close_failure() -> None:
 
 @pytest.mark.integration
 async def test_runner_bounds_uncooperative_cleanup_after_timeout() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild(
         "uncooperative",
@@ -268,10 +268,10 @@ async def test_fake_client_child_turn_budget_returns_failure_and_parent_continue
     )
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         seen: list[AgentEvent] = []
@@ -293,12 +293,12 @@ async def test_fake_client_child_turn_budget_returns_failure_and_parent_continue
 @pytest.mark.integration
 async def test_fake_client_confirmation_wait_is_woken_by_subagent_timeout() -> None:
     """子 Session 等待确认时，runner 超时应取消确认并完成关闭。"""
-    from codeagent.app.composition.tools.adapter import adapt_tools
-    from codeagent.app.container import ChatModelPort
-    from codeagent.core.orchestration.config import AgentLoopConfig
-    from codeagent.session import AgentSession, EventBus
-    from codeagent.tools.atomic import BashTool
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.tools.adapter import adapt_tools
+    from tenon.app.container import ChatModelPort
+    from tenon.core.orchestration.config import AgentLoopConfig
+    from tenon.session import AgentSession, EventBus
+    from tenon.tools.atomic import BashTool
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     class AskPolicy:
         def decide(self, tool_name: str, args: dict) -> PolicyDecision:

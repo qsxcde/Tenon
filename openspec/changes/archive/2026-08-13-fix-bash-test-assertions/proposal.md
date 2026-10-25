@@ -9,9 +9,9 @@
 
 ## What Changes
 
-- **不改任何产品代码**:bash 工具实现(`src/codeagent/tools/atomic/bash.py`)零改动,行为不变;
+- **不改任何产品代码**:bash 工具实现(`src/tenon/tools/atomic/bash.py`)零改动,行为不变;
 - **重写 3 个 cwd 断言**(A1):以"标记文件 + 行为验证"替代路径字符串断言——在目标目录放 marker 文件,命令 `test -f marker.txt && echo CWD_OK`,断言 `CWD_OK` 出现在输出中。断言与平台路径表示彻底解耦,Windows / Linux / macOS 全部通过;
-- **精简 1 条 PIPESTATUS 测试命令**(B1):删除 `; exit ${PIPESTATUS[1]}` 后缀,使用裸管道 `ps aux | grep codeagent-zzz-nonexistent`(退出码天然来自末段 grep=1),并补充断言 `"退出码: 1"` 以确认验证的是"grep 的 1 被豁免"路径,而非命令成功;
+- **精简 1 条 PIPESTATUS 测试命令**(B1):删除 `; exit ${PIPESTATUS[1]}` 后缀,使用裸管道 `ps aux | grep tenon-zzz-nonexistent`(退出码天然来自末段 grep=1),并补充断言 `"退出码: 1"` 以确认验证的是"grep 的 1 被豁免"路径,而非命令成功;
 - 测试语义验证强度不降反升:不再依赖环境差异,且与相邻 `test_semantically_ok_*` 单测语义对齐。
 
 ## Capabilities

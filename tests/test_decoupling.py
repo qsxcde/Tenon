@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-SRC_ROOT = Path(__file__).resolve().parents[1] / "src" / "codeagent"
+SRC_ROOT = Path(__file__).resolve().parents[1] / "src" / "tenon"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: 例外文件/目录:跨层 import 全允许(组合根与入口)。
@@ -44,25 +44,25 @@ def _forbidden_for(rel: str) -> list[str]:
     if rel.startswith("app/composition/"):
         return []
     if rel.startswith("core/"):
-        return ["codeagent.config", "codeagent.tools", "codeagent.ai", "codeagent.session"]
+        return ["tenon.config", "tenon.tools", "tenon.ai", "tenon.session"]
     if rel.startswith("session/"):
-        return ["codeagent.ai", "codeagent.tools", "codeagent.config"]
+        return ["tenon.ai", "tenon.tools", "tenon.config"]
     if rel.startswith("ai/"):
         return [
-            "codeagent.app",
-            "codeagent.core",
-            "codeagent.session",
-            "codeagent.tools",
+            "tenon.app",
+            "tenon.core",
+            "tenon.session",
+            "tenon.tools",
         ]
     if rel.startswith("tools/"):
-        return ["codeagent.core", "codeagent.session", "codeagent.ai", "codeagent.app"]
+        return ["tenon.core", "tenon.session", "tenon.ai", "tenon.app"]
     if rel.startswith("app/tui/"):
-        forbidden = ["codeagent.ai", "codeagent.tools", "codeagent.config"]
+        forbidden = ["tenon.ai", "tenon.tools", "tenon.config"]
         if rel not in _ENGINE_MODULES:
             forbidden.append("textual")
         return forbidden
     if rel.startswith("app/"):
-        return ["codeagent.core", "codeagent.session", "codeagent.ai", "codeagent.tools"]
+        return ["tenon.core", "tenon.session", "tenon.ai", "tenon.tools"]
     return []  # 顶层 __init__ / resources(占位,无依赖)
 
 
@@ -102,7 +102,7 @@ def test_composition_roots_exist() -> None:
 
 def test_core_exports_runtime_contracts_without_legacy_entrypoints() -> None:
     """core 对外只暴露新 Agent 运行时，不再暴露旧端口/整轮入口。"""
-    import codeagent.core as core
+    import tenon.core as core
 
     assert hasattr(core, "Agent")
     assert not hasattr(core, "AgentPorts")
@@ -116,7 +116,7 @@ def test_core_subpackages_do_not_import_the_public_facade() -> None:
         if path.name == "__init__.py":
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        if "codeagent.core" in _imported_modules(tree):
+        if "tenon.core" in _imported_modules(tree):
             violations.append(_rel(path))
     assert not violations, f"core 内部模块反向依赖公共 façade: {violations}"
 
@@ -172,15 +172,15 @@ def test_composition_modules_do_not_import_container_facade() -> None:
     for path in sorted(composition_root.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"))
         imported = _imported_modules(tree)
-        assert "codeagent.app.container" not in imported, _rel(path)
+        assert "tenon.app.container" not in imported, _rel(path)
 
 
 def test_current_surfaces_do_not_reference_removed_ai_modules() -> None:
     """源码、测试和当前架构文档不得依赖已删除的 AI 兼容入口。"""
     legacy_markers = (
-        "codeagent.ai.factory",
-        "codeagent.ai.model_pattern",
-        "codeagent.ai.protocol",
+        "tenon.ai.factory",
+        "tenon.ai.model_pattern",
+        "tenon.ai.protocol",
         "ai/factory.py",
         "ai/model_pattern.py",
         "ai/protocol/",

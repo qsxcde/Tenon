@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from codeagent.app.composition.tui.factory import TuiAssembler
+from tenon.app.composition.tui.factory import TuiAssembler
 
 pytestmark = pytest.mark.unit
 

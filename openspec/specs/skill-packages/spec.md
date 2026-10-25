@@ -8,7 +8,7 @@
 
 ### Requirement: Package 来源与布局
 
-系统 SHALL 支持从 Git URL 和本地目录安装 Skill Package。Package SHALL 通过清单声明或默认约定提供一个 Skill 根目录；根目录下的 skills/**/SKILL.md SHALL 被视为可发现的 Skill，包内其它 Harness 的插件目录 SHALL 不被 CodeAgent 自动执行或作为 Skill 入口加载。
+系统 SHALL 支持从 Git URL 和本地目录安装 Skill Package。Package SHALL 通过清单声明或默认约定提供一个 Skill 根目录；根目录下的 skills/**/SKILL.md SHALL 被视为可发现的 Skill，包内其它 Harness 的插件目录 SHALL 不被 Tenon 自动执行或作为 Skill 入口加载。
 
 #### Scenario: 从 Git URL 安装
 
@@ -31,7 +31,7 @@
 
 #### Scenario: 安装记录可恢复
 
-- **WHEN** CodeAgent 重新启动
+- **WHEN** Tenon 重新启动
 - **THEN** 系统从安装记录恢复已安装 Package，并按记录重新发现 Skill
 
 #### Scenario: Git revision 被锁定
@@ -80,7 +80,7 @@ Package SHALL 支持用户级和项目级作用域。默认安装 SHALL 不执�
 #### Scenario: 可执行扩展保持惰性
 
 - **WHEN** Package 包含插件脚本或 Harness 专用扩展目录
-- **THEN** CodeAgent 将其视为非执行资源，不在安装、加载或普通会话中运行
+- **THEN** Tenon 将其视为非执行资源，不在安装、加载或普通会话中运行
 
 #### Scenario: 路径越界被拒绝
 

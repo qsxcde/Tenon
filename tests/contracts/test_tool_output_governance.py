@@ -4,15 +4,15 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from codeagent.core.contracts.messages import (
+from tenon.core.contracts.messages import (
     OutputCompleteness,
     ToolCall,
     ToolExecutionStatus,
     ToolOutputMetadata,
     ToolResult,
 )
-from codeagent.core.execution.result import normalize_tool_result
-from codeagent.core.execution.state import ToolOperation
+from tenon.core.execution.result import normalize_tool_result
+from tenon.core.execution.state import ToolOperation
 
 
 def test_tool_output_metadata_is_immutable_and_serializable() -> None:

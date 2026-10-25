@@ -24,7 +24,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/app/composition/subagent/` 下的 profile registry、`delegate` 适配器、子会话工厂和运行器校验。
+- 影响 `src/tenon/app/composition/subagent/` 下的 profile registry、`delegate` 适配器、子会话工厂和运行器校验。
 - 影响 `delegate` 工具的公开参数 schema 和默认 profile；调用方需要将 `read_only` 请求迁移为 `explore`。
 - 影响 Subagent 相关应用层、契约层和集成测试，以及 v0.5 迭代文档和 Subagent runtime delta spec。
 - 不新增第三方依赖，不修改 `core` 的 provider-neutral 生命周期；仅同步 `SubagentRequest` 的默认 profile 字符串为 `explore`，不把 profile registry 或权限策略放入 core；不改变 `session` 的持久化格式，也不开放 Shell、MCP 或写入工具。

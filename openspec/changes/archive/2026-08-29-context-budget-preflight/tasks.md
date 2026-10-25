@@ -1,6 +1,6 @@
 ## 1. Core 预算前置判定模型
 
-- [x] 1.1 在 `src/codeagent/core/` 增加 provider 无关的预算前置判定结果，固定 `safe`、`near_limit`、`over_limit`、`uncertain` 状态，并携带 `allowed`、原因、阈值和预算快照字段。
+- [x] 1.1 在 `src/tenon/core/` 增加 provider 无关的预算前置判定结果，固定 `safe`、`near_limit`、`over_limit`、`uncertain` 状态，并携带 `allowed`、原因、阈值和预算快照字段。
 - [x] 1.2 实现纯判定函数：可确认预算按 `headroom` 判断超限和临界；不确定预算按 `uncertain_budget_policy` 判断是否允许发送；保证判定不修改消息、工具定义或预算快照。
 - [x] 1.3 增加 token/比例互斥的警戒阈值配置与校验，提供稳定默认值，拒绝负数、非有限比例、同时配置或其它非法值。
 - [x] 1.4 增加超预算和不确定阻断的结构化 core 错误，保留判定状态、输入估算、输入预算、余量和窗口来源。

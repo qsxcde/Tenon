@@ -2,7 +2,7 @@
 
 - [x] 1.1 盘点 `container.py` 当前公开入口、测试使用的私有符号、动态导入和资源关闭路径，形成拆分前兼容清单。
 - [x] 1.2 为旧导入路径、fake provider 零网络装配、runtime 幂等关闭和 TUI 无 key 懒启动补齐或固化回归测试。
-- [x] 1.3 创建 `src/codeagent/app/composition/` 包，并增加禁止反向导入 `container.py` 的导入烟测。
+- [x] 1.3 创建 `src/tenon/app/composition/` 包，并增加禁止反向导入 `container.py` 的导入烟测。
 
 ## 2. 拆分模型、上下文、策略和工具装配
 

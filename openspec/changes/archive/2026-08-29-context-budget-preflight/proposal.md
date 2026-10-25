@@ -26,8 +26,8 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/` 的预算检查、请求循环、错误和事件契约。
-- 影响 `src/codeagent/session/` 的运行收尾、失败分类和预算诊断状态。
-- 影响 `src/codeagent/app/composition/` 的阈值和策略装配，但不改变 provider 协议。
+- 影响 `src/tenon/core/` 的预算检查、请求循环、错误和事件契约。
+- 影响 `src/tenon/session/` 的运行收尾、失败分类和预算诊断状态。
+- 影响 `src/tenon/app/composition/` 的阈值和策略装配，但不改变 provider 协议。
 - 新增 core/session/app 的离线回归测试；不需要真实 API key、网络或 provider tokenizer。
 - 不改变 JSONL 消息、usage、压缩和父级链格式；自动压缩与工具结果治理留给后续变更。

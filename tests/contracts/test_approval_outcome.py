@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from codeagent.core.contracts.ports import (
+from tenon.core.contracts.ports import (
     ApprovalOutcome,
     ApprovalResult,
     PolicyDecision,

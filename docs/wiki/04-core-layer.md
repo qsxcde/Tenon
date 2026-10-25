@@ -1,6 +1,6 @@
 # 04 · core 层：Agent Runtime
 
-> 目录：`src/codeagent/core/`。定位：**纯内存、全异步、零外部依赖**的领域运行时。不 import `config` / `ai` / `tools` / `session`，模块顶层零副作用，平台可直接 import。
+> 目录：`src/tenon/core/`。定位：**纯内存、全异步、零外部依赖**的领域运行时。不 import `config` / `ai` / `tools` / `session`，模块顶层零副作用，平台可直接 import。
 
 ## 1. 文件地图
 

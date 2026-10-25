@@ -11,12 +11,12 @@ from pathlib import Path
 
 import pytest
 
-from codeagent.app.skills.packages.manager import (
+from tenon.app.skills.packages.manager import (
     PackageManager,
     _remove_path,
     _restore_bytes,
 )
-from codeagent.app.skills.packages.registry import (
+from tenon.app.skills.packages.registry import (
     PackageRegistry,
     PackageValidationError,
 )
@@ -29,7 +29,7 @@ def _write_package(root: Path, *, package_id: str = "demo", version: str = "1.0.
     (root / "skills" / "fmt" / "SKILL.md").write_text(
         "---\nname: fmt\ndescription: 格式化\n---\n正文", encoding="utf-8"
     )
-    (root / "codeagent-package.json").write_text(
+    (root / "tenon-package.json").write_text(
         json.dumps(
             {
                 "id": package_id,
@@ -106,7 +106,7 @@ def test_install_rejects_missing_local_directory(tmp_path):
 def test_git_clone_failure_reports_stderr(monkeypatch, tmp_path):
     """git clone 返回非零时携带 stderr,便于定位凭据/网络问题。"""
     monkeypatch.setattr(
-        "codeagent.app.skills.packages.manager.subprocess.run",
+        "tenon.app.skills.packages.manager.subprocess.run",
         lambda *args, **kwargs: subprocess.CompletedProcess(
             args=args, returncode=128, stdout="", stderr="fatal: denied"
         ),
@@ -158,7 +158,7 @@ def test_diagnostics_aggregate_both_scopes(tmp_path):
     manager = _manager(tmp_path)
     (tmp_path / "config" / "registry.json").parent.mkdir(parents=True, exist_ok=True)
     (tmp_path / "config" / "registry.json").write_text("{broken", encoding="utf-8")
-    project_registry = tmp_path / "workspace" / ".codeagent" / "registry.json"
+    project_registry = tmp_path / "workspace" / ".tenon" / "registry.json"
     project_registry.parent.mkdir(parents=True, exist_ok=True)
     project_registry.write_text("{broken", encoding="utf-8")
 
@@ -248,7 +248,7 @@ def test_remove_rollback_restores_target(monkeypatch, tmp_path):
         manager.remove("demo")
 
     assert target.exists()
-    assert (target / "codeagent-package.json").exists()
+    assert (target / "tenon-package.json").exists()
 
 
 def test_remove_rejects_record_outside_store(tmp_path):

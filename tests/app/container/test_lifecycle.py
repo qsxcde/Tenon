@@ -4,12 +4,12 @@ from tests.app.container.fixtures import *  # noqa: F401,F403
 
 
 def test_create_agent_config_injects_shared_tool_runtime():
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_agent_config
-        from codeagent.core.execution.runtime import ToolExecutionRuntime
+        from tenon.app.container import create_agent_config
+        from tenon.core.execution.runtime import ToolExecutionRuntime
 
         config = create_agent_config()
 
@@ -18,8 +18,8 @@ def test_create_agent_config_injects_shared_tool_runtime():
 
 async def test_agent_runtime_close_is_idempotent():
     """Composition-root runtime closes model resources exactly once."""
-    from codeagent.app.container import AgentRuntime
-    from codeagent.core.orchestration.config import AgentLoopConfig
+    from tenon.app.container import AgentRuntime
+    from tenon.core.orchestration.config import AgentLoopConfig
 
     class Closable:
         model_id = "stub"
@@ -39,8 +39,8 @@ async def test_agent_runtime_close_is_idempotent():
 
 
 async def test_agent_runtime_waits_for_sync_model_close():
-    from codeagent.app.container import AgentRuntime
-    from codeagent.core.orchestration.config import AgentLoopConfig
+    from tenon.app.container import AgentRuntime
+    from tenon.core.orchestration.config import AgentLoopConfig
 
     class SyncClosable:
         def __init__(self):
@@ -59,8 +59,8 @@ async def test_agent_runtime_waits_for_sync_model_close():
 
 
 async def test_concurrent_agent_runtime_close_waits_for_one_shared_close():
-    from codeagent.app.container import AgentRuntime
-    from codeagent.core.orchestration.config import AgentLoopConfig
+    from tenon.app.container import AgentRuntime
+    from tenon.core.orchestration.config import AgentLoopConfig
 
     started = asyncio.Event()
     release = asyncio.Event()
@@ -84,9 +84,9 @@ async def test_concurrent_agent_runtime_close_waits_for_one_shared_close():
 
 
 async def test_agent_runtime_closes_model_after_active_tool_is_cancelled():
-    from codeagent.app.container import AgentRuntime
-    from codeagent.core.execution.runtime import ToolExecutionRuntime
-    from codeagent.core.orchestration.config import AgentLoopConfig
+    from tenon.app.container import AgentRuntime
+    from tenon.core.execution.runtime import ToolExecutionRuntime
+    from tenon.core.orchestration.config import AgentLoopConfig
 
     started = asyncio.Event()
     order: list[str] = []
@@ -107,7 +107,7 @@ async def test_agent_runtime_closes_model_after_active_tool_is_cancelled():
             order.append("model_close")
             assert tool_runtime.active_operations == {}
 
-    from codeagent.core.contracts.messages import ToolCall
+    from tenon.core.contracts.messages import ToolCall
 
     tool_runtime = ToolExecutionRuntime()
     tool_task = asyncio.create_task(
@@ -126,8 +126,8 @@ async def test_agent_runtime_closes_model_after_active_tool_is_cancelled():
 
 
 async def test_agent_runtime_is_removed_from_registry_after_close():
-    from codeagent.app.container import AgentRuntime, runtime_for_config
-    from codeagent.core.orchestration.config import AgentLoopConfig
+    from tenon.app.container import AgentRuntime, runtime_for_config
+    from tenon.core.orchestration.config import AgentLoopConfig
 
     class Closable:
         async def aclose(self):
@@ -136,7 +136,7 @@ async def test_agent_runtime_is_removed_from_registry_after_close():
     client = Closable()
     config = AgentLoopConfig(model=client, tools=[])
     runtime = AgentRuntime(config, None, client, [])
-    from codeagent.app.composition.runtime.factory import _RUNTIMES_BY_CONFIG
+    from tenon.app.composition.runtime.factory import _RUNTIMES_BY_CONFIG
 
     _RUNTIMES_BY_CONFIG[id(config)] = runtime
     await runtime.close()
@@ -145,7 +145,7 @@ async def test_agent_runtime_is_removed_from_registry_after_close():
 
 def test_rebuild_config_closes_realized_previous_runtime():
     """TUI 热切换在新端口构造成功后释放旧模型客户端。"""
-    from codeagent.app.container import create_tui_app
+    from tenon.app.container import create_tui_app
 
     class ClosableClient:
         model_id = "fake-model"
@@ -163,7 +163,7 @@ def test_rebuild_config_closes_realized_previous_runtime():
         clients.append(client)
         return client
 
-    with patch("codeagent.app.composition.model.selection.create_llm", side_effect=make_client):
+    with patch("tenon.app.composition.model.selection.create_llm", side_effect=make_client):
         app = create_tui_app(provider="fake", backend=_StubBackend())
         # TUI 端口是 lazy 的，先访问共享工具以实现旧 runtime。
         _ = app._manager.tools
@@ -177,8 +177,8 @@ def test_rebuild_config_closes_realized_previous_runtime():
 
 async def test_tui_rebuild_rebinds_policy_for_existing_session():
     """异步热切换后,已有会话的审批策略必须绑定到新 runtime。"""
-    from codeagent.ai.providers.fake import FakeClient
-    from codeagent.app.container import create_tui_app
+    from tenon.ai.providers.fake import FakeClient
+    from tenon.app.container import create_tui_app
 
     clients: list[FakeClient] = []
 
@@ -188,7 +188,7 @@ async def test_tui_rebuild_rebinds_policy_for_existing_session():
         return client
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=make_client,
     ):
         app = create_tui_app(provider="fake", backend=_StubBackend())

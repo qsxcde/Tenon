@@ -8,8 +8,8 @@ from pathlib import Path
 DEFAULT_PLUGIN_MODULE = """
 from pydantic import BaseModel
 
-from codeagent.tools.base import AtomicTool
-from codeagent.tools.registry import ToolSpec
+from tenon.tools.base import AtomicTool
+from tenon.tools.registry import ToolSpec
 
 
 class HelloArgs(BaseModel):
@@ -50,7 +50,7 @@ def make_plugin(
         "tools": ["hello"],
     }
     payload.update(manifest or {})
-    (plugin_dir / "codeagent-plugin.json").write_text(
+    (plugin_dir / "tenon-plugin.json").write_text(
         json.dumps(payload, ensure_ascii=False), encoding="utf-8"
     )
     (plugin_dir / module_file).write_text(module_text, encoding="utf-8")

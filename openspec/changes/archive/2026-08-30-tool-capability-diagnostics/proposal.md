@@ -19,6 +19,6 @@
 
 ## Impact
 
-- 影响 `src/codeagent/tools` 的能力检测与工具工厂，以及 TUI 状态诊断输出。
+- 影响 `src/tenon/tools` 的能力检测与工具工厂，以及 TUI 状态诊断输出。
 - 增加 provider-neutral 的只读数据模型和组合根注入，不新增第三方依赖，不改变 JSONL 会话格式。
 - 测试覆盖 Unix/Windows 模拟环境、缺失 shell/检索器、权限能力和诊断文本稳定性。

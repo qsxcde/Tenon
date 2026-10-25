@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any, get_args, get_type_hints
 
-from codeagent.session.compaction.service import CompactionService
-from codeagent.session.manager import SessionManager
-from codeagent.session.runtime.controller import SessionRuntime
-from codeagent.session.session import AgentSession
+from tenon.session.compaction.service import CompactionService
+from tenon.session.manager import SessionManager
+from tenon.session.runtime.controller import SessionRuntime
+from tenon.session.session import AgentSession
 
 
 def _contains_any(annotation: object) -> bool:

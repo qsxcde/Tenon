@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.contracts.subagents import SubagentRequest, SubagentStatus
+from tenon.core.contracts.subagents import SubagentRequest, SubagentStatus
 
 
 @pytest.mark.unit
 def test_profile_registry_exposes_canonical_read_only_profiles() -> None:
-    from codeagent.app.composition.subagent.profiles import (
+    from tenon.app.composition.subagent.profiles import (
         READ_ONLY_TOOL_NAMES,
         profile_for,
         profile_names,
@@ -35,7 +35,7 @@ def test_profile_registry_exposes_canonical_read_only_profiles() -> None:
 @pytest.mark.unit
 def test_implement_profile_is_writable_but_cannot_delegate() -> None:
     """可写 profile 只放宽工作区工具,单层约束(禁 delegate)保持。"""
-    from codeagent.app.composition.subagent.profiles import (
+    from tenon.app.composition.subagent.profiles import (
         WRITABLE_TOOL_NAMES,
         allowed_tool_names_for,
         profile_for,
@@ -50,7 +50,7 @@ def test_implement_profile_is_writable_but_cannot_delegate() -> None:
 
 @pytest.mark.unit
 def test_removed_read_only_profile_fails_closed() -> None:
-    from codeagent.app.composition.subagent.profiles import profile_for
+    from tenon.app.composition.subagent.profiles import profile_for
 
     with pytest.raises(ValueError, match="read_only"):
         profile_for("read_only")
@@ -69,8 +69,8 @@ def test_subagent_request_defaults_to_explore() -> None:
 
 @pytest.mark.unit
 def test_delegate_schema_matches_profile_registry() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
-    from codeagent.app.composition.subagent.profiles import profile_names
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.profiles import profile_names
 
     schema = DelegateTool(object()).parameters
 
@@ -80,7 +80,7 @@ def test_delegate_schema_matches_profile_registry() -> None:
 
 @pytest.mark.unit
 async def test_delegate_rejects_removed_read_only_before_running_child() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     class Runner:
         def __init__(self) -> None:
@@ -114,7 +114,7 @@ async def test_delegate_rejects_removed_read_only_before_running_child() -> None
 
 @pytest.mark.unit
 async def test_runner_rejects_removed_read_only_before_child_creation() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     created = False
 

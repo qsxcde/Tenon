@@ -27,7 +27,7 @@
 
 ## Impact
 
-- 主要影响 src/codeagent/app/tui/ 的组件、视图、Textual 后端和后端端口。
-- 影响 src/codeagent/core/events.py、src/codeagent/core/loop.py、src/codeagent/core/execution.py 与会话层的事件/运行状态传递。
+- 主要影响 src/tenon/app/tui/ 的组件、视图、Textual 后端和后端端口。
+- 影响 src/tenon/core/events.py、src/tenon/core/loop.py、src/tenon/core/execution.py 与会话层的事件/运行状态传递。
 - 影响工具结果的显示元数据以及必要时的临时输出附件/导出接口。
 - 更新 openspec/specs/tui/spec.md 的行为契约；不改变现有命令名称、会话持久化格式或工具安全策略。

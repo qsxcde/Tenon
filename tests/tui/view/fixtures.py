@@ -4,14 +4,14 @@ import asyncio
 from types import SimpleNamespace
 from typing import Any
 import pytest
-from codeagent.app.tui.presentation.blocks import ToolCallBlock
-from codeagent.app.tui.commands.parser import Command
-from codeagent.app.tui.presentation.primitives import rich_to_plain
-from codeagent.app.tui.presentation.status import FooterInfo
-from codeagent.app.tui.application import TuiApp
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.core.contracts.messages import Message
-from codeagent.session.persistence import SessionQuery, UsageStats
+from tenon.app.tui.presentation.blocks import ToolCallBlock
+from tenon.app.tui.commands.parser import Command
+from tenon.app.tui.presentation.primitives import rich_to_plain
+from tenon.app.tui.presentation.status import FooterInfo
+from tenon.app.tui.application import TuiApp
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.messages import Message
+from tenon.session.persistence import SessionQuery, UsageStats
 from tests.fixtures.tui import FakeBackend as StubBackend
 
 
@@ -295,7 +295,7 @@ def _make_login_app(
 
 
 def _sample_skills():
-    from codeagent.app.skills.models import Skill
+    from tenon.app.skills.models import Skill
 
     return [
         Skill("fmt", "格式化代码。", "/skills/fmt/SKILL.md", "格式化正文"),

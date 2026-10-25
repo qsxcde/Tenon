@@ -12,14 +12,14 @@ _BROKEN_MODULE = 'raise RuntimeError("boom")'
 
 
 def _extensions_dir():
-    from codeagent.app.config import extensions_dir
+    from tenon.app.config import extensions_dir
 
     return extensions_dir()
 
 
 def _assemble(allowed=None):
-    from codeagent.app.composition.runtime.tool_assembly import assemble_runtime_tools
-    from codeagent.tools.shared import ToolResourceLimits
+    from tenon.app.composition.runtime.tool_assembly import assemble_runtime_tools
+    from tenon.tools.shared import ToolResourceLimits
 
     diags: list[str] = []
     tools, mcp_tools = assemble_runtime_tools(

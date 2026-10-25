@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.core.contracts.messages import CleanupStatus, ToolExecutionStatus, ToolResult
-from codeagent.core.contracts.tool_status import ToolLifecycleStatus, ToolStatusSnapshot
+from tenon.core.contracts.messages import CleanupStatus, ToolExecutionStatus, ToolResult
+from tenon.core.contracts.tool_status import ToolLifecycleStatus, ToolStatusSnapshot
 
 
 def test_tool_status_snapshot_normalizes_legacy_execution_values() -> None:

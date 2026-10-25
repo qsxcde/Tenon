@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.core.contracts.subagents import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.core.contracts.subagents import (
     SubagentContextItem,
     SubagentRequest,
     SubagentResult,
@@ -35,7 +35,7 @@ class _RecordingRunner:
 
 @pytest.mark.unit
 async def test_delegate_accepts_review_and_explicit_context() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     runner = _RecordingRunner()
     tool = DelegateTool(runner).bind_parent_run_id("parent-run")
@@ -64,7 +64,7 @@ async def test_delegate_accepts_review_and_explicit_context() -> None:
 
 @pytest.mark.unit
 async def test_delegate_rejects_malformed_or_oversized_context_before_runner() -> None:
-    from codeagent.app.composition.subagent.delegate_tool import DelegateTool
+    from tenon.app.composition.subagent.delegate_tool import DelegateTool
 
     runner = _RecordingRunner()
     tool = DelegateTool(runner).bind_parent_run_id("parent-run")
@@ -85,7 +85,7 @@ async def test_delegate_rejects_malformed_or_oversized_context_before_runner() -
 
 @pytest.mark.unit
 def test_review_profile_is_read_only_and_has_role_instructions() -> None:
-    from codeagent.app.composition.subagent.profiles import (
+    from tenon.app.composition.subagent.profiles import (
         allowed_tool_names_for,
         profile_for,
     )
@@ -100,7 +100,7 @@ def test_review_profile_is_read_only_and_has_role_instructions() -> None:
 
 @pytest.mark.unit
 def test_subagent_prompt_contains_only_explicit_context_as_data() -> None:
-    from codeagent.app.composition.subagent.context import render_subagent_prompt
+    from tenon.app.composition.subagent.context import render_subagent_prompt
 
     prompt = render_subagent_prompt(
         "review the diff",
@@ -117,7 +117,7 @@ def test_subagent_prompt_contains_only_explicit_context_as_data() -> None:
 
 @pytest.mark.unit
 async def test_runner_rejects_oversized_direct_request_before_child_creation() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     created = False
 
@@ -176,10 +176,10 @@ async def test_review_child_receives_explicit_context_without_parent_history() -
     child_client = FakeClient(response="发现一个审查问题")
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         await session.run("父会话隐藏内容：不得传给子 Agent")
@@ -221,10 +221,10 @@ async def test_review_child_reports_insufficient_scope_without_parent_history() 
     child_client = FakeClient(response="范围不足：没有可验证的文件或 diff")
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         await session.run("父会话秘密：不可作为审查证据")
@@ -263,10 +263,10 @@ async def test_prompt_injection_cannot_expand_subagent_tools(profile: str) -> No
     child_client = FakeClient(response="只读分析结果")
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         await session.run("父级请求")

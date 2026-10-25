@@ -29,10 +29,10 @@ restore-tui 落地的 MVP 聊天区是**纯文本标记**(`你:` / `[思考]` / 
 ## Impact
 
 - **受影响代码**:
-  - `src/codeagent/app/tui/components.py` —— `Segment`/`RichLine` 模型、各块输出样式标签、`ToolCallBlock.expanded` + `toggle_expand`;
-  - 新增 `src/codeagent/app/tui/theme.py`(或并入 backend)—— 样式标签 → 颜色的主题映射;
-  - `src/codeagent/app/tui/textual_backend.py` —— 把 `RichLine` 渲染为富文本(含背景)、工具 header 点击事件路由;
-  - `src/codeagent/app/tui/view.py` —— 点击 → `toggle_expand` + 重渲染;
+  - `src/tenon/app/tui/components.py` —— `Segment`/`RichLine` 模型、各块输出样式标签、`ToolCallBlock.expanded` + `toggle_expand`;
+  - 新增 `src/tenon/app/tui/theme.py`(或并入 backend)—— 样式标签 → 颜色的主题映射;
+  - `src/tenon/app/tui/textual_backend.py` —— 把 `RichLine` 渲染为富文本(含背景)、工具 header 点击事件路由;
+  - `src/tenon/app/tui/view.py` —— 点击 → `toggle_expand` + 重渲染;
   - `tests/tui/` —— 断言样式标签序列(不碰 ANSI);
 - **不受影响**:`core/`、`session/`、`tools/`、`ai/`、headless `app/main.py` 与 `--tui` 入口零改动;
 - **依赖**:零新增(textual 已在 restore-tui 引入);

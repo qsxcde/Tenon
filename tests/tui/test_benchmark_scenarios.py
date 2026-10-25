@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.app.tui.benchmark.fixture import BenchmarkConfig, build_fixture, scenarios
-from codeagent.app.tui.benchmark.performance import PerformanceRecorder
-from codeagent.app.tui.benchmark.runner import run_scenario
+from tenon.app.tui.benchmark.fixture import BenchmarkConfig, build_fixture, scenarios
+from tenon.app.tui.benchmark.performance import PerformanceRecorder
+from tenon.app.tui.benchmark.runner import run_scenario
 
 pytestmark = [pytest.mark.unit, pytest.mark.performance]
 

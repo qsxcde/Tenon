@@ -1,4 +1,4 @@
-# codeagent Code Wiki
+# tenon Code Wiki
 
 > 面向开发者的代码级 Wiki。描述**当前代码树**（v0.7.0，Python 3.12）的结构、职责与运行方式。
 > 整体架构、核心契约与不变量统一由 [`../design/architecture.md`](../design/architecture.md) 维护（原 `02-architecture.md` 已合并入该文）；演进决策背景见 [`../iteration/`](../iteration/)，本 Wiki 侧重"代码在哪里、由谁负责、怎么跑通"。
@@ -32,16 +32,16 @@
 
 | 项 | 值 |
 | --- | --- |
-| 包名 / 版本 | `codeagent` / `0.7.0` |
+| 包名 / 版本 | `tenon` / `0.7.0` |
 | 语言 / 构建 | Python 3.12+ / `uv_build`（`uv` 管理依赖与虚拟环境） |
-| CLI 入口 | `codeagent = "codeagent.app.main:main"`（亦支持 `python -m codeagent`） |
+| CLI 入口 | `tenon = "tenon.app.main:main"`（亦支持 `python -m tenon`） |
 | 分层 | `app` / `core` / `session` / `ai` / `tools` / `resources`，依赖单向流动 |
 | 编排 | 自研 ReAct（`core/orchestration/loop.py`），无 langchain/langgraph |
-| 持久化 | `~/.codeagent/sessions/<id>.jsonl`（JSONL 树形，格式版本 1） |
+| 持久化 | `~/.tenon/sessions/<id>.jsonl`（JSONL 树形，格式版本 1） |
 | 测试基线 | `1870 passed`（无 skipped），快速质量集 1718 passed，OpenSpec 25/25（2026-10-24，macOS）；覆盖率以 CI `quality-fast` 实测为准 |
 
 ## 维护约定
 
 - 本 Wiki 描述"当前树"；行为或公共接口变化时同步更新对应章节与 [`AGENTS.md`](../../AGENTS.md)。
-- 文档中的代码位置一律写**模块路径**（如 `src/codeagent/core/agent.py`），不写行号，避免漂移。
+- 文档中的代码位置一律写**模块路径**（如 `src/tenon/core/agent.py`），不写行号，避免漂移。
 - 与 `docs/design/` 的分工：设计文档记录"为什么这样决策"并承载整体架构、核心契约与全局不变量（`docs/design/architecture.md`），本 Wiki 记录各层"代码在哪里、怎么跑通"。原独立架构页已合并，避免两处同时维护同一组结构事实。

@@ -32,7 +32,7 @@ def test_bash_timeout(tmp_path):
 
 async def test_bash_async_agent_timeout_cleans_process_tree(tmp_path):
     """Agent timeout uses Bash's cancellable subprocess path, not a thread wait."""
-    from codeagent.app.composition.tools.adapter import adapt_tools
+    from tenon.app.composition.tools.adapter import adapt_tools
 
     async def scenario():
         return await ToolExecutionRuntime().execute(
@@ -177,7 +177,7 @@ def test_semantically_ok_exit_two_grep_still_ok():
 
 def test_semantically_ok_pipeline_last_segment_exempts_grep():
     """管道命令的退出码由最后一段决定:末段 grep 豁免(回归:此前只看首 token 误判)。"""
-    assert _semantically_ok(1, "ps aux | grep codeagent") is True
+    assert _semantically_ok(1, "ps aux | grep tenon") is True
     assert _semantically_ok(1, "cat x | grep foo") is True
     assert _semantically_ok(2, "ls /nonexistent | grep foo") is True
 
@@ -266,7 +266,7 @@ def test_is_wsl_shim_marks_wsl_forwarders(monkeypatch):
     `resolve_bash` 仍命中 WSL 转发器,导致子进程 env 注入(NO_COLOR/LANG)失效、
     长命令报 Argument list too long、ps 语义与本地 bash 不一致。
     """
-    from codeagent.tools.execution.shell import is_wsl_shim
+    from tenon.tools.execution.shell import is_wsl_shim
 
     monkeypatch.setenv("SystemRoot", r"C:\Windows")
     monkeypatch.setenv("LOCALAPPDATA", r"C:\Users\me\AppData\Local")
@@ -280,7 +280,7 @@ def test_is_wsl_shim_marks_wsl_forwarders(monkeypatch):
 
 def test_resolve_bash_skips_wsl_shim():
     """resolve_bash 解析结果不是 WSL 转发器(回归:此前命中 system32\\bash.exe)。"""
-    from codeagent.tools.execution.shell import is_wsl_shim, resolve_bash
+    from tenon.tools.execution.shell import is_wsl_shim, resolve_bash
 
     resolved = resolve_bash()
     assert Path(resolved).exists()

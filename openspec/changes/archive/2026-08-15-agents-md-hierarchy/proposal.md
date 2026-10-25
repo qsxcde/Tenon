@@ -5,7 +5,7 @@ T-43 AGENTS.md 分层指令(FR-16):全局 → 项目 → 子目录分层加载�
 ## What Changes
 
 - **基础系统提示词**:新建 `resources/prompts/system.md`(工具使用说明 / 行为规范等基础指令),经资源打包注入。
-- **分层加载器**:`load_agents_files(cwd, config_dir)` 纯函数——全局(`~/.codeagent/AGENTS.md`)优先,随后从 **cwd 向上遍历到文件系统根**(非 git 根,自包含可离线测),每级目录按候选表取第一个存在的文件:`AGENTS.override.md > AGENTS.md > AGENTS.MD > CLAUDE.md > CLAUDE.MD`(兼容 Claude 生态);去重;顺序 = 全局最前、越近 cwd 越靠后(优先级越高)。
+- **分层加载器**:`load_agents_files(cwd, config_dir)` 纯函数——全局(`~/.tenon/AGENTS.md`)优先,随后从 **cwd 向上遍历到文件系统根**(非 git 根,自包含可离线测),每级目录按候选表取第一个存在的文件:`AGENTS.override.md > AGENTS.md > AGENTS.MD > CLAUDE.md > CLAUDE.MD`(兼容 Claude 生态);去重;顺序 = 全局最前、越近 cwd 越靠后(优先级越高)。
 - **合并注入**:system prompt = 基础提示词 + `<project_context>` 段(每个文件包 `<project_instructions path="<绝对路径>">` 内容 + 来源标注——FR-8.4 来源透明);组合根解析一次 → `ChatModelPort` 首插 system 消息;`replace_ports` 热切换时重解析(cwd 不变幂等)。
 - **加载结果可见可断言**:`/status` 命令扩展显示本次会话加载的 AGENTS.md 文件列表;离线测试构造临时目录树断言顺序/优先级/注入内容(FakeClient 捕获消息)。
 - 无 **BREAKING**:消息列表首插 system 属模型端口内部行为,既有事件契约/工具/会话零改动。

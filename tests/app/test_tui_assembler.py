@@ -11,11 +11,11 @@ from typing import Any
 
 import pytest
 
-from codeagent.ai.catalog.registry import ModelRegistry
-from codeagent.ai.catalog.store import ModelStore
-from codeagent.app import config as app_config
-from codeagent.app.composition.tui import config as tui_config
-from codeagent.app.composition.tui.factory import TuiAssembler
+from tenon.ai.catalog.registry import ModelRegistry
+from tenon.ai.catalog.store import ModelStore
+from tenon.app import config as app_config
+from tenon.app.composition.tui import config as tui_config
+from tenon.app.composition.tui.factory import TuiAssembler
 
 pytestmark = pytest.mark.unit
 
@@ -153,7 +153,7 @@ def test_build_summarizer_wraps_new_client(monkeypatch):
 
     monkeypatch.setattr(tui_config.model_selection, "create_llm", lambda **kwargs: client)
     monkeypatch.setattr(
-        "codeagent.app.composition.model.factory.LlmSummarizer",
+        "tenon.app.composition.model.factory.LlmSummarizer",
         _Summarizer,
     )
     assembler = _assembler()
@@ -187,7 +187,7 @@ def test_restore_session_config_prefers_unique_catalog_owner(monkeypatch):
 
 def test_refresh_skills_delegates_to_skills_view(monkeypatch):
     """技能视图每次刷新都重读注册表,不使用启动快照。"""
-    from codeagent.app.composition.tui import factory as tui_factory
+    from tenon.app.composition.tui import factory as tui_factory
 
     calls: list[Any] = []
 

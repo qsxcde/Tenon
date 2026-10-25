@@ -6,13 +6,13 @@
 
 ```bash
 uv sync --group dev                # 运行时 + 开发依赖（CI 用 --locked）
-uv run codeagent --prompt "你好"    # 无头 CLI 冒烟
-uv run codeagent --tui             # 交互式终端
+uv run tenon --prompt "你好"    # 无头 CLI 冒烟
+uv run tenon --tui             # 交互式终端
 ```
 
 - Python `>=3.12`，构建后端 `uv_build`，包版本 `0.5.0`（与 `pyproject.toml` 单一事实源一致）。
-- 测试必须离线：不依赖真实 API key、真实 provider 或用户 `~/.codeagent` 数据；用 `FakeClient`、`tmp_path`、`monkeypatch`、`InMemoryFsOps`。
-- 凭据只放 `~/.codeagent/.env`；仓库本地 `.env` 不会被读取。
+- 测试必须离线：不依赖真实 API key、真实 provider 或用户 `~/.tenon` 数据；用 `FakeClient`、`tmp_path`、`monkeypatch`、`InMemoryFsOps`。
+- 凭据只放 `~/.tenon/.env`；仓库本地 `.env` 不会被读取。
 
 ## 二、测试分层与命令
 
@@ -78,17 +78,17 @@ uv run codeagent --tui             # 交互式终端
 3. 若事件携带对子会话的关联，遵循 `delegation_id` 关联约定。
 4. 补契约测试（事件字段稳定性）与 TUI/headless 消费回归。
 
-### 4.5 新增扩展插件（`~/.codeagent/extensions/`）
+### 4.5 新增扩展插件（`~/.tenon/extensions/`）
 
-1. 建目录 `~/.codeagent/extensions/<id>/`，放 `codeagent-plugin.json`（`id`/`name`/`version`/`module`/`tools`，id 与工具名匹配 `^[a-z][a-z0-9_]*$` 且不含 `__`）与 manifest 声明的 Python 模块（单文件，兄弟 import 不支持）。
+1. 建目录 `~/.tenon/extensions/<id>/`，放 `tenon-plugin.json`（`id`/`name`/`version`/`module`/`tools`，id 与工具名匹配 `^[a-z][a-z0-9_]*$` 且不含 `__`）与 manifest 声明的 Python 模块（单文件，兄弟 import 不支持）。
 2. 模块导出 `TOOL_SPECS: Iterable[ToolSpec]`（与 `BUILTIN_TOOL_SPECS` 同构，`build(ToolBuildContext) -> AtomicTool`）。
-3. 装配后工具名为 `ext__<id>__<工具名>`；**目录放置即信任**（插件代码同进程执行，import 期副作用属信任范围），调用层 fail-closed：默认需确认，可在 `~/.codeagent/extensions.json` 的 `permissions.deny/ask/allow` 显式放行/拒绝（glob，deny 优先）。
+3. 装配后工具名为 `ext__<id>__<工具名>`；**目录放置即信任**（插件代码同进程执行，import 期副作用属信任范围），调用层 fail-closed：默认需确认，可在 `~/.tenon/extensions.json` 的 `permissions.deny/ask/allow` 显式放行/拒绝（glob，deny 优先）。
 4. 单插件失败只产生 `plugin_failed:` 诊断并跳过；补离线测试（`tests/tools/plugins/`，tmp_path 假插件目录）。
 
 ### 4.6 运行期安全与可验证性
 
-- **沙箱**：`SANDBOX_POLICY=read-only|workspace-write|danger-full-access`（默认后者，写入 `~/.codeagent/.env`）。macOS 用 `sandbox-exec`、Linux 用 `bwrap`；受限策略无后端时 bash 直接 fail-closed，不会静默降级。
-- **写前快照**：`write`/`edit` 在写入前把原文存入 `~/.codeagent/checkpoints/`（上限 200 条）；`codeagent undo --list|--dry-run` 查看，`codeagent undo` 逐级恢复。
+- **沙箱**：`SANDBOX_POLICY=read-only|workspace-write|danger-full-access`（默认后者，写入 `~/.tenon/.env`）。macOS 用 `sandbox-exec`、Linux 用 `bwrap`；受限策略无后端时 bash 直接 fail-closed，不会静默降级。
+- **写前快照**：`write`/`edit` 在写入前把原文存入 `~/.tenon/checkpoints/`（上限 200 条）；`tenon undo --list|--dry-run` 查看，`tenon undo` 逐级恢复。
 - **离线评测**：`uv run python -m evals` 用 fake 模型驱动真实循环；`tests/test_evals.py` 已纳入 `contract` 门禁，新增关键行为时优先补用例。
 - **缓存观测**：`--context` 输出命中率与冷/暖诊断码；基础系统提示词前缀不得含时间戳或临时路径（契约测试锁定）。
 
@@ -152,7 +152,7 @@ uv run python scripts/release_check.py --dist-dir artifacts/dist --output artifa
 | 让 `app/container.py` 承载实现 | façade 只导出；实现放 `app/composition/*`，且不得反向导入 façade |
 | 用固定 `sleep` 等异步稳定 | 用显式事件/受控 clock |
 | 静默丢弃超限内容 | 截断必标记、裁剪必可见（返回诊断） |
-| 让 `~/.codeagent` 数据进入测试 | 用 `tmp_path` + 注入配置目录 |
+| 让 `~/.tenon` 数据进入测试 | 用 `tmp_path` + 注入配置目录 |
 | 为通过门禁放宽 mypy/规模配置 | 拆分代码或按流程登记豁免 |
 
 ## 相关阅读

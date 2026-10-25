@@ -2,20 +2,20 @@
 
 - [x] 1.1 扫描源码、测试和组合根中所有 `Args`、`args_schema`、`invoke`、`ainvoke`、`invoke_async` 的工具调用点，形成迁移清单并确认没有遗漏的直接调用方。
 - [x] 1.2 为严格 `AgentTool.execute(...)`、统一 `ToolResult` 和清理状态补充 core 契约测试，覆盖成功、参数错误、异常、超时、取消、清理失败和清理不支持。
-- [x] 1.3 扩展架构/静态检查，确保 `src/codeagent/core` 不再访问旧工具属性，且继续禁止导入 `config`、`ai`、`tools`、`session`。
+- [x] 1.3 扩展架构/静态检查，确保 `src/tenon/core` 不再访问旧工具属性，且继续禁止导入 `config`、`ai`、`tools`、`session`。
 - [x] 1.4 固定当前 core 的事件顺序、并发回填顺序、steer、follow-up、失败回滚和上下文预算行为基线。
 
 ## 2. 建立工具适配边界
 
-- [x] 2.1 在 `src/codeagent/tools/` 或 `src/codeagent/app/composition/` 新增显式 AgentTool 适配模块，定义名称、描述、provider-neutral 参数和统一执行结果的转换规则。
+- [x] 2.1 在 `src/tenon/tools/` 或 `src/tenon/app/composition/` 新增显式 AgentTool 适配模块，定义名称、描述、provider-neutral 参数和统一执行结果的转换规则。
 - [x] 2.2 为 AtomicTool 适配器实现参数校验、异步执行、异常转换、进度回调和清理状态转换；同步底层调用必须在线程中执行并报告不可抢占状态。
 - [x] 2.3 为 MCP 工具实现同一 AgentTool 适配契约，保留 `mcp__<server>__<tool>` 名称和原有参数/结果语义，不让 MCP 类型进入 core。
 - [x] 2.4 修改组合根工厂，使传给 `AgentLoopConfig` 的工具全部是适配后的 AgentTool，并增加内建工具和 MCP 工具装配契约测试。
 
 ## 3. 收紧 core 端口与模型请求
 
-- [x] 3.1 修改 `src/codeagent/core/ports.py` 的类型契约，使 `AgentTool`、`ToolExecutionRuntimePort`、`ModelPort` 和 `AgentLoopConfig` 使用明确的 core 类型，并补充统一清理契约。
-- [x] 3.2 修改 `src/codeagent/core/model_request.py`，只从 AgentTool 读取 `name`、`description` 和 `parameters`，删除 `args_schema.model_json_schema()` fallback。
+- [x] 3.1 修改 `src/tenon/core/ports.py` 的类型契约，使 `AgentTool`、`ToolExecutionRuntimePort`、`ModelPort` 和 `AgentLoopConfig` 使用明确的 core 类型，并补充统一清理契约。
+- [x] 3.2 修改 `src/tenon/core/model_request.py`，只从 AgentTool 读取 `name`、`description` 和 `parameters`，删除 `args_schema.model_json_schema()` fallback。
 - [x] 3.3 修改工具调用流程，使 before/after hook 只处理 AgentTool 和 ToolResult，不再构造或探测旧式 `Args/invoke` 工具。
 - [x] 3.4 保留 `TransformContext`、context budget 和 context preflight 的现有兼容及事件语义，补充预算变更不受工具协议迁移影响的回归测试。
 

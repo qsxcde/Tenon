@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.ai.model.types import ChatMessage, ToolDefinition
-from codeagent.ai.providers.fake import FakeClient
+from tenon.ai.model.types import ChatMessage, ToolDefinition
+from tenon.ai.providers.fake import FakeClient
 
 
 @pytest.mark.asyncio

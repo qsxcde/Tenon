@@ -9,10 +9,10 @@ from unittest.mock import patch
 
 import pytest
 
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.core.contracts.messages import Message
-from codeagent.core.contracts.subagents import (
+from tenon.app.tui.state.model import TuiModel
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.messages import Message
+from tenon.core.contracts.subagents import (
     SubagentBudget,
     SubagentReasonCode,
     SubagentRequest,
@@ -137,7 +137,7 @@ class _EventChild:
 
 @pytest.mark.unit
 async def test_runner_emits_bounded_correlated_envelopes_and_one_terminal_event() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild("bounded")
     events: list[AgentEvent] = []
@@ -170,7 +170,7 @@ async def test_runner_emits_bounded_correlated_envelopes_and_one_terminal_event(
 
 @pytest.mark.unit
 async def test_runner_isolates_async_observer_failure_and_ignores_late_child_event() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild("late")
     observed: list[str] = []
@@ -208,7 +208,7 @@ async def test_runner_isolates_async_observer_failure_and_ignores_late_child_eve
 
 @pytest.mark.unit
 async def test_runner_emits_one_cancelled_terminal_with_cleanup_diagnostic() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild("cancel", block=asyncio.Event(), cleanup_confirmed=False)
     events: list[AgentEvent] = []
@@ -234,7 +234,7 @@ async def test_runner_emits_one_cancelled_terminal_with_cleanup_diagnostic() -> 
 
 @pytest.mark.unit
 async def test_runner_maps_startup_failure_to_one_terminal_event() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     events: list[AgentEvent] = []
 
@@ -255,7 +255,7 @@ async def test_runner_maps_startup_failure_to_one_terminal_event() -> None:
 
 @pytest.mark.unit
 async def test_runner_preserves_budget_exceeded_as_failed_terminal() -> None:
-    from codeagent.app.composition.subagent.runner import SerialSubagentRunner
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     child = _EventChild("budget", block=asyncio.Event(), turn_events=2)
     events: list[AgentEvent] = []
@@ -277,7 +277,7 @@ async def test_runner_preserves_budget_exceeded_as_failed_terminal() -> None:
 
 @pytest.mark.integration
 async def test_real_fake_parent_receives_top_level_subagent_events_and_continues() -> None:
-    from codeagent.ai.providers.fake import FakeClient
+    from tenon.ai.providers.fake import FakeClient
 
     root_client = FakeClient(
         steps=[
@@ -296,10 +296,10 @@ async def test_real_fake_parent_receives_top_level_subagent_events_and_continues
     child_client = FakeClient(response="子 Agent 的内部输出")
 
     with patch(
-        "codeagent.app.composition.model.selection.create_llm",
+        "tenon.app.composition.model.selection.create_llm",
         side_effect=[root_client, child_client],
     ):
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(provider="fake", store=None)
         events: list[AgentEvent] = []

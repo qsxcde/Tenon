@@ -22,10 +22,10 @@
 
 ## Impact
 
-- `src/codeagent/session/store.py`:header 字段扩展 + `meta` entry + `SessionRef` 扩展(title / model / effort);
-- `src/codeagent/session/manager.py`(新):SessionManager,经 `session/__init__.py` 导出;
-- `src/codeagent/core/ports.py`:`AgentPorts` 移除 `store` 字段;
-- `src/codeagent/app/container.py`:`create_agent_ports` 不再传 store;新增 `create_session_manager` 装配(ports 工厂 + store 注入);
-- `src/codeagent/app/main.py`:`--session <id>` / `--list-sessions` 参数;
+- `src/tenon/session/store.py`:header 字段扩展 + `meta` entry + `SessionRef` 扩展(title / model / effort);
+- `src/tenon/session/manager.py`(新):SessionManager,经 `session/__init__.py` 导出;
+- `src/tenon/core/ports.py`:`AgentPorts` 移除 `store` 字段;
+- `src/tenon/app/container.py`:`create_agent_ports` 不再传 store;新增 `create_session_manager` 装配(ports 工厂 + store 注入);
+- `src/tenon/app/main.py`:`--session <id>` / `--list-sessions` 参数;
 - 测试:`tests/session/test_store.py`(meta/元数据)、`tests/session/test_session_manager.py`(新)、`tests/test_container.py`、`tests/test_cli.py`;分层断言保持绿(session 不 import ai / tools / config)。
 - 依赖:无新增(python 标准库 + 既有依赖)。

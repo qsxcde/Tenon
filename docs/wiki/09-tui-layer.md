@@ -109,7 +109,7 @@ TuiRenderCoordinator（30fps 防抖）→ TuiBackend.render(...) → Textual
 | `/model *` | 切换模型（支持 `model:effort`） |
 | `/effort *` | 切换思考强度 |
 | `/fork` | 从指定消息（缺省最近用户消息）分叉会话 |
-| `/undo` | 查看或恢复写前快照（`list` / `preview`），与 `codeagent undo` 同源 |
+| `/undo` | 查看或恢复写前快照（`list` / `preview`），与 `tenon undo` 同源 |
 | `/export <path>` | 导出当前会话完整文档到文件 |
 | `/subagents` | 查看并发上限与活跃委派；`cancel <delegation-id>` 终止单个委派 |
 | `/context-window` | 查看或设置模型上下文窗口（写入 `models.json` 后热切换） |

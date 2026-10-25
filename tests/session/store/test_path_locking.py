@@ -11,8 +11,8 @@ import fcntl
 
 import pytest
 
-from codeagent.session.persistence import locking
-from codeagent.session.persistence.locking import PathLock, path_lock
+from tenon.session.persistence import locking
+from tenon.session.persistence.locking import PathLock, path_lock
 
 pytestmark = pytest.mark.unit
 

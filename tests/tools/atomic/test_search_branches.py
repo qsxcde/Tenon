@@ -9,11 +9,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from codeagent.tools.atomic import find as find_mod
-from codeagent.tools.atomic import grep as grep_mod
-from codeagent.tools.atomic.find import FindTool, _glob_to_regex, find_files
-from codeagent.tools.atomic.grep import GrepTool, _glob_match, grep_files
-from codeagent.tools.shared import LocalFsOps, ToolResourceLimits
+from tenon.tools.atomic import find as find_mod
+from tenon.tools.atomic import grep as grep_mod
+from tenon.tools.atomic.find import FindTool, _glob_to_regex, find_files
+from tenon.tools.atomic.grep import GrepTool, _glob_match, grep_files
+from tenon.tools.shared import LocalFsOps, ToolResourceLimits
 
 pytestmark = pytest.mark.unit
 

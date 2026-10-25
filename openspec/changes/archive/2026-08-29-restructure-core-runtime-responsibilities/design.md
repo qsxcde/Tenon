@@ -2,7 +2,7 @@
 
 本变更建立在 `openspec/specs/core/spec.md`、`openspec/specs/tools/spec.md` 以及正在收尾的 context-budget 变更之上。当前 core 的分层 import 已经正确,但 `ToolExecutionRuntime` 和 `new_tool_result` 仍通过属性探测兼容旧式 `Args/invoke/ainvoke` 工具,`execution.py`、`loop.py` 中的单个函数也同时管理调用、清理、并发和生命周期。
 
-实现必须保持 `core` 只依赖标准库和 core 自身类型;具体内建工具、MCP client、Pydantic schema、进程和文件系统能力留在 `tools/` 或 `app/composition/`。`TransformContext`、上下文预算、消息/事件字段、session 提交边界和公共 `codeagent.core` 导出继续保持现有语义。
+实现必须保持 `core` 只依赖标准库和 core 自身类型;具体内建工具、MCP client、Pydantic schema、进程和文件系统能力留在 `tools/` 或 `app/composition/`。`TransformContext`、上下文预算、消息/事件字段、session 提交边界和公共 `tenon.core` 导出继续保持现有语义。
 
 ## Goals / Non-Goals
 
@@ -12,7 +12,7 @@
 - 通过显式工具适配器把内建工具和 MCP 工具装配为统一的 AgentTool,由组合根负责挂载。
 - 将工具执行状态、结果归一化、清理和 ReAct 工具批次拆为可独立测试的模块。
 - 保持并行/串行执行、调用顺序、超时、取消、清理诊断、事件顺序、steer、follow-up 和失败回滚语义不变。
-- 保持 `codeagent.core` 当前规范导出,减少调用方只因内部拆分而修改 import。
+- 保持 `tenon.core` 当前规范导出,减少调用方只因内部拆分而修改 import。
 
 **Non-Goals:**
 
@@ -37,7 +37,7 @@
 
 ### 3. 保留稳定 façade,按职责拆分实现
 
-公共 `codeagent.core` re-export 不变,内部按以下边界重组:
+公共 `tenon.core` re-export 不变,内部按以下边界重组:
 
 ```text
 core/

@@ -6,14 +6,14 @@ import asyncio
 
 import pytest
 
-from codeagent.app.tui.presentation.primitives import rich_to_plain
-from codeagent.app.tui.presentation.blocks import AssistantBlock, SubagentBlock
-from codeagent.app.tui.application import TuiApp
-from codeagent.app.tui.state.model import TuiModel
-from codeagent.app.tui.state.runtime import RuntimePhase
-from codeagent.app.composition.subagent.event_diagnostics import make_queued_event
-from codeagent.core.contracts.events import AgentEvent, EventType
-from codeagent.core.contracts.subagents import SubagentRequest
+from tenon.app.tui.presentation.primitives import rich_to_plain
+from tenon.app.tui.presentation.blocks import AssistantBlock, SubagentBlock
+from tenon.app.tui.application import TuiApp
+from tenon.app.tui.state.model import TuiModel
+from tenon.app.tui.state.runtime import RuntimePhase
+from tenon.app.composition.subagent.event_diagnostics import make_queued_event
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.subagents import SubagentRequest
 
 
 def _event(

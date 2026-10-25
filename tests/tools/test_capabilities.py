@@ -6,7 +6,7 @@ import pytest
 
 
 def test_capability_snapshot_is_frozen_and_has_stable_serialization() -> None:
-    from codeagent.tools.capabilities import ToolCapabilities, ToolCapability
+    from tenon.tools.capabilities import ToolCapabilities, ToolCapability
 
     item = ToolCapability(
         key="rg",
@@ -34,7 +34,7 @@ def test_capability_snapshot_is_frozen_and_has_stable_serialization() -> None:
 
 
 def test_probe_reports_all_capabilities_without_running_external_commands() -> None:
-    from codeagent.tools.capabilities import detect_tool_capabilities
+    from tenon.tools.capabilities import detect_tool_capabilities
 
     calls: list[str] = []
 
@@ -68,7 +68,7 @@ def test_probe_reports_all_capabilities_without_running_external_commands() -> N
 
 
 def test_probe_reports_actionable_missing_shell_and_optional_dependencies() -> None:
-    from codeagent.tools.capabilities import detect_tool_capabilities
+    from tenon.tools.capabilities import detect_tool_capabilities
 
     def missing_shell() -> str:
         raise ValueError("no bash")
@@ -92,7 +92,7 @@ def test_probe_reports_actionable_missing_shell_and_optional_dependencies() -> N
 
 
 def test_probe_keeps_unknown_security_policy_explicit() -> None:
-    from codeagent.tools.capabilities import detect_tool_capabilities
+    from tenon.tools.capabilities import detect_tool_capabilities
 
     snapshot = detect_tool_capabilities(
         os_name="posix",

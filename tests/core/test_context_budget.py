@@ -6,27 +6,27 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from codeagent.core.context.budget import (
+from tenon.core.context.budget import (
     ContextBudgetInput,
     estimate_context_budget,
     govern_tool_messages,
 )
-from codeagent.core.context.model import AgentContext
-from codeagent.core.context.preflight import (
+from tenon.core.context.model import AgentContext
+from tenon.core.context.preflight import (
     ContextPreflightConfig,
     evaluate_context_preflight,
 )
-from codeagent.core.context.tokens import estimate_text_tokens, is_cjk
-from codeagent.core.contracts.messages import Message
-from codeagent.core.contracts.errors import ContextPreparationError
-from codeagent.core.contracts.ports import StreamEvent
-from codeagent.core.orchestration.loop import run_agent_loop
-from codeagent.core.orchestration.config import AgentLoopConfig
+from tenon.core.context.tokens import estimate_text_tokens, is_cjk
+from tenon.core.contracts.messages import Message
+from tenon.core.contracts.errors import ContextPreparationError
+from tenon.core.contracts.ports import StreamEvent
+from tenon.core.orchestration.loop import run_agent_loop
+from tenon.core.orchestration.config import AgentLoopConfig
 
 
 def test_context_transformer_contract_is_explicit_and_publicly_exported():
-    from codeagent.core import ContextTransformer as PublicContextTransformer
-    from codeagent.core.context.contracts import ContextTransformer
+    from tenon.core import ContextTransformer as PublicContextTransformer
+    from tenon.core.context.contracts import ContextTransformer
 
     assert getattr(ContextTransformer, "_is_protocol", False) is True
     assert PublicContextTransformer is ContextTransformer
@@ -134,7 +134,7 @@ def test_context_budget_detaches_mutable_input_values():
 
 
 def test_govern_tool_messages_crops_to_request_headroom_and_keeps_facts():
-    from codeagent.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
+    from tenon.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
 
     metadata = ToolOutputMetadata(
         completeness=OutputCompleteness.COMPLETE,
@@ -195,7 +195,7 @@ def test_govern_tool_messages_marks_legacy_result_unknown_when_cropped():
 
 
 def test_govern_tool_messages_keeps_multiple_call_id_facts_independent():
-    from codeagent.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
+    from tenon.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
 
     first = Message(
         role="tool",
@@ -267,7 +267,7 @@ class _BudgetAwareModel:
 
 @pytest.mark.asyncio
 async def test_budget_aware_context_preparer_gets_neutral_view_and_keeps_source_context():
-    from codeagent.core.context.contracts import ContextPreparationRequest
+    from tenon.core.context.contracts import ContextPreparationRequest
 
     model = _BudgetAwareModel()
     source = AgentContext(messages=[Message(role="user", content="history")])
@@ -350,7 +350,7 @@ async def test_context_preparer_receives_neutral_tool_definitions():
     )
 
     assert len(seen[0].tools) == 1
-    from codeagent.core.context.contracts import ContextToolDefinition
+    from tenon.core.context.contracts import ContextToolDefinition
 
     assert isinstance(seen[0].tools[0], ContextToolDefinition)
     assert seen[0].tools[0].name == "search"
@@ -661,7 +661,7 @@ async def test_prepare_context_emits_exactly_one_budget_snapshot_when_cropping()
     重复事件会让订阅方（TUI 诊断、headless ``--context``）把一次请求的
     预算变化计成两次；预算快照应当是每个请求恰好一个。
     """
-    from codeagent.core.model.request import prepare_context
+    from tenon.core.model.request import prepare_context
 
     history = [
         Message(role="user", content="hi"),

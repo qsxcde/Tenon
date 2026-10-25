@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 
 def test_grep_uses_rg_json_result_without_changing_context_format(tmp_path) -> None:
-    from codeagent.tools.atomic.grep import GrepTool
+    from tenon.tools.atomic.grep import GrepTool
 
     target = tmp_path / "src" / "main.py"
     target.parent.mkdir()
@@ -21,9 +21,7 @@ def test_grep_uses_rg_json_result_without_changing_context_format(tmp_path) -> N
         ),
         truncated=False,
     )
-    with patch(
-        "codeagent.tools.execution.search.run_optional_search", return_value=external
-    ) as run:
+    with patch("tenon.tools.execution.search.run_optional_search", return_value=external) as run:
         result = GrepTool(cwd=str(tmp_path)).invoke(GrepTool.Args(pattern="needle", context=1))
 
     assert "src/main.py-1- before" in result
@@ -36,17 +34,17 @@ def test_grep_uses_rg_json_result_without_changing_context_format(tmp_path) -> N
 
 
 def test_grep_falls_back_when_rg_is_unavailable(tmp_path) -> None:
-    from codeagent.tools.atomic.grep import GrepTool
+    from tenon.tools.atomic.grep import GrepTool
 
     (tmp_path / "main.py").write_text("needle\n", encoding="utf-8")
-    with patch("codeagent.tools.execution.search.run_optional_search", return_value=None):
+    with patch("tenon.tools.execution.search.run_optional_search", return_value=None):
         result = GrepTool(cwd=str(tmp_path)).invoke(GrepTool.Args(pattern="needle"))
 
     assert "main.py:1: needle" in result
 
 
 def test_find_uses_fd_paths_then_reapplies_glob_and_relative_path(tmp_path) -> None:
-    from codeagent.tools.atomic.find import FindTool
+    from tenon.tools.atomic.find import FindTool
 
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "main.py").write_text("ok", encoding="utf-8")
@@ -54,7 +52,7 @@ def test_find_uses_fd_paths_then_reapplies_glob_and_relative_path(tmp_path) -> N
         stdout=f"{tmp_path / 'src' / 'main.py'}\0{tmp_path / 'src' / 'main.txt'}\0".encode(),
         truncated=False,
     )
-    with patch("codeagent.tools.atomic.find.run_optional_search", return_value=external) as run:
+    with patch("tenon.tools.atomic.find.run_optional_search", return_value=external) as run:
         result = FindTool(cwd=str(tmp_path)).invoke(FindTool.Args(pattern="**/*.py"))
 
     assert "src/main.py" in result
@@ -66,17 +64,17 @@ def test_find_uses_fd_paths_then_reapplies_glob_and_relative_path(tmp_path) -> N
 
 
 def test_find_falls_back_when_fd_fails(tmp_path) -> None:
-    from codeagent.tools.atomic.find import FindTool
+    from tenon.tools.atomic.find import FindTool
 
     (tmp_path / "main.py").write_text("ok", encoding="utf-8")
-    with patch("codeagent.tools.atomic.find.run_optional_search", return_value=None):
+    with patch("tenon.tools.atomic.find.run_optional_search", return_value=None):
         result = FindTool(cwd=str(tmp_path)).invoke(FindTool.Args(pattern="*.py"))
 
     assert "main.py" in result
 
 
 def test_optional_search_uses_argv_and_bounded_output(monkeypatch, tmp_path) -> None:
-    from codeagent.tools.execution.search import run_optional_search
+    from tenon.tools.execution.search import run_optional_search
 
     seen = {}
 
@@ -117,7 +115,7 @@ def test_optional_search_uses_argv_and_bounded_output(monkeypatch, tmp_path) -> 
 def test_optional_search_returns_none_for_failed_or_timed_out_command(
     monkeypatch, tmp_path
 ) -> None:
-    from codeagent.tools.execution.search import run_optional_search
+    from tenon.tools.execution.search import run_optional_search
     import subprocess
 
     class FailedProcess:

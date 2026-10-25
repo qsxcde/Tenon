@@ -7,14 +7,14 @@ import threading
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.core import Agent, AgentContext, AgentLoopConfig, EventType, Message
-from codeagent.session.compaction import CompactionPolicyConfig
-from codeagent.session.persistence.jsonl import JsonFileStore
-from codeagent.session.persistence.memory_store import MemoryStore
-from codeagent.session.persistence.models import UsageStats
-from codeagent.session.runtime.state import CommitStatus, RunPhase
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import Agent, AgentContext, AgentLoopConfig, EventType, Message
+from tenon.session.compaction import CompactionPolicyConfig
+from tenon.session.persistence.jsonl import JsonFileStore
+from tenon.session.persistence.memory_store import MemoryStore
+from tenon.session.persistence.models import UsageStats
+from tenon.session.runtime.state import CommitStatus, RunPhase
 from tests.session.behavior.fixtures import _StubSummarizer, _compact_session, _long, _session
 
 
@@ -135,7 +135,7 @@ def test_turn_rollback_does_not_persist_governed_tool_metadata(tmp_path, store_k
         store = _FailingUsageMemoryStore()
     else:
         store = _FailingUsageJsonStore(tmp_path / "sessions")
-    from codeagent.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
+    from tenon.core.contracts.messages import OutputCompleteness, ToolOutputMetadata
 
     store.create("rollback")
     tool = Message(

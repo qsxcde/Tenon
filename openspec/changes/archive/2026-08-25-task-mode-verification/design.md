@@ -1,6 +1,6 @@
 ## Context
 
-See `proposal.md` for the motivation and user-visible scope. 当前 `TuiApp._run_conversation()` 和 CLI 响应路径直接调用 `AgentSession.run()`；`src/codeagent/core/loop.py` 只负责通用 ReAct 循环，工具事件已经可以被订阅，但 bash 的退出码主要存在于格式化文本中。代码任务监督、工作区变更判定和验证命令选择不应下沉到 core，也不能依赖解析输出文本。
+See `proposal.md` for the motivation and user-visible scope. 当前 `TuiApp._run_conversation()` 和 CLI 响应路径直接调用 `AgentSession.run()`；`src/tenon/core/loop.py` 只负责通用 ReAct 循环，工具事件已经可以被订阅，但 bash 的退出码主要存在于格式化文本中。代码任务监督、工作区变更判定和验证命令选择不应下沉到 core，也不能依赖解析输出文本。
 
 ## Goals / Non-Goals
 

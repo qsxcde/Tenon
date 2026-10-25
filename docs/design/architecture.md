@@ -1,4 +1,4 @@
-# codeagent 架构设计文档
+# tenon 架构设计文档
 
 > 版本: v0.7(扩展与运行期安全落地后的架构校准)
 > 适用范围: 自研编排(2026-08-14 起,已弃用 langgraph/langchain)的 Code Agent 项目
@@ -7,7 +7,7 @@
 
 ## 1. 背景与目标
 
-本项目是基于**自研编排**的编程 Agent(codeagent)。设计目标:
+本项目是基于**自研编排**的编程 Agent(tenon)。设计目标:
 
 1. **可演进**:从"单个工具调用型 Agent"平滑演进到多 Agent / 多会话 / 平台部署。
 2. **可替换**:更换模型供应商(DeepSeek / OpenAI / Qwen / GLM / Kimi / MiniMax)、更换工具集、更换存储,均不触碰 Agent 编排代码。
@@ -44,18 +44,18 @@
 
 - 工具链:`uv` + `src` 布局,Python 3.12。
 - 依赖:`httpx`、`mcp`、`pydantic`、`pydantic-settings`、`pyyaml`、`textual`;dev 依赖 `pytest`。**无 langchain/langgraph**。
-- 入口:`pyproject.toml` 中 `codeagent = "codeagent.app.main:main"`。
+- 入口:`pyproject.toml` 中 `tenon = "tenon.app.main:main"`。
 - **已完成(v0.1~v0.5 功能范围)**:
-- 密钥外置:固定目录 `~/.codeagent/.env`(首次启动幂等生成模板),**不读取 CWD 下 `.env`**(安全决策 H10);全局 `Settings` 保存 provider 选择和工具资源限制，工具资源由组合根解析为不可变 `ToolResourceLimits`。
+- 密钥外置:固定目录 `~/.tenon/.env`(首次启动幂等生成模板),**不读取 CWD 下 `.env`**(安全决策 H10);全局 `Settings` 保存 provider 选择和工具资源限制，工具资源由组合根解析为不可变 `ToolResourceLimits`。
 - `ai/` 层:模型基础设施(provider / catalog / model / transport / errors),**不负责应用装配**;支持 6 个真实 provider(deepseek / openai / qwen / glm / kimi / minimax)+ 离线 `fake`;模型客户端自研(httpx + 自研 SSE 解析,thinking / usage 全量透传);`errors.py` 统一分类网络、超时、限流、认证、参数、服务端和未知失败并提供脱敏诊断;provider/model/effort 选择位于 `app/composition/model/selection.py`,适配自研循环的 `ChatModelPort` 在组合根。
-- 工具层(hexagonal):`AtomicTool` 无状态基类 + `FsOps` 文件系统抽象缝 + cwd 注入;read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo 十一个内建工具(声明式 `BUILTIN_TOOL_SPECS`);MCP 客户端可接入 `tools/list` / `tools/call`，以 `mcp__<server>__<tool>` 命名空间化，并实施全局 / 单 server / 描述长度分组预算;扩展插件经 `tools/plugins/` 以 `ext__<id>__<tool>` 命名注入;`ToolResourceLimits` 在组合根统一注入并发、超时、输出字节/行、预览内存和清理等待上限；`grep`/`find` 只把 `rg`/`fd` 作为不经 shell 的可选加速，失败时回退纯 Python；bash 带危险命令黑名单(字符串正则 + shlex 分词语义级检测)、树级进程击杀、默认 120s 超时(上限 600)、30k 输出截断与三档沙箱(受限策略无后端 fail-closed);`tools/security/` 提供执行前安全分类器(deny > ask > allow，MCP/插件权限同源匹配)，`tools/capabilities.py` 在组合根生成只读环境能力快照；`tools/shared/checkpoints.py` 为 write/edit 提供写前快照与 `codeagent undo`。
+- 工具层(hexagonal):`AtomicTool` 无状态基类 + `FsOps` 文件系统抽象缝 + cwd 注入;read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo 十一个内建工具(声明式 `BUILTIN_TOOL_SPECS`);MCP 客户端可接入 `tools/list` / `tools/call`，以 `mcp__<server>__<tool>` 命名空间化，并实施全局 / 单 server / 描述长度分组预算;扩展插件经 `tools/plugins/` 以 `ext__<id>__<tool>` 命名注入;`ToolResourceLimits` 在组合根统一注入并发、超时、输出字节/行、预览内存和清理等待上限；`grep`/`find` 只把 `rg`/`fd` 作为不经 shell 的可选加速，失败时回退纯 Python；bash 带危险命令黑名单(字符串正则 + shlex 分词语义级检测)、树级进程击杀、默认 120s 超时(上限 600)、30k 输出截断与三档沙箱(受限策略无后端 fail-closed);`tools/security/` 提供执行前安全分类器(deny > ask > allow，MCP/插件权限同源匹配)，`tools/capabilities.py` 在组合根生成只读环境能力快照；`tools/shared/checkpoints.py` 为 write/edit 提供写前快照与 `tenon undo`。
 - `core/` Agent Runtime:根级 `agent.py` 为运行时外壳，`contracts/`、`context/`、`model/`、`execution/`、`orchestration/`、`observation.py` 和 `support/` 按职责组织纯内存、全异步实现；模块顶层零副作用。
 - `session/` 会话层:bus + session + manager + store(JSONL 树形,含 usage 与父级 `subagent` entry)+ compaction + tree;`SessionRef.last_activity_at` 在创建时初始化并随成功消息追加更新,最近会话按该值排序;会话标题支持自动派生和 append-only `name` 元数据重命名;`SessionQuery` 统一标题/id、模型、时间、运行状态和归档范围筛选,管理器为驻留会话叠加只读运行态;归档使用 append-only 元数据,删除由存储边界完成路径保护和索引清理;恢复报告区分 healthy/degraded/unavailable,有效损坏记录局部降级,结构性错误携带可操作建议;父会话通过独立且有界的运行记录保留委派事实，非终态记录重启后转为 `abandoned/process_restarted`，不改变普通消息、标题、最近活动、usage、压缩、fork 或 `/sessions` 子会话列表；`abort()` 运行中断、`steer()` 运行中注入、`followup()` 结束后续跑一轮、成功轮次才落盘、失败/取消内存回滚。
 - `app/composition/subagent/` 是 Subagent 的应用装配边界：`profiles.py` 作为唯一 registry 定义 `explore`/`review`（只读）与 `implement`（受限可写，禁 `delegate`/MCP）的角色、输出指导和工具白名单；`delegate_tool.py` 与 `runner.py` 在创建子 Session 前复用同一校验入口，`factory.py` 和 TUI 组合根复用同一装配策略，`subagent_max_concurrency` 控制有界并发（默认 1 = 串行）。`read_only` 只作为历史记录中可能出现的有界文本，不是新的 delegate 输入；`tester` 和命令执行不属于当前能力。
 - 会话列表、搜索、筛选和 `continue_recent` 使用派生索引完成候选元数据读取与排序；单个索引缺失、损坏或过期时只对目标会话回源，其它会话不重复扫描 JSONL，最终目标恢复允许单独检查。
 - 事件按消息、模型请求、工具生命周期、运行控制和 Subagent 委派分组；模型请求显式发布 `model_request_started / model_request_finished`，工具生命周期包含 `tool_queued / tool_started / tool_progress / tool_finished / tool_result`，Subagent 使用 `subagent_queued / subagent_started / subagent_progress / subagent_finished`，事件通过 `run_id`、`parent_run_id`、`child_run_id`、`delegation_id`、`tool_call_id` 和结构化状态字段关联。完整事件契约见 §5.7。
 - 入口形态:`app/main.py` headless 双路径(`--prompt` / stdin)+ `--tui` 交互式终端(斜杠命令 / 模糊补全 / 选择器 / Markdown / 滚动 / `/login` / `/skills` / `/mcp` / `/tree` 等命令体系)；headless 对 Subagent 输出有界 `子Agent状态:` 行，TUI 使用独立委派块和状态栏聚合，不复制 child transcript。
-- Skills 系统(v0.3 阶段 1~4):SKILL.md 格式 + 三源发现(内建 `resources/skills/` / 个人 `<config_dir>/skills/` / 项目 `<cwd>/.codeagent/skills/`)+ 渐进式披露(名称/描述入 system prompt,**正文经 `skill` 工具按需获取**)+ TUI `/skills` 手动加载。
+- Skills 系统(v0.3 阶段 1~4):SKILL.md 格式 + 三源发现(内建 `resources/skills/` / 个人 `<config_dir>/skills/` / 项目 `<cwd>/.tenon/skills/`)+ 渐进式披露(名称/描述入 system prompt,**正文经 `skill` 工具按需获取**)+ TUI `/skills` 手动加载。
 - MCP(v0.3 阶段 2):用户级配置发现、工具 schema 适配、权限分类、`/mcp` 可见诊断与分组预算。
 - token 用量透明(v0.3 阶段 3):usage 归一、会话级 append-only 落库、`/status` 与 headless CLI 展示输入 / 输出 / 缓存命中（不做费用估算）。
 - 会话树(v0.3 阶段 4):`build_tree` 纯函数、`/tree` 导航及 `/sessions list` 父子缩进展示。
@@ -91,21 +91,21 @@
 ### 4.1 目录树
 
 ```text
-codeagent/
-├── pyproject.toml / uv.lock          # 依赖、CLI 入口(codeagent.app.main:main)
+tenon/
+├── pyproject.toml / uv.lock          # 依赖、CLI 入口(tenon.app.main:main)
 ├── README.md / AGENTS.md             # 说明 + Agent 工作指南
-├── .env.example                      # 密钥模板(不入库;实际密钥在 ~/.codeagent/.env)
+├── .env.example                      # 密钥模板(不入库;实际密钥在 ~/.tenon/.env)
 ├── docs/                             # design/(需求/架构/蓝图)+ wiki/(代码级)+ iteration/(权威)+ benchmarks
 ├── openspec/                         # OpenSpec 规格与归档变更
 │
-├── src/codeagent/
-│   ├── __init__.py / __main__.py     # 版本 + python -m codeagent
+├── src/tenon/
+│   ├── __init__.py / __main__.py     # 版本 + python -m tenon
 │   │
 │   ├── app/                          # [组合根 + 入口] ★ 唯一跨层交汇点
 │   │   ├── container.py              #   组合根:create_agent_config / create_agent_session
 │   │   │                             #     / create_session_manager / create_tui_app
 │   │   ├── main.py                   #   CLI 入口:--prompt / stdin / --tui
-│   │   ├── config.py                 #   全局 Settings + ~/.codeagent 模板幂等生成
+│   │   ├── config.py                 #   全局 Settings + ~/.tenon 模板幂等生成
 │   │   ├── context/agents.py         #   AGENTS.md 分层加载 + 基础提示词
 │   │   ├── subagent_observability.py #   headless 委派状态行投影(无终端依赖)
 │   │   ├── errors/reporting.py       #   安全错误呈现与诊断记录
@@ -235,7 +235,7 @@ codeagent/
 
 ### 4.3 配置命名空间(重要)
 
-`~/.codeagent/.env` 是共享文件,但全局 `Settings` 与各 provider 的 `Config` **各自解析、各自只认自己的键**:
+`~/.tenon/.env` 是共享文件,但全局 `Settings` 与各 provider 的 `Config` **各自解析、各自只认自己的键**:
 
 | 配置类 | 认的键 | 忽略 |
 |---|---|---|
@@ -243,7 +243,7 @@ codeagent/
 | `DeepSeekConfig` | `DEEPSEEK_*`(env_prefix) | `LLM_PROVIDER` 等 |
 | `OpenAIConfig` | `OPENAI_*`(env_prefix) | 其它 |
 
-因此**所有配置类必须设置 `extra="ignore"`**,否则共享 `.env` 中任一命名空间的键都会让其它配置类报 `extra_forbidden`(实现时实际踩过,已修复并补防回归测试)。配置来源固定为 `~/.codeagent/.env`,不读 CWD 相对路径 `.env`(H10)。
+因此**所有配置类必须设置 `extra="ignore"`**,否则共享 `.env` 中任一命名空间的键都会让其它配置类报 `extra_forbidden`(实现时实际踩过,已修复并补防回归测试)。配置来源固定为 `~/.tenon/.env`,不读 CWD 相对路径 `.env`(H10)。
 
 ## 5. 核心契约
 

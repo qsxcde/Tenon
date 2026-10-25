@@ -6,11 +6,11 @@ from pathlib import Path
 from unittest.mock import patch
 import httpx
 import pytest
-from codeagent.ai.transport.openai_compat import OpenAICompatClient
+from tenon.ai.transport.openai_compat import OpenAICompatClient
 
 
 async def _run_config(config, prompt: str, *, history=None, emit=None):
-    from codeagent.core import AgentContext, run_agent_loop
+    from tenon.core import AgentContext, run_agent_loop
 
     previous = list(history or [])
     new_messages = await run_agent_loop(
@@ -57,14 +57,14 @@ class _StubBackend:
 
 
 def _config_with_mode(approval_mode: str):
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_agent_config
+        from tenon.app.container import create_agent_config
 
         config = create_agent_config(approval_mode=approval_mode)
-        from codeagent.app.container import _create_policy
+        from tenon.app.container import _create_policy
 
         return config, _create_policy(approval_mode=approval_mode)
 

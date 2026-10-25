@@ -26,7 +26,7 @@ P1-1 需要在不改变 JSONL 作为真实数据源、不改变会话恢复语�
 
 ## Impact
 
-- 主要影响 `src/codeagent/session/store.py` 及 `tests/session/test_store.py`。
+- 主要影响 `src/tenon/session/store.py` 及 `tests/session/test_store.py`。
 - 可能新增 session 层内部的索引数据结构或辅助模块；不改变 `core`、`SessionManager` 和 `AgentSession` 的公共接口。
 - 会话目录新增私有索引文件，索引文件需要遵循现有会话目录/文件权限策略。
 - 不新增第三方依赖；JSONL 文件仍可被诊断、备份和删除，索引可随时重建。

@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 
 
-from codeagent.core.contracts.messages import Message
-from codeagent.session.persistence import (
+from tenon.core.contracts.messages import Message
+from tenon.session.persistence import (
     JsonFileStore,
     MemoryStore,
     RecoveryDiagnostic,
     SessionRecoveryReport,
 )
-from codeagent.session.session_persistence import SessionPersistence
+from tenon.session.session_persistence import SessionPersistence
 
 
 def test_recovery_report_is_typed_and_serializable() -> None:

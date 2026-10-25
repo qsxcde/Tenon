@@ -6,9 +6,9 @@
 
 import pytest
 
-from codeagent.core.contracts.messages import Message, ToolCall
-from codeagent.core.context.budget import ContextBudgetSnapshot
-from codeagent.session.compaction import (
+from tenon.core.contracts.messages import Message, ToolCall
+from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.session.compaction import (
     AutoCompactionDecision,
     CompactionPlan,
     CompactionPolicyConfig,
@@ -126,7 +126,7 @@ def test_extract_file_ops_dedup_and_empty():
 
 
 def test_summarizer_is_a_provider_agnostic_boundary() -> None:
-    from codeagent.session.compaction.summarizer import Summarizer
+    from tenon.session.compaction.summarizer import Summarizer
 
     assert hasattr(Summarizer, "summarize")
 

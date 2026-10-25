@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from codeagent.ai.errors import ProviderError
-from codeagent.ai.model.types import ChatMessage, StreamEvent
-from codeagent.ai.transport.openai_compat import OpenAICompatClient
-from codeagent.ai.transport.retry import MAX_RETRIES, retry_delay, validate_max_retries
+from tenon.ai.errors import ProviderError
+from tenon.ai.model.types import ChatMessage, StreamEvent
+from tenon.ai.transport.openai_compat import OpenAICompatClient
+from tenon.ai.transport.retry import MAX_RETRIES, retry_delay, validate_max_retries
 
 
 def _client(**kwargs) -> OpenAICompatClient:

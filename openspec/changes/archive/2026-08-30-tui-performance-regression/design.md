@@ -1,6 +1,6 @@
 ## Context
 
-当前 `src/codeagent/app/tui/benchmark/` 已有离线纯组件 fixture、帧耗时和部分内存计数，`TuiRenderCoordinator` 也维护 generation、丢帧和超帧状态。但 benchmark 没有覆盖提交准备态和首个文本增量，`dropped_frames` 在基准结果中被固定为 0，比较脚本只比较少量 p50/p95 与峰值内存；跨平台运行时会直接落入不可比较但缺少完整指标的报告。V4-20/V4-21 已经提供可观测状态和按需渲染能力，本变更只在其上增加测量和验收闭环。
+当前 `src/tenon/app/tui/benchmark/` 已有离线纯组件 fixture、帧耗时和部分内存计数，`TuiRenderCoordinator` 也维护 generation、丢帧和超帧状态。但 benchmark 没有覆盖提交准备态和首个文本增量，`dropped_frames` 在基准结果中被固定为 0，比较脚本只比较少量 p50/p95 与峰值内存；跨平台运行时会直接落入不可比较但缺少完整指标的报告。V4-20/V4-21 已经提供可观测状态和按需渲染能力，本变更只在其上增加测量和验收闭环。
 
 ## Goals / Non-Goals
 

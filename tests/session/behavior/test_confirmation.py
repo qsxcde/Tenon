@@ -81,7 +81,7 @@ async def test_confirmation_timeout_fails_with_structured_error():
 
 
 async def test_stale_confirmation_response_is_ignored_without_waking_new_request():
-    from codeagent.session.runtime.confirmation import ConfirmationCoordinator
+    from tenon.session.runtime.confirmation import ConfirmationCoordinator
 
     coordinator = ConfirmationCoordinator()
     assert coordinator.register("first") is True
@@ -104,7 +104,7 @@ async def test_stale_confirmation_response_is_ignored_without_waking_new_request
 
 
 async def test_confirmation_timeout_removes_request_and_wakes_waiter():
-    from codeagent.session.runtime.confirmation import (
+    from tenon.session.runtime.confirmation import (
         ConfirmationCoordinator,
         ConfirmationTimeoutError,
     )
@@ -118,7 +118,7 @@ async def test_confirmation_timeout_removes_request_and_wakes_waiter():
 
 
 async def test_wait_timeout_applies_to_request_registered_without_timer():
-    from codeagent.session.runtime.confirmation import (
+    from tenon.session.runtime.confirmation import (
         ConfirmationCoordinator,
         ConfirmationTimeoutError,
     )
@@ -132,8 +132,8 @@ async def test_wait_timeout_applies_to_request_registered_without_timer():
 
 async def test_request_outcomes_use_closed_enum_on_boundary_paths():
     """确认请求终态收敛为 ApprovalOutcome(拒绝/超时/取消三条边界路径)。"""
-    from codeagent.core.contracts.ports import ApprovalOutcome
-    from codeagent.session.runtime.confirmation import (
+    from tenon.core.contracts.ports import ApprovalOutcome
+    from tenon.session.runtime.confirmation import (
         ConfirmationCoordinator,
         ConfirmationTimeoutError,
     )

@@ -15,7 +15,7 @@
 
 ## 测试目录结构
 
-`tests/` 按源码层级与行为域组织，与 `src/codeagent/` 的包结构对应：
+`tests/` 按源码层级与行为域组织，与 `src/tenon/` 的包结构对应：
 
 ```text
 tests/
@@ -39,7 +39,7 @@ tests/
 
 离线评测套件独立于 `tests/`，位于仓库根 `evals/`：`uv run python -m evals` 用 fake 模型驱动真实 Agent 循环，覆盖工具流、未知工具、审批阻断与改参传播；`tests/test_evals.py` 以 `contract` marker 将套件纳入快速质量集，避免用例失效后无人察觉。
 
-运行期安全相关回归：`tests/tools/test_sandbox.py`（三档策略、Seatbelt/bwrap 计划、无后端 fail-closed、配置取值一致性）与 `tests/tools/test_checkpoints.py`（快照/淘汰/LIFO 恢复、write/edit 集成、快照失败不阻塞写入、`codeagent undo` CLI）。
+运行期安全相关回归：`tests/tools/test_sandbox.py`（三档策略、Seatbelt/bwrap 计划、无后端 fail-closed、配置取值一致性）与 `tests/tools/test_checkpoints.py`（快照/淘汰/LIFO 恢复、write/edit 集成、快照失败不阻塞写入、`tenon undo` CLI）。
 
 历史上集中的 `tests/tui/test_view.py`、`tests/session/test_store.py`、`tests/session/test_session.py`、`tests/test_container.py` 与 `tests/tools/test_tools.py` 已按行为域拆分完毕，拆分过程与验收证据见 [`iteration/`](iteration/)。拆分验收标准保持不变：测试收集总数不减少、每个原测试名称只出现一次、共享 fixture 继续从 `tests/fixtures/` 加载、生产代码不因测试重组而修改。
 
@@ -47,7 +47,7 @@ tests/
 
 ## 应用层包布局
 
-`src/codeagent/app/` 的规范实现按职责归并到 `context/`、`errors/`、`skills/`、`tasks/`、`composition/` 和 `tui/` 子包；`main.py`、`container.py`、`config.py` 保留为根入口。已迁移的根层和 TUI 平铺模块已删除，生产代码和测试必须直接使用具体规范模块。
+`src/tenon/app/` 的规范实现按职责归并到 `context/`、`errors/`、`skills/`、`tasks/`、`composition/` 和 `tui/` 子包；`main.py`、`container.py`、`config.py` 保留为根入口。已迁移的根层和 TUI 平铺模块已删除，生产代码和测试必须直接使用具体规范模块。
 
 工具生命周期回归按 `tool_call_id` 验证 queued → running → terminal 的单向归约，覆盖确认、拒绝、超时、取消无结果、清理不确定、迟到/重复结果和输出截断；`TOOL_FINISHED` 只确定执行状态，`TOOL_RESULT` 只补充输出事实。
 
@@ -105,7 +105,7 @@ uv run ruff check src tests evals scripts
 uv run python scripts/scale_scan.py
 
 # 生成覆盖率报告（不设置高比例硬门槛）
-uv run pytest -m "unit or contract" -q --strict-markers --cov=codeagent --cov-report=term-missing
+uv run pytest -m "unit or contract" -q --strict-markers --cov=tenon --cov-report=term-missing
 
 # 发布检查：构建、检查产物、干净环境安装并运行 fake provider
 uv run python scripts/release_check.py \
@@ -116,7 +116,7 @@ uv run python scripts/release_check.py \
 openspec validate --specs
 ```
 
-测试必须离线运行，不依赖真实 API key、真实 Provider 或用户的 `~/.codeagent` 数据。
+测试必须离线运行，不依赖真实 API key、真实 Provider 或用户的 `~/.tenon` 数据。
 
 ## Marker 约定
 

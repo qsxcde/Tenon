@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from codeagent.app.tui.benchmark.benchmark import BenchmarkConfig, build_fixture, run_benchmark
-from codeagent.app.tui.presentation.blocks import Component
-from codeagent.app.tui.presentation.output import OutputBuffer, OutputMetadata
-from codeagent.app.tui.presentation.primitives import Span, rich_to_plain
-from codeagent.app.tui.state.transcript import Transcript
+from tenon.app.tui.benchmark.benchmark import BenchmarkConfig, build_fixture, run_benchmark
+from tenon.app.tui.presentation.blocks import Component
+from tenon.app.tui.presentation.output import OutputBuffer, OutputMetadata
+from tenon.app.tui.presentation.primitives import Span, rich_to_plain
+from tenon.app.tui.state.transcript import Transcript
 
 
 class _VariableBlock(Component):

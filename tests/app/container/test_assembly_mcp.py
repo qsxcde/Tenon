@@ -24,19 +24,19 @@ def test_config_append_mcp_tools(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     mock_server = str(Path(__file__).parents[2] / "mcp" / "mock_server.py")
-    (tmp_path / ".codeagent").mkdir(exist_ok=True)
-    (tmp_path / ".codeagent" / "mcp.json").write_text(
+    (tmp_path / ".tenon").mkdir(exist_ok=True)
+    (tmp_path / ".tenon" / "mcp.json").write_text(
         json.dumps(
             {"servers": [{"name": "mock", "command": sys.executable, "args": [mock_server]}]}
         ),
         encoding="utf-8",
     )
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_agent_config
-        from codeagent.core import AgentTool
+        from tenon.app.container import create_agent_config
+        from tenon.core import AgentTool
 
         ports = create_agent_config()
     names = [t.name for t in ports.tools]
@@ -47,6 +47,6 @@ def test_config_append_mcp_tools(tmp_path, monkeypatch):
     tool = next(t for t in ports.tools if t.name == "mcp__mock__echo")
     result = asyncio.run(tool.execute("mcp-1", {"text": "hi"}))
     assert "echo:" in result.content
-    from codeagent.tools.mcp.loader import close_mcp_tools
+    from tenon.tools.mcp.loader import close_mcp_tools
 
     close_mcp_tools(ports.tools)

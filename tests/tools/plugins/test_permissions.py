@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 
-from codeagent.tools.plugins.permissions import parse_extension_permissions
-from codeagent.tools.security import ALLOW, ASK, DENY, classify_tool
-from codeagent.tools.security.permission_rules import ThreeTierPermissionRules
+from tenon.tools.plugins.permissions import parse_extension_permissions
+from tenon.tools.security import ALLOW, ASK, DENY, classify_tool
+from tenon.tools.security.permission_rules import ThreeTierPermissionRules
 
 
 def test_missing_or_broken_config_returns_empty_rules(tmp_path):

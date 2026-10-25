@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 from pydantic import SecretStr
 
-from codeagent.ai.providers.openai import OpenAIConfig, make_llm
+from tenon.ai.providers.openai import OpenAIConfig, make_llm
 
 pytestmark = pytest.mark.unit
 
@@ -23,7 +23,7 @@ def _patch_client(monkeypatch) -> dict[str, Any]:
             captured.update(kwargs)
 
     monkeypatch.setattr(
-        "codeagent.ai.transport.openai_compat.OpenAICompatClient",
+        "tenon.ai.transport.openai_compat.OpenAICompatClient",
         _Client,
     )
     return captured
@@ -88,7 +88,7 @@ def test_make_llm_accepts_unknown_model_via_bare_spec(monkeypatch):
 
 def test_make_llm_prefers_explicit_spec(monkeypatch):
     """显式传入的规格优先于配置里的模型名。"""
-    from codeagent.ai.catalog.spec import ModelSpec
+    from tenon.ai.catalog.spec import ModelSpec
 
     captured = _patch_client(monkeypatch)
 

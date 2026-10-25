@@ -2,8 +2,8 @@
 
 from tests.tui.view.fixtures import *  # noqa: F401,F403
 
-from codeagent.app.tasks.supervisor import TaskSupervisor
-from codeagent.app.tui.presentation.blocks import ErrorBlock
+from tenon.app.tasks.supervisor import TaskSupervisor
+from tenon.app.tui.presentation.blocks import ErrorBlock
 
 
 def test_fake_backend_regression_contract_covers_top_level_interactions():
@@ -123,7 +123,7 @@ def test_submit_task_creation_failure_clears_preparing_state(monkeypatch):
     def fail_to_create(*args, **kwargs):
         raise RuntimeError("task supervisor unavailable")
 
-    monkeypatch.setattr("codeagent.app.tui.session.conversation.TaskSupervisor", fail_to_create)
+    monkeypatch.setattr("tenon.app.tui.session.conversation.TaskSupervisor", fail_to_create)
     backend.submit("创建失败")
 
     assert app.model.running is False

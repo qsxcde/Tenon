@@ -23,7 +23,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/contracts/subagents.py` 及 core 公共导出，新增稳定的 provider-neutral 数据类型。
-- 影响 `src/codeagent/app/composition/subagent/` 的子结果提取和 `delegate` ToolResult 适配；不改变子 Session 持久化格式，也不把临时子会话加入普通会话列表。
+- 影响 `src/tenon/core/contracts/subagents.py` 及 core 公共导出，新增稳定的 provider-neutral 数据类型。
+- 影响 `src/tenon/app/composition/subagent/` 的子结果提取和 `delegate` ToolResult 适配；不改变子 Session 持久化格式，也不把临时子会话加入普通会话列表。
 - 影响相关 core/app 测试、V5.0.5 迭代记录和 OpenSpec 主规格同步内容。
 - 不新增第三方依赖，不改变旧调用方只使用 `summary`、`failure` 或 `diagnostics` 的行为。

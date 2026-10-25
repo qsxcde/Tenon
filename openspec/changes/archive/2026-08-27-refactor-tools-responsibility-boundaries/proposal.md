@@ -31,7 +31,7 @@ None. Existing tool behavior remains unchanged. This change declares `skip_specs
 
 ## Impact
 
-- 受影响代码：全部八个内建原子工具、`src/codeagent/tools/shared/` 文件系统公共能力、`src/codeagent/tools/atomic/bash.py`、`src/codeagent/tools/security.py`、`src/codeagent/tools/mcp/config.py` 及新增的执行、安全和 MCP 配置模块。
+- 受影响代码：全部八个内建原子工具、`src/tenon/tools/shared/` 文件系统公共能力、`src/tenon/tools/atomic/bash.py`、`src/tenon/tools/security.py`、`src/tenon/tools/mcp/config.py` 及新增的执行、安全和 MCP 配置模块。
 - 受影响测试：Bash 安全/进程测试、文件类工具的路径/编码/换行/遍历测试、tools 安全测试、MCP 配置与启动测试，以及仍直接导入 Bash 私有函数的测试。
 - 受影响内部导入：`tools/security.py` 对 Bash 私有函数的依赖、MCP loader 和组合根对配置解析器的导入路径需要统一调整。
 - 外部行为：原子工具名称、参数 schema、结果格式、结构化执行元数据、确认策略和 MCP 装配行为保持兼容。

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-APP_ROOT = Path(__file__).resolve().parents[2] / "src" / "codeagent" / "app"
+APP_ROOT = Path(__file__).resolve().parents[2] / "src" / "tenon" / "app"
 
 
 def _module_name(path: Path) -> str:
@@ -15,7 +15,7 @@ def _module_name(path: Path) -> str:
     parts = relative.parts
     if parts[-1] == "__init__":
         parts = parts[:-1]
-    return "codeagent.app" + ("." + ".".join(parts) if parts else "")
+    return "tenon.app" + ("." + ".".join(parts) if parts else "")
 
 
 def _imports(path: Path, modules: set[str]) -> set[str]:

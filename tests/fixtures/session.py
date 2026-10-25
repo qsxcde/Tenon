@@ -6,13 +6,13 @@ from collections.abc import Callable
 
 import pytest
 
-from codeagent.ai.providers.fake import FakeClient
-from codeagent.app.container import ChatModelPort
-from codeagent.app.composition.tools.adapter import adapt_tools
-from codeagent.core import AgentLoopConfig
-from codeagent.session import AgentSession, EventBus
-from codeagent.session.persistence import MemoryStore
-from codeagent.tools.atomic import (
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.app.composition.tools.adapter import adapt_tools
+from tenon.core import AgentLoopConfig
+from tenon.session import AgentSession, EventBus
+from tenon.session.persistence import MemoryStore
+from tenon.tools.atomic import (
     BashTool,
     EditTool,
     FindTool,

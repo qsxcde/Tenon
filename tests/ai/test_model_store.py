@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from codeagent.ai.catalog.spec import ModelSpec
-from codeagent.ai.catalog.store import ModelStore
+from tenon.ai.catalog.spec import ModelSpec
+from tenon.ai.catalog.store import ModelStore
 
 
 def _store(tmp_path, data_bytes: bytes) -> ModelStore:
@@ -144,7 +144,7 @@ def test_model_spec_immutable_no_append():
 
 def test_available_returns_copy(tmp_path):
     """available() 返回副本,外部写入不持久化进注册表(H15)。"""
-    from codeagent.ai.catalog.registry import ModelRegistry
+    from tenon.ai.catalog.registry import ModelRegistry
 
     reg = ModelRegistry(ModelStore(tmp_path / "none.json"))
     reg.available("deepseek")["INJECT"] = None
@@ -153,12 +153,12 @@ def test_available_returns_copy(tmp_path):
 
 def test_model_spec_context_window_field():
     """context_window 字段透传;缺省 None(压缩阈值触发用)。"""
-    from codeagent.ai.catalog.spec import ModelSpec
+    from tenon.ai.catalog.spec import ModelSpec
 
     spec = ModelSpec(id="m", context_window=128_000)
     assert spec.context_window == 128_000
     assert ModelSpec(id="m2").context_window is None  # 缺省兜底
-    from codeagent.ai.catalog.builtin import DEEPSEEK_MODELS
+    from tenon.ai.catalog.builtin import DEEPSEEK_MODELS
 
     assert DEEPSEEK_MODELS["deepseek-v4-flash"].context_window == 256_000
 

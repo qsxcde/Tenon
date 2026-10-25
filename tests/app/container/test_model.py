@@ -27,14 +27,14 @@ async def test_real_provider_runs_through_loop():
     )
     mock_async_client = httpx.AsyncClient(transport=transport, timeout=httpx.Timeout(10.0))
 
-    from codeagent.app.container import create_agent_config
-    from codeagent.core import EventType
+    from tenon.app.container import create_agent_config
+    from tenon.core import EventType
 
     events = []
     with (
-        patch("codeagent.app.composition.model.selection.create_llm", return_value=llm),
+        patch("tenon.app.composition.model.selection.create_llm", return_value=llm),
         patch(
-            "codeagent.ai.transport.openai_compat.httpx.AsyncClient",
+            "tenon.ai.transport.openai_compat.httpx.AsyncClient",
             return_value=mock_async_client,
         ),
     ):
@@ -52,16 +52,16 @@ async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
     """组合根装配:system prompt = 基础提示词 + 分层 AGENTS.md(首条 system 消息)。"""
     monkeypatch.chdir(tmp_path)
     (tmp_path / "AGENTS.md").write_text("项目级指令", encoding="utf-8")
-    from codeagent.app.config import CONFIG_DIR
+    from tenon.app.config import CONFIG_DIR
 
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     (CONFIG_DIR / "AGENTS.md").write_text("全局指令", encoding="utf-8")
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         model = FakeClient(response="测试回复")
         mock_llm.return_value = model
-        from codeagent.app.container import create_agent_config, agents_sources
+        from tenon.app.container import create_agent_config, agents_sources
 
         ports = create_agent_config()
         sources = agents_sources()
@@ -74,7 +74,7 @@ async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
     assert model.call_history
     first = model.call_history[0]["messages"][0]
     assert first["role"] == "system"
-    assert "codeagent" in first["content"]  # 基础提示词
+    assert "tenon" in first["content"]  # 基础提示词
     assert "项目级指令" in first["content"]
     assert '<project_instructions path="' in first["content"]
     assert "全局指令" in first["content"]
@@ -83,16 +83,16 @@ async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
 async def test_system_prompt_only_once_and_hot_swap_stable(tmp_path, monkeypatch):
     """system 只首插一次(重复调用不叠加);热切换后仍携带。"""
     monkeypatch.chdir(tmp_path)
-    from codeagent.app.config import CONFIG_DIR
+    from tenon.app.config import CONFIG_DIR
 
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     (CONFIG_DIR / "AGENTS.md").write_text("全局指令", encoding="utf-8")
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         model = FakeClient(responses=["第一轮", "第二轮"])
         mock_llm.return_value = model
-        from codeagent.app.container import create_agent_config
+        from tenon.app.container import create_agent_config
 
         ports = create_agent_config()
 
@@ -111,8 +111,8 @@ async def test_bootstrap_is_present_once_per_model_context_for_new_and_recovered
     """Bootstrap 随每个新模型上下文出现一次，普通轮次不在历史中重复堆积。"""
     import json
 
-    from codeagent.app.skills.packages.manager import PackageManager
-    from codeagent.app.skills.runtime import BOOTSTRAP_TAG
+    from tenon.app.skills.packages.manager import PackageManager
+    from tenon.app.skills.runtime import BOOTSTRAP_TAG
 
     source = tmp_path / "superpowers"
     (source / "skills" / "using-superpowers").mkdir(parents=True)
@@ -123,21 +123,21 @@ async def test_bootstrap_is_present_once_per_model_context_for_new_and_recovered
     (source / "skills" / "fmt" / "SKILL.md").write_text(
         "---\ndescription: format\n---\n普通正文", encoding="utf-8"
     )
-    (source / "codeagent-package.json").write_text(
+    (source / "tenon-package.json").write_text(
         json.dumps({"id": "superpowers", "bootstrap": "using-superpowers"}),
         encoding="utf-8",
     )
     home = tmp_path / "home"
     PackageManager(home, tmp_path).install(source)
-    monkeypatch.setattr("codeagent.app.config.CONFIG_DIR", home)
+    monkeypatch.setattr("tenon.app.config.CONFIG_DIR", home)
     monkeypatch.chdir(tmp_path)
 
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         model = FakeClient(responses=["第一轮", "第二轮"])
         mock_llm.return_value = model
-        from codeagent.app.container import create_agent_config
+        from tenon.app.container import create_agent_config
 
         ports = create_agent_config()
 
@@ -156,31 +156,31 @@ async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkey
     """压缩重建上下文后，下一轮仍带 Bootstrap 和工具映射。"""
     import json
 
-    from codeagent.app.skills.packages.manager import PackageManager
-    from codeagent.app.skills.runtime import BOOTSTRAP_TAG
-    from codeagent.session import EventBus
-    from codeagent.session import AgentSession
+    from tenon.app.skills.packages.manager import PackageManager
+    from tenon.app.skills.runtime import BOOTSTRAP_TAG
+    from tenon.session import EventBus
+    from tenon.session import AgentSession
 
     source = tmp_path / "superpowers"
     (source / "skills" / "using-superpowers").mkdir(parents=True)
     (source / "skills" / "using-superpowers" / "SKILL.md").write_text(
         "---\ndescription: bootstrap\n---\n检查任务相关 Skill。", encoding="utf-8"
     )
-    (source / "codeagent-package.json").write_text(
+    (source / "tenon-package.json").write_text(
         json.dumps({"id": "superpowers", "bootstrap": "using-superpowers"}),
         encoding="utf-8",
     )
     home = tmp_path / "home"
     PackageManager(home, tmp_path).install(source)
-    monkeypatch.setattr("codeagent.app.config.CONFIG_DIR", home)
+    monkeypatch.setattr("tenon.app.config.CONFIG_DIR", home)
     monkeypatch.chdir(tmp_path)
 
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         model = FakeClient(responses=["答1", "答2", "答3", "答4"])
         mock_llm.return_value = model
-        from codeagent.app.container import create_agent_config
+        from tenon.app.container import create_agent_config
 
         ports = create_agent_config()
 
@@ -202,16 +202,16 @@ async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkey
 async def test_config_inject_skills_section_and_tool(tmp_path, monkeypatch):
     """组合根装配:system prompt 追加技能段 + skill 工具携带渲染注册表。"""
     monkeypatch.chdir(tmp_path)
-    (tmp_path / ".codeagent" / "skills" / "fmt").mkdir(parents=True)
-    (tmp_path / ".codeagent" / "skills" / "fmt" / "SKILL.md").write_text(
+    (tmp_path / ".tenon" / "skills" / "fmt").mkdir(parents=True)
+    (tmp_path / ".tenon" / "skills" / "fmt" / "SKILL.md").write_text(
         "---\ndescription: 格式化。\n---\n格式化正文", encoding="utf-8"
     )
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         model = FakeClient(response="测试回复")
         mock_llm.return_value = model
-        from codeagent.app.container import create_agent_config
+        from tenon.app.container import create_agent_config
 
         ports = create_agent_config()
 
@@ -230,11 +230,11 @@ async def test_config_inject_skills_section_and_tool(tmp_path, monkeypatch):
 
 async def test_session_with_summarizer_can_compact():
     """注入桩 Summarizer 的会话可压缩;压缩不可用(未注入)时明确报错。"""
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(response="测试回复")
-        from codeagent.app.container import create_agent_session
+        from tenon.app.container import create_agent_session
 
         session = create_agent_session(summarizer=_StubSummarizer())
         assert await session.compact() is False  # 空历史:全保留,不压缩
@@ -251,13 +251,13 @@ async def test_tui_app_with_store_persists_session_and_usage():
     usage 无落库点、/status 显示「用量: (无)」。store 注入后本轮 usage
     落库并经 session.usage 读取到聚合值。
     """
-    from codeagent.session.persistence import MemoryStore
+    from tenon.session.persistence import MemoryStore
 
     store = MemoryStore()
 
     session = None
-    with patch("codeagent.app.composition.model.selection.create_llm") as mock_llm:
-        from codeagent.ai.providers.fake import FakeClient
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
 
         mock_llm.return_value = FakeClient(
             usage={
@@ -267,7 +267,7 @@ async def test_tui_app_with_store_persists_session_and_usage():
             },
             response="回复",
         )
-        from codeagent.app.container import create_tui_app
+        from tenon.app.container import create_tui_app
 
         app = create_tui_app(provider="fake", backend=_StubBackend(), store=store)
         # _LazyConfig 首次 run 才装配模型客户端:run 必须在 mock 作用域内。
@@ -285,7 +285,7 @@ async def test_tui_app_with_store_persists_session_and_usage():
 
 def test_usage_of_openai_cached_tokens():
     """归一兼容 OpenAI 口径:缓存命中取 prompt_tokens_details.cached_tokens。"""
-    from codeagent.app.container import _usage_of
+    from tenon.app.container import _usage_of
 
     norm = _usage_of(
         {
@@ -305,7 +305,7 @@ def test_usage_of_openai_cached_tokens():
 
 def test_usage_of_vendor_cached_tokens():
     """归一兼容供应商口径:prompt_cache_hit_tokens 兜底缓存命中。"""
-    from codeagent.app.container import _usage_of
+    from tenon.app.container import _usage_of
 
     norm = _usage_of(
         {
@@ -320,7 +320,7 @@ def test_usage_of_vendor_cached_tokens():
 
 def test_usage_of_missing_cached_defaults_zero():
     """双字段缺失:缓存命中兜底 0;reasoning 兜底 0;空 usage 返回 None。"""
-    from codeagent.app.container import _usage_of
+    from tenon.app.container import _usage_of
 
     norm = _usage_of({"prompt_tokens": 50, "completion_tokens": 10})
     assert norm == {

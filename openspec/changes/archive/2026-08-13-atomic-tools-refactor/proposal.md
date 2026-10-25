@@ -31,10 +31,10 @@
 ## Impact
 
 - **受影响代码**:
-  - `src/codeagent/tools/base.py` —— `AtomicTool` 加注入;
-  - `src/codeagent/tools/atomic/{read,write,edit,bash}.py` —— 重构;新增 `grep.py / find.py / ls.py`;
-  - `src/codeagent/tools/atomic/__init__.py`、`src/codeagent/tools/__init__.py`、`src/codeagent/tools/registry.py` —— 导出与工厂更新;
-  - 新增 `src/codeagent/tools/shared/` 五个模块;
+  - `src/tenon/tools/base.py` —— `AtomicTool` 加注入;
+  - `src/tenon/tools/atomic/{read,write,edit,bash}.py` —— 重构;新增 `grep.py / find.py / ls.py`;
+  - `src/tenon/tools/atomic/__init__.py`、`src/tenon/tools/__init__.py`、`src/tenon/tools/registry.py` —— 导出与工厂更新;
+  - 新增 `src/tenon/tools/shared/` 五个模块;
   - `tests/tools/test_tools.py`、`tests/conftest.py` —— 测试改造与新夹具;
 - **不受影响**:`core/`、`session/`、`ai/`、`app/` 零改动——工具对它们是黑盒(`make_tools` 签名不变,组合根唯一交汇行不变);
 - **依赖**:零新增(纯 Python 实现,不引入 rg/fd/第三方库);

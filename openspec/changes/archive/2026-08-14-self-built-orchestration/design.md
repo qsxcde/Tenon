@@ -44,7 +44,7 @@
 ### D5:JSONL 树形会话格式(草案,版本 1)
 
 ```
-~/.codeagent/sessions/<session-id>.jsonl
+~/.tenon/sessions/<session-id>.jsonl
 {"type":"session","version":1,"id":"s1","parentSession":null,"timestamp":"...","cwd":"..."}
 {"type":"message","id":"m1","parentId":null,"timestamp":"...","role":"user","content":"..."}
 {"type":"message","id":"m2","parentId":"m1","timestamp":"...","role":"assistant","tool_calls":[...]}

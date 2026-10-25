@@ -23,7 +23,7 @@
 
 ## Impact
 
-- 影响 `src/codeagent/core/events.py`、`src/codeagent/core/errors.py`、`src/codeagent/core/agent.py`、`src/codeagent/session/runtime/controller.py` 和 `src/codeagent/session/session.py`。
+- 影响 `src/tenon/core/events.py`、`src/tenon/core/errors.py`、`src/tenon/core/agent.py`、`src/tenon/session/runtime/controller.py` 和 `src/tenon/session/session.py`。
 - 可能新增 session runtime 状态/错误模型，并调整事件消费者读取的 metadata 字段。
 - TUI、CLI 和测试需要使用结构化终态，而不是通过错误文本或布尔字段推断运行状态。
 - 不引入新的编排框架；不把持久化、安全策略或 UI 逻辑下沉到 core。
