@@ -3,8 +3,10 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
+import pytest
+
 from tenon.app.tasks.verification.models import TaskStatus, VerificationResult
-from tenon.app.tasks.verification.runner import VerificationRunner
+from tenon.app.tasks.verification.runner import VerificationRunner, _shell_argv
 from tenon.app.tasks.verification.workspace import (
     VerificationCommandResolver,
     WorkspaceInspector,
@@ -77,3 +79,26 @@ async def test_verification_runner_reports_cancellation(tmp_path: Path, task_tra
     result = await scenario()
     assert result.status is TaskStatus.CANCELLED
     assert result.cancelled is True
+
+
+@pytest.mark.unit
+def test_shell_argv_offsets_cmd_quote_stripping():
+    """cmd /s /c 会剥离首尾引号,带引号的命令必须外层再包一层。
+
+    回归:未包装时 ``"python.exe" -c "..."`` 被截断成非法命令行,
+    Windows 上真实子进程测试全部报 not recognized。
+    """
+    command = '"C:\\py\\python.exe" -c "print(1)"'
+
+    argv = _shell_argv(command, is_windows=True)
+
+    assert argv[:4] == ["cmd.exe", "/d", "/s", "/c"]
+    assert argv[-1] == f'"{command}"'
+    # 被 cmd 剥离一层后恰好还原成原始命令。
+    assert argv[-1][1:-1] == command
+
+
+@pytest.mark.unit
+def test_shell_argv_keeps_plain_command_unwrapped_on_posix():
+    """POSIX 分支保持 /bin/sh -lc,不做任何引号包装。"""
+    assert _shell_argv("pytest -q", is_windows=False) == ["/bin/sh", "-lc", "pytest -q"]

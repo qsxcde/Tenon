@@ -15,6 +15,20 @@ from .models import TaskStatus, VerificationResult
 ExecuteFn = Callable[[str, float], Awaitable[Any] | Any]
 
 
+def _shell_argv(command: str, *, is_windows: bool | None = None) -> list[str]:
+    """构造平台 shell 调用参数。
+
+    Windows 的 ``cmd /s /c`` 会剥离命令首尾引号:带引号的命令,例如
+    ``"C:\\path\\python.exe" -c "..."``,会被截断成非法命令行并报
+    "is not recognized"。Windows 下单统一在外层再包一对引号,正好抵消
+    这次剥离;``is_windows`` 可注入,便于在任意平台验证两条分支。
+    """
+    windows = os.name == "nt" if is_windows is None else is_windows
+    if windows:
+        return ["cmd.exe", "/d", "/s", "/c", f'"{command}"']
+    return ["/bin/sh", "-lc", command]
+
+
 class VerificationRunner:
     """运行一条验证命令并标准化结构化结果。"""
 
@@ -69,11 +83,7 @@ class VerificationRunner:
         if self.execute is not None:
             value = self.execute(command, timeout)
             return await value if inspect.isawaitable(value) else value
-        argv = (
-            ["cmd.exe", "/d", "/s", "/c", command]
-            if os.name == "nt"
-            else ["/bin/sh", "-lc", command]
-        )
+        argv = _shell_argv(command)
         process = await asyncio.create_subprocess_exec(
             *argv,
             cwd=self.cwd,
