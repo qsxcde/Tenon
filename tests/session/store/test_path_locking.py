@@ -7,12 +7,14 @@ Windows 专属分支不在本平台执行。
 from __future__ import annotations
 
 import errno
-import fcntl
 
 import pytest
 
 from tenon.session.persistence import locking
 from tenon.session.persistence.locking import PathLock, path_lock
+
+#: fcntl 仅 POSIX 可用;Windows 走 msvcrt 分支,本模块整体跳过。
+fcntl = pytest.importorskip("fcntl", reason="fcntl 仅在 POSIX 可用")
 
 pytestmark = pytest.mark.unit
 
