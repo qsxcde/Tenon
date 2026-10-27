@@ -5,7 +5,7 @@
 ## 开发环境
 
 ```bash
-git clone https://github.com/qsxcde/tenon.git
+git clone https://github.com/qsxcde/Tenon.git
 cd tenon
 uv sync --group dev
 ```

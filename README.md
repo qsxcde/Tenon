@@ -2,8 +2,8 @@
 
 > 本地、单用户、可离线验证的编程 Agent。自研 ReAct 编排，端口-适配器（hexagonal）分层，提供交互式终端（TUI）与无头 CLI 两种形态。
 
-[![CI](https://github.com/qsxcde/tenon/actions/workflows/ci.yml/badge.svg)](https://github.com/qsxcde/tenon/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/release-v0.7.0-blue)](https://github.com/qsxcde/tenon/releases/tag/v0.7.0)
+[![CI](https://github.com/qsxcde/Tenon/actions/workflows/ci.yml/badge.svg)](https://github.com/qsxcde/Tenon/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v0.7.0-blue)](https://github.com/qsxcde/Tenon/releases/tag/v0.7.0)
 [![Python](https://img.shields.io/badge/python-3.12%2B-3776AB)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -60,7 +60,7 @@
 ### 安装
 
 ```bash
-git clone https://github.com/qsxcde/tenon.git
+git clone https://github.com/qsxcde/Tenon.git
 cd tenon
 
 uv sync --group dev   # 运行时 + 开发依赖

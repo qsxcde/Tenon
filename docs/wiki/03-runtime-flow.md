@@ -6,7 +6,7 @@
 - 项目采用 `src/` 布局，包名 `tenon`，构建后端 `uv_build`。
 
 ```bash
-git clone https://github.com/qsxcde/tenon.git && cd tenon
+git clone https://github.com/qsxcde/Tenon.git && cd tenon
 uv sync --group dev      # 运行时 + 开发依赖（推荐开发时用）
 uv sync                  # 只装运行时依赖
 ```

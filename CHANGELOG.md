@@ -186,6 +186,6 @@ v0.4.0 完成 V4-01～V4-38，重点将单 Agent Runtime 收敛为可长期使�
 - 异步 ReAct 对话、工具调用和事件流订阅
 - 危险命令黑名单、Windows bash 探测和离线测试基线
 
-[Unreleased]: https://github.com/qsxcde/tenon/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/qsxcde/tenon/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/qsxcde/tenon/compare/v0.3.0...v0.4.0
+[Unreleased]: https://github.com/qsxcde/Tenon/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/qsxcde/Tenon/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/qsxcde/Tenon/compare/v0.3.0...v0.4.0
