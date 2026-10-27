@@ -74,7 +74,6 @@ TuiRenderCoordinator（30fps 防抖）→ TuiBackend.render(...) → Textual
 | `blocks/` | 块模型：`message_blocks`、`tool_blocks`、`tool_lifecycle`、`subagent`（含 `subagent_glyphs`）、`errors` |
 | `md_renderer.py` | Markdown → 富文本渲染 |
 | `output.py` | 工具输出浏览/导出（对应 `/output` 命令） |
-| `components.py` | 组合组件 |
 | `status*.py` | 状态栏分片：`status.py`、`status_footer`、`status_zones`、`status_context`、`status_clock`、`status_tool_counts`、`status_subagents` |
 | `theme.py` | 主题与配色 |
 | `subagent_result_stats.py` | Subagent 结果统计展示 |

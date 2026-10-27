@@ -2,7 +2,7 @@
 
 > 版本: v0.7(扩展与运行期安全落地后的架构校准)
 > 适用范围: 自研编排(2026-08-14 起,已弃用 langgraph/langchain)的 Code Agent 项目
-> 更新日期: 2026-10-25(合并原 `docs/wiki/02-architecture.md` 的结构事实内容,本文成为架构的唯一权威入口)
+> 更新日期: 2026-10-25(合并原 wiki 独立架构页的结构事实内容,本文成为架构的唯一权威入口)
 > 事实来源: 本文描述当前代码树;演进决策见 [self-built-orchestration-blueprint.md](./self-built-orchestration-blueprint.md)(决策与收益记录)、迭代记录 `docs/iteration/v0.1.md` ~ `v0.7.md`;分层实现细节见 `docs/wiki/` 的 04~12 章
 
 ## 1. 背景与目标
@@ -60,7 +60,7 @@
 - token 用量透明(v0.3 阶段 3):usage 归一、会话级 append-only 落库、`/status` 与 headless CLI 展示输入 / 输出 / 缓存命中（不做费用估算）。
 - 会话树(v0.3 阶段 4):`build_tree` 纯函数、`/tree` 导航及 `/sessions list` 父子缩进展示。
 - 安全确认环(v0.2):执行前 `ApprovalPolicy`(组合根把 `tools/security/` 分类器适配为端口),`ask` 由循环 emit `confirmation_requested` 并等待会话确认队列;headless 缺省 deny(fail closed),`--yes` 逃生舱。
-- 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型),`uv run pytest -q` **1870 passed**(2026-10-24,macOS / Python 3.12;此前 v0.5 基线为 1711 passed，v0.5.0 发布记录为 1695 passed，3 skipped / 1698 collected,2026-10-10, Windows);离线评测 `python -m evals` 4/4；本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。最新门禁结果以 `docs/testing.md` 与 CI 实测为准。
+- 测试基建:`tests/` 按行为域与源码层级分包 + `FakeClient`(离线假模型);离线评测 `python -m evals` 4/4；本地质量集与既有 CI 分层门禁保持独立，并已接入 Ruff、release check 和 TUI 性能基线。**用例数与覆盖率以 `docs/testing.md` 的最近实测和 CI 结果为准**，本文不复述易漂移的计数。
 - TUI 性能验收:`benchmark/` 使用 schema v2 的固定离线 fixture 测量提交首帧、首 token、帧 p50/p95、控制延迟、峰值 Python 分配和协调器的 dropped/over-budget 计数；`compare_benchmark.py` 只在 schema、平台、Python、视口和 fixture 一致时比较，`update_tui_baseline.py` 负责生成受约束的 Linux/Python 3.12 候选基线。
 
 **v0.7 当前状态与远期**:V4-01～V4-38、V5-00～V5-10、v0.6 正确性硬化与 v0.7 扩展/运行期安全均已完成实现与验收；发布包版本已提升为 `0.7.0`，v0.6 修复与 v0.7 能力同版交付，CHANGELOG 已收口。当前工程治理已接入覆盖率报告、Ruff（覆盖 `src tests evals scripts`）、构建安装冒烟和 CI 跨平台矩阵；TUI schema v2 的正式 Linux/Python 3.12 基线仍按 CI artifact 与人工复核流程推进，性能暂保持非阻塞。Subagent 已从"串行只读 MVP"扩展为**默认串行、可配置有界并发**，并新增 `implement` 受限可写 profile（工具白名单含 write/edit/bash，禁 `delegate`/MCP，深度仍固定为 1）；插件系统已交付 v1（仅贡献工具、目录即信任、默认需确认）；执行期已有三档沙箱与写前 checkpoint。工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、Web/HTTP 事件流订阅与 Web UI 仍不在范围内。
@@ -538,7 +538,7 @@ TUI:    app/main.py --tui → create_tui_app() → TuiApp.start()
 | **v0.6 正确性硬化** | 安全分类语义化、只读搜索边界、合并输出上限、中英 token 估算、会话索引增量 | 已实现;`docs/iteration/v0.6.md` 记录证据 |
 | **v0.7 扩展与运行期安全** | 工具注册表数据化、审批封闭枚举、web/todo 工具、工具执行瀑布链、扩展插件目录、Subagent 有界并发与 `implement`、API 形状注册表、三档沙箱、写前 checkpoint/`undo`、缓存诊断、离线评测 | 已实现并推送;详见 `docs/iteration/v0.7.md` |
 
-v0.7 当前进度:V4-01～V4-38、V5-00～V5-10、v0.6 三项硬化与 v0.7 扩展/运行期安全均已落地。2026-10-24(macOS / Python 3.12)复核结果为 `uv run pytest -q` **1870 passed**(无 skipped)、快速质量集 **1718 passed / 152 deselected**、集成层 **931 passed**、`python -m evals` **4/4**、`openspec validate --specs` **25/25**。此前 v0.5 基线为 1711 passed / 86.35% / 24 规格(2026-10-18);覆盖率以 CI `quality-fast` 实测为准。v0.5.0 发布时点为 `1695 passed，3 skipped`(1698 collected)/ 覆盖率 84.40%(2026-10-10,Windows / Python 3.12);v0.4 基线为 1532 passed / 83.61% / 20 规格(2026-08-30,macOS)。仓库内 TUI schema v1 基线保留为历史数据,schema v2 候选由 CI 生成并人工复核,性能暂不启用硬阈值。最新门禁数据请以 `docs/testing.md` 与 CI 实测为准,本文不再逐次校准测试数字。
+v0.7 当前进度:V4-01～V4-38、V5-00～V5-10、v0.6 三项硬化与 v0.7 扩展/运行期安全均已落地,项目已更名为 `tenon`(发行名、import 名、CLI 入口与配置目录统一)。门禁结果(用例数、覆盖率、规格数)统一以 `docs/testing.md` 与 CI 实测为准,本文不再逐次校准。仓库内 TUI schema v1 基线保留为历史数据,schema v2 候选由 CI 生成并人工复核,性能暂不启用硬阈值。
 
 ## 12. 参考
 

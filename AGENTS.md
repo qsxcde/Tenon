@@ -70,7 +70,7 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - 规模约束是可执行门禁而非口头约定：`scripts/scale_scan.py` 扫描**全部生产层**（`app`/`core`/`session`/`ai`/`tools`）强制单文件 ≤ 300 行、单函数 ≤ 80 行，并由 `tests/contracts/test_scale_limits.py` 纳入 `unit or contract` 门禁。接近上限时必须按职责拆分，而不是继续向原文件追加代码。
 - 规模豁免只允许通过 `scripts/scale_scan.py` 的 `COMPATIBILITY_EXCEPTIONS` 逐项登记文件路径与书面理由；未登记的文件超限会使 CI 失败。生成文件与第三方代码不进入扫描范围。
 - 当前 CI 的正确性检查仍只启用 Ruff `E9`、`F821` 和 `F841`；完整 Ruff 规则集与 pyright 尚未接入门禁。
-- 格式化门禁已确定并接入 CI：唯一方案是 `ruff format`（不引入 Black），行宽遵循 `pyproject.toml`，目前为 100 个字符；提交前运行 `uv run ruff format src tests scripts`，CI 用 `--check` 校验。
+- 格式化门禁已确定并接入 CI：唯一方案是 `ruff format`（不引入 Black），行宽遵循 `pyproject.toml`，目前为 100 个字符；提交前运行 `uv run ruff format src tests evals scripts`，CI 用 `--check` 校验。
 - 类型门禁以 mypy 分层棘轮方式接入：`scripts/type_scan.py` 逐层统计错误数并与 `docs/type-baseline.json` 比较，任何一层回升即失败；债务下降后用 `--update` 固化基线。禁止为通过门禁而放宽 `pyproject.toml` 中的 mypy 配置或扩大基线。
 - 接入更多工具或调整上述任一门禁时，必须同步更新 `pyproject.toml`、CI 和本文档。
 

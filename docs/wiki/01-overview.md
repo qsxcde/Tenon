@@ -72,7 +72,7 @@
 - **已发布**：`v0.1.0` → `v0.7.0`（annotated 标签 `v0.4.0` → `b981534`，`v0.5.0` → `7bbc6a7`；`v0.7.0` 对应本次发布提交）。
 - **v0.4**：V4-01～V4-38，Runtime 可靠性、上下文治理、TUI/Session 交互、生命周期 Hook、工具与 Provider 稳定性。
 - **v0.5**：V5-00～V5-10，串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI/headless 可观察性；领域规则下沉 `core/subagent/`。
-- **基线**：`1870 passed`（无 skipped），快速质量集 `1718 passed`，OpenSpec 25/25（2026-10-24，macOS / Python 3.12）。此前 v0.5.0 发布记录为 `1695 passed / 3 skipped` / 84.40% / 1525 passed（2026-10-10，Windows / Python 3.12）；覆盖率基线以 CI `quality-fast` 实测为准。
+- **基线**：`2141 passed`（无 skipped），快速质量集 `1977 passed`，OpenSpec 25/25（2026-10-27，macOS / Python 3.12）。覆盖率口径、分层批次与历史趋势统一以 [`../testing.md`](../testing.md) 为准，本章不复述历史版本数字。
 - **v0.6**：三项正确性硬化（安全分类语义化、合并输出上限与 token 估算、会话索引增量）。
 - **v0.7**：工具注册表数据化、审批封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint/`undo`、缓存诊断与离线评测。
 - **后续评估**：程序化工具编排（`run_code` 形态）、执行控制（steer 接入 UI、后台作业、事件流导出）、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换；Web UI 暂不规划。

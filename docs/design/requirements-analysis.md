@@ -56,8 +56,8 @@
 | 会话持久化(DR-3 / FR-5.4) | 🔲 v0.2 线性 | ✅ **JSONL 树形**(`SessionStore` 按 id/parentId,v0.2 已落地,含 fork) |
 | 会话生命周期(FR-5.5 / FR-5.10) | 🔲 v0.2 / 🔲 未落地 | ✅ `SessionManager`(create/switch/fork/dispose)+ `steer`/`followup`/`abort` 已落地 |
 | 上下文压缩(FR-5.6) | 🔲 v0.2 | ✅ 已落地(`compaction`,手动 + 阈值) |
-| 安全确认环(FR-8.2 / NFR-S3) | 🔲 v0.2 | ✅ 已落地(`security-permissions`:ApprovalPolicy + tools/security.py 三档分类器,headless 缺省 fail closed) |
-| AGENTS.md 分层(F-16) | 🔲 v0.2 规划 | ✅ 已落地(`app/agents.py`,全局→项目→子目录分层注入) |
+| 安全确认环(FR-8.2 / NFR-S3) | 🔲 v0.2 | ✅ 已落地(`security-permissions`:ApprovalPolicy + tools/security/ 三档分类器,headless 缺省 fail closed) |
+| AGENTS.md 分层(F-16) | 🔲 v0.2 规划 | ✅ 已落地(`app/context/agents.py`,全局→项目→子目录分层注入) |
 | 平台部署 `langgraph.json`(F-24 / IR-10) | 📝 P2 | **永久调整**:随自研编排改写为 HTTP/事件订阅入口(F-27);**2026-08-22 定案:Web/HTTP 入口移出 v0.3(E12)**——平台向无真实消费者,价值被 CLI/TUI 事件流订阅覆盖,推迟远期按需重估 |
 | 测试基线(附录 B) | 336(2026-08-14) | 当前权威基线见 §0.3（2026-10-18 复核：**1710 passed**）；§0.2 记录 2026-08-30 的 v0.4 快照为 **1532 passed**（macOS）；测试零网络零密钥，跨平台结果以 CI artifact 为准 |
 | 解耦扫描测试(NFR-M1 / AR-4) | 已移除待恢复 | ✅ 已重写恢复(`tests/test_decoupling.py`,2026-08-14,AST 扫描 + anti-wargaming 守卫) |
@@ -312,7 +312,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 | FR-2.2 | 统一模型创建入口 | `app.composition.model_selection.create_llm()` 按 provider+model 解析并构造未绑定工具的模型 | P0 | ✅ |
 | FR-2.3 | 内置模型目录 | 模型元数据(id/别名/reasoning/maxTokens)静态登记(`catalog/builtin.py`) | P0 | ✅ |
 | FR-2.4 | 用户模型覆盖 | `~/.tenon/models.json` 按 id **upsert 合并**(同 id 覆盖、新 id 追加、内置保留) | P1 | ✅ |
-| FR-2.5 | 运行时思考强度切换 | `model:effort` 内联 / `/effort` 命令,优先级:内联>参数>配置默认 | P0 | ✅(`app/composition/model_selection.py` 单一解析实现) |
+| FR-2.5 | 运行时思考强度切换 | `model:effort` 内联 / `/effort` 命令,优先级:内联>参数>配置默认 | P0 | ✅(`app/composition/model/selection.py` 单一解析实现) |
 | FR-2.6 | 缺失密钥可操作报错 | 缺 API Key 报"请配置 DEEPSEEK_API_KEY"而非 SDK 原始错误 | P0 | ✅ |
 | FR-2.7 | 模型列表探测 | 调用供应商 `/models` 自动发现模型(当前目录静态兜底) | P2 | 📝 |
 | FR-2.8 | 模型客户端自研(ModelRuntime) | 框架无关模型契约 + OpenAI 兼容传输层,替代 langchain 模型客户端(自研蓝图第一步) | P0 | ✅ 已落地:`model/`(ChatClient 契约)+ `transport/sse.py` 与 `transport/openai_compat.py`(httpx);`ai/bridge/` 已随自研编排删除,组合根直接适配 |
@@ -384,7 +384,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 |---|---|---|---|---|
 | FR-8.1 | 危险命令黑名单 | `rm -rf /` 等价写法拦截,拒绝带审计信息(命中原因) | P0 | ✅ 已落地(字符串正则 + shlex 分词语义级检测) |
 | FR-8.2 | bash 确认环 | 敏感/未确认命令默认拒绝或需用户确认 | P1 | ✅ 已落地(v0.2 `security-permissions`:ApprovalPolicy 三档 deny/ask/allow;headless 缺省 fail closed,`--yes` 逃生舱) |
-| FR-8.3 | 文件访问边界 | read/write/edit 默认限定工作区,跨工作区访问需显式确认 | P1 | ✅ 已落地(`tools/security.py` `classify_file`:越界读 allow+warning,越界写 ask;bash 经 `_dangerous_intent` + 边界判定) |
+| FR-8.3 | 文件访问边界 | read/write/edit 默认限定工作区,跨工作区访问需显式确认 | P1 | ✅ 已落地(`tools/security/` `classify_file`:越界读 allow+warning,越界写 ask;bash 经 `_dangerous_intent` + 边界判定) |
 | FR-8.4 | Prompt 注入防护 | 工具返回内容按"数据"处理,不拼进 system prompt 当指令执行 | P0 | ✅ 设计约束,持续保持 |
 
 ### 4.10 修订版功能实现清单(合并 GAP 分析 §5,F-01~F-28)
@@ -401,7 +401,7 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 | F-04 | `core/contracts/messages.py` 消息模型 + `core/orchestration/loop.py` `run_agent_loop` | ✅ 已落地(自研编排后 `state.py`/`build_graph` 删除,改为自研 ReAct 主循环,2026-08-14) |
 | F-05 | ~~`core/nodes/` agent & tools 节点~~ | ⚠️ 随自研编排删除(循环内直接 emit,工具并行经 `asyncio.gather`) |
 | F-06 | `core/contracts/events.py` AgentEvent 类型 | ✅ 已落地(**11 类事件**,含 `confirmation_requested`) |
-| F-07 | `session/bus.py` 事件总线 | ✅ 已落地 |
+| F-07 | `session/events/bus.py` 事件总线 | ✅ 已落地 |
 | F-08 | `session/session.py` AgentSession | ✅ 已落地(含 abort / steer / followup;自研版) |
 | F-09 | `container.py` 接线(现 `app/container.py`) | ✅ 已落地(create_agent_config / create_agent_session / create_session_manager / create_tui_app) |
 | F-10 | 流式回复渲染 | ⚠️ 事件→StreamChunk 渲染层随 TUI 移除;headless 事件聚合保留 |
@@ -410,12 +410,12 @@ Loop 双层(无状态循环 / 有状态 Agent)是另一条正交结构:**自研 
 
 | ID | 功能 | 说明 | 依据 |
 |---|---|---|---|
-| F-11 | `session/store.py` 会话持久化 | ✅ JSONL 树形,重启恢复 | 竞品标配 |
-| F-12 | `session/manager.py` SessionManager | ✅ create/switch/fork/dispose | 竞品标配 |
-| F-13 | `session/compaction.py` 上下文压缩 | ✅ 手动 + 阈值 | 长会话刚需 |
+| F-11 | `session/persistence/` 会话持久化 | ✅ JSONL 树形,重启恢复 | 竞品标配 |
+| F-12 | `session/manager/manager.py` SessionManager | ✅ create/switch/fork/dispose | 竞品标配 |
+| F-13 | `session/compaction/` 上下文压缩 | ✅ 手动 + 阈值 | 长会话刚需 |
 | F-14 | 安全权限模型 `[竞品对标]` | ✅ 已落地(security-permissions:三档分类器 + 确认环) | Claude Code 手动挡 |
 | F-15 | 会话回滚 `/undo` `[竞品对标]` | ⚠️ **改写为 `/fork`**(v0.2 T-42 定案:回滚语义以分支会话替代,F-23 提前) | Codex 297👍 / OpenCode 快照 |
-| F-16 | AGENTS.md 分层指令 `[竞品对标]` | ✅ 已落地(agents-md-hierarchy:全局→项目→子目录,`app/agents.py`) | 行业标准化 |
+| F-16 | AGENTS.md 分层指令 `[竞品对标]` | ✅ 已落地(agents-md-hierarchy:全局→项目→子目录,`app/context/agents.py`) | 行业标准化 |
 | F-17 | 会话列表与切换 | ✅ 已落地(`/sessions`,订阅跟随切换) | 竞品标配 |
 | F-17b | TUI 形态恢复(FR-1.11) | ✅ 已落地(v0.2 T-44/T-45:命令/补全/选择器/Markdown/滚动) | 本项目演进 |
 
@@ -521,7 +521,7 @@ class AgentSession:
 | 新增一个 provider | `ai/` + 环境变量 | `session.py` / `core/` | ❌ 泄漏 |
 | 新增/更换一个工具 | `tools/` | `core/orchestration/` / `ai/` | ❌ 泄漏 |
 | 改编排形状(加节点/改循环) | `core/` | `ai/` / `tools/` | ❌ 泄漏 |
-| 换会话存储 | `store.py` + `container` | `cli.py` / `core/` | ❌ 泄漏 |
+| 换会话存储 | `store.py` + `container` | `app/main.py` / `core/` | ❌ 泄漏 |
 | 加会话分叉 | `session/` | `core/` | ❌ 泄漏 |
 
 > ✅ 2026-08-14 已重写恢复:`tests/test_decoupling.py` AST 扫描强制校验(70+ 项断言),并带 anti-wargaming 守卫(`test_scan_has_content` / `test_composition_roots_exist` / `test_textual_only_in_engine_backend`),规则写错或例外文件被删都会被抓住。
@@ -605,7 +605,7 @@ class AgentSession:
 | NFR-M3 | 可替换性 | provider/工具/存储更换不动编排层 | 端口-适配器契约(`AgentLoopConfig` / `AgentClient`) | ✅ |
 | NFR-M4 | 代码规范 | 类型注解完整、中文 docstring | 分层职责单一,无循环 import | ✅ |
 | NFR-M5 | 变更影响面 | 新增 provider=1 文件;新增工具=0 处 core 改动 | AR-4 判据 | ✅ |
-| NFR-M6 | 同步约束 | `model:effort` 解析唯一实现 | `app/composition/model_selection.py` 单一来源,组合根各入口共用 | ✅ |
+| NFR-M6 | 同步约束 | `model:effort` 解析唯一实现 | `app/composition/model/selection.py` 单一来源,组合根各入口共用 | ✅ |
 
 ### 6.6 可扩展性(NFR-E)
 
@@ -679,7 +679,7 @@ class AgentSession:
 |---|---|---|---|
 | httpx | ≥ 0.28.1 | 稳定 | OpenAI 兼容传输层(自研模型客户端) |
 | pydantic / pydantic-settings | ≥ 2.x | 稳定 | 工具 Args schema / 分层配置 |
-| textual | ≥ 2.1.0 | 稳定 | TUI 引擎(仅 `app/tui/textual_backend.py` 加载) |
+| textual | ≥ 2.1.0 | 稳定 | TUI 引擎(仅 `app/tui/adapters/textual/backend.py` 加载) |
 | pytest | ≥ 9.1.1 | 稳定 | 测试基建 |
 
 (注:langchain-core / langgraph / langchain-openai 已随自研编排与模型层落地**全部移除**——2026-08-14 自研编排后运行时依赖收敛为 httpx / pydantic / pydantic-settings / textual。)
