@@ -43,9 +43,9 @@
 ## 3. 现状
 
 - 工具链:`uv` + `src` 布局,Python 3.12。
-- 依赖:`httpx`、`mcp`、`pydantic`、`pydantic-settings`、`pyyaml`、`textual`;dev 依赖 `pytest`。**无 langchain/langgraph**。
+- 依赖:`httpx`、`mcp`、`pydantic-settings`（含 `pydantic`）、`pyyaml`、`textual`;dev 依赖 `mypy`、`pytest`、`pytest-asyncio`、`pytest-cov`、`pytest-timeout`、`ruff`。**无 langchain/langgraph**。
 - 入口:`pyproject.toml` 中 `tenon = "tenon.app.main:main"`。
-- **已完成(v0.1~v0.5 功能范围)**:
+- **已完成(v0.1~v0.7 功能范围)**:
 - 密钥外置:固定目录 `~/.tenon/.env`(首次启动幂等生成模板),**不读取 CWD 下 `.env`**(安全决策 H10);全局 `Settings` 保存 provider 选择和工具资源限制，工具资源由组合根解析为不可变 `ToolResourceLimits`。
 - `ai/` 层:模型基础设施(provider / catalog / model / transport / errors),**不负责应用装配**;支持 6 个真实 provider(deepseek / openai / qwen / glm / kimi / minimax)+ 离线 `fake`;模型客户端自研(httpx + 自研 SSE 解析,thinking / usage 全量透传);`errors.py` 统一分类网络、超时、限流、认证、参数、服务端和未知失败并提供脱敏诊断;provider/model/effort 选择位于 `app/composition/model/selection.py`,适配自研循环的 `ChatModelPort` 在组合根。
 - 工具层(hexagonal):`AtomicTool` 无状态基类 + `FsOps` 文件系统抽象缝 + cwd 注入;read / write / edit / bash / grep / find / ls / skill / web_fetch / web_search / todo 十一个内建工具(声明式 `BUILTIN_TOOL_SPECS`);MCP 客户端可接入 `tools/list` / `tools/call`，以 `mcp__<server>__<tool>` 命名空间化，并实施全局 / 单 server / 描述长度分组预算;扩展插件经 `tools/plugins/` 以 `ext__<id>__<tool>` 命名注入;`ToolResourceLimits` 在组合根统一注入并发、超时、输出字节/行、预览内存和清理等待上限；`grep`/`find` 只把 `rg`/`fd` 作为不经 shell 的可选加速，失败时回退纯 Python；bash 带危险命令黑名单(字符串正则 + shlex 分词语义级检测)、树级进程击杀、默认 120s 超时(上限 600)、30k 输出截断与三档沙箱(受限策略无后端 fail-closed);`tools/security/` 提供执行前安全分类器(deny > ask > allow，MCP/插件权限同源匹配)，`tools/capabilities.py` 在组合根生成只读环境能力快照；`tools/shared/checkpoints.py` 为 write/edit 提供写前快照与 `tenon undo`。
@@ -290,7 +290,7 @@ async def run_agent_loop(context, config, prompt, *, emit=None, recursion_limit=
 - 观察 Hook 通过 `LifecycleHookEvent(scope, phase, event, run_id, session_id)` 接收脱离主事件的快照；core 只发送 turn/model/tool scope，session 适配层补充 session scope，Hook 返回值不参与控制。
 - `app/composition/runtime/extensions.py` 提供不可变的 `RuntimeExtensions` 组合对象，统一承载 ContextTransformer、预算上下文扩展、工具 Hook、生命周期 Hook 和扩展超时；runtime、session 恢复与 TUI 重建复用同一对象，core/session 只消费协议。
 - `recursion_limit`(默认 50)是循环计数;`abort()` 抛 CancelledError 自然传播;同步旧工具的 `asyncio.to_thread` 只存在于组合根适配器,core 只看到异步 `AgentTool.execute`。
-- 安全策略经 `policy.decide` 在每个工具调用执行前调用。
+- 安全策略由会话层包装为 `policy_gate` 追加到 `before_tool_calls` 链尾，在每次工具调用执行前经 `policy.decide` 裁定。
 
 ### 5.3 AgentSession —— 有状态会话壳(单个对话)
 
@@ -302,8 +302,8 @@ class AgentSession:
                  lifecycle_hooks=()): ...
 
     async def run(self, text) -> None: ...    # 直接驱动 run_agent_loop,发布事件,不返回值
-    async def steer(self, text) -> None: ...  # 运行中注入消息
-    async def followup(self) -> None: ...     # 结束后续跑一轮
+    def steer(self, text) -> None: ...        # 运行中注入消息
+    def followup(self, text) -> Awaitable[None]: ...  # 结束后续跑一轮
     def subscribe(self, fn) -> Callable[[], None]: ...   # 订阅事件,返回退订函数
     def abort(self) -> None: ...              # 取消当前 run
 ```
@@ -545,7 +545,7 @@ v0.7 当前进度:V4-01～V4-38、V5-00～V5-10、v0.6 三项硬化与 v0.7 扩�
 - 编排自研决策与收益:[`self-built-orchestration-blueprint.md`](./self-built-orchestration-blueprint.md)
 - 需求基线:[`requirements-analysis.md`](./requirements-analysis.md)(FR / NFR / F-xx 编号出处)
 - 代码级 wiki:`docs/wiki/README.md`(分层实现细节、依赖关系图、开发指南与术语表)
-- 迭代记录:[`docs/iteration/v0.1.md`](../iteration/v0.1.md) / [`v0.2.md`](../iteration/v0.2.md) / [`v0.3.md`](../iteration/v0.3.md) / [`v0.4.md`](../iteration/v0.4.md)(权威)
+- 迭代记录:[`docs/iteration/v0.1.md`](../iteration/v0.1.md) / [`v0.2.md`](../iteration/v0.2.md) / [`v0.3.md`](../iteration/v0.3.md) / [`v0.4.md`](../iteration/v0.4.md) / [`v0.5.md`](../iteration/v0.5.md) / [`v0.6.md`](../iteration/v0.6.md) / [`v0.7.md`](../iteration/v0.7.md)(权威)
 - 历史审计结论:2026-08-21 文档漂移、安全与测试基线审计的修复结论已记录在 `docs/iteration/v0.3.md` §6.5；原始审计文件不在当前工作树中。
 - [earendil-works/pi](https://github.com/earendil-works/pi) — Pi Agent SDK(三层协作 / 双层 loop / 事件驱动 / 会话即状态)
 - [learning-pi-agent](https://github.com/yamsfeer/learning-pi-agent) — 架构深度笔记

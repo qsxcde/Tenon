@@ -197,9 +197,15 @@ for call in msg.tool_calls:
 2. **消息归约正确性**:结论：5 场景双跑 diff 通过，当前由 `core/contracts/messages.py` 按 `tool_call_id` 归约。
 3. **会话持久化格式**:结论：采用 JSONL 树形 `SessionStore`，支持恢复、分叉、压缩和回放。
 
-## 9. 当前复核（2026-08-30）
+## 9. v0.4 时点复核（2026-08-30，历史快照）
 
 - v0.4 的 V4-01～V4-38 功能范围已完成实现，覆盖 Runtime 可靠性、上下文治理、TUI / Session 交互、生命周期 Hook、工具与 Provider 稳定性；发布包版本已统一为 `0.4.0`，发布说明已固定。
 - `uv run pytest -q`：**1532 passed**（macOS）；本地快速质量集 **1391 passed，141 deselected**、覆盖率 **83.61%**；`openspec validate --specs`：**20/20**；`git diff --check` 通过。
 - release check 已验证 wheel/sdist、版本、资源、敏感文件、干净环境安装和 fake provider CLI；最新 main CI 在本次文档修改前已成功完成。
 - TUI schema v2 性能 artifact 已生成；仓库内 `docs/benchmarks/tui-baseline.json` 仍是 schema v1 历史基线，Linux/Python 3.12 的 v2 候选需经 CI 生成和人工复核后再提交，覆盖率和性能仍按现有非阻塞策略执行。
+
+## 10. 后续状态（2026-10-28）
+
+- v0.5、v0.6 与 v0.7 已先后发布：Subagent 协作、正确性硬化与扩展/运行期安全均已完成；当前包版本 `0.7.0`。
+- 全量离线测试 **2141 passed**、快速集 **1977 passed / 覆盖率 90%**、离线评测 4/4、OpenSpec 25 份主规格（2026-10-28，Linux / Python 3.12）。
+- 当前架构、门禁与剩余范围以 [architecture.md](./architecture.md) §3、[`../testing.md`](../testing.md) 与 `docs/iteration/v0.7.md` 为准；本文第 2~6 节仍为 2026-08-14 实施前的历史方案。

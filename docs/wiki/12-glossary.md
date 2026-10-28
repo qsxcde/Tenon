@@ -20,7 +20,7 @@
 | **Steering** | 运行中用户干预（插话/打断）经 `steer_queue` 注入循环 |
 | **LifecycleHook** | 扩展点：turn/model/tool/session 阶段边界回调（同步/异步），失败被隔离 |
 | **RuntimeExtensions** | 组合层扩展容器：上下文变换/准备/预算、工具前后钩子、生命周期 Hook |
-| **上下文预算** | `ContextBudgetInput/Snapshot`：按 chars//4 估算输入 token 与 headroom |
+| **上下文预算** | `ContextBudgetInput/Snapshot`：按共享估算器（CJK 按字、ASCII `len // 4`）估算输入 token 与 headroom |
 | **Preflight** | 请求前预算判定：safe / near_limit / over_limit / uncertain；不确定策略可 allow 或 fail |
 | **Governance** | `govern_tool_messages`：请求局部裁剪工具结果，结构化事实保留、持久化历史不被改写 |
 | **压缩（Compaction）** | 上下文接近窗口时按 user 边界摘要旧历史；摘要消息 id 前缀 `summary-`，永不落盘 |
@@ -44,7 +44,7 @@
 | `DEFAULT_CONTEXT_WINDOW` | 128 000 | `core/context/budget.py` |
 | `DEFAULT_OUTPUT_RESERVE` | 4 096 | `core/context/budget.py` |
 | `DEFAULT_RESERVE_TOKENS` | 16 384 | `core/context/budget.py` |
-| token 估算 | `chars // 4`（最小 1） | `core/context/budget.py` |
+| token 估算 | CJK 按字计价，其它非 ASCII 2 字符/token，ASCII `len // 4`（最小 1） | `core/context/tokens.py`、`core/context/budget.py` |
 | `warning_headroom_tokens` | 2 048 | `core/context/preflight.py` |
 | `uncertain_budget_policy` | `allow` / `fail`（默认 allow） | `core/context/preflight.py` |
 | Subagent 深度 / 工具白名单 | 1 / 只读 profile:read、grep、find、ls、skill；`implement`:含 write/edit/bash | `core/subagent/*`、`app/composition/subagent/profiles.py` |
@@ -74,7 +74,7 @@
 | 常量 | 值 | 位置 |
 | --- | --- | --- |
 | bash 默认/最大超时 | 120s / 600s | `tools/atomic/bash.py` |
-| bash `MAX_OUTPUT_CHARS` | 30 000 | `tools/atomic/bash.py` |
+| bash 合并输出上限 | 30 000 字节（stdout/stderr 合并后二次截断，标记 `merged_budget`） | `tools/shared/merged.py` |
 | 输出截断 `DEFAULT_MAX_BYTES` / `DEFAULT_MAX_LINES` | 30 000 / 2000 | `tools/shared/truncate.py` |
 | grep / find / ls 默认 limit | 100 / 1000 / 500 | `tools/atomic/{grep,find,ls}.py` |
 | read 默认行数 | 2000 | `tools/atomic/read.py` |
@@ -83,7 +83,7 @@
 | `DEFAULT_TOOL_MEMORY_BYTES` | 1 048 576 | `tools/shared/resource_limits.py` |
 | `DEFAULT_TOOL_CLEANUP_TIMEOUT` | 10.0s | `tools/shared/resource_limits.py` |
 | MCP 全局 / 每 server / 描述上限 | 40 / 15 / 200 | `tools/mcp/budget.py` |
-| 文件边界工具 | read、write、edit | `tools/security/filesystem.py` |
+| 文件边界工具 | read、write、edit；grep / find / ls 共享同一边界结论 | `tools/security/filesystem.py`、`tools/security/classifier.py` |
 
 ### app / TUI / 质量门禁
 
@@ -115,7 +115,7 @@
 | 模型错误分类/脱敏 | `ai/errors.py` |
 | 重试与 SSE 解析 | `ai/transport/{retry,sse,streaming}.py` |
 | 新增内置工具 | `tools/atomic/<name>.py` + `tools/registry.py` |
-| 安全规则（ask/deny/allowlist） | `tools/security/{ask_rules,bash_rules,classifier,filesystem}.py` |
+| 安全规则（ask/deny/allowlist） | `tools/security/{ask_rules,bash_rules,classifier,filesystem,wrappers,interpreters}.py` |
 | MCP 预算/命名/加载 | `tools/mcp/{budget,adapter,loader}.py` |
 | 工具资源上限 | `tools/shared/resource_limits.py` |
 | CLI 参数/退出码 | `app/main.py` |

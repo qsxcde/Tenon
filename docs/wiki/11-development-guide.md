@@ -10,7 +10,7 @@ uv run tenon --prompt "你好"    # 无头 CLI 冒烟
 uv run tenon --tui             # 交互式终端
 ```
 
-- Python `>=3.12`，构建后端 `uv_build`，包版本 `0.5.0`（与 `pyproject.toml` 单一事实源一致）。
+- Python `>=3.12`，构建后端 `uv_build`，包版本 `0.7.0`（与 `pyproject.toml` 单一事实源一致）。
 - 测试必须离线：不依赖真实 API key、真实 provider 或用户 `~/.tenon` 数据；用 `FakeClient`、`tmp_path`、`monkeypatch`、`InMemoryFsOps`。
 - 凭据只放 `~/.tenon/.env`；仓库本地 `.env` 不会被读取。
 
@@ -41,7 +41,7 @@ uv run tenon --tui             # 交互式终端
 | 格式化 | `uv run ruff format --check src tests evals scripts` | 唯一方案（不引入 Black），行宽 100 |
 | 类型棘轮 | `uv run python scripts/type_scan.py` | mypy 按 core/ai/tools/session/app 五层统计，与 `docs/type-baseline.json` 比较，回升即失败；债务下降后用 `--update` 固化基线 |
 | 规模门禁 | `uv run python scripts/scale_scan.py` | 生产层单文件 ≤ 300 行、单函数 ≤ 80 行；豁免仅在 `COMPATIBILITY_EXCEPTIONS` 逐项登记 |
-| 分层测试 | `uv run pytest -m "unit or contract" -q` | 快速质量集；CI 覆盖率硬下限 **80%**（实测 86.35%） |
+| 分层测试 | `uv run pytest -m "unit or contract" -q` | 快速质量集；CI 覆盖率硬下限 **80%**（2026-10-28 实测 90%） |
 | 发布检查 | `uv run python scripts/release_check.py --dist-dir artifacts/dist --output artifacts/release-check.json` | 构建 wheel/sdist、版本/资源/敏感文件检查、干净环境安装 + fake provider CLI 验证 |
 
 禁止为通过门禁放宽配置或扩大基线。完整 Ruff 规则集与 pyright 尚未接入 CI；接入任一门禁时必须同步更新 `pyproject.toml`、CI 与 `AGENTS.md`。

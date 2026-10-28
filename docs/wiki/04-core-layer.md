@@ -157,7 +157,7 @@ async def run_turn(config, iteration, is_last, emit, working, new_messages) -> b
 - 常量：`DEFAULT_CONTEXT_WINDOW=128_000`、`DEFAULT_OUTPUT_RESERVE=4_096`、`DEFAULT_RESERVE_TOKENS=16_384`。
 - `ContextBudgetInput(context_window, output_reserve, reserve_tokens, system_prompt, tool_definitions, messages, window_source)`：严格校验（正整数、非负、储备不超窗口），深拷贝输入。
 - `ContextBudgetSnapshot`：`input_budget = context_window - output_reserve - reserve_tokens`；`input_tokens` 拆分为 system prompt / 工具定义 / 对话 / 工具结果四段；`headroom = input_budget - input_tokens`；`status` 为 `estimate`（window_source ∈ catalog/override/provider）或 `uncertain`。
-- 估算口径：`max(1, chars // 4)`，tool_call 参数以排序 JSON 计长。
+- 估算口径：共享估算器（`core/context/tokens.py`）按 CJK 字计价、其它非 ASCII 两字符/token、ASCII 保持 `len // 4`；纯 ASCII 结果与历史口径一致，tool_call 参数以排序 JSON 计长。
 - `govern_tool_messages`：确定性、请求局部；按剩余工具消息数均分可用 token，超出的替换为"元数据摘要 + 截断正文"，永不修改会话历史。
 
 ### 6.2 Preflight（`core/context/preflight.py`）

@@ -104,7 +104,7 @@
 ### 5.2 命令解析与文件边界
 
 - `shell_parse.split_segments`：以 shlex 语义切分复合命令（`;`/`&&`/`||`/管道），**语法非法时 fail closed**（按不可信处理），且逐段分类，避免"前段安全掩盖后段危险"。
-- `filesystem._BOUNDED_TOOLS = ("read", "write", "edit")`：这三个工具受工作区边界约束；`within_workspace(path, workspace)` 校验越界；`_secret_path_hit` 拦截凭据类敏感路径（如 `.env`）。越界与敏感路径产生 deny/ask，按规则而定。
+- `filesystem._BOUNDED_TOOLS = ("read", "write", "edit")`：这三个工具受工作区边界约束；只读搜索工具 `grep` / `find` / `ls` 在 `classify_tool` 中复用 `classify_file`，与 `read` 共享同一边界结论；`within_workspace(path, workspace)` 校验越界；`_secret_path_hit` 拦截凭据类敏感路径（如 `.env`）。越界与敏感路径产生 deny/ask，按规则而定。
 - `security/mcp.py`：MCP 工具的权限分类（服务器级/工具级），与内建工具统一进入同一决策面。
 
 安全分类结果最终由 core 的 `ApprovalPolicy` 端口在运行期裁定（自动允许 / 询问用户 / 拒绝），确认交互由会话层的 `ConfirmationCoordinator` 承载。

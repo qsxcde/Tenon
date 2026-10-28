@@ -103,7 +103,7 @@ uv run tenon skill reload  [--project]
 
 ### 3.4 TUI 内命令
 
-`/provider` `/model` `/effort` `/login` `/skills` `/mcp` `/tools` `/status` `/sessions`（含 `search` / `filter` / `archive` / `archived` / `recovery` / `delete`）`/tree` `/fork` `/name` `/context` `/compact` `/output` `/retry` `/continue` `/clear` `/mode` `/ask` `/plan` `/code` `/help` `/quit`；运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。完整命令表见 [09 · TUI](09-tui-layer.md)。
+`/provider` `/model` `/effort` `/login` `/skills` `/mcp`（含 `reload`）`/tools` `/status` `/sessions`（含 `search` / `filter` / `archive` / `archived` / `recovery` / `delete`）`/tree` `/fork` `/name` `/context` `/context-window` `/compact` `/output` `/undo` `/export` `/subagents` `/retry` `/continue` `/clear` `/mode` `/ask` `/plan` `/code` `/help` `/quit`；运行中按 `Esc` 打断，空闲按 `Esc` 退出并打印完整会话文档。完整命令表见 [09 · TUI](09-tui-layer.md)。
 
 ## 4. 一次对话的完整生命周期
 
@@ -128,7 +128,7 @@ create_agent_session
      → create_llm(provider, model, reasoning_effort) → ai 层 ChatClient
      → _load_skills(cfg) + format_skill_invocation → 渲染技能正文
      → _build_system_prompt(cfg, skills)   # 基础提示词 + 分层 AGENTS.md + bootstrap + skills 段
-     → create_tools(cfg, skills)           # 8 原子工具 + MCP 工具（预算裁剪）
+     → create_tools(cfg, skills)           # 11 个内建工具 + MCP / 插件工具（预算裁剪）
      → ChatModelPort(client, system_prompt, budget metadata)
      → _create_policy(approval_mode)       # tools/security 分类器 → ApprovalPolicy
  → AgentSession(config, EventBus(), store, ..., runtime_closer=runtime.close, policy=...)
@@ -213,8 +213,8 @@ session.run(text)
 ```bash
 uv run pytest -m "unit or contract" -q --strict-markers   # 快速质量集（日常首选）
 uv run pytest -q                                          # 全量离线测试
-uv run ruff check src tests scripts                       # 正确性静态检查
-uv run ruff format src tests scripts                      # 提交前格式化
+uv run ruff check src tests evals scripts                 # 正确性静态检查
+uv run ruff format src tests evals scripts                # 提交前格式化
 uv run python scripts/scale_scan.py                       # 规模门禁
 uv run python scripts/type_scan.py                        # 类型债务棘轮
 openspec validate --specs                                 # 规格校验（25 份）

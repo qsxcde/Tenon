@@ -16,16 +16,16 @@
 
 | 目标 | 含义 |
 | --- | --- |
-| **可演进** | 从单工具调用 Agent 平滑演进到多 Agent（v0.5 已交付串行只读委派）、多会话、平台部署 |
+| **可演进** | 从单工具调用 Agent 平滑演进到多 Agent（v0.5 串行只读委派，v0.7 有界并发与受限可写 profile）、多会话、平台部署 |
 | **可替换** | 换模型供应商、换工具集、换存储后端都不触碰编排代码 |
 | **可感知** | 会话过程以事件流暴露；TUI / CLI / 测试 / CI 均可订阅 |
 | **可测试** | 核心层零网络、零密钥可运行；注入 `FakeClient` 即可离线跑通全量测试 |
 
-## 3. 当前能力（v0.5）
+## 3. 当前能力（v0.7）
 
 | 能力 | 说明 |
 | --- | --- |
-| 交互式 TUI | 多行 composer（Enter 提交 / Shift+Enter 换行）、流式正文、可展开工具结果、edit/write 红绿差异、状态栏（model/effort/cwd）、Markdown 渲染、Esc 打断、斜杠命令 + 模糊补全 |
+| 交互式 TUI | 多行 composer（Enter 提交 / Shift+Enter 换行）、流式正文、可展开工具结果、edit/write 红绿差异、状态栏（model/effort/cwd）、Markdown 渲染、Esc 打断、斜杠命令 + 模糊补全；维护命令 `/undo` `/export` `/subagents` `/context-window` 与 `/mcp reload` |
 | Headless CLI | `--prompt` 一次性 / stdin 逐行；事件聚合输出最终回复；敏感操作默认 fail closed |
 | 自研编排 | `core/agent.py` 有状态外壳 + `core/orchestration/loop.py` ReAct 主循环（模型 → 工具 → 继续/结束） |
 | 11 个内建工具 | `read` / `write` / `edit` / `bash` / `grep` / `find` / `ls` / `skill` / `web_fetch` / `web_search` / `todo`；无状态 `AtomicTool` + `FsOps` 抽象缝；`grep`/`find` 把 `rg`/`fd` 当可选加速，失败回退纯 Python；web 工具网络经注入、出站进确认环 |
@@ -72,7 +72,7 @@
 - **已发布**：`v0.1.0` → `v0.7.0`（annotated 标签 `v0.4.0` → `b981534`，`v0.5.0` → `7bbc6a7`；`v0.7.0` 对应本次发布提交）。
 - **v0.4**：V4-01～V4-38，Runtime 可靠性、上下文治理、TUI/Session 交互、生命周期 Hook、工具与 Provider 稳定性。
 - **v0.5**：V5-00～V5-10，串行只读 Subagent 委派、父子事件诊断、有界运行记录与 TUI/headless 可观察性；领域规则下沉 `core/subagent/`。
-- **基线**：`2141 passed`（无 skipped），快速质量集 `1977 passed`，OpenSpec 25/25（2026-10-27，macOS / Python 3.12）。覆盖率口径、分层批次与历史趋势统一以 [`../testing.md`](../testing.md) 为准，本章不复述历史版本数字。
+- **基线**：`2141 passed`（无 skipped），快速质量集 `1977 passed`、覆盖率 90%，OpenSpec 25/25（2026-10-28，Linux / Python 3.12）。覆盖率口径、分层批次与历史趋势统一以 [`../testing.md`](../testing.md) 为准，本章不复述历史版本数字。
 - **v0.6**：三项正确性硬化（安全分类语义化、合并输出上限与 token 估算、会话索引增量）。
 - **v0.7**：工具注册表数据化、审批封闭枚举、web/todo 工具、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` 可写 profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint/`undo`、缓存诊断与离线评测。
 - **后续评估**：程序化工具编排（`run_code` 形态）、执行控制（steer 接入 UI、后台作业、事件流导出）、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线替换；Web UI 暂不规划。

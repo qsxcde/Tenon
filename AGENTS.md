@@ -4,7 +4,7 @@
 
 ## 项目结构
 
-- `src/tenon/app/`：程序入口、CLI、TUI 和依赖组装。跨层组装逻辑放在 `app/container.py` 或 `app/main.py`。
+- `src/tenon/app/`：程序入口、CLI、TUI 和依赖组装。跨层组装逻辑放在 `app/container.py`、`app/main.py` 或 `app/composition/*`。
 - `src/tenon/core/`：依赖较少的领域模型、协议和核心编排，不直接依赖具体 UI、网络、工具或持久化实现。
 - `src/tenon/session/`：会话状态、生命周期、JSONL 持久化、压缩和会话树。
 - `src/tenon/ai/`：模型提供商、客户端和传输层。
