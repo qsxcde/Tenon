@@ -61,7 +61,7 @@ class SessionManagerHost:
     # 各实现签名差异引发的 override 检查噪声。
     _adopt: Callable[..., AgentSession]
     _halt_current: Callable[[], None]
-    _halt_current_and_wait: Callable[[], Awaitable[None]]
+    _halt_current_and_wait: Callable[..., Awaitable[bool]]
     _last_user_message_id: Callable[[str], str]
 
 

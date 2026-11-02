@@ -141,7 +141,9 @@ class TuiCommandCoordinator(
                 self._track_task(
                     asyncio.get_running_loop().create_task(self._finish_async_config(result))
                 )
-                self.model.append_info("正在等待当前运行收尾并切换配置...")
+                if self.model.running:
+                    # 空闲时切换几乎瞬时完成,只在确实需要等旧回合收尾时提示。
+                    self.model.append_info("正在等待当前运行收尾并切换配置...")
                 self._schedule_render()
                 return True
             new_model, new_effort = result

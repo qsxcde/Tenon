@@ -109,6 +109,38 @@ def test_config_commands_use_rebuild_ports():
     assert calls[-1] == (None, None, "low")
 
 
+async def test_config_switch_prompts_only_while_run_is_active():
+    """空闲切换不打印等待提示;运行中切换才提示要等旧回合收尾。"""
+    backend = StubBackend()
+    manager = FakeManager()
+
+    async def rebuild(provider, model, effort):
+        return "m-new", "high"
+
+    app = TuiApp(
+        manager,
+        backend,
+        rebuild_ports=lambda provider, model, effort: ("m-new", "high"),
+        rebuild_ports_async=rebuild,
+    )
+    backend.on_submit(app._submit)
+
+    backend.submit("/model deepseek-v4:high")
+    for _ in range(20):
+        await asyncio.sleep(0)
+
+    text = "\n".join(app.model.transcript.all_lines(120))
+    assert "已切换配置" in text
+    assert "正在等待当前运行收尾" not in text
+
+    # 入口守卫会拒绝运行中的输入,这里直接调回调验证提示条件本身。
+    app.model.running = True
+    assert app._apply_config(model="deepseek-v4:high") is True
+    await asyncio.sleep(0)
+
+    assert "正在等待当前运行收尾并切换配置" in "\n".join(app.model.transcript.all_lines(120))
+
+
 def test_config_command_invalid_provider_shows_error():
     """/provider 未知值 → 回调 ValueError 就地提示(NFR-U7 容错)。"""
     backend = StubBackend()

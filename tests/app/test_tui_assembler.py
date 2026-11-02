@@ -149,6 +149,23 @@ def test_apply_selection_window_writes_override_and_keeps_limit(monkeypatch, tmp
     assert spec.max_context_window == 1_048_576
 
 
+async def test_rebuild_async_aborts_when_run_does_not_settle(monkeypatch):
+    """旧回合未在超时内收尾 → 中止切换,不进入端口重建。"""
+    assembler = _assembler()
+
+    async def never_settles(timeout=None):
+        return False
+
+    monkeypatch.setattr(
+        assembler,
+        "manager",
+        SimpleNamespace(_halt_current_and_wait=never_settles, _config=object()),
+    )
+
+    with pytest.raises(ValueError, match="未在 10s 内收尾"):
+        await assembler.rebuild_config_async(None, None, None)
+
+
 def test_apply_selection_window_rejects_value_above_limit(monkeypatch, tmp_path):
     """选择串里的窗口同样受上限约束,不允许绕过 ``/context-window`` 的校验。"""
     models = tmp_path / "models.json"

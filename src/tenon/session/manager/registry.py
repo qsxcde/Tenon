@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from typing import Any
 
 from tenon.session.events.bus import EventBus
@@ -27,22 +28,23 @@ class SessionManagerRegistry(SessionManagerHost):
         if current is not None:
             current.abort()
 
-    async def _halt_current_and_wait(self) -> None:
+    async def _halt_current_and_wait(self, timeout: float | None = None) -> bool:
+        """取消当前运行并等待其进入空闲态;返回是否在时限内收尾。
+
+        ``timeout`` 透传给会话的 ``cancel_and_wait`` / ``wait_for_idle``,调用方据此
+        区分"已收尾"与"仍在运行",避免无限等待阻塞热切换。
+        """
         current = self.current
         if current is None:
-            return
+            return True
         cancel_and_wait = getattr(current, "cancel_and_wait", None)
         if callable(cancel_and_wait):
-            result = cancel_and_wait()
-            if hasattr(result, "__await__"):
-                await result
-            return
+            return await _settled(cancel_and_wait(timeout))
         current.abort()
         wait_for_idle = getattr(current, "wait_for_idle", None)
         if callable(wait_for_idle):
-            result = wait_for_idle()
-            if hasattr(result, "__await__"):
-                await result
+            return await _settled(wait_for_idle(timeout))
+        return True
 
     def _adopt(
         self,
@@ -104,6 +106,13 @@ class SessionManagerRegistry(SessionManagerHost):
             victim = min(candidates, key=lambda sid: self._session_access.get(sid, 0))
             self._sessions.pop(victim, None)
             self._session_access.pop(victim, None)
+
+
+async def _settled(result: object) -> bool:
+    """统一同步/异步返回值;未声明布尔结果的旧会话对象视为已收尾。"""
+    if isinstance(result, Awaitable):
+        result = await result
+    return result if isinstance(result, bool) else True
 
 
 __all__ = ["SessionManagerRegistry"]

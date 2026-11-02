@@ -19,6 +19,9 @@ from ..session.factory import create_agent_session, create_session_manager
 from .context_window import write_context_window
 from .host import TuiAssemblerHost
 
+# 热切换等待上限:超过后中止切换并提示,避免被不可取消的工具永久阻塞。
+_HALT_TIMEOUT_SECONDS = 10.0
+
 
 class TuiConfigMixin(TuiAssemblerHost):
     def _ensure_subagent_runner(self) -> Any:
@@ -202,8 +205,11 @@ class TuiConfigMixin(TuiAssemblerHost):
             raise RuntimeError("TUI 尚未完成 SessionManager 装配")
         provider = self._target_provider(new_model, new_provider)
         self._apply_selection_window(provider, new_model)
+        if not await self.manager._halt_current_and_wait(_HALT_TIMEOUT_SECONDS):
+            raise ValueError(
+                f"当前运行未在 {_HALT_TIMEOUT_SECONDS:.0f}s 内收尾,已中止切换,请稍后重试"
+            )
         old_config = self.manager._config
-        await self.manager._halt_current_and_wait()
         config = self._new_config(provider, new_model, new_effort)
         await close_runtime_for_config_async(old_config)
         model_id, effort = self._resolved_selection(provider, new_model, new_effort)
