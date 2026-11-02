@@ -166,7 +166,8 @@
 | `name` | 展示名 |
 | `reasoning` | 是否推理模型（决定 `reasoning_effort` 透传） |
 | `max_tokens` | 输出上限 |
-| `context_window` | 上下文窗口；压缩阈值与 budget 估算使用 |
+| `context_window` | 当前生效的上下文窗口；压缩阈值与 budget 估算使用 |
+| `max_context_window` | 模型能力上限；TUI 窗口档位与写入校验使用（缺失按 `context_window` 兜底） |
 | `tool_calling` | 是否支持工具调用 |
 | `prompt_cache` | 是否声明提示缓存 |
 | `aliases` | 别名元组（内部恒为 `tuple`，构造时接受 list） |

@@ -22,6 +22,7 @@ def test_resolver_uses_catalog_facts_and_keeps_cache_observation_separate():
 
     assert capabilities.model == "declared"
     assert capabilities.context_window == 40_000
+    assert capabilities.max_context_window == 40_000  # 未声明上限时按生效窗口兜底
     assert capabilities.window_source == "catalog"
     assert capabilities.reasoning is True
     assert capabilities.tool_calling is False
@@ -36,6 +37,7 @@ def test_resolver_marks_missing_catalog_facts_unknown_and_uses_fallback_window()
 
     assert capabilities.model == "unlisted"
     assert capabilities.context_window == 128_000
+    assert capabilities.max_context_window is None  # 上限未知,不猜测
     assert capabilities.window_source == "fallback"
     assert capabilities.reasoning is None
     assert capabilities.tool_calling is None

@@ -184,6 +184,92 @@ def test_context_window_keys_are_preserved_in_user_model_overrides(tmp_path):
     assert models["snake"].context_window == 64_000
 
 
+def test_max_context_window_keys_are_preserved_in_user_model_overrides(tmp_path):
+    """maxContextWindow / max_context_window 双拼写都认,表示模型能力上限。"""
+    store = _store(
+        tmp_path,
+        json.dumps(
+            {
+                "fake": {
+                    "models": [
+                        {"id": "camel", "maxContextWindow": 1_048_576},
+                        {"id": "snake", "max_context_window": 262_144},
+                        {"id": "legacy", "contextWindow": 8_000},
+                    ]
+                }
+            }
+        ).encode(),
+    )
+
+    models = {model.id: model for model in store.load()["fake"]["models"]}
+
+    assert models["camel"].max_context_window == 1_048_576
+    assert models["snake"].max_context_window == 262_144
+    assert models["legacy"].max_context_window is None  # 未声明上限
+
+
+def test_invalid_max_context_window_is_rejected(tmp_path):
+    """上限必须是正整数;布尔、零、字符串都会让整条记录被拒绝。"""
+    store = _store(
+        tmp_path,
+        json.dumps(
+            {
+                "fake": {
+                    "models": [
+                        {"id": "zero", "maxContextWindow": 0},
+                        {"id": "bool", "max_context_window": True},
+                        {"id": "text", "max_context_window": "1048576"},
+                        {"id": "valid", "max_context_window": 1_048_576},
+                    ]
+                }
+            }
+        ).encode(),
+    )
+
+    models = {model.id: model for model in store.load()["fake"]["models"]}
+
+    assert list(models) == ["valid"]
+    assert models["valid"].max_context_window == 1_048_576
+
+
+def test_override_without_limit_inherits_builtin_capability(tmp_path):
+    """用户把窗口调小后仍保留内置 1M 上限,可以再调回去。"""
+    from tenon.ai.catalog.registry import ModelRegistry
+
+    store = _store(
+        tmp_path,
+        json.dumps({"kimi": {"models": [{"id": "kimi-k3", "contextWindow": 307_200}]}}).encode(),
+    )
+
+    spec = ModelRegistry(store).resolve("kimi-k3", provider="kimi")
+
+    assert spec.context_window == 307_200
+    assert spec.max_context_window == 1_048_576
+
+
+def test_override_can_declare_explicit_limit(tmp_path):
+    """显式声明上限时以用户值为准(自定义或新版本模型)。"""
+    from tenon.ai.catalog.registry import ModelRegistry
+
+    store = _store(
+        tmp_path,
+        json.dumps(
+            {
+                "kimi": {
+                    "models": [
+                        {"id": "kimi-k3", "contextWindow": 307_200, "maxContextWindow": 614_400}
+                    ]
+                }
+            }
+        ).encode(),
+    )
+
+    spec = ModelRegistry(store).resolve("kimi-k3", provider="kimi")
+
+    assert spec.context_window == 307_200
+    assert spec.max_context_window == 614_400
+
+
 def test_model_capability_flags_are_optional_and_strict(tmp_path):
     store = _store(
         tmp_path,

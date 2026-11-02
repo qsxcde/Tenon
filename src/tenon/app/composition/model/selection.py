@@ -2,24 +2,56 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 from tenon.ai.catalog.registry import ModelRegistry
 from tenon.ai.catalog.store import ModelStore
 from tenon.ai.model.protocols import ChatClient
 from tenon.ai.providers.all import PROVIDER_CONFIGS, PROVIDERS
+from tenon.core.context.window import try_parse_window_tokens
 
 KNOWN_EFFORTS = ("low", "medium", "high")
 _default_registry: ModelRegistry | None = None
 
 
+@dataclass(frozen=True)
+class ModelPattern:
+    """``model[:effort][:window]`` 的解析结果。"""
+
+    base: str
+    effort: str | None = None
+    context_window: int | None = None
+
+
+def parse_model_pattern(pattern: str) -> ModelPattern:
+    """从右向左剥离可识别的 effort / 窗口后缀,其余部分保持为模型 id。
+
+    无法识别的后缀不剥离(例如别名里带冒号的历史写法),避免把模型 id 改坏。
+    """
+    parts = pattern.split(":")
+    effort: str | None = None
+    context_window: int | None = None
+    while len(parts) > 1:
+        suffix = parts[-1]
+        if context_window is None:
+            window = try_parse_window_tokens(suffix)
+            if window is not None:
+                context_window = window
+                parts.pop()
+                continue
+        if effort is None and suffix in KNOWN_EFFORTS:
+            effort = suffix
+            parts.pop()
+            continue
+        break
+    return ModelPattern(":".join(parts), effort, context_window)
+
+
 def split_model_pattern(pattern: str) -> tuple[str, str | None]:
-    """解析产品输入中的 ``model:effort`` 后缀。"""
-    if ":" in pattern:
-        base, effort = pattern.rsplit(":", 1)
-        if effort in KNOWN_EFFORTS:
-            return base, effort
-    return pattern, None
+    """解析产品输入中的 ``model:effort`` 后缀(窗口后缀一并剥离)。"""
+    parsed = parse_model_pattern(pattern)
+    return parsed.base, parsed.effort
 
 
 def _get_default_registry() -> ModelRegistry:
@@ -83,7 +115,9 @@ def create_llm(
 
 __all__ = [
     "KNOWN_EFFORTS",
+    "ModelPattern",
     "create_llm",
     "get_available_providers",
+    "parse_model_pattern",
     "split_model_pattern",
 ]

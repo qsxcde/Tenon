@@ -11,6 +11,11 @@ from pathlib import Path
 from typing import Any
 
 from tenon.app.errors.reporting import report_unexpected_error
+from tenon.core.context.window import (
+    available_window_presets,
+    format_window_presets,
+    parse_window_tokens,
+)
 from ..ports.admin import TuiAdminPort
 from .host import TuiAppHost
 from .parser import Command
@@ -185,7 +190,7 @@ class TuiAdminCommandCoordinator(TuiAppHost):
             self._schedule_render()
             return
         try:
-            tokens = _parse_tokens(cmd.args[0])
+            tokens = parse_window_tokens(cmd.args[0])
         except ValueError as exc:
             self.model.append_info(str(exc))
             self._schedule_render()
@@ -196,12 +201,17 @@ class TuiAdminCommandCoordinator(TuiAppHost):
         capabilities = self.model.status.model_capabilities
         window = getattr(capabilities, "context_window", None)
         source = getattr(capabilities, "window_source", None) or "unknown"
+        limit = getattr(capabilities, "max_context_window", None)
         if not isinstance(window, int):
             return "上下文窗口: 未知 · 用法: /context-window <tokens>"
-        return (
-            f"上下文窗口: {window:,} · 来源 {source}\n"
-            "用法: /context-window <tokens>(支持 131072 / 128k / 131,072)"
-        )
+        lines = [f"上下文窗口: {window:,} · 来源 {source}"]
+        if type(limit) is int:
+            lines.append(f"模型上限: {limit:,}")
+            presets = available_window_presets(limit)
+            if presets:
+                lines.append(f"可选档位: {format_window_presets(presets)}")
+        lines.append("用法: /context-window <tokens>(支持 131072 / 128k / 131,072)")
+        return "\n".join(lines)
 
     def _apply_context_window(self, admin: TuiAdminPort, tokens: int) -> None:
         async def run() -> None:
@@ -223,19 +233,3 @@ class TuiAdminCommandCoordinator(TuiAppHost):
         self.model.append_info(f"正在写入上下文窗口 {tokens} 并热切换...")
         self._schedule_render()
         self._track_task(asyncio.get_running_loop().create_task(run()))
-
-
-def _parse_tokens(raw: str) -> int:
-    """解析 ``131072`` / ``128k`` / ``131,072`` 形式的窗口值。"""
-    text = raw.strip().replace(",", "").replace("_", "")
-    multiplier = 1
-    if text.lower().endswith("k"):
-        multiplier, text = 1024, text[:-1]
-    elif text.lower().endswith("m"):
-        multiplier, text = 1024 * 1024, text[:-1]
-    if not text.isdigit():
-        raise ValueError(f"上下文窗口必须是正整数: {raw}(支持 131072 / 128k)")
-    tokens = int(text) * multiplier
-    if tokens < 1:
-        raise ValueError("上下文窗口必须大于 0")
-    return tokens

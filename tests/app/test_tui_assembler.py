@@ -120,6 +120,47 @@ async def test_set_context_window_requires_provider(monkeypatch):
         await assembler.set_context_window(8_000)
 
 
+async def test_set_context_window_rejects_value_above_model_limit(monkeypatch, tmp_path):
+    """超过模型声明上限的窗口在写盘前被拒绝,文件不产生。"""
+    models = tmp_path / "models.json"
+    monkeypatch.setattr(app_config, "CONFIG_MODELS_FILE", models)
+    assembler = _assembler()
+
+    with pytest.raises(ValueError, match="上限 256,000"):
+        await assembler.set_context_window(307_200)
+
+    assert not models.exists()
+
+
+def test_apply_selection_window_writes_override_and_keeps_limit(monkeypatch, tmp_path):
+    """``/model kimi-k3:1m`` 在切换前写入窗口覆盖,同时保留 1M 能力上限。"""
+    models = tmp_path / "models.json"
+    monkeypatch.setattr(app_config, "CONFIG_MODELS_FILE", models)
+    assembler = _assembler(provider="kimi", model="kimi-k3")
+
+    assembler._apply_selection_window("kimi", "kimi-k3:300k")
+
+    record = json.loads(models.read_text(encoding="utf-8"))["kimi"]["models"][0]
+    assert record["id"] == "kimi-k3"
+    assert record["contextWindow"] == 307_200
+    assert record["maxContextWindow"] == 1_048_576
+    spec = assembler.registry.resolve("kimi-k3", provider="kimi")
+    assert spec.context_window == 307_200
+    assert spec.max_context_window == 1_048_576
+
+
+def test_apply_selection_window_rejects_value_above_limit(monkeypatch, tmp_path):
+    """选择串里的窗口同样受上限约束,不允许绕过 ``/context-window`` 的校验。"""
+    models = tmp_path / "models.json"
+    monkeypatch.setattr(app_config, "CONFIG_MODELS_FILE", models)
+    assembler = _assembler(provider="kimi", model="kimi-k3")
+
+    with pytest.raises(ValueError, match="上限 1,048,576"):
+        assembler._apply_selection_window("kimi", "kimi-k3:1200k")
+
+    assert not models.exists()
+
+
 def test_create_child_session_disables_recursive_subagents(monkeypatch):
     """子会话按 profile 限制工具、禁用嵌套委派且不进入普通 store。"""
     captured: dict[str, Any] = {}

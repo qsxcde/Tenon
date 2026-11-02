@@ -16,7 +16,7 @@ from ..runtime.factory import (
     policy_for_config,
 )
 from ..session.factory import create_agent_session, create_session_manager
-from .admin import model_override_record
+from .context_window import write_context_window
 from .host import TuiAssemblerHost
 
 
@@ -173,6 +173,7 @@ class TuiConfigMixin(TuiAssemblerHost):
         if self.manager is None:
             raise RuntimeError("TUI 尚未完成 SessionManager 装配")
         provider = self._target_provider(new_model, new_provider)
+        self._apply_selection_window(provider, new_model)
         old_config = self.manager._config
         self.manager._halt_current()
         config = self._new_config(provider, new_model, new_effort)
@@ -200,6 +201,7 @@ class TuiConfigMixin(TuiAssemblerHost):
         if self.manager is None:
             raise RuntimeError("TUI 尚未完成 SessionManager 装配")
         provider = self._target_provider(new_model, new_provider)
+        self._apply_selection_window(provider, new_model)
         old_config = self.manager._config
         await self.manager._halt_current_and_wait()
         config = self._new_config(provider, new_model, new_effort)
@@ -234,22 +236,36 @@ class TuiConfigMixin(TuiAssemblerHost):
         覆盖记录必须写全已知元数据:``ModelStore`` 按 id 整体替换,只写窗口会让该
         模型的 ``maxTokens``/``reasoning``/``aliases`` 丢失。
         """
-        if type(tokens) is not int or tokens < 1:
-            raise ValueError("上下文窗口必须为正整数")
-        from tenon.ai.catalog.registry import ModelRegistry
-        from tenon.ai.catalog.store import ModelStore
-        from tenon.app import config as app_config
-
         provider, model_id = self._active_selection()
         if not provider:
             raise ValueError("无法确定当前 provider,请先用 /provider 选择")
-        spec = self.registry.resolve(model_id, provider=provider)
-        store = ModelStore(app_config.CONFIG_MODELS_FILE)
-        store.write_model_override(provider, model_override_record(spec, tokens))
-        self.registry = ModelRegistry(ModelStore(app_config.CONFIG_MODELS_FILE))
+        self._write_context_window(provider, model_id, tokens)
         await self.rebuild_config_async(provider, model_id, self.reasoning_effort)
         budget = resolve_context_budget_metadata(self.registry, self.cfg, provider, model_id)
         return budget.context_window, budget.window_source
+
+    def _apply_selection_window(self, provider: str | None, new_model: str | None) -> None:
+        """切换模型前应用选择串里的 ``:window`` 后缀;非法值在此阶段直接失败。"""
+        if not new_model:
+            return
+        pattern = model_selection.parse_model_pattern(new_model)
+        if pattern.context_window is None:
+            return
+        if not provider:
+            raise ValueError("无法确定目标 provider,请先用 /provider 选择")
+        self._write_context_window(provider, pattern.base, pattern.context_window)
+
+    def _write_context_window(self, provider: str, model_id: str, tokens: int) -> None:
+        """写入覆盖并刷新注册表,上限校验与整条元数据保留在共用实现里。"""
+        from tenon.app import config as app_config
+
+        self.registry = write_context_window(
+            self.registry,
+            provider,
+            model_id,
+            tokens,
+            app_config.CONFIG_MODELS_FILE,
+        )
 
     def _active_selection(self) -> tuple[str | None, str]:
         """解析当前生效的 provider 与模型 id(缺省回落到配置默认值)。"""

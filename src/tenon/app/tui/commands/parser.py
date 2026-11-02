@@ -118,7 +118,12 @@ def default_registry() -> dict[str, CommandSpec]:
         "login": CommandSpec(
             "login", "配置 provider 的 API key 并切换", args=("provider",), picker=True
         ),
-        "model": CommandSpec("model", "切换模型(支持 model:effort)", args=("model",), picker=True),
+        "model": CommandSpec(
+            "model",
+            "切换模型(支持 model:effort:window,如 kimi-k3:1m)",
+            args=("model",),
+            picker=True,
+        ),
         "effort": CommandSpec("effort", "切换思考强度", args=("level",), picker=True),
         "fork": CommandSpec("fork", "从指定消息分叉会话(缺省最近用户消息)", args=("message-id",)),
         "compact": CommandSpec("compact", "压缩当前会话上下文"),

@@ -113,37 +113,15 @@ class ModelStore:
 def _parse_record(m: dict) -> ModelSpec | None:
     """把一条 models.json 记录解析为强类型 ModelSpec;类型非法返回 None 并告警。"""
     mid = m["id"]
-    # camelCase(maxTokens) 与 snake_case(max_tokens) 双拼写都认(H12)
-    max_tokens = m.get("maxTokens")
-    if max_tokens is None:
-        max_tokens = m.get("max_tokens")
-    elif "max_tokens" in m and m["max_tokens"] != max_tokens:
-        logger.warning("模型 %s 同时给出 maxTokens 与 max_tokens,采用 maxTokens", mid)
-    # 用 type(...) is int 而非 isinstance(True 是 int 子类,会混过校验把 true 送进请求体)
-    if max_tokens is not None and (type(max_tokens) is not int or max_tokens < 1):
-        logger.warning(
-            "模型 %s 的 maxTokens 非法(应为正整数,得到 %r),跳过",
-            mid,
-            max_tokens,
-        )
+    max_tokens, valid = _positive_int(m, mid, "maxTokens", "max_tokens")
+    if not valid:
         return None
-
-    # contextWindow/context_window are accepted for Pi-compatible user
-    # catalogs.  Keep the same strict bool/type handling as maxTokens.
-    context_window = m.get("contextWindow")
-    if context_window is None:
-        context_window = m.get("context_window")
-    elif "context_window" in m and m["context_window"] != context_window:
-        logger.warning(
-            "模型 %s 同时给出 contextWindow 与 context_window,采用 contextWindow",
-            mid,
-        )
-    if context_window is not None and (type(context_window) is not int or context_window < 1):
-        logger.warning(
-            "模型 %s 的 contextWindow 非法(应为正整数,得到 %r),跳过",
-            mid,
-            context_window,
-        )
+    # contextWindow 是生效窗口,maxContextWindow 是模型能力上限(缺失表示未知)。
+    context_window, valid = _positive_int(m, mid, "contextWindow", "context_window")
+    if not valid:
+        return None
+    max_context_window, valid = _positive_int(m, mid, "maxContextWindow", "max_context_window")
+    if not valid:
         return None
 
     aliases = m.get("aliases", [])
@@ -167,10 +145,40 @@ def _parse_record(m: dict) -> ModelSpec | None:
         reasoning=reasoning,
         max_tokens=max_tokens,
         context_window=context_window,
+        max_context_window=max_context_window,
         tool_calling=tool_calling,
         prompt_cache=prompt_cache,
         aliases=tuple(aliases),
     )
+
+
+def _positive_int(
+    record: dict,
+    model_id: str,
+    camel_key: str,
+    snake_key: str,
+) -> tuple[int | None, bool]:
+    """读取可选正整数字段;缺失是 unknown,非法类型拒绝整条记录。
+
+    用 ``type(...) is int`` 而非 ``isinstance``:``True`` 是 ``int`` 子类,会混过
+    校验把 ``true`` 送进请求体。
+    """
+    value = record.get(camel_key)
+    if value is None:
+        value = record.get(snake_key)
+    elif snake_key in record and record[snake_key] != value:
+        logger.warning(
+            "模型 %s 同时给出 %s 与 %s,采用 %s", model_id, camel_key, snake_key, camel_key
+        )
+    if value is not None and (type(value) is not int or value < 1):
+        logger.warning(
+            "模型 %s 的 %s 非法(应为正整数,得到 %r),跳过",
+            model_id,
+            camel_key,
+            value,
+        )
+        return None, False
+    return value, True
 
 
 def _optional_bool(

@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from tenon.ai.catalog.builtin import BUILTIN_CATALOGS
 from tenon.ai.catalog.spec import ModelSpec
 from tenon.ai.catalog.store import ModelStore
@@ -24,10 +26,15 @@ class ModelRegistry:
         self._apply_user_overrides(store or ModelStore())
 
     def _apply_user_overrides(self, store: ModelStore) -> None:
-        """Pi 的 upsert 语义:id 相同→覆盖,id 新→追加,内置保留。"""
+        """Pi 的 upsert 语义:id 相同→覆盖,id 新→追加,内置保留。
+
+        覆盖记录只表达"用户怎么用这个模型",不改变模型固有上限:未显式声明
+        ``maxContextWindow`` 时继承内置上限,避免用户调小窗口后永久失去 1M 能力。
+        """
         for provider, conf in store.load().items():
             base = self._catalogs.setdefault(provider, {})
-            base.update({m.id: m for m in conf.get("models", [])})
+            for spec in conf.get("models", []):
+                base[spec.id] = _inherit_window_limit(base.get(spec.id), spec)
 
     def available(self, provider: str) -> dict[str, ModelSpec]:
         # 返回副本:外部写入不持久化进注册表内部状态(H15)
@@ -61,3 +68,13 @@ class ModelRegistry:
         # 错误文案列出可用 model id(而非仅 provider 名)
         all_ids = sorted(m for cat in self._catalogs.values() for m in cat)
         raise ValueError(f"未找到模型 {pattern!r},可用模型: {all_ids}")
+
+
+def _inherit_window_limit(builtin: ModelSpec | None, override: ModelSpec) -> ModelSpec:
+    """覆盖记录未声明上限时继承内置能力上限(含内置生效窗口)。"""
+    if builtin is None or override.max_context_window is not None:
+        return override
+    builtin_limit = builtin.max_context_window or builtin.context_window
+    if builtin_limit is None:
+        return override
+    return replace(override, max_context_window=builtin_limit)

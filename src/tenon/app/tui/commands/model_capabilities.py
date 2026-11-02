@@ -15,10 +15,14 @@ def append_model_capability_lines(lines: list[str], capabilities: Any, session: 
         else "未知"
     )
     source = capabilities.window_source or "unknown"
+    limit = getattr(capabilities, "max_context_window", None)
+    window_line = f"  上下文窗口: {window} · 来源 {source}"
+    if type(limit) is int:
+        window_line += f" · 上限 {limit:,}"
     lines.extend(
         [
             "模型能力:",
-            f"  上下文窗口: {window} · 来源 {source}",
+            window_line,
             f"  思考: {_capability_label(capabilities.reasoning)}",
             f"  工具调用: {_capability_label(capabilities.tool_calling)}",
             "  " + _cache_capability_line(capabilities, session),

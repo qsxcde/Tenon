@@ -204,6 +204,36 @@ def test_rebuild_config_syncs_model_context_window():
     assert app._manager.current.context_window == 32_000
 
 
+def test_rebuild_with_window_suffix_applies_override(monkeypatch, tmp_path):
+    """`/model kimi-k3:300k` 在切换模型的同时把生效窗口落到会话。"""
+    from tenon.ai.catalog.registry import ModelRegistry
+    from tenon.ai.catalog.store import ModelStore
+    from tenon.app import config as app_config
+
+    models = tmp_path / "models.json"
+    monkeypatch.setattr(app_config, "CONFIG_MODELS_FILE", models)
+    with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
+        from tenon.ai.providers.fake import FakeClient
+        from tenon.app.container import create_tui_app
+        from tenon.session.persistence import MemoryStore
+
+        mock_llm.return_value = FakeClient(response="测试回复")
+        app = create_tui_app(
+            provider="kimi",
+            model="kimi-k3",
+            registry=ModelRegistry(ModelStore(None)),
+            store=MemoryStore(),
+            backend=_StubBackend(),
+        )
+        model_id, _effort = app._rebuild_ports("kimi", "kimi-k3:300k", None)
+
+    assert model_id == "kimi-k3"
+    assert app._manager.current.context_window == 307_200
+    saved = ModelRegistry(ModelStore(models)).resolve("kimi-k3", provider="kimi")
+    assert saved.context_window == 307_200
+    assert saved.max_context_window == 1_048_576
+
+
 def test_create_agent_config_binds_catalog_window_to_model_budget():
     with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
         from tenon.ai.catalog.registry import ModelRegistry
@@ -396,6 +426,19 @@ def test_create_tui_app_injects_selector_candidates():
     assert isinstance(candidates["model"], dict)
     assert "deepseek" in candidates["model"]
     assert candidates["model"]["deepseek"] == sorted(candidates["model"]["deepseek"])
+
+
+def test_model_candidates_expose_window_variants_within_model_limit():
+    """1M 模型的候选追加 300k/600k/1m;上限不足的模型不出现窗口变体。"""
+    from tenon.ai.catalog.registry import ModelRegistry
+    from tenon.app.composition.tui.factory import _resolve_candidates
+
+    models = _resolve_candidates(registry=ModelRegistry())["model"]
+
+    assert "kimi-k3:300k" in models["kimi"]
+    assert "kimi-k3:600k" in models["kimi"]
+    assert "kimi-k3:1m" in models["kimi"]
+    assert all(":" not in candidate for candidate in models["deepseek"])
 
 
 def test_policy_deny_mode_default_and_fails_closed():

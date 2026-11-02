@@ -37,7 +37,14 @@ GLM_MODELS: dict[str, ModelSpec] = {
 # Kimi / Moonshot(2026-08):kimi-k3 支持 reasoning_effort,上下文 1M;
 # kimi-k2.x 系列 256K,按官方文档仅列 kimi-k2.6 与 code-highspeed 变体。
 KIMI_MODELS: dict[str, ModelSpec] = {
-    "kimi-k3": ModelSpec(id="kimi-k3", reasoning=True, aliases=("kimi",)),
+    "kimi-k3": ModelSpec(
+        id="kimi-k3",
+        reasoning=True,
+        aliases=("kimi",),
+        # 1M 能力随模型声明,窗口档位据此放行 300k/600k/1m
+        context_window=1_048_576,
+        max_context_window=1_048_576,
+    ),
     "kimi-k2.7-code-highspeed": ModelSpec(id="kimi-k2.7-code-highspeed", reasoning=False),
     "kimi-k2.6": ModelSpec(id="kimi-k2.6", reasoning=False),
 }

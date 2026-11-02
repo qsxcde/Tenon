@@ -21,6 +21,24 @@ def _configured_providers() -> set[str]:
     return app_config.configured_providers(app_config.CONFIG_ENV_FILE)
 
 
+def _model_candidates(registry: Any, provider: str) -> list[str]:
+    """模型候选:为有窗口档位的模型追加 ``model:<window>`` 变体。
+
+    档位来自模型上限,因此 1M 变体只会出现在支持 1M 的模型后面;选择变体后
+    由 ``/model`` 选择串解析在切换时写入生效窗口。
+    """
+    from ..model.window import window_presets_for
+
+    options: list[str] = []
+    available = registry.available(provider)
+    for model_id in available:
+        options.append(model_id)
+        options.extend(
+            f"{model_id}:{label}" for label, _ in window_presets_for(available[model_id])
+        )
+    return options
+
+
 def _resolve_candidates(cfg: Any = None, registry: Any = None) -> dict[str, Any]:
     """解析 provider、model、effort 选择器候选。"""
     from tenon.ai.catalog.registry import ModelRegistry
@@ -31,7 +49,7 @@ def _resolve_candidates(cfg: Any = None, registry: Any = None) -> dict[str, Any]
     reg = registry or ModelRegistry(ModelStore(app_config.CONFIG_MODELS_FILE))
     providers = sorted(PROVIDERS)
     models = {
-        provider: sorted(reg.available(provider))
+        provider: sorted(_model_candidates(reg, provider))
         for provider in providers
         if reg.available(provider)
     }

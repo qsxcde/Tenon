@@ -223,6 +223,8 @@ def test_model_override_record_preserves_metadata():
     assert record == {
         "id": "deepseek-v4-pro",
         "contextWindow": 131_072,
+        # 上限是模型能力,不随本次生效窗口变小
+        "maxContextWindow": 256_000,
         "reasoning": True,
         "maxTokens": 8192,
         "toolCalling": True,
@@ -419,6 +421,40 @@ def test_context_window_shows_numeric_window_and_source():
     text = _text(app)
     assert "上下文窗口: 256,000 · 来源 catalog" in text
     assert "用法: /context-window <tokens>" in text
+
+
+def test_context_window_lists_presets_inside_model_limit():
+    """1M 模型展示上限与 300k/600k/1m 三档可选窗口。"""
+    app, _backend = _make_app(FakeAdmin())
+    app.model.status.model_capabilities = SimpleNamespace(
+        context_window=1_048_576,
+        max_context_window=1_048_576,
+        window_source="catalog",
+    )
+
+    app._cmd_context_window(Command("context-window", ()))
+
+    text = _text(app)
+    assert "模型上限: 1,048,576" in text
+    assert "300k(307,200)" in text
+    assert "600k(614,400)" in text
+    assert "1m(1,048,576)" in text
+
+
+def test_context_window_hides_presets_above_model_limit():
+    """上限 256K 的模型不提供 1M 档,避免误导用户越过能力边界。"""
+    app, _backend = _make_app(FakeAdmin())
+    app.model.status.model_capabilities = SimpleNamespace(
+        context_window=256_000,
+        max_context_window=256_000,
+        window_source="catalog",
+    )
+
+    app._cmd_context_window(Command("context-window", ()))
+
+    text = _text(app)
+    assert "模型上限: 256,000" in text
+    assert "可选档位" not in text
 
 
 async def test_context_window_accepts_megabyte_suffix():

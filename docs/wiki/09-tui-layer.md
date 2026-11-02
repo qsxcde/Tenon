@@ -105,13 +105,13 @@ TuiRenderCoordinator（30fps 防抖）→ TuiBackend.render(...) → Textual
 | `/tools` | 列出可用工具 |
 | `/provider *` | 切换 provider |
 | `/login *` | 配置 provider 的 API key 并切换（输入掩码） |
-| `/model *` | 切换模型（支持 `model:effort`） |
+| `/model *` | 切换模型（支持 `model:effort:window`，如 `kimi-k3:1m`） |
 | `/effort *` | 切换思考强度 |
 | `/fork` | 从指定消息（缺省最近用户消息）分叉会话 |
 | `/undo` | 查看或恢复写前快照（`list` / `preview`），与 `tenon undo` 同源 |
 | `/export <path>` | 导出当前会话完整文档到文件 |
 | `/subagents` | 查看并发上限与活跃委派；`cancel <delegation-id>` 终止单个委派 |
-| `/context-window` | 查看或设置模型上下文窗口（写入 `models.json` 后热切换） |
+| `/context-window` | 查看或设置模型上下文窗口（含 300k/600k/1m 档位与上限校验，写入 `models.json` 后热切换） |
 | `/compact` | 压缩当前会话上下文 |
 | `/output` | 浏览或导出最近工具输出 |
 | `/retry` | 安全重试最近一次模型失败 |

@@ -12,6 +12,7 @@ from tenon.ai.catalog.registry import ModelRegistry
 from tenon.app.composition.model.selection import (
     create_llm,
     get_available_providers,
+    parse_model_pattern,
     split_model_pattern,
 )
 from tenon.ai.providers import PROVIDERS, deepseek, fake, glm, kimi, minimax, qwen
@@ -151,6 +152,21 @@ def test_split_pattern():
     assert split_model_pattern("deepseek-v4-pro") == ("deepseek-v4-pro", None)
     # 非合法 effort 不拆
     assert split_model_pattern("deepseek-v4-pro:foo") == ("deepseek-v4-pro:foo", None)
+
+
+def test_parse_pattern_supports_window_suffix():
+    """选择串可同时携带 effort 与窗口档位,顺序不限。"""
+    pattern = parse_model_pattern("kimi-k3:high:1m")
+    assert pattern.base == "kimi-k3"
+    assert pattern.effort == "high"
+    assert pattern.context_window == 1_048_576
+
+    reversed_pattern = parse_model_pattern("kimi-k3:600k:low")
+    assert reversed_pattern.base == "kimi-k3"
+    assert reversed_pattern.effort == "low"
+    assert reversed_pattern.context_window == 614_400
+
+    assert split_model_pattern("kimi-k3:1m") == ("kimi-k3", None)
 
 
 def test_create_llm_inline_effort(monkeypatch):

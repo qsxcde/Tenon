@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 from .budget import resolve_context_budget_metadata
 from .selection import _get_default_registry, _provider_config, split_model_pattern
+from .window import model_window_limit
 
 CapabilityState = Literal["supported", "unsupported", "unknown"]
 
@@ -22,6 +23,7 @@ class ModelCapabilities:
     provider: str = ""
     model: str = ""
     context_window: int | None = None
+    max_context_window: int | None = None
     window_source: str = "unknown"
     reasoning: bool | None = None
     tool_calling: bool | None = None
@@ -73,6 +75,7 @@ def resolve_model_capabilities(
         provider=resolved_provider,
         model=model_id,
         context_window=budget.context_window,
+        max_context_window=model_window_limit(spec),
         window_source=budget.window_source,
         reasoning=getattr(spec, "reasoning", None),
         tool_calling=getattr(spec, "tool_calling", None),

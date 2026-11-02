@@ -10,6 +10,8 @@ from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 
+from ..model.window import model_window_limit
+
 __all__ = ["TuiAdminService", "model_override_record"]
 
 
@@ -17,9 +19,13 @@ def model_override_record(spec: Any, context_window: int) -> dict[str, Any]:
     """把目录规格转成 models.json 覆盖记录,保留除窗口外的全部元数据。
 
     ``ModelStore`` 的 upsert 是整体替换,只写 ``id`` 与 ``contextWindow`` 会把该模型
-    的 ``maxTokens``/``reasoning``/``aliases`` 清空,因此必须写全已知字段。
+    的 ``maxTokens``/``reasoning``/``aliases`` 清空,因此必须写全已知字段。窗口上限
+    单独写入:它属于模型能力,不能随本次生效窗口一起变小。
     """
     record: dict[str, Any] = {"id": spec.id, "contextWindow": context_window}
+    limit = model_window_limit(spec)
+    if limit is not None:
+        record["maxContextWindow"] = limit
     if spec.name:
         record["name"] = spec.name
     if spec.reasoning is not None:

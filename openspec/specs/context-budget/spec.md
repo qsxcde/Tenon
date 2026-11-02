@@ -59,7 +59,7 @@
 
 ### Requirement: 模型窗口元数据可追溯
 
-模型目录和用户模型覆盖配置 SHALL 能读取正整数形式的 `context_window` 或 `contextWindow` 元数据,并将其绑定到最终模型选择结果。缺失、非法或无法确认来源的窗口值 SHALL 产生明确的 fallback 或 uncertain 标记,不得静默宣称该值为模型的精确能力上限。
+模型目录和用户模型覆盖配置 SHALL 能读取正整数形式的 `context_window` 或 `contextWindow`(生效窗口)与 `max_context_window` 或 `maxContextWindow`(模型能力上限)元数据,并将其绑定到最终模型选择结果。上限缺失时 SHALL 按生效窗口兜底,两者都缺失时标记未知。用户覆盖记录未声明上限时 SHALL 继承同一 `id` 的内置上限,使调小生效窗口不改变模型能力声明。缺失、非法或无法确认来源的窗口值 SHALL 产生明确的 fallback 或 uncertain 标记,不得静默宣称该值为模型的精确能力上限。
 
 #### Scenario: 目录记录提供窗口
 
@@ -70,6 +70,16 @@
 
 - **WHEN** 用户通过模型覆盖配置声明模型及其上下文窗口
 - **THEN** 解析后的模型规格保留该窗口元数据,模型切换后新请求使用覆盖后的值
+
+#### Scenario: 用户覆盖继承能力上限
+
+- **WHEN** 用户覆盖记录只修改 `contextWindow`,没有声明 `maxContextWindow`
+- **THEN** 解析后的模型规格保留内置上限,生效窗口取用户值
+
+#### Scenario: 窗口超过声明上限
+
+- **WHEN** 用户请求的窗口值超过模型声明的上限
+- **THEN** 该请求被拒绝并返回上限数值,不写入覆盖配置
 
 #### Scenario: 窗口元数据缺失
 
