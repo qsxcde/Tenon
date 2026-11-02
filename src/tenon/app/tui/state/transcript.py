@@ -56,6 +56,18 @@ class Transcript(ProgressiveTranscriptMixin, TranscriptLayoutMixin, Component):
         if add_listener is not None:
             add_listener(self._on_block_touched)
 
+    def insert(self, index: int, block: Component) -> None:
+        """在指定位置插入块，并同步布局索引中的顺序。"""
+        index = max(0, min(int(index), len(self._blocks)))
+        self._blocks.insert(index, block)
+        self._layout_index.insert(index, block)
+        add_listener = getattr(block, "add_touch_listener", None)
+        if add_listener is not None:
+            add_listener(self._on_block_touched)
+        self.layout_index = []
+        self._range_starts = []
+        self._line_blocks = []
+
     def _on_block_touched(self, block: Component) -> None:
         self._layout_index.invalidate(block)
         token = self._layout_index.token_for(block)

@@ -9,10 +9,9 @@ from textual.binding import Binding
 from textual.events import Resize
 from textual.widgets import Label
 
+from ...presentation.theme import LOGIN_SURFACE, PALETTE
 from .rich import _NoDefaultBackground
 from .widgets import InputSubmitted, _Composer, _Transcript
-
-_LOGIN_SURFACE = "#171a1d"
 
 
 class _TextualApp(App):
@@ -41,7 +40,7 @@ class _TextualApp(App):
         self._filters.insert(0, _NoDefaultBackground())
         self.styles.background = self.screen.styles.background = "ansi_default"
         self.transcript.styles.background = self.composer.input.styles.background = "ansi_default"
-        self.composer.key_input.styles.background = _LOGIN_SURFACE
+        self.composer.key_input.styles.background = PALETTE[LOGIN_SURFACE]
         self.composer.input.focus()
         self.call_after_refresh(self._backend._notify_resize)
 

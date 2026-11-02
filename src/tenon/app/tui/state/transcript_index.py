@@ -32,6 +32,16 @@ class TranscriptLayoutIndex:
             state.add(state._estimate(token, block))
         return token
 
+    def insert(self, index: int, block: Component) -> int:
+        """Insert a block at a transcript position while preserving ordering."""
+        token = self._next_token
+        self._next_token += 1
+        self._blocks.insert(index, (token, block))
+        self._tokens[id(block)] = token
+        for state in self._states.values():
+            state.insert(index, state._estimate(token, block))
+        return token
+
     def unregister(self, block: Component) -> None:
         token = self._tokens.pop(id(block))
         self._blocks = [

@@ -50,4 +50,5 @@ class TuiModelHost:
 
     # -- 宿主方法(mixin 调用) ---------------------------------------------
     _ensure_assistant: Callable[[], AssistantBlock]
+    _append_tool_block: Callable[[ToolCallBlock], None]
     append_info: Callable[[str], None]

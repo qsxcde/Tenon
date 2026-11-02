@@ -31,11 +31,16 @@ __all__ = [
 
 @dataclass(frozen=True)
 class Span:
-    """一段带样式的文本:``fg``/``bg`` 是 theme.py 的样式标签,不是 ANSI。"""
+    """一段带样式的文本:``fg``/``bg`` 是 theme.py 的样式标签,不是 ANSI。
+
+    ``link`` 保存可点击目标(如 Markdown 链接 URL),由后端映射为终端超链接;
+    组件层仍然不感知终端能力。
+    """
 
     text: str
     fg: str | None = None
     bg: str | None = None
+    link: str | None = None
 
 
 #: 一行 = 段序列(可同行异色:工具块的 状态色图标+accent 名+dim 参数)。
@@ -99,8 +104,8 @@ class Component:
         raise NotImplementedError(f"{type(self).__name__} 未实现 render")
 
 
-def _seg(text: str, fg: str | None = None, bg: str | None = None) -> Span:
-    return Span(text, fg=fg, bg=bg)
+def _seg(text: str, fg: str | None = None, bg: str | None = None, link: str | None = None) -> Span:
+    return Span(text, fg=fg, bg=bg, link=link)
 
 
 def _plain(text: str, fg: str = TEXT) -> RichLine:

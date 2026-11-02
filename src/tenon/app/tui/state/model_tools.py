@@ -8,7 +8,7 @@ from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.tool_status import ToolLifecycleStatus
 
 from .host import TuiModelHost
-from ..presentation.blocks import CancelledBlock, ToolCallBlock
+from ..presentation.blocks import CancelledBlock, ToolCallBlock, ToolGroupBlock
 from .tool_lifecycle import is_terminal, normalize_status
 
 
@@ -134,10 +134,23 @@ class ToolEventMixin(TuiModelHost):
                 block.args = args
             return block
         block = ToolCallBlock(name, args, call_id=call_id)
-        self.transcript.append(block)
+        self._append_tool_block(block)
         if call_id:
             self._tool_blocks_by_id[call_id] = block
         return block
+
+    def _append_tool_block(self, block: ToolCallBlock) -> None:
+        """追加工具块；连续调用共享一个可折叠的分组摘要头。"""
+        blocks = self.transcript.blocks
+        last = blocks[-1] if blocks else None
+        if isinstance(last, ToolCallBlock) and isinstance(last.group, ToolGroupBlock):
+            last.group.add(block)
+        elif isinstance(last, ToolCallBlock):
+            group = ToolGroupBlock()
+            self.transcript.insert(len(blocks) - 1, group)
+            group.add(last)
+            group.add(block)
+        self.transcript.append(block)
 
     def _track_pending(self, block: ToolCallBlock) -> None:
         if block not in self._pending_tools:

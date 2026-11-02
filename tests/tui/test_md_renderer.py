@@ -14,6 +14,7 @@ from tenon.app.tui.presentation.theme import (
     BLOCK_MARK,
     BOLD,
     CODE_BG,
+    CODE_NUMBER,
     HEADING,
     LIST_BULLET,
     TEXT,
@@ -74,7 +75,9 @@ def test_code_block_complete_gets_background():
     lines = md_renderer("```python\nprint(1)\n```", 60)
     # 围栏行 BLOCK_MARK;块内行 CODE_BG 背景(完整块才上背景,design D2)
     assert lines[0] == [Span("```python", fg=BLOCK_MARK)]
-    assert lines[1] == [Span("print(1)", fg=TEXT, bg=CODE_BG)]
+    assert "".join(span.text for span in lines[1]) == "print(1)"
+    assert all(span.bg == CODE_BG for span in lines[1])
+    assert any(span.fg == CODE_NUMBER for span in lines[1])  # 语言高亮生效
     assert lines[2] == [Span("```", fg=BLOCK_MARK)]
 
 

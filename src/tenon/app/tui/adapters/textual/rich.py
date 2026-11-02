@@ -9,7 +9,7 @@ from textual.color import Color
 from textual.filter import LineFilter
 
 from ...presentation.primitives import RichLine
-from ...presentation.theme import BOLD, PALETTE
+from ...presentation.theme import BOLD, ITALIC, LINK, PALETTE
 
 
 def _strip_default_bg(style: Style) -> Style:
@@ -59,6 +59,9 @@ def _line_to_text(line: RichLine) -> Text:
                 color=PALETTE.get(span.fg) if span.fg else None,
                 bgcolor=PALETTE.get(span.bg) if span.bg else None,
                 bold=span.fg == BOLD,
+                italic=span.fg == ITALIC,
+                underline=span.fg == LINK,
+                link=span.link,
             ),
         )
     return text

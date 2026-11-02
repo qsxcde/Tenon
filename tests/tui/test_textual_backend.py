@@ -9,6 +9,14 @@ from typing import Any
 
 from textual.events import MouseScrollDown, MouseScrollUp
 from tenon.app.tui.presentation.primitives import Span
+from tenon.app.tui.presentation.theme import (
+    COMPOSER_RULE,
+    ITALIC,
+    LINK,
+    LOGIN_ACCENT,
+    LOGIN_SURFACE,
+    PALETTE,
+)
 
 
 def test_textual_rich_adapter_preserves_styled_line_content():
@@ -22,6 +30,24 @@ def test_textual_rich_adapter_preserves_styled_line_content():
     rendered = rich_to_text([[Span("hello", fg="accent")]])
 
     assert rendered.plain == "hello"
+
+
+def test_textual_rich_adapter_maps_italic_and_hyperlink():
+    """斜体标签映射字重，链接标签映射下划线 + OSC 8 目标。"""
+    try:
+        from tenon.app.tui.adapters.textual.rich import rich_to_text
+    except ImportError:
+        rich_to_text = None
+
+    assert rich_to_text is not None, "富文本展示适配必须独立于 TextualBackend"
+    rendered = rich_to_text(
+        [[Span("斜体", fg=ITALIC), Span("文档", fg=LINK, link="https://example.com")]]
+    )
+
+    first, second = rendered.spans
+    assert first.style.italic is True
+    assert second.style.underline is True
+    assert second.style.link == "https://example.com"
 
 
 def _wheel(direction: str) -> Any:
@@ -333,10 +359,10 @@ async def test_input_mask_switches_composer_components():
             assert composer.login_hint.display
             assert str(composer.login_hint.content) == "Enter 保存  ·  Esc 取消"
             assert composer.styles.height.value == 4
-            assert composer.key_input.styles.background == Color.parse("#171a1d")
-            assert composer.key_input.styles.border.top[1] == Color.parse("#171a1d")
-            assert composer.top_rule.styles.color == Color.parse("#39d9ff")
-            assert composer.bottom_rule.styles.color == Color.parse("#39d9ff")
+            assert composer.key_input.styles.background == Color.parse(PALETTE[LOGIN_SURFACE])
+            assert composer.key_input.styles.border.top[1] == Color.parse(PALETTE[LOGIN_SURFACE])
+            assert composer.top_rule.styles.color == Color.parse(PALETTE[LOGIN_ACCENT])
+            assert composer.bottom_rule.styles.color == Color.parse(PALETTE[LOGIN_ACCENT])
             assert backend._app.focused is composer.key_input
 
             backend.set_input_mask(False)
@@ -346,8 +372,8 @@ async def test_input_mask_switches_composer_components():
             assert not composer.login_label.display
             assert not composer.login_hint.display
             assert composer.styles.height.value == 3
-            assert composer.top_rule.styles.color == Color.parse("#5a5a5a")
-            assert composer.bottom_rule.styles.color == Color.parse("#5a5a5a")
+            assert composer.top_rule.styles.color == Color.parse(PALETTE[COMPOSER_RULE])
+            assert composer.bottom_rule.styles.color == Color.parse(PALETTE[COMPOSER_RULE])
             assert backend._app.focused is composer.input
             # 退出掩码:普通输入提示还原,密码输入内容清空
             assert composer.input.placeholder == "输入消息..."

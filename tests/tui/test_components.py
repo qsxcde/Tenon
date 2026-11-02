@@ -12,6 +12,7 @@ from tenon.app.tui.presentation.blocks import (
     CancelledBlock,
     ErrorBlock,
     ToolCallBlock,
+    ToolGroupBlock,
     UserBlock,
 )
 from tenon.app.tui.state.model import TuiModel
@@ -275,9 +276,17 @@ def test_assistant_wraps_cjk_by_cell_width():
 
 
 def test_activity_block_has_low_frequency_frames():
-    assert rich_to_plain(ActivityBlock(0).render(60)) == ["• 思考中 ·"]
-    assert rich_to_plain(ActivityBlock(2).render(60)) == ["• 思考中 ···"]
-    assert ActivityBlock(1).render(60)[0][1].fg == ACTIVITY
+    assert rich_to_plain(ActivityBlock(0).render(60)) == ["· 思考中"]
+    assert rich_to_plain(ActivityBlock(5).render(60)) == ["✽ 思考中"]
+    assert "思考中" in rich_to_plain(ActivityBlock(2).render(60))[0]
+    assert ActivityBlock(1).render(60)[0][0].fg == ACTIVITY
+
+
+def test_pending_tool_icon_uses_warning_color():
+    """运行中的工具图标使用警告色，与完成/失败状态可区分。"""
+    block = ToolCallBlock("read", {"file_path": "a.py"})
+    header = block.render(60)[0]
+    assert header[2].text == "·" and header[2].fg == WARNING
 
 
 def test_tool_call_folded_by_default():
@@ -304,6 +313,82 @@ def test_tool_call_expand_shows_result():
     assert len(lines) == 2
     assert lines[0][0].text == "▼"
     assert lines[1][0].fg == TOOL_OUTPUT and "file content" in lines[1][0].text
+
+
+def test_consecutive_tool_calls_collapse_into_group_header():
+    """同一轮连续工具调用折叠为一条分组摘要，避免占满聊天区。"""
+    model = TuiModel()
+    model.apply(
+        AgentEvent(
+            EventType.TOOL_CALL,
+            payload=[
+                {"name": "read", "args": {"file_path": "a.py"}, "id": "c1"},
+                {"name": "bash", "args": {"command": "ls"}, "id": "c2"},
+            ],
+        )
+    )
+    for call_id, result in (("c1", "file content"), ("c2", "退出码: 0(耗时 1.2s)")):
+        model.apply(
+            AgentEvent(
+                EventType.TOOL_RESULT,
+                payload=result,
+                metadata={"tool_call_id": call_id},
+            )
+        )
+
+    collapsed = rich_to_plain(model.transcript.all_rich(80))
+    assert sum("2 个工具调用" in line for line in collapsed) == 1
+    assert not any("Read a.py" in line or "Ran command" in line for line in collapsed)
+    group = next(block for block in model.transcript.blocks if isinstance(block, ToolGroupBlock))
+    header = group.render(80)[0]
+    assert header[2].text == "✓" and header[2].fg == SUCCESS
+
+    group.toggle_expand()
+    expanded = rich_to_plain(model.transcript.all_rich(80))
+    assert any("Read a.py" in line for line in expanded)
+    assert any("Ran command" in line for line in expanded)
+
+
+def test_single_tool_call_keeps_its_own_row():
+    """只有一个工具调用时不创建分组头，保持原有一行摘要。"""
+    model = TuiModel()
+    model.apply(
+        AgentEvent(
+            EventType.TOOL_CALL,
+            payload=[{"name": "read", "args": {"file_path": "a.py"}, "id": "c1"}],
+        )
+    )
+    assert not any(isinstance(block, ToolGroupBlock) for block in model.transcript.blocks)
+    assert any("Reading a.py" in line for line in rich_to_plain(model.transcript.all_rich(80)))
+
+
+def test_click_group_header_toggles_group():
+    """点击分组摘要行展开整组，再次点击折叠。"""
+    from tenon.app.tui.application import TuiApp
+
+    model = TuiModel()
+    model.apply(
+        AgentEvent(
+            EventType.TOOL_CALL,
+            payload=[
+                {"name": "read", "args": {"file_path": "a.py"}, "id": "c1"},
+                {"name": "bash", "args": {"command": "ls"}, "id": "c2"},
+            ],
+        )
+    )
+    model.transcript.render(80, 8)
+    group = next(block for block in model.transcript.blocks if isinstance(block, ToolGroupBlock))
+    assert model.transcript.block_at(0) is group
+
+    app = object.__new__(TuiApp)
+    app.model = model
+    renders: list[bool] = []
+    app._schedule_render = lambda: renders.append(True)
+
+    app._click(0)
+
+    assert group.expanded is True
+    assert renders == [True]
 
 
 def test_tool_call_error_icon():
@@ -431,6 +516,18 @@ def test_edit_tool_expand_shows_intent_diff_with_colored_rows():
     assert any(span.text == "+ new" and span.bg == DIFF_ADD for line in lines for span in line)
 
 
+def test_edit_tool_diff_pads_background_to_terminal_width():
+    """差异行背景补齐到渲染宽度，形成连续色带。"""
+    block = ToolCallBlock("edit", {"file_path": "a.py", "old_string": "old", "new_string": "new"})
+    block.set_result("已替换 1 处: a.py")
+    block.toggle_expand()
+    lines = block.render(20)
+    diff_lines = [line for line in lines if line and line[-1].bg in {DIFF_ADD, DIFF_REMOVE}]
+    assert diff_lines
+    for line in diff_lines:
+        assert _cells("".join(span.text for span in line)) == 20
+
+
 def test_error_and_cancelled_spans():
     assert ErrorBlock("boom").render(60)[0][0].fg == ERROR
     assert CancelledBlock().render(60)[0][0].fg == WARNING
@@ -480,8 +577,6 @@ def test_status_bar_truncates_cjk_metadata():
 
 def test_status_bar_renders_context_usage_on_right():
     """状态栏右侧显示上下文占用、窗口上限与低占用进度条。"""
-    from tenon.app.tui.presentation.theme import ACCENT
-
     bar = StatusBar()
     bar.model = "deepseek-v4-flash"
     bar.effort = "high"
@@ -494,8 +589,18 @@ def test_status_bar_renders_context_usage_on_right():
 
     assert plain.endswith("上下文 12.4k / 128k · 9.7%")
     assert "▰" in plain and "▱" in plain
-    assert any(span.fg == ACCENT for span in line)
+    assert any(span.fg == SUCCESS for span in line)
     assert _cells(plain) <= 100
+
+
+def test_context_meter_color_tracks_usage():
+    """低/中/高上下文占用分别使用 success/warning/error 标签。"""
+    from tenon.app.tui.presentation.status_context import render_context_spans
+
+    for tokens, tag in ((10_000, SUCCESS), (80_000, WARNING), (120_000, ERROR)):
+        spans = render_context_spans(40, tokens, 128_000)
+        assert any(span.fg == tag for span in spans)
+    assert any(span.fg == ACCENT for span in render_context_spans(40, None, 128_000))
 
 
 def test_status_bar_shows_context_window_before_first_usage():

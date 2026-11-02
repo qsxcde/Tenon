@@ -11,6 +11,7 @@ from .tool_lifecycle import ToolLifecycleMixin
 from ..primitives import (
     Component,
     RichLine,
+    _cell_width,
     _seg,
     _truncate,
     _wrap_rich,
@@ -84,6 +85,9 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
         self.execution_status = "running"
         self.result = ""
         self.expanded = False
+        #: 所属的连续调用分组;仅用于成员判定,分组折叠由 group_collapsed 驱动。
+        self.group: Component | None = None
+        self.group_collapsed = False
         self.awaiting = False
         self.rejected = False
         self.output_buffer: OutputBuffer | None = None
@@ -206,14 +210,17 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
                 if emitted >= 80:
                     lines.append([_seg("… 差异内容已截断", fg=DIM)])
                     return lines
-                lines.append(
-                    [_seg(f"{marker} {_truncate(value, max(1, width - 2))}", fg=TEXT, bg=bg)]
-                )
+                text = f"{marker} {_truncate(value, max(1, width - 2))}"
+                rendered = _seg(text, fg=TEXT, bg=bg)
+                padding = " " * max(0, width - _cell_width(text))
+                lines.append([rendered, _seg(padding, bg=bg)] if padding else [rendered])
                 emitted += 1
         return lines
 
     def render(self, width: int) -> list[RichLine]:
-        icon, icon_tag = {"pending": ("·", DIM), "done": ("✓", SUCCESS), "error": ("✗", ERROR)}[
+        if self.group_collapsed:
+            return []
+        icon, icon_tag = {"pending": ("·", WARNING), "done": ("✓", SUCCESS), "error": ("✗", ERROR)}[
             self.status
         ]
         if self.rejected:

@@ -62,7 +62,7 @@ class ModelHistoryMixin(TuiModelHost):
         for call in getattr(message, "tool_calls", None) or []:
             name, args, call_id = self._tool_call_fields(call)
             tool_block = ToolCallBlock(name, args, call_id=call_id)
-            self.transcript.append(tool_block)
+            self._append_tool_block(tool_block)
             self._pending_tools.append(tool_block)
             if tool_block.call_id:
                 self._pending_tools_by_id[tool_block.call_id] = tool_block

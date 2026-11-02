@@ -233,11 +233,11 @@ class AssistantBlock(Component):
 class ActivityBlock(Component):
     """不写入历史的轻量等待提示。"""
 
-    _FRAMES = (" ·", " ··", " ···")
+    _FRAMES = ("·", "✢", "✳", "✶", "✻", "✽", "✻", "✶", "✳", "✢")
 
     def __init__(self, frame: int = 0) -> None:
         self.frame = frame
 
     def render(self, width: int) -> list[RichLine]:
-        suffix = self._FRAMES[self.frame % len(self._FRAMES)]
-        return [[_seg("• ", fg=ASSISTANT_PROMPT), _seg(f"思考中{suffix}", fg=ACTIVITY)]]
+        glyph = self._FRAMES[self.frame % len(self._FRAMES)]
+        return [[_seg(f"{glyph} 思考中", fg=ACTIVITY)]]

@@ -141,6 +141,11 @@ class WidthLayout:
         self.positions[record.token] = (chunk_index, offset)
         self._refresh_chunk(chunk_index)
 
+    def insert(self, index: int, record: LayoutRecord) -> None:
+        """Insert a record at a block position and rebuild the prefix index."""
+        self.records.insert(index, record)
+        self._rebuild()
+
     def remove(self, token: int) -> None:
         chunk_index, offset = self.positions[token]
         self.records.pop(chunk_index * _CHUNK_SIZE + offset)
