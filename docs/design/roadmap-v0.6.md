@@ -118,6 +118,8 @@ openspec validate --specs                           # 24 passed
 | v0.9 | 子 Agent 演进 | 子会话续跑 → 有界并行只读 → worktree 写隔离与父级裁决 | 子会话可追问;并行结果可裁决;写冲突有明确失败语义 |
 | v1.0 | 对外接口 | 发行元数据(description/license/authors/urls)、SDK 入口、真实 provider 可选冒烟 | 干净环境可装可跑;SDK 有稳定示例 |
 
+> 事后校准（2026-11-08）：三档沙箱已在 v0.7 随运行期安全一并交付（`read-only` / `workspace-write` / `danger-full-access`，macOS Seatbelt、Linux bwrap，受限策略无后端 fail-closed）；因此 v0.8 表中"沙箱"一项已完成，余下的程序化工具编排（`run_code` 形态）仍待评估。执行控制中的 `steer` TUI 接线、后台作业与 headless JSON 事件流同样尚未落地，本表保留为后续方向参考。
+
 不做的方向:账号绑定与商业插件市场(与"可替换、可嵌入"定位冲突)、费用估算(单价漂移且非用户当前痛点)。
 
 ## 7. 风险

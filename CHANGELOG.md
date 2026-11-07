@@ -9,6 +9,8 @@
 
 - **TUI 维护类命令**：新增 `/undo`（查看/恢复写前快照）、`/export <path>`（导出当前会话文档）、`/subagents`（查看并发上限与活跃委派，`cancel <id>` 终止单个委派）、`/context-window`（读取或写入 `models.json` 的 `contextWindow` 并热切换）；`/mcp reload` 免重启重建 MCP 与工具运行时。这些高权限动作经 `TuiAdminPort` 由组合根实现，视图层不直接触碰快照存储与模型目录。
 - **TUI 启动恢复**：`tenon --tui -c` 恢复最近有活动的会话（此前 TUI 启动固定新建）。
+- **上下文窗口档位与上限校验**：`ModelSpec` 新增 `maxContextWindow`，`models.json` 可按模型声明窗口上限；`/context-window` 与 `/model` 支持 `300k` / `600k` / `1m` 档位，超过模型上限时拒绝写入。写入记录单独保存上限，用户调小生效窗口后仍可调回，同时保留原有的 `maxTokens` / `reasoning` / `aliases` 元数据。
+- **TUI 视觉刷新**：调色板升级为高对比现代终端风，composer / 登录态颜色改由 `PALETTE` 提供（适配器不再硬编码 hex）；工具状态色、intent diff 连续色带、状态栏上下文占用分级着色，活动提示改为约 0.45 秒一帧的低频脉冲字形。
 
 ### Changed
 

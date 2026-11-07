@@ -4,8 +4,8 @@
 
 截至 2026-11-08 复核（macOS / Python 3.12，项目更名为 `tenon` 后）：
 
-- `uv run pytest -q`：**2204 passed**（2204 collected，无 skipped），行覆盖率 **93%**（20429 statements，1416 missing）。
-- 本地快速质量集：`uv run pytest -m "unit or contract" -q` → **2040 passed，164 deselected**（38.69s，含覆盖率插桩），覆盖率为 **90%**（20429 statements，1979 missing），硬下限仍为 **88%**（CI `--cov-fail-under=88`）。
+- `uv run pytest -q`：**2213 passed**（2213 collected，无 skipped），行覆盖率 **93%**（20429 statements，1416 missing）。
+- 本地快速质量集：`uv run pytest -m "unit or contract" -q` → **2049 passed，164 deselected**（38.69s，含覆盖率插桩），覆盖率为 **90%**（20429 statements，1979 missing），硬下限仍为 **88%**（CI `--cov-fail-under=88`）。
 - 分层批次：`(integration or e2e or platform or compatibility) and not contract` → **154 passed，2035 deselected**（15.47s）。跨平台测试和 CI 质量结果以对应 GitHub Actions artifact 为准。
 - 历史基线（仅作趋势参考，不代表当前口径）：v0.5.0 发布 `1695 passed / 3 skipped`（1698 collected）、**84.40%**（2026-10-10，Windows）；v0.4 `1532 passed`、**83.61%**（2026-08-30，macOS）；v0.7 能力收口时为 `1870 passed` / 快速集 `1718 passed`（2026-10-24）。用例数的持续增长来自测试拆分、契约补充、Subagent 全链路、运行期安全、TUI 维护命令与新增模块的覆盖补齐。
 - `test-foundation-stability` 与 `test-structure-coverage` 均已归档；当前测试结构和 `last_activity_at` 跨层契约已落地。
@@ -100,11 +100,14 @@ uv run pytest -m "not slow" -q
 # 完整离线测试
 uv run pytest -q
 
-# CI 同步的正确性静态检查（只阻断语法错误、未定义名称和未使用局部变量）
+# CI 同步的正确性静态检查（E9/F821/F841 + 导入排序、现代化语法与常见缺陷规则）
 uv run ruff check src tests evals scripts
 
 # 应用层生产文件/函数规模护栏
 uv run python scripts/scale_scan.py
+
+# 文档相对链接检查
+uv run python scripts/check_doc_links.py
 
 # 生成覆盖率报告（不设置高比例硬门槛）
 uv run pytest -m "unit or contract" -q --strict-markers --cov=tenon --cov-report=term-missing
@@ -155,7 +158,7 @@ openspec validate --specs
 
 `.github/workflows/ci.yml` 将门禁分为四类：
 
-- `quality-fast`：Ruff、`uv audit --locked`、unit/contract、覆盖率报告（硬下限 88%）、版本一致性、补丁格式和 OpenSpec 规格/变更校验。
+- `quality-fast`：Ruff、`uv audit --locked`、unit/contract、覆盖率报告（硬下限 88%）、版本一致性、补丁格式、OpenSpec 规格/变更校验和文档链接检查。
 - `test-matrix`：Ubuntu、Windows、macOS 上执行 integration/e2e/platform/compatibility（排除已由快速集覆盖的 contract 用例），统一使用 fake provider；失败时保留 JUnit 和跳过原因。
 - `package-smoke`：运行 release check，构建并检查 wheel/sdist，在干净虚拟环境安装后检查 CLI 和内建 resources 可用。
 - `performance`：运行离线 TUI 基准并上传 JSON；性能回归目前只告警，不阻断普通 PR。报告使用 schema v2，包含提交/首 token 延迟、帧 p50/p95、控制事件 p95、峰值 Python 分配和协调器帧计数。硬上限与发布候选判定见 [`TUI 性能边界与回归判定`](benchmarks/tui-performance-policy.md)。

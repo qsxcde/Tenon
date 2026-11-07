@@ -101,6 +101,9 @@ jobs:
       - name: Validate OpenSpec changes
         run: openspec validate --changes
 
+      - name: Check documentation links
+        run: uv run python scripts/check_doc_links.py
+
       - name: Upload fast quality artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

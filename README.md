@@ -36,7 +36,7 @@
 | **可感知** | 会话过程以事件流暴露，CLI / TUI / 测试 / CI 都能订阅 |
 | **可测试** | 核心层零网络、零密钥即可运行，注入 `FakeClient` 即可跑通全量测试 |
 
-当前状态：`v0.7.0` · Python 3.12+ · 全量离线测试 **2204 passed** · 快速质量集 **2040 passed** · OpenSpec **25/25**。
+当前状态：`v0.7.0` · Python 3.12+ · 全量离线测试 **2213 passed** · 快速质量集 **2049 passed** · OpenSpec **25/25**。
 
 ## 核心特性
 
@@ -55,7 +55,7 @@
 ### 环境要求
 
 - Python 3.12 或更高
-- [uv](https://docs.astral.sh/uv/)
+- [uv](https://docs.astral.sh/uv/) 0.12.1 或更高（CI 与 `uv_build` 均要求 `>=0.12.1`）
 
 ### 安装
 
@@ -142,6 +142,8 @@ uv run tenon undo                     # LIFO 逐级恢复最近一次 write/edit
 | `TOOL_MAX_CONCURRENCY` | `4` | 同轮工具调用的并发上限 |
 | `TOOL_TIMEOUT` / `TOOL_MAX_TIMEOUT` | 无 / `600` | 单次工具超时与硬上限（秒） |
 
+> **安全默认值**：`SANDBOX_POLICY` 缺省为 `danger-full-access`（不包装 bash 命令），以保持本地工作流可用；处理不可信仓库时建议改为 `workspace-write` 或 `read-only`（受限策略缺少 Seatbelt/bwrap 后端时直接拒绝执行）。扩展插件按"目录放置即信任"加载并在同进程执行，沙箱只约束 bash 子进程，不约束插件 Python 代码；`ext__*` 工具默认需要确认，可在 `~/.tenon/extensions.json` 收窄。headless 模式无 `--yes` 时敏感操作一律拒绝。
+
 完整迁移与回滚说明见 [v0.7 升级指南](docs/releases/v0.7-upgrade.md)。
 
 ## 架构与项目结构
@@ -187,11 +189,12 @@ uv run ruff check src tests evals scripts                 # 正确性静态检�
 uv run ruff format --check src tests evals scripts        # 格式化门禁
 uv run python scripts/type_scan.py                        # 类型债务棘轮
 uv run python scripts/scale_scan.py                       # 规模门禁（文件 ≤300 行 / 函数 ≤80 行）
+uv run python scripts/check_doc_links.py                  # 文档相对链接检查
 openspec validate --specs                                 # 规格校验
 uv build                                                  # 构建 wheel / sdist
 ```
 
-CI 由 `quality-fast`（Ruff、快速测试、覆盖率下限 88%、类型棘轮、OpenSpec）、三平台离线测试矩阵、`package-smoke`（构建、干净安装、fake provider CLI 冒烟）与非阻塞性能报告组成。测试标记与分层说明见 [docs/testing.md](docs/testing.md)。
+CI 由 `quality-fast`（Ruff、`uv audit --locked`、快速测试、覆盖率下限 88%、类型棘轮、OpenSpec、文档链接）、三平台离线测试矩阵、`package-smoke`（构建、干净安装、fake provider CLI 冒烟）与非阻塞性能报告组成。测试标记与分层说明见 [docs/testing.md](docs/testing.md)。
 
 ## 版本与路线图
 

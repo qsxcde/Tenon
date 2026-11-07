@@ -38,7 +38,7 @@
 | 分层 | `app` / `core` / `session` / `ai` / `tools` / `resources`，依赖单向流动 |
 | 编排 | 自研 ReAct（`core/orchestration/loop.py`），无 langchain/langgraph |
 | 持久化 | `~/.tenon/sessions/<id>.jsonl`（JSONL 树形，格式版本 1） |
-| 测试基线 | `2204 passed`（无 skipped），快速质量集 2040 passed、覆盖率 90%，OpenSpec 25/25（2026-11-08，macOS）；覆盖率与历史趋势以 [`../testing.md`](../testing.md) 与 CI 为准 |
+| 测试基线 | `2213 passed`（无 skipped），快速质量集 2049 passed、覆盖率 90%，OpenSpec 25/25（2026-11-08，macOS）；覆盖率与历史趋势以 [`../testing.md`](../testing.md) 与 CI 为准 |
 
 ## 维护约定
 

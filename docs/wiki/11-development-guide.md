@@ -110,12 +110,12 @@ uv run tenon --tui             # 交互式终端
 
 | 任务 | 内容 |
 | --- | --- |
-| `quality-fast` | Ruff、unit/contract 测试、覆盖率（`--cov-fail-under=88`）、版本一致性、补丁格式与 OpenSpec 校验 |
+| `quality-fast` | Ruff、`uv audit --locked`、unit/contract 测试、覆盖率（`--cov-fail-under=88`）、版本一致性、补丁格式、OpenSpec 校验与文档链接检查 |
 | `test-matrix` | Ubuntu / Windows / macOS 上执行 integration/e2e/platform/compatibility（统一 fake provider；失败保留 JUnit） |
 | `package-smoke` | release check：构建、产物检查、干净环境安装、CLI 与内建 resources 验证 |
 | `performance` | 离线 TUI 基准（5 场景）并上传 JSON；回归只告警，不阻断普通 PR（发布候选用 `--fail-on-regression`） |
 
-当前 `quality-fast` 与平台矩阵存在约 25 个兼容性/平台测试重复执行；不影响正确性，后续需决定保留或调整 marker 分层。
+平台矩阵通过 `and not contract` 排除已由快速集覆盖的契约测试，不再与 `quality-fast` 重复执行。
 
 ## 八、版本与文档同步
 

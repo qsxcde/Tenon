@@ -42,11 +42,12 @@ uv run ruff format --check src tests evals scripts             # 当前 CI 的�
 uv run python scripts/type_scan.py                       # 当前 CI 的类型债务棘轮
 uv run python scripts/scale_scan.py                      # 全生产层规模门禁(也被 contract 测试覆盖)
 uv run pytest -m "unit or contract" -q --cov=tenon --cov-report=term-missing
+uv run python scripts/check_doc_links.py                 # 文档相对链接检查(CI 门禁)
 uv build                                                 # 构建发行产物
 openspec validate --specs                                # 验证 OpenSpec 规格说明
 ```
 
-测试和构建必须使用仓库声明的工具链。CI 使用 `uv sync --locked --group dev`，本地应优先保持 lock 文件同步。
+- 测试和构建必须使用仓库声明的工具链。CI 使用 `uv sync --locked --group dev`，本地应优先保持 lock 文件同步；`uv_build` 与 CI 要求 `uv >= 0.12.1`。
 
 ## 架构与依赖边界
 
@@ -124,7 +125,7 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 
 当前 CI 包含以下质量层级：
 
-- 快速质量门禁：Ruff、`unit/contract` 测试、覆盖率、版本一致性、差异格式和 OpenSpec 验证。
+- 快速质量门禁：Ruff、`uv audit --locked`、`unit/contract` 测试、覆盖率（下限 88%）、版本一致性、差异格式、OpenSpec 规格/变更验证与文档链接检查。
 - 跨平台测试：Ubuntu、Windows 和 macOS 上的 `integration/e2e/platform/compatibility` 测试。
 - 发行检查：构建 wheel/sdist、检查版本和资源、干净环境安装，并使用 fake provider 验证 CLI。
 - 性能报告：TUI 基准和基线比较，当前为非阻塞任务。
