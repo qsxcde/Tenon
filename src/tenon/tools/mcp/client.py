@@ -161,11 +161,7 @@ class McpServerClient:
             future.cancel()
             try:
                 await asyncio.wait_for(asyncio.shield(wrapped), timeout=5.0)
-            except (
-                asyncio.CancelledError,
-                asyncio.TimeoutError,
-                concurrent.futures.CancelledError,
-            ):
+            except (TimeoutError, asyncio.CancelledError, concurrent.futures.CancelledError):
                 pass
             raise
         extracted = extract_result(result)
@@ -189,11 +185,7 @@ class McpServerClient:
             future.cancel()
             try:
                 await asyncio.wait_for(asyncio.shield(wrapped), timeout=5.0)
-            except (
-                asyncio.CancelledError,
-                asyncio.TimeoutError,
-                concurrent.futures.CancelledError,
-            ):
+            except (TimeoutError, asyncio.CancelledError, concurrent.futures.CancelledError):
                 pass
             raise
         extracted = extract_result(result)

@@ -5,7 +5,8 @@ from __future__ import annotations
 import asyncio
 import json
 import uuid
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 from tenon.ai.errors import classify_provider_error
 from tenon.ai.model.types import (
@@ -15,9 +16,9 @@ from tenon.ai.model.types import (
     ToolCall,
     ToolDefinition,
 )
-from tenon.ai.transport.sse import SSEParser
-from tenon.ai.transport.retry import retry_delay
 from tenon.ai.transport.host import OpenAICompatClientHost
+from tenon.ai.transport.retry import retry_delay
+from tenon.ai.transport.sse import SSEParser
 
 
 class OpenAICompatStreamingMixin(OpenAICompatClientHost):

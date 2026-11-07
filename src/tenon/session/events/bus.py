@@ -6,7 +6,8 @@ bus 本身不持有图/模型/工具,只负责扇出事件,保持"薄"。
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 # 订阅回调签名:接收一个 AgentEvent
 Subscriber = Callable[[Any], None]

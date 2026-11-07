@@ -7,8 +7,8 @@ from typing import Any
 
 from tenon.core.contracts.messages import ToolOutputMetadata
 from tenon.core.contracts.subagent_results import (
-    MAX_SUBAGENT_ARTIFACT_REF_CHARS,
     MAX_SUBAGENT_ARTIFACT_LABEL_CHARS,
+    MAX_SUBAGENT_ARTIFACT_REF_CHARS,
     MAX_SUBAGENT_CONTINUATION_CHARS,
     MAX_SUBAGENT_EVIDENCE,
     MAX_SUBAGENT_EVIDENCE_EXCERPT_CHARS,

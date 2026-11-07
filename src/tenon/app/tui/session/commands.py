@@ -5,11 +5,12 @@ from __future__ import annotations
 import shlex
 
 from tenon.app.session_recovery import format_recovery_report
-from tenon.session.persistence.errors import SessionRecoveryError
-from ..commands.host import TuiAppHost
-from ..commands.parser import Command
 from tenon.session.navigation.tree import SessionNode, build_tree
 from tenon.session.persistence import SessionQuery
+from tenon.session.persistence.errors import SessionRecoveryError
+
+from ..commands.host import TuiAppHost
+from ..commands.parser import Command
 
 
 class SessionCommandsMixin(TuiAppHost):

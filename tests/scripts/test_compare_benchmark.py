@@ -7,7 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 PARAMETERS = {
     "history_blocks": 100,
     "stream_chars": 10_000,

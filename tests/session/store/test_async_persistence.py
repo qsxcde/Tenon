@@ -9,8 +9,8 @@ import pytest
 from tenon.core.contracts.messages import Message
 from tenon.session.persistence.async_boundary import AsyncPersistenceBoundary
 from tenon.session.persistence.memory_store import MemoryStore
-from tenon.session.session_persistence import SessionPersistence
 from tenon.session.persistence.models import UsageStats
+from tenon.session.session_persistence import SessionPersistence
 
 
 class _SlowMemoryStore(MemoryStore):

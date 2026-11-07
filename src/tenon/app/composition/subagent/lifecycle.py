@@ -56,9 +56,10 @@ def observe_child_event(active: Any, event: AgentEvent) -> bool:
             _transition(active, target)
         _remember_child_identity(active)
         return True
-    if active.state.status is SubagentStatus.WAITING_CONFIRMATION:
-        _transition(active, SubagentStatus.RUNNING)
-    elif active.state.status is SubagentStatus.STARTING:
+    if (
+        active.state.status is SubagentStatus.WAITING_CONFIRMATION
+        or active.state.status is SubagentStatus.STARTING
+    ):
         _transition(active, SubagentStatus.RUNNING)
     _remember_child_identity(active)
     return True

@@ -7,12 +7,11 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, cast
 
+from ..ports.backend import TuiBackend
 from ..presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
 from ..presentation.primitives import RichLine
-from ..ports.backend import TuiBackend
 from ..rendering.coordinator import TuiEventBuffer, TuiRenderCoordinator
 from ..state.model import TuiModel
-
 
 _SCENARIOS = {"history", "stream", "tool-output", "restore", "scroll-resize"}
 SCENARIO_REQUIRED_METRICS = {

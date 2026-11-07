@@ -35,7 +35,7 @@ async def test_timeout_from_executor_marks_failed():
     """执行器抛 TimeoutError → FAILED 且 timed_out。"""
 
     async def slow(command: str, timeout: float):
-        raise asyncio.TimeoutError
+        raise TimeoutError
 
     result = await VerificationRunner(".", execute=slow).run("pytest -q")
 

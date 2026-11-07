@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, AsyncIterator, Protocol
+from collections.abc import AsyncIterator
+from typing import Any, Protocol
 
 from tenon.ai.model.types import (
     ChatMessage,
@@ -38,7 +39,7 @@ class ChatClient(Transport, Protocol):
     @property
     def model_id(self) -> str: ...
 
-    def bind_tools(self, tools: list[ToolDefinition]) -> "ChatClient": ...
+    def bind_tools(self, tools: list[ToolDefinition]) -> ChatClient: ...
 
 
 class Provider(Protocol):

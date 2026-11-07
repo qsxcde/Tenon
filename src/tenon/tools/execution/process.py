@@ -176,18 +176,18 @@ class ProcessRunner:
             timed_out = False
             try:
                 await asyncio.wait_for(proc.wait(), timeout=request.timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 timed_out = True
                 cleanup_confirmed = self._backend.kill_tree(proc.pid)
                 try:
                     await asyncio.wait_for(proc.wait(), timeout=request.cleanup_timeout)
-                except (asyncio.TimeoutError, ProcessLookupError):
+                except (TimeoutError, ProcessLookupError):
                     cleanup_confirmed = False
             except asyncio.CancelledError:
                 cleanup_confirmed = self._backend.kill_tree(proc.pid)
                 try:
                     await asyncio.wait_for(proc.wait(), timeout=request.cleanup_timeout)
-                except (asyncio.TimeoutError, ProcessLookupError):
+                except (TimeoutError, ProcessLookupError):
                     cleanup_confirmed = False
                 raise
             stdout, stdout_stats = self._read_output(out_name, request)

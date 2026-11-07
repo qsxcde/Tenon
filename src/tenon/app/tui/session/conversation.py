@@ -8,11 +8,12 @@ from typing import Any
 from tenon.app.errors.reporting import report_unexpected_error
 from tenon.app.tasks.modes import TaskMode
 from tenon.app.tasks.supervisor import TaskEvent, TaskPhase, TaskSupervisor
+from tenon.core.contracts.events import AgentEvent, EventType
+
 from ..commands.host import TuiAppHost
 from ..commands.parser import Command
 from ..presentation.primitives import Span
 from ..presentation.theme import ACCENT, DIM, ERROR, WARNING
-from tenon.core.contracts.events import AgentEvent, EventType
 
 
 class TuiConversationCoordinator(TuiAppHost):

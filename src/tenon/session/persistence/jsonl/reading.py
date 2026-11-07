@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from tenon.core.contracts.messages import Message
 from tenon.session.persistence.codec import _dict_to_message, _validate_header
@@ -22,22 +23,21 @@ class JsonlReadingMixin(JsonlStoreHost):
 
     def _iter_entries(self, path: Path) -> Iterator[dict[str, Any]]:
         header_seen = False
-        with self._lock_for(path):
-            with path.open("r", encoding="utf-8") as stream:
-                for line in stream:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        entry = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    if not isinstance(entry, dict):
-                        continue
-                    if not header_seen:
-                        _validate_header(entry, path)
-                        header_seen = True
-                    yield entry
+        with self._lock_for(path), path.open("r", encoding="utf-8") as stream:
+            for line in stream:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(entry, dict):
+                    continue
+                if not header_seen:
+                    _validate_header(entry, path)
+                    header_seen = True
+                yield entry
         if not header_seen:
             raise ValueError(f"会话文件缺少 header: {path}")
 

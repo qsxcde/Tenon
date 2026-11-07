@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from tenon.core.contracts.ports import ApprovalPolicy
 from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.session.manager.host import SessionManagerHost
+from tenon.session.persistence.codec import normalize_title
 from tenon.session.persistence.errors import SessionRecoveryError
 from tenon.session.persistence.models import (
     RecoveryDiagnostic,
@@ -19,7 +20,6 @@ from tenon.session.persistence.models import (
     SessionRef,
     SessionStore,
 )
-from tenon.session.persistence.codec import normalize_title
 from tenon.session.runtime.state import RunPhase
 
 if TYPE_CHECKING:

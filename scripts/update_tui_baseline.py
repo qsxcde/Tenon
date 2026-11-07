@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 SCHEMA_VERSION = 2
 REQUIRED_SCENARIOS = ("history", "restore", "stream", "tool-output")
 

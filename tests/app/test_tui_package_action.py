@@ -88,7 +88,7 @@ def test_install_returns_package_and_scope(tmp_path):
 
     message = assembler.package_action("install", ("./pkg", "--project"))
 
-    assert "已安装 Package pkg@1.2.0 (project)" == message
+    assert message == "已安装 Package pkg@1.2.0 (project)"
     assert packages.calls == [("install", ("./pkg",), {"scope": "project"})]
 
 

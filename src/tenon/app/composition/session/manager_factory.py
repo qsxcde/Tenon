@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Any, Callable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from tenon.core.context.preflight import ContextPreflightConfig
 from tenon.core.contracts.hooks import LifecycleHook
@@ -12,12 +12,12 @@ from tenon.session.compaction import CompactionPolicyConfig
 from tenon.tools.shared import ToolResourceLimits
 
 from ..model.factory import _resolve_context_window, _resolve_model_effort
+from ..runtime.extensions import RuntimeExtensions, normalize_runtime_extensions
 from ..runtime.factory import (
     close_runtime_for_config_async,
     create_agent_config,
     policy_for_config,
 )
-from ..runtime.extensions import RuntimeExtensions, normalize_runtime_extensions
 from ..subagent.factory import make_child_session_factory
 from .agent_factory import create_agent_session
 

@@ -36,7 +36,7 @@ def make_llm(
     spec: ModelSpec | None = None,
     *,
     reasoning_effort: str | None = None,
-) -> "OpenAICompatClient":
+) -> OpenAICompatClient:
     """按配置 + 模型规格构造自研 ``OpenAICompatClient``。
 
     - ``spec`` 缺省时按 ``cfg.model`` 在内置目录解析;查不到的新模型按非推理处理;

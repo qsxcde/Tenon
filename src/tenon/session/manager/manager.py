@@ -7,11 +7,12 @@ from collections.abc import Callable, Iterable
 from dataclasses import is_dataclass
 from typing import Any
 
-from tenon.core.contracts.hooks import LifecycleHook, LifecycleHookEvent as LifecycleHookEvent
+from tenon.core.contracts.hooks import LifecycleHook
+from tenon.core.contracts.hooks import LifecycleHookEvent as LifecycleHookEvent
 from tenon.core.contracts.ports import AgentTool, ApprovalPolicy
 from tenon.core.orchestration.config import AgentLoopConfig
-from tenon.session.compaction.summarizer import Summarizer
 from tenon.session.compaction import CompactionPolicyConfig
+from tenon.session.compaction.summarizer import Summarizer
 from tenon.session.constants import DEFAULT_CONTEXT_WINDOW
 from tenon.session.contracts import SessionCloser
 from tenon.session.events.bus import Subscriber

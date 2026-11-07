@@ -6,8 +6,8 @@
 
 from __future__ import annotations
 
-from ..presentation.theme import ACCENT, DIM, SUCCESS
 from ..presentation.primitives import Span
+from ..presentation.theme import ACCENT, DIM, SUCCESS
 from .host import TuiAppHost
 from .registry import _COMMANDS
 

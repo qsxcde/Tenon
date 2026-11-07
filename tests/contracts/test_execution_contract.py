@@ -5,8 +5,8 @@ import time
 
 import pytest
 
-from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
+from tenon.core.execution.runtime import ToolExecutionRuntime
 
 
 class _AgentTool:

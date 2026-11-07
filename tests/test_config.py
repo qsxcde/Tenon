@@ -168,3 +168,31 @@ def test_migrate_legacy_config_keeps_existing_current(tmp_path, monkeypatch):
     assert migrate_legacy_config(current, legacy) is None
     assert (current / ".env").read_text(encoding="utf-8") == "new"
     assert (legacy / ".env").read_text(encoding="utf-8") == "old"
+
+
+def test_migrate_legacy_config_noop_without_legacy(tmp_path):
+    """旧目录不存在时不动作,也不创建新目录(交给后续 ensure 流程)。"""
+    legacy = tmp_path / ".missing"
+    current = tmp_path / ".current"
+
+    assert migrate_legacy_config(current, legacy) is None
+    assert not current.exists()
+
+
+def test_migrate_legacy_config_warns_on_move_failure(tmp_path, monkeypatch, caplog):
+    """迁移失败只告警并返回 None,不向启动路径抛异常。"""
+    legacy = tmp_path / ".legacy"
+    current = tmp_path / ".current"
+    legacy.mkdir()
+    (legacy / ".env").write_text("LLM_PROVIDER=fake", encoding="utf-8")
+
+    def _fail_move(src, dst):
+        raise OSError("permission denied")
+
+    monkeypatch.setattr("tenon.app.config_migration.shutil.move", _fail_move)
+
+    with caplog.at_level("WARNING"):
+        assert migrate_legacy_config(current, legacy) is None
+    assert "旧配置目录迁移失败" in caplog.text
+    assert (legacy / ".env").read_text(encoding="utf-8") == "LLM_PROVIDER=fake"
+    assert not current.exists()

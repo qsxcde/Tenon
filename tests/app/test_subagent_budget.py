@@ -35,9 +35,9 @@ class _RecordingRunner:
 @pytest.mark.unit
 def test_effective_budget_uses_defaults_and_rejects_hard_limit_overflow() -> None:
     from tenon.app.composition.subagent.budget import (
+        DEFAULT_MAX_OUTPUT_CHARS,
         DEFAULT_MAX_TOOL_CALLS,
         DEFAULT_MAX_TURNS,
-        DEFAULT_MAX_OUTPUT_CHARS,
         DEFAULT_TIMEOUT_SECONDS,
         effective_budget,
     )

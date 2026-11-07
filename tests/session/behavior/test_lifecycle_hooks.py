@@ -4,9 +4,9 @@ import asyncio
 
 import pytest
 
-from tenon.core import AgentEvent, AgentLoopConfig, EventType, LifecycleHookEvent
-from tenon.app.container import ChatModelPort
 from tenon.ai.providers.fake import FakeClient
+from tenon.app.container import ChatModelPort
+from tenon.core import AgentEvent, AgentLoopConfig, EventType, LifecycleHookEvent
 from tenon.session import AgentSession, EventBus
 from tenon.session.persistence import MemoryStore
 from tenon.session.runtime.state import RunPhase

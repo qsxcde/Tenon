@@ -18,13 +18,17 @@ from ...ports.backend import (
 )
 from ...presentation.primitives import RichLine
 from .app import _TextualApp
-from .widgets import _KeyInput as _KeyInput
 from .rich import (
-    _NoDefaultBackground as _NoDefaultBackground,
     _line_to_text,
-    _strip_default_bg as _strip_default_bg,
     rich_to_text,
 )
+from .rich import (
+    _NoDefaultBackground as _NoDefaultBackground,
+)
+from .rich import (
+    _strip_default_bg as _strip_default_bg,
+)
+from .widgets import _KeyInput as _KeyInput
 
 
 class TextualBackend:

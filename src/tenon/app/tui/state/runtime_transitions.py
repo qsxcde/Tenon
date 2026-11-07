@@ -8,8 +8,8 @@ from typing import Any
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.tool_status import ToolLifecycleStatus
 
-from .runtime_state import RuntimePhase, RuntimeSnapshot
 from .runtime_operations import compaction_finished, int_or_none, operation_finished
+from .runtime_state import RuntimePhase, RuntimeSnapshot
 from .tool_lifecycle import is_terminal, normalize_status, transition_status
 
 

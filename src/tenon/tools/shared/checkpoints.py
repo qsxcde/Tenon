@@ -48,7 +48,7 @@ class CheckpointEntry:
         }
 
     @classmethod
-    def from_dict(cls, raw: dict) -> "CheckpointEntry":
+    def from_dict(cls, raw: dict) -> CheckpointEntry:
         return cls(
             seq=int(raw["seq"]),
             path=str(raw["path"]),

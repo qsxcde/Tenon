@@ -10,10 +10,10 @@ from tenon.core.contracts.subagents import SubagentRequest
 from tenon.session.compaction import CompactionPolicyConfig
 from tenon.tools.shared import ToolResourceLimits
 
-from .runner import ChildSessionFactory, ParallelSubagentRunner, SerialSubagentRunner
+from ..runtime.extensions import RuntimeExtensions
 from .budget import effective_budget
 from .profiles import allowed_tool_names_for, prompt_for
-from ..runtime.extensions import RuntimeExtensions
+from .runner import ChildSessionFactory, ParallelSubagentRunner, SerialSubagentRunner
 
 
 def create_subagent_runner(

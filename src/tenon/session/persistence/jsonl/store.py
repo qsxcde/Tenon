@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from tenon.session.persistence.index import SessionIndex
 from tenon.session.persistence.codec import _now as _codec_now
+from tenon.session.persistence.index import SessionIndex
 from tenon.session.persistence.jsonl.forking import JsonlForkingMixin
 from tenon.session.persistence.jsonl.indexing import JsonlIndexingMixin
 from tenon.session.persistence.jsonl.reading import JsonlReadingMixin

@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from tenon.app.tasks.verification.models import TaskStatus, VerificationResult
 from tenon.app.tasks.verification import runner as runner_module
+from tenon.app.tasks.verification.models import TaskStatus, VerificationResult
 from tenon.app.tasks.verification.runner import VerificationRunner
 from tenon.app.tasks.verification.workspace import (
     VerificationCommandResolver,

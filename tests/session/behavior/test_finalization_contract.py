@@ -15,7 +15,7 @@ from tenon.session.persistence.jsonl import JsonFileStore
 from tenon.session.persistence.memory_store import MemoryStore
 from tenon.session.persistence.models import UsageStats
 from tenon.session.runtime.state import CommitStatus, RunPhase
-from tests.session.behavior.fixtures import _StubSummarizer, _compact_session, _long, _session
+from tests.session.behavior.fixtures import _compact_session, _long, _session, _StubSummarizer
 
 
 class _FailingUsageMemoryStore(MemoryStore):

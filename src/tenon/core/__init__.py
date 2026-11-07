@@ -4,36 +4,36 @@
 本包内部模块。外部世界通过 AgentLoopConfig 注入模型、工具和运行时。
 """
 
-from tenon.core.context.model import AgentContext
+from tenon.core.agent import Agent
 from tenon.core.context.budget import (
-    ContextBudgetInput,
-    ContextBudgetSnapshot,
     DEFAULT_CONTEXT_WINDOW,
     DEFAULT_OUTPUT_RESERVE,
     DEFAULT_RESERVE_TOKENS,
+    ContextBudgetInput,
+    ContextBudgetSnapshot,
     estimate_context_budget,
     govern_tool_messages,
 )
+from tenon.core.context.contracts import (
+    ContextBudgetPort,
+    ContextPreparationRequest,
+    ContextPreparer,
+    ContextToolDefinition,
+    ContextTransformer,
+)
 from tenon.core.context.diagnostics import ContextDiagnostics
+from tenon.core.context.model import AgentContext
 from tenon.core.context.preflight import (
     ContextPreflightConfig,
     ContextPreflightResult,
     PreflightStatus,
     evaluate_context_preflight,
 )
-from tenon.core.context.contracts import (
-    ContextBudgetPort,
-    ContextPreparationRequest,
-    ContextPreparer,
-    ContextTransformer,
-    ContextToolDefinition,
-)
-from tenon.core.agent import Agent
 from tenon.core.contracts.errors import (
     AgentContinueError,
     AgentRuntimeError,
-    ContextPreparationError,
     ContextPreflightError,
+    ContextPreparationError,
     ContextTransformTimeoutError,
     SubagentContractError,
     SubagentRequestError,
@@ -55,18 +55,6 @@ from tenon.core.contracts.hooks import (
     session_event_phase,
     to_lifecycle_hook_event,
 )
-from tenon.core.execution.runtime import (
-    CleanupResult,
-    OperationRegistry,
-    ToolExecutionRuntime,
-    ToolOperation,
-)
-from tenon.core.orchestration.loop import (
-    DEFAULT_RECURSION_LIMIT,
-    RecursionLimitError,
-    run_agent_loop,
-    run_agent_loop_continue,
-)
 from tenon.core.contracts.messages import (
     CleanupStatus,
     Message,
@@ -84,12 +72,13 @@ from tenon.core.contracts.ports import (
     ToolCleanupPort,
     ToolDecision,
 )
+from tenon.core.contracts.subagent_state import SubagentState
 from tenon.core.contracts.subagents import (
     SubagentArtifact,
     SubagentBudget,
     SubagentContextItem,
-    SubagentEvidence,
     SubagentEventSink,
+    SubagentEvidence,
     SubagentFailure,
     SubagentFailurePhase,
     SubagentFinding,
@@ -100,8 +89,19 @@ from tenon.core.contracts.subagents import (
     SubagentStatus,
     SubagentUsage,
 )
-from tenon.core.contracts.subagent_state import SubagentState
+from tenon.core.execution.runtime import (
+    CleanupResult,
+    OperationRegistry,
+    ToolExecutionRuntime,
+    ToolOperation,
+)
 from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.loop import (
+    DEFAULT_RECURSION_LIMIT,
+    RecursionLimitError,
+    run_agent_loop,
+    run_agent_loop_continue,
+)
 
 __all__ = [
     "AgentEvent",

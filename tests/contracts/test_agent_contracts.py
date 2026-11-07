@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-
 import pytest
 
 from tenon.core.context.model import AgentContext
 from tenon.core.contracts.errors import AgentContinueError
-from tenon.core.contracts.ports import AgentTool, ToolDecision
 from tenon.core.contracts.messages import Message
+from tenon.core.contracts.ports import AgentTool, ToolDecision
 from tenon.core.orchestration.config import AgentLoopConfig
 
 

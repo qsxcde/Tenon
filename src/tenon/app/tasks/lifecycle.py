@@ -6,9 +6,8 @@ import asyncio
 
 from .host import TaskSupervisorHost
 from .modes import TaskMode
-from .verification.models import TaskStatus, WorkspaceDiff, WorkspaceSnapshot
-
 from .results import TaskEvent, TaskPhase, TaskResult
+from .verification.models import TaskStatus, WorkspaceDiff, WorkspaceSnapshot
 
 
 class TaskLifecycleMixin(TaskSupervisorHost):

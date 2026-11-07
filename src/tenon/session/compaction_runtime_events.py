@@ -8,7 +8,6 @@ from tenon.core.context.budget import ContextBudgetSnapshot
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.session.host import AgentSessionHost
 
-
 CompactionTrigger = Literal["manual", "auto"]
 
 

@@ -10,9 +10,9 @@ from .profiles import (
     allowed_tool_names_for,
     instructions_for,
     output_guidance_for,
-    profile_names,
-    profile_for,
     profile_error_message,
+    profile_for,
+    profile_names,
     prompt_for,
 )
 from .runner import ParallelSubagentRunner, SerialSubagentRunner

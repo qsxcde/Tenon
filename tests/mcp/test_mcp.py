@@ -6,9 +6,9 @@
 
 from __future__ import annotations
 
-import json
 import asyncio
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -349,8 +349,8 @@ def test_permissions_missing_config_empty():
 
 def test_classify_mcp_rules():
     """安全分类器:deny/ask 命中;未命中与无规则 → 默认放行。"""
-    from tenon.tools.security import classify_mcp
     from tenon.tools.mcp.permissions import McpPermissionRules
+    from tenon.tools.security import classify_mcp
 
     rules = McpPermissionRules(deny=("mcp__db",), ask=("mcp__github",))
     denied = classify_mcp("mcp__db__query", rules)

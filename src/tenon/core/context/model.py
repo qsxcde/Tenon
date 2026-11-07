@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
 from tenon.core.contracts.errors import AgentContinueError
 from tenon.core.contracts.messages import Message
 from tenon.core.contracts.ports import AgentTool
@@ -18,7 +19,7 @@ class AgentContext:
     messages: list[Message] = field(default_factory=list)
     tools: list[AgentTool] = field(default_factory=list)
 
-    def copy(self) -> "AgentContext":
+    def copy(self) -> AgentContext:
         """Copy the context containers without copying message/tool objects."""
         return AgentContext(
             system_prompt=self.system_prompt,

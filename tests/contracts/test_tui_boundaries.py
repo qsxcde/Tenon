@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 TUI_ROOT = Path(__file__).resolve().parents[2] / "src" / "tenon" / "app" / "tui"
 
 

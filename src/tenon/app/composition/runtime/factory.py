@@ -4,28 +4,28 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Iterable
-from typing import Any, Callable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from tenon.core.context.contracts import identity_context
+from tenon.core.context.preflight import ContextPreflightConfig
 from tenon.core.contracts.hooks import LifecycleHook
 from tenon.core.execution.runtime import ToolExecutionRuntime
-from tenon.core.context.preflight import ContextPreflightConfig
 from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.tools.capabilities import detect_tool_capabilities
+from tenon.tools.shared import ToolResourceLimits
 
+from ..model import selection as model_selection
 from ..model.factory import (
     DEFAULT_RESERVE_TOKENS,
     ChatModelPort,
     _resolve_context_budget_metadata,
     resolve_model_capabilities,
 )
-from ..model import selection as model_selection
 from ..policy import _create_policy
 from ..prompts import _build_system_prompt, _load_skills
-from .extensions import RuntimeExtensions, normalize_runtime_extensions
-from tenon.tools.capabilities import detect_tool_capabilities
 from ..tools.factory import resolve_tool_resource_limits
-from tenon.tools.shared import ToolResourceLimits
+from .extensions import RuntimeExtensions, normalize_runtime_extensions
 from .tool_assembly import assemble_runtime_tools
 
 
@@ -48,8 +48,9 @@ class AgentRuntime:
         self._closed = False
         self._close_task: asyncio.Task[None] | None = None
         # Runtime ownership is attached to the composition config instead of
-        # being stored in process-global mutable state.
-        setattr(config, "_runtime_owner", self)
+        # being stored in process-global mutable state. It is a dynamic
+        # attribute, so it must be set via setattr (noqa: B010).
+        setattr(config, "_runtime_owner", self)  # noqa: B010
 
     async def close(self) -> None:
         """关闭模型和 MCP 资源，重复调用安全。"""
@@ -228,10 +229,12 @@ def create_agent_config(
         after_tool_calls=runtime_extensions.after_tool_calls,
         lifecycle_hooks=runtime_extensions.lifecycle_hooks,
     )
-    # Keep environment and AI metadata at the composition boundary.
-    setattr(config, "tool_capabilities", detect_tool_capabilities())
-    setattr(config, "tool_resource_limits", resolved_limits)
-    setattr(config, "model_capabilities", getattr(config.model, "capabilities", None))
+    # Keep environment and AI metadata at the composition boundary. These are
+    # dynamic composition attributes, not declared AgentLoopConfig fields, so
+    # they must be set via setattr (noqa: B010) rather than assignment.
+    setattr(config, "tool_capabilities", detect_tool_capabilities())  # noqa: B010
+    setattr(config, "tool_resource_limits", resolved_limits)  # noqa: B010
+    setattr(config, "model_capabilities", getattr(config.model, "capabilities", None))  # noqa: B010
     AgentRuntime(config, _create_policy(cfg, approval_mode), client, mcp_tools, tool_runtime)
     return config
 
@@ -265,7 +268,8 @@ class _LazyPolicy:
         self._config = config
 
     def decide(self, tool_name: str, args: dict[str, Any]) -> Any:
-        getattr(self._config, "model")
+        # 触发模型端口解析，确保 runtime 已绑定；该表达式仅用于诊断。
+        _ = self._config.model
         runtime = runtime_for_config(self._config)
         if runtime is None:  # pragma: no cover - defensive registry invariant
             raise RuntimeError("Agent 配置尚未完成装配")

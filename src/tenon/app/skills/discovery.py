@@ -118,6 +118,7 @@ def package_records(
     scope: str,
 ) -> list[Any]:
     from tenon.app.config import package_paths
+
     from .packages.registry import PackageRecord, PackageRegistry
 
     store_path, registry_path, _ = package_paths(cwd, scope=scope, config_dir=config_dir)

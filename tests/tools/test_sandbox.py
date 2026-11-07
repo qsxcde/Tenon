@@ -89,7 +89,7 @@ def test_linux_workspace_write_binds_workspace_writable():
     assert plan.executable == "/usr/bin/bwrap"
     prefix = plan.argv_prefix
     assert prefix[:3] == ("--ro-bind", "/", "/")
-    assert ("--bind", WS, WS) == prefix[3:6]
+    assert prefix[3:6] == ("--bind", WS, WS)
     assert prefix[-1] == BASH
 
 

@@ -1,12 +1,11 @@
 """recovery behavior tests."""
 
-from tests.session.behavior.fixtures import *  # noqa: F401,F403
-
 import json
 
 import pytest
 
 from tenon.session.persistence import JsonFileStore, SessionRecoveryError
+from tests.session.behavior.fixtures import *  # noqa: F401,F403
 
 
 async def test_followup_continues_history():

@@ -10,7 +10,6 @@ from typing import Any, Literal, TypeAlias
 
 import httpx
 
-
 ProviderErrorKind: TypeAlias = Literal[
     "network",
     "timeout",

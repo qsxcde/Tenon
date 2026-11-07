@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from tenon.core.contracts.events import SUBAGENT_EVENT_TYPES, AgentEvent, EventType
+
 from ..presentation.blocks import ErrorBlock, UserBlock
 from ..presentation.primitives import _visible_user_content
-from .runtime import RuntimePhase
-from tenon.core.contracts.events import SUBAGENT_EVENT_TYPES, AgentEvent, EventType
-from .model_tools import ToolEventMixin
 from .model_subagents import SubagentEventMixin
+from .model_tools import ToolEventMixin
+from .runtime import RuntimePhase
 
 
 def _token_label(value: Any) -> str:

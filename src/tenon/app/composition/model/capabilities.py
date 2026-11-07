@@ -30,7 +30,7 @@ class ModelCapabilities:
     prompt_cache: bool | None = None
     cached_tokens_observed: int | None = None
 
-    def with_cache_observation(self, cached_tokens: int | None) -> "ModelCapabilities":
+    def with_cache_observation(self, cached_tokens: int | None) -> ModelCapabilities:
         """返回带本次会话缓存 usage 观测的副本,不改变能力声明。"""
         return replace(self, cached_tokens_observed=cached_tokens)
 

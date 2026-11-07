@@ -5,9 +5,10 @@ from __future__ import annotations
 import json
 import os
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 PACKAGE_MANIFEST_FILE = "tenon-package.json"
 PACKAGE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -66,7 +67,7 @@ class PackageRecord:
         }
 
     @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> "PackageRecord":
+    def from_dict(cls, value: dict[str, Any]) -> PackageRecord:
         package_id = str(value.get("id") or "").strip()
         root_text, skills_text = value.get("root"), value.get("skills")
         if (

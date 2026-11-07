@@ -25,7 +25,6 @@ from tenon.session.persistence.records import MessageRecord
 from tenon.session.runtime import SessionRuntime
 from tenon.session.session_persistence import SessionPersistence
 
-
 LEGACY_MODULES = (
     "tenon.session.bus",
     "tenon.session.json_file_store",

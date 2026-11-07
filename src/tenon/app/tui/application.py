@@ -13,22 +13,26 @@ from collections.abc import Callable
 from typing import Any
 
 from tenon.app.skills.models import Skill
+from tenon.app.tasks.modes import TaskMode
+from tenon.app.tasks.supervisor import TaskSupervisor
+from tenon.core.contracts.events import AgentEvent, EventType
+
+from .commands.coordinator import TuiCommandCoordinator
+from .commands.interaction import (
+    _SUGGESTION_WINDOW as _SUGGESTION_WINDOW,
+)
+from .commands.interaction import (
+    TuiInteractionCoordinator,
+)
+from .lifecycle import TuiShutdownMixin
 from .ports.admin import TuiAdminPort
 from .ports.backend import TuiBackend
 from .presentation.blocks import SubagentBlock, ToolCallBlock, ToolGroupBlock
-from .state.model import TuiModel
 from .presentation.status import FooterInfo
 from .rendering.coordinator import TuiEventBuffer, TuiRenderCoordinator
-from .commands.interaction import (
-    _SUGGESTION_WINDOW as _SUGGESTION_WINDOW,
-    TuiInteractionCoordinator,
-)
-from .session.coordinator import TuiSessionCoordinator
 from .session.conversation import TuiConversationCoordinator
-from .commands.coordinator import TuiCommandCoordinator
-from tenon.core.contracts.events import AgentEvent, EventType
-from tenon.app.tasks.modes import TaskMode
-from tenon.app.tasks.supervisor import TaskSupervisor
+from .session.coordinator import TuiSessionCoordinator
+from .state.model import TuiModel
 
 #: 退出文档的兜底宽度(视口尺寸不可用时)。
 _DEFAULT_EXIT_WIDTH = 120
@@ -39,6 +43,7 @@ class TuiApp(
     TuiSessionCoordinator,
     TuiCommandCoordinator,
     TuiInteractionCoordinator,
+    TuiShutdownMixin,
 ):
     """把会话事件流驱动成组件渲染 + 输入/打断/退出的视图逻辑。"""
 
@@ -155,35 +160,6 @@ class TuiApp(
         self.model.transcript.scroll(delta)
         self._schedule_render()
 
-    # -- 确认交互(security-permissions)-------------------------------------
-    def _exit(self) -> None:
-        """Schedule async shutdown from the synchronous backend callback."""
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            asyncio.run(self.shutdown())
-            return
-        if not self._shutdown_complete and self._shutdown_task is None:
-            self._shutdown_task = self._track_task(loop.create_task(self.shutdown()))
-
-    def _track_task(self, task: asyncio.Task[Any]) -> asyncio.Task[Any]:
-        """Register a TUI-owned task so shutdown can await or cancel it."""
-        self._background_tasks.add(task)
-
-        def consume_done(done: asyncio.Task[Any]) -> None:
-            self._background_tasks.discard(done)
-            if done.cancelled():
-                return
-            try:
-                done.exception()
-            except BaseException:
-                # Retrieving the exception prevents asyncio's orphan-task
-                # warning; task bodies render their own operational errors.
-                pass
-
-        task.add_done_callback(consume_done)
-        return task
-
     # -- 事件 → 渲染 -------------------------------------------------------
     def _event_buffer_flush(self) -> None:
         self._event_buffer.flush()
@@ -223,60 +199,26 @@ class TuiApp(
             return
         self._shutdown_started = True
         self._accepting_input = False
+        self._stop_runtime_activity()
+        tasks = self._collect_shutdown_tasks()
+        await self._cancel_tasks(tasks)
+        self._release_subscription()
+        await self._close_owned_runtime()
+        self._finish_shutdown()
+
+    def _stop_runtime_activity(self) -> None:
         self._stop_activity_timer()
         self._render_coordinator.stop_status_timer()
         self._render_coordinator.cancel_pending_render()
         self._clear_confirmation()
 
-        tasks = [
-            task
-            for task in (
-                self._restore_task,
-                self._conversation_task,
-                self._session_action_task,
-                self._package_task,
-            )
-            if task is not None and not task.done()
-        ]
+    def _collect_shutdown_tasks(self) -> list[asyncio.Task[Any]]:
+        tasks = self._pending_tasks()
         current = asyncio.current_task()
         for task in tuple(self._background_tasks):
             if task is not current and not task.done() and task not in tasks:
                 tasks.append(task)
-        if self._task_supervisor is not None:
-            self._task_supervisor.cancel()
-        for task in tasks:
-            task.cancel()
-        if tasks:
-            try:
-                await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=1.0)
-            except asyncio.TimeoutError:
-                pass
-
-        if self._unsubscribe is not None:
-            unsubscribe, self._unsubscribe = self._unsubscribe, None
-            try:
-                unsubscribe()
-            except (ValueError, KeyError):
-                pass
-
-        manager_close = getattr(self._manager, "close", None)
-        if callable(manager_close):
-            result = manager_close()
-            if hasattr(result, "__await__"):
-                # The manager owns model/MCP/tool resources. Its async close
-                # is the authoritative wait boundary; proceeding after a
-                # timeout would allow the TUI to exit while work still holds
-                # those resources.
-                await result
-        elif self._close_runtime is not None:
-            result = self._close_runtime()
-            if hasattr(result, "__await__"):
-                await result
-
-        self._event_buffer.flush()
-        width = self._transcript_width()
-        self._backend.exit_document(self.model.transcript.iter_lines(width))
-        self._shutdown_complete = True
+        return tasks
 
     def _sync_activity_timer(self) -> None:
         self._render_coordinator.sync_activity_timer()

@@ -286,7 +286,7 @@ class Settings(BaseSettings):
         return checkpoints_dir()
 
     @model_validator(mode="after")
-    def _check_cwd_env(self) -> "Settings":
+    def _check_cwd_env(self) -> Settings:
         warn_cwd_env()
         if self.sandbox_policy not in SANDBOX_POLICY_CHOICES:
             raise ValueError(

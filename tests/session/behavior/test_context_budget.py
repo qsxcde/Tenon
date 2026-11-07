@@ -4,8 +4,8 @@ from tenon.ai.providers.fake import FakeClient
 from tenon.app.container import ChatModelPort
 from tenon.core import AgentLoopConfig, EventType
 from tenon.session import AgentSession, EventBus
-from tenon.session.persistence.models import UsageStats
 from tenon.session.persistence import MemoryStore
+from tenon.session.persistence.models import UsageStats
 
 
 def _session(model: ChatModelPort, store: MemoryStore) -> AgentSession:

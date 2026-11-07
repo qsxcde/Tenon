@@ -10,13 +10,12 @@ from tenon.app.tui.adapters.textual.backend import TextualBackend
 from tenon.app.tui.application import TuiApp
 from tenon.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock
 from tenon.core.contracts.events import AgentEvent, EventType
-from tests.tui.view.fixtures import FakeManager, FakeSession
 from tests.tui.performance_helpers import (
     assert_control_latency,
     assert_event_order,
     assert_text_complete,
 )
-
+from tests.tui.view.fixtures import FakeManager, FakeSession
 
 pytestmark = pytest.mark.integration
 

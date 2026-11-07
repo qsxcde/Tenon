@@ -38,8 +38,8 @@ def test_read_only_mode_denies_mutation_and_allows_reads():
 async def test_plan_policy_is_enforced_by_react_tool_boundary():
 
     from tenon.ai.providers.fake import FakeClient
-    from tenon.app.container import ChatModelPort
     from tenon.app.composition.tools.adapter import adapt_tools
+    from tenon.app.container import ChatModelPort
     from tenon.core import (
         AgentContext,
         AgentLoopConfig,

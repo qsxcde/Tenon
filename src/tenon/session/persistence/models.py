@@ -164,9 +164,7 @@ class SessionQuery:
             return False
         if self.status and getattr(ref, "status", "idle") != self.status:
             return False
-        if self.archived is not None and getattr(ref, "archived", False) != self.archived:
-            return False
-        return True
+        return not (self.archived is not None and getattr(ref, "archived", False) != self.archived)
 
     def without_status(self) -> SessionQuery:
         """返回供持久化层使用的查询,运行态状态留给会话管理器覆盖。"""

@@ -13,10 +13,9 @@ from __future__ import annotations
 
 import asyncio
 import enum
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
-from collections.abc import Mapping
-from typing import Any, AsyncIterator, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from tenon.core.contracts.messages import Message, ToolCall, ToolResult
 
@@ -92,7 +91,7 @@ class ToolExecutionRuntimePort(Protocol):
 
     async def execute(
         self,
-        tool: "AgentTool",
+        tool: AgentTool,
         call: ToolCall,
         timeout: float | None = None,
         operation_id: str | None = None,
@@ -121,13 +120,13 @@ class ModelPort(Protocol):
     async def generate(
         self,
         messages: list[Message],
-        tools: list["AgentTool"] | None = None,
+        tools: list[AgentTool] | None = None,
     ) -> ModelResponse: ...
 
     def stream(
         self,
         messages: list[Message],
-        tools: list["AgentTool"] | None = None,
+        tools: list[AgentTool] | None = None,
     ) -> AsyncIterator[StreamEvent]: ...
 
 
@@ -171,11 +170,11 @@ class ToolDecision:
     warning: bool = False
 
     @classmethod
-    def allow(cls, reason: str = "", *, warning: bool = False) -> "ToolDecision":
+    def allow(cls, reason: str = "", *, warning: bool = False) -> ToolDecision:
         return cls("allow", reason, warning)
 
     @classmethod
-    def block(cls, reason: str, *, warning: bool = False) -> "ToolDecision":
+    def block(cls, reason: str, *, warning: bool = False) -> ToolDecision:
         return cls("block", reason, warning)
 
 
@@ -220,7 +219,7 @@ class ApprovalResult:
     reason: str = ""
 
     @classmethod
-    def from_response(cls, approved: bool, reason: str = "") -> "ApprovalResult":
+    def from_response(cls, approved: bool, reason: str = "") -> ApprovalResult:
         """把确认响应(批准/拒绝)映射为封闭终态。"""
         if approved:
             return cls(ApprovalOutcome.ALLOWED_ONCE, reason)
@@ -230,7 +229,7 @@ class ApprovalResult:
         )
 
     @classmethod
-    def from_exception(cls, exc: BaseException) -> "ApprovalResult":
+    def from_exception(cls, exc: BaseException) -> ApprovalResult:
         """把等待审批期间的异常归因到封闭终态(取消/超时),其余归为通道不可用。"""
         if isinstance(exc, asyncio.CancelledError):
             return cls(

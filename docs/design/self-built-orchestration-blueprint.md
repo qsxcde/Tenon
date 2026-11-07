@@ -207,5 +207,5 @@ for call in msg.tool_calls:
 ## 10. 后续状态（2026-11-08）
 
 - v0.5、v0.6 与 v0.7 已先后发布：Subagent 协作、正确性硬化与扩展/运行期安全均已完成；当前包版本 `0.7.0`。
-- 全量离线测试 **2189 passed**、快速集 **2025 passed / 覆盖率 90%**、离线评测 4/4、OpenSpec 25 份主规格（2026-11-08，macOS / Python 3.12）。
+- 全量离线测试 **2204 passed**、快速集 **2040 passed / 覆盖率 90%**、离线评测 4/4、OpenSpec 25 份主规格（2026-11-08，macOS / Python 3.12）。
 - 当前架构、门禁与剩余范围以 [architecture.md](./architecture.md) §3、[`../testing.md`](../testing.md) 与 `docs/iteration/v0.7.md` 为准；本文第 2~6 节仍为 2026-08-14 实施前的历史方案。

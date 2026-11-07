@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
 from scripts.scale_scan import (
     COMPATIBILITY_EXCEPTIONS,
     MAX_FILE_LINES,

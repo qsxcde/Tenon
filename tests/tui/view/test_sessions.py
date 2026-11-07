@@ -1,13 +1,12 @@
 """TUI view sessions behavior tests."""
 
-from tests.tui.view.fixtures import *  # noqa: F401,F403
-
+from tenon.app.tui.presentation.blocks import SubagentBlock
 from tenon.session.persistence import (
     RecoveryDiagnostic,
     SessionRecoveryError,
     SessionRecoveryReport,
 )
-from tenon.app.tui.presentation.blocks import SubagentBlock
+from tests.tui.view.fixtures import *  # noqa: F401,F403
 
 
 def test_session_switch_refreshes_skill_registry_and_diagnostics():

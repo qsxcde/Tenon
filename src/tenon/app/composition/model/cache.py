@@ -51,7 +51,7 @@ class CacheObservation:
             return 0.0
         return min(1.0, self.cached_tokens / self.input_tokens)
 
-    def observe(self, usage: Mapping[str, int] | None) -> "CacheObservation":
+    def observe(self, usage: Mapping[str, int] | None) -> CacheObservation:
         """吸收一次 usage;缺少字段时视为 0,不制造虚假命中。"""
         if not usage:
             return self

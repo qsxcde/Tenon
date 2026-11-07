@@ -5,10 +5,13 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
+from .lifecycle import TaskLifecycleMixin
 from .modes import TaskMode, mode_policy
+from .results import TaskEvent, TaskPhase, TaskResult
 from .verification.models import (
     TaskStatus,
     VerificationResult,
@@ -17,9 +20,6 @@ from .verification.models import (
 )
 from .verification.runner import VerificationRunner
 from .verification.workspace import VerificationCommandResolver, WorkspaceInspector
-
-from .lifecycle import TaskLifecycleMixin
-from .results import TaskEvent, TaskPhase, TaskResult
 
 __all__ = ["TaskPhase", "TaskEvent", "TaskResult", "TaskSupervisor"]
 

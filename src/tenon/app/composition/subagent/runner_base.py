@@ -117,7 +117,7 @@ class BaseSubagentRunner:
                     active,
                     on_event,
                 )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             if not timeout_scope.expired():
                 raise
             active.cancel_requested = True

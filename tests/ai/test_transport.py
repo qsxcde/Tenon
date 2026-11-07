@@ -11,8 +11,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tenon.ai.transport.openai_compat import OpenAICompatClient
 from tenon.ai.model.types import ChatMessage, ToolCall, ToolDefinition
+from tenon.ai.transport.openai_compat import OpenAICompatClient
 
 
 def _client(**kwargs) -> OpenAICompatClient:
@@ -308,7 +308,7 @@ class _FakeSSEResponse:
     async def aread(self) -> bytes:
         return b""
 
-    async def __aenter__(self) -> "_FakeSSEResponse":
+    async def __aenter__(self) -> _FakeSSEResponse:
         return self
 
     async def __aexit__(self, *args) -> bool:
@@ -328,7 +328,7 @@ class _FakeStreamingClient:
     def __init__(self, lines: list[str]):
         self._lines = lines
 
-    async def __aenter__(self) -> "_FakeStreamingClient":
+    async def __aenter__(self) -> _FakeStreamingClient:
         return self
 
     async def __aexit__(self, *args) -> bool:
@@ -415,12 +415,14 @@ async def test_stream_error_includes_body_details():
     import httpx
 
     c = _client()
-    with _patch_async_client(
-        lambda r: httpx.Response(401, json={"error": {"message": "Invalid API key"}})
+    with (
+        _patch_async_client(
+            lambda r: httpx.Response(401, json={"error": {"message": "Invalid API key"}})
+        ),
+        pytest.raises(httpx.HTTPStatusError) as ei,
     ):
-        with pytest.raises(httpx.HTTPStatusError) as ei:
-            async for _ in c.stream([], tools=[]):
-                pass
+        async for _ in c.stream([], tools=[]):
+            pass
     # body 已被 aread:细节可读,未被 ResponseNotRead 挡住
     assert "Invalid API key" in ei.value.response.text
 
@@ -464,10 +466,9 @@ async def test_stream_non_retryable_4xx_no_retry():
         return httpx.Response(400, json={"error": "bad request"})
 
     c = _client(max_retries=3)
-    with _patch_async_client(handler):
-        with pytest.raises(httpx.HTTPStatusError):
-            async for _ in c.stream([], tools=[]):
-                pass
+    with _patch_async_client(handler), pytest.raises(httpx.HTTPStatusError):
+        async for _ in c.stream([], tools=[]):
+            pass
     assert calls["n"] == 1  # 不重试
 
 

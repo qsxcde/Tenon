@@ -11,8 +11,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from tenon.session.persistence.models import SessionRef
 
@@ -24,7 +24,7 @@ class SessionNode:
     """会话树节点:会话元数据 + 其子分支(按时间序)。"""
 
     ref: SessionRef
-    children: list["SessionNode"] = field(default_factory=list)
+    children: list[SessionNode] = field(default_factory=list)
 
 
 def build_tree(

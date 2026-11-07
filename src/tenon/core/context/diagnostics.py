@@ -44,7 +44,7 @@ class ContextDiagnostics:
     last_failure: dict[str, str] | None = None
 
     @classmethod
-    def empty(cls) -> "ContextDiagnostics":
+    def empty(cls) -> ContextDiagnostics:
         """Return an explicit empty state for sessions without observations."""
         return cls()
 
@@ -54,7 +54,7 @@ class ContextDiagnostics:
         snapshot: ContextBudgetSnapshot,
         *,
         model_id: str | None = None,
-    ) -> "ContextDiagnostics":
+    ) -> ContextDiagnostics:
         """Create a diagnostic view using exactly one budget snapshot."""
         certainty: WindowCertainty
         if snapshot.status == "uncertain":
@@ -105,7 +105,7 @@ class ContextDiagnostics:
             return None
         return max(0.0, min(100.0, self.input_tokens / self.context_window * 100))
 
-    def with_preflight(self, result: ContextPreflightResult) -> "ContextDiagnostics":
+    def with_preflight(self, result: ContextPreflightResult) -> ContextDiagnostics:
         """Attach the latest preflight while keeping other observations."""
         base = self._replace_budget(result.snapshot)
         return replace(
@@ -122,7 +122,7 @@ class ContextDiagnostics:
         input_tokens: int,
         output_tokens: int = 0,
         cached_tokens: int = 0,
-    ) -> "ContextDiagnostics":
+    ) -> ContextDiagnostics:
         """Attach provider usage without replacing the request estimate."""
         return replace(
             self,
@@ -143,7 +143,7 @@ class ContextDiagnostics:
         target_tokens: int | None = None,
         summarized_entry_ids: tuple[str, ...] = (),
         kept_entry_ids: tuple[str, ...] = (),
-    ) -> "ContextDiagnostics":
+    ) -> ContextDiagnostics:
         """Attach bounded compaction metadata without message contents."""
         return replace(
             self,
@@ -170,7 +170,7 @@ class ContextDiagnostics:
         action: str,
         reason: str | None,
         facts_complete: bool | None,
-    ) -> "ContextDiagnostics":
+    ) -> ContextDiagnostics:
         """Append one tool result and bound the runtime-only collection."""
         item = ToolResultDiagnostic(
             tool_call_id=tool_call_id,
@@ -189,7 +189,7 @@ class ContextDiagnostics:
         code: str,
         message: str,
         phase: str,
-    ) -> "ContextDiagnostics":
+    ) -> ContextDiagnostics:
         """Attach a local failure without implying committed provider usage."""
         return replace(
             self,
@@ -199,7 +199,7 @@ class ContextDiagnostics:
             actual_cached_tokens=None,
         )
 
-    def _replace_budget(self, snapshot: ContextBudgetSnapshot) -> "ContextDiagnostics":
+    def _replace_budget(self, snapshot: ContextBudgetSnapshot) -> ContextDiagnostics:
         current = ContextDiagnostics.from_budget(snapshot, model_id=self.model_id)
         return replace(
             current,

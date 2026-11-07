@@ -9,8 +9,8 @@ from tenon.core.context.preflight import ContextPreflightConfig
 from tenon.tools.shared import ToolResourceLimits
 
 from ..prompts import _workspace, agents_sources, skills_view
-from ..runtime.factory import close_runtime_for_config
 from ..runtime.extensions import RuntimeExtensions
+from ..runtime.factory import close_runtime_for_config
 from .config import TuiConfigMixin
 
 
@@ -69,12 +69,12 @@ def _resolve_footer_info(
     registry: Any = None,
 ) -> Any:
     """解析底部状态栏所需的 model、effort、provider 和 cwd。"""
-    from tenon.app.config import Settings
-    from tenon.app.tui.presentation.status import FooterInfo
     from tenon.app.composition.model.factory import (
         _resolve_model_effort,
         resolve_model_capabilities,
     )
+    from tenon.app.config import Settings
+    from tenon.app.tui.presentation.status import FooterInfo
 
     model_id, effort = _resolve_model_effort(cfg, provider, model, reasoning_effort)
     resolved_provider = provider or getattr(cfg, "llm_provider", None) or Settings().llm_provider
@@ -177,8 +177,9 @@ class TuiAssembler(TuiConfigMixin):
     def build(self) -> Any:
         """创建 TuiApp；``continue_recent`` 时恢复最近会话，否则新建。"""
         from tenon.app import config as app_config
-        from tenon.app.tui.application import TuiApp
         from tenon.app.tui.adapters.textual.backend import TextualBackend
+        from tenon.app.tui.application import TuiApp
+
         from .admin import TuiAdminService
 
         manager = self._build_manager()

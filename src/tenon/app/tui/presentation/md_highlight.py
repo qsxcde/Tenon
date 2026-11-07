@@ -45,30 +45,149 @@ _COMMENT_PREFIX: dict[str, tuple[str, ...]] = {
 }
 
 _PYTHON_KEYWORDS = frozenset(
-    """
-    and as assert async await break class continue def del elif else except finally for
-    from global if import in is lambda match nonlocal not or pass raise return try yield
-    True False None self
-    """.split()
+    [
+        "and",
+        "as",
+        "assert",
+        "async",
+        "await",
+        "break",
+        "class",
+        "continue",
+        "def",
+        "del",
+        "elif",
+        "else",
+        "except",
+        "finally",
+        "for",
+        "from",
+        "global",
+        "if",
+        "import",
+        "in",
+        "is",
+        "lambda",
+        "match",
+        "nonlocal",
+        "not",
+        "or",
+        "pass",
+        "raise",
+        "return",
+        "try",
+        "yield",
+        "True",
+        "False",
+        "None",
+        "self",
+    ]
 )
 _JS_KEYWORDS = frozenset(
-    """
-    async await break case catch class const continue default delete do else export extends
-    false finally for from function if import in instanceof let new null of return static
-    super switch this throw true try typeof undefined var void while yield
-    """.split()
+    [
+        "async",
+        "await",
+        "break",
+        "case",
+        "catch",
+        "class",
+        "const",
+        "continue",
+        "default",
+        "delete",
+        "do",
+        "else",
+        "export",
+        "extends",
+        "false",
+        "finally",
+        "for",
+        "from",
+        "function",
+        "if",
+        "import",
+        "in",
+        "instanceof",
+        "let",
+        "new",
+        "null",
+        "of",
+        "return",
+        "static",
+        "super",
+        "switch",
+        "this",
+        "throw",
+        "true",
+        "try",
+        "typeof",
+        "undefined",
+        "var",
+        "void",
+        "while",
+        "yield",
+    ]
 )
 _BASH_KEYWORDS = frozenset(
-    """
-    case do done elif else esac fi for function if in select then time until while
-    """.split()
+    [
+        "case",
+        "do",
+        "done",
+        "elif",
+        "else",
+        "esac",
+        "fi",
+        "for",
+        "function",
+        "if",
+        "in",
+        "select",
+        "then",
+        "time",
+        "until",
+        "while",
+    ]
 )
 _RUST_KEYWORDS = frozenset(
-    """
-    as async await break const continue crate dyn else enum extern false fn for if impl in
-    let loop match mod move mut pub ref return self static struct super trait true type
-    unsafe use where while
-    """.split()
+    [
+        "as",
+        "async",
+        "await",
+        "break",
+        "const",
+        "continue",
+        "crate",
+        "dyn",
+        "else",
+        "enum",
+        "extern",
+        "false",
+        "fn",
+        "for",
+        "if",
+        "impl",
+        "in",
+        "let",
+        "loop",
+        "match",
+        "mod",
+        "move",
+        "mut",
+        "pub",
+        "ref",
+        "return",
+        "self",
+        "static",
+        "struct",
+        "super",
+        "trait",
+        "true",
+        "type",
+        "unsafe",
+        "use",
+        "where",
+        "while",
+    ]
 )
 
 _LANG_KEYWORDS: dict[str, frozenset[str]] = {

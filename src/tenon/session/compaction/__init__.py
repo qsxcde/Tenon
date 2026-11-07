@@ -2,10 +2,10 @@
 
 from tenon.session.compaction.details import extract_file_ops
 from tenon.session.compaction.policy import (
+    DEFAULT_BUDGET_TOKENS,
     AutoCompactionDecision,
     CompactionPlan,
     CompactionPolicyConfig,
-    DEFAULT_BUDGET_TOKENS,
     decide_auto_compaction,
     estimate_tokens,
     find_cut_point,

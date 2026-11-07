@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import importlib.resources
 import json
 import os
@@ -10,8 +11,6 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-import argparse
-
 
 REQUIRED_RESOURCES = (
     "prompts/system.md",

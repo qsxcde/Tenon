@@ -7,8 +7,8 @@ prompt, and serialized tool definitions.
 
 from __future__ import annotations
 
-import json
 import copy
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any, Literal

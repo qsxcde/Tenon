@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
-from tenon.ai.model.types import ChatMessage, ToolCall as AiToolCall, ToolDefinition
+from tenon.ai.model.types import ChatMessage, ToolDefinition
+from tenon.ai.model.types import ToolCall as AiToolCall
 from tenon.core.context.budget import (
     ContextBudgetInput,
     ContextBudgetSnapshot,

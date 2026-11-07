@@ -35,8 +35,7 @@ class TuiConfigMixin(TuiAssemblerHost):
         return self.subagent_runner
 
     def _create_child_session(self, request: Any) -> Any:
-        from ..subagent.profiles import allowed_tool_names_for
-        from ..subagent.profiles import prompt_for
+        from ..subagent.profiles import allowed_tool_names_for, prompt_for
 
         return create_agent_session(
             self.cfg,

@@ -8,6 +8,7 @@ PageUp/PageDown 恒滚视口;确认键仅在激活时拦截;终端背景融合�
 from typing import Any
 
 from textual.events import MouseScrollDown, MouseScrollUp
+
 from tenon.app.tui.presentation.primitives import Span
 from tenon.app.tui.presentation.theme import (
     COMPOSER_RULE,
@@ -338,8 +339,9 @@ async def test_on_mount_installs_background_blending():
 
 async def test_input_mask_switches_composer_components():
     """(tui-login-command)set_input_mask:普通输入 ↔ 密码输入 display 互斥。"""
-    from tenon.app.tui.adapters.textual.backend import TextualBackend
     from textual.color import Color
+
+    from tenon.app.tui.adapters.textual.backend import TextualBackend
 
     async def _run() -> None:
         backend = TextualBackend()

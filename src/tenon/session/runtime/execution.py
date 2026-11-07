@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-import uuid
 import asyncio
+import uuid
 from dataclasses import fields, replace
 from typing import Any
 
 from tenon.core import AgentContext, ToolDecision
-from tenon.core.context.contracts import BeforeToolCall
+from tenon.core.context.contracts import BeforeToolCall, ContextTransformer
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.messages import Message
 from tenon.core.contracts.ports import ApprovalPolicy, ApprovalResult
-from tenon.core.context.contracts import ContextTransformer
 from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.session.runtime.host import SessionRuntimeHost
 

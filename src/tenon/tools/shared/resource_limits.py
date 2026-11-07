@@ -50,7 +50,7 @@ class ToolResourceLimits:
         return min(self.max_output_bytes, self.max_memory_bytes)
 
     @classmethod
-    def from_config(cls, cfg: Any = None) -> "ToolResourceLimits":
+    def from_config(cls, cfg: Any = None) -> ToolResourceLimits:
         """从应用配置读取工具资源字段；缺失字段使用兼容默认值。"""
         if isinstance(cfg, cls):
             return cfg

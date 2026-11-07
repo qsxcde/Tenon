@@ -12,15 +12,15 @@ from tenon.core.context.model import AgentContext
 from tenon.core.contracts.errors import AgentRuntimeError
 from tenon.core.contracts.events import AgentEvent
 from tenon.core.contracts.hooks import LifecycleHook
+from tenon.core.contracts.messages import Message
 from tenon.core.execution.runtime import ToolExecutionRuntime
+from tenon.core.observation import LifecycleHookObservationMixin
+from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.orchestration.loop import (
     DEFAULT_RECURSION_LIMIT,
     run_agent_loop,
     run_agent_loop_continue,
 )
-from tenon.core.contracts.messages import Message
-from tenon.core.orchestration.config import AgentLoopConfig
-from tenon.core.observation import LifecycleHookObservationMixin
 
 EventListener = Callable[[AgentEvent], Any]
 

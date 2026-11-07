@@ -115,8 +115,9 @@ def test_optional_search_uses_argv_and_bounded_output(monkeypatch, tmp_path) -> 
 def test_optional_search_returns_none_for_failed_or_timed_out_command(
     monkeypatch, tmp_path
 ) -> None:
-    from tenon.tools.execution.search import run_optional_search
     import subprocess
+
+    from tenon.tools.execution.search import run_optional_search
 
     class FailedProcess:
         returncode = 2

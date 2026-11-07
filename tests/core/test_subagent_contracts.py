@@ -655,8 +655,8 @@ def test_agent_event_hydrates_correlation_from_legacy_metadata() -> None:
 
 @pytest.mark.contract
 def test_core_facade_exports_subagent_contract_identity() -> None:
-    import tenon.core.contracts as contracts
     import tenon.core as public
+    import tenon.core.contracts as contracts
 
     for name in (
         "SubagentStatus",

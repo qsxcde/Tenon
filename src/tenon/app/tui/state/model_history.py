@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from .host import TuiModelHost
 from ..presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
 from ..presentation.primitives import _visible_user_content
+from .host import TuiModelHost
 
 
 class ModelHistoryMixin(TuiModelHost):

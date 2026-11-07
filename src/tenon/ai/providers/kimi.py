@@ -36,7 +36,7 @@ def make_llm(
     spec: ModelSpec | None = None,
     *,
     reasoning_effort: str | None = None,
-) -> "OpenAICompatClient":
+) -> OpenAICompatClient:
     """按配置 + 模型规格构造自研 ``OpenAICompatClient``。
 
     未配置 ``api_key`` 时报可操作错误,而不是 SDK 的 Missing credentials。

@@ -13,8 +13,9 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator, Protocol
+from typing import Protocol
 
 __all__ = ["FsOps", "LocalFsOps"]
 

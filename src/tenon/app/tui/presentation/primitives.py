@@ -8,8 +8,8 @@ from __future__ import annotations
 import re
 import unicodedata
 import weakref
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from .theme import TEXT
 
@@ -74,7 +74,7 @@ class Component:
             listener(self)
         self._touch_listeners = active
 
-    def add_touch_listener(self, listener: Callable[["Component"], None]) -> None:
+    def add_touch_listener(self, listener: Callable[[Component], None]) -> None:
         """Register a weak listener notified after the component revision changes."""
         if getattr(listener, "__self__", None) is not None:
             listener_ref: object = weakref.WeakMethod(listener)  # type: ignore[arg-type]
@@ -91,7 +91,7 @@ class Component:
             listeners.append(listener_ref)
         self._touch_listeners = listeners
 
-    def remove_touch_listener(self, listener: Callable[["Component"], None]) -> None:
+    def remove_touch_listener(self, listener: Callable[[Component], None]) -> None:
         """Remove a previously registered touch listener."""
         listeners = getattr(self, "_touch_listeners", [])
         self._touch_listeners = [

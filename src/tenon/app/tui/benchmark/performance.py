@@ -9,13 +9,12 @@ from __future__ import annotations
 
 import json
 import math
-import tracemalloc
 import time
+import tracemalloc
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
-
 
 BENCHMARK_SCHEMA_VERSION = 2
 
@@ -39,7 +38,7 @@ class MetricSummary:
     p95_ms: float
 
     @classmethod
-    def from_samples(cls, samples: list[float] | tuple[float, ...]) -> "MetricSummary":
+    def from_samples(cls, samples: list[float] | tuple[float, ...]) -> MetricSummary:
         if not samples:
             raise ValueError("metric summary requires at least one sample")
         values = sorted(float(value) for value in samples)

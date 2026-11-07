@@ -6,19 +6,19 @@
 
 import pytest
 
-from tenon.core.contracts.messages import Message, ToolCall
 from tenon.core.context.budget import ContextBudgetSnapshot
+from tenon.core.contracts.messages import Message, ToolCall
 from tenon.session.compaction import (
+    DEFAULT_BUDGET_TOKENS,
     AutoCompactionDecision,
     CompactionPlan,
     CompactionPolicyConfig,
     CompactionService,
-    DEFAULT_BUDGET_TOKENS,
+    decide_auto_compaction,
     estimate_tokens,
     extract_file_ops,
     find_cut_point,
     plan_compaction,
-    decide_auto_compaction,
 )
 
 

@@ -17,11 +17,11 @@ from tenon.core.context.preflight import (
     evaluate_context_preflight,
 )
 from tenon.core.context.tokens import estimate_text_tokens, is_cjk
-from tenon.core.contracts.messages import Message
 from tenon.core.contracts.errors import ContextPreparationError
+from tenon.core.contracts.messages import Message
 from tenon.core.contracts.ports import StreamEvent
-from tenon.core.orchestration.loop import run_agent_loop
 from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.loop import run_agent_loop
 
 
 def test_context_transformer_contract_is_explicit_and_publicly_exported():

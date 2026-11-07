@@ -6,8 +6,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from tenon.tools.security.ask_rules import default_ask_rules
 from tenon.tools.security.bash_rules import (

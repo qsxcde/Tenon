@@ -86,9 +86,9 @@ def clone_context_messages(messages: Iterable[Message]) -> list[Message]:
 
 
 def _is_async_callable(extension: Callable[..., Any]) -> bool:
-    return inspect.iscoroutinefunction(extension) or inspect.iscoroutinefunction(
-        getattr(extension, "__call__", None)
-    )
+    # 需要检查可调用对象的 __call__ 是否异步，callable() 无法提供该信息。
+    call = getattr(extension, "__call__", None)  # noqa: B004
+    return inspect.iscoroutinefunction(extension) or inspect.iscoroutinefunction(call)
 
 
 __all__ = [

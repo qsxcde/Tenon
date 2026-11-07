@@ -4,8 +4,8 @@
 
 截至 2026-11-08 复核（macOS / Python 3.12，项目更名为 `tenon` 后）：
 
-- `uv run pytest -q`：**2189 passed**（2189 collected，无 skipped），行覆盖率 **93%**（20349 statements，1436 missing）。
-- 本地快速质量集：`uv run pytest -m "unit or contract" -q` → **2025 passed，164 deselected**（36.13s，含覆盖率插桩），覆盖率为 **90%**（20349 statements，2000 missing），硬下限仍为 **88%**（CI `--cov-fail-under=88`）。
+- `uv run pytest -q`：**2204 passed**（2204 collected，无 skipped），行覆盖率 **93%**（20429 statements，1416 missing）。
+- 本地快速质量集：`uv run pytest -m "unit or contract" -q` → **2040 passed，164 deselected**（38.69s，含覆盖率插桩），覆盖率为 **90%**（20429 statements，1979 missing），硬下限仍为 **88%**（CI `--cov-fail-under=88`）。
 - 分层批次：`(integration or e2e or platform or compatibility) and not contract` → **154 passed，2035 deselected**（15.47s）。跨平台测试和 CI 质量结果以对应 GitHub Actions artifact 为准。
 - 历史基线（仅作趋势参考，不代表当前口径）：v0.5.0 发布 `1695 passed / 3 skipped`（1698 collected）、**84.40%**（2026-10-10，Windows）；v0.4 `1532 passed`、**83.61%**（2026-08-30，macOS）；v0.7 能力收口时为 `1870 passed` / 快速集 `1718 passed`（2026-10-24）。用例数的持续增长来自测试拆分、契约补充、Subagent 全链路、运行期安全、TUI 维护命令与新增模块的覆盖补齐。
 - `test-foundation-stability` 与 `test-structure-coverage` 均已归档；当前测试结构和 `last_activity_at` 跨层契约已落地。

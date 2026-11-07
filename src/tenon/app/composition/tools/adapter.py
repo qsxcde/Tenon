@@ -186,7 +186,7 @@ def adapt_tools(tools: list[Any]) -> list[AgentTool]:
     """Return explicit AgentTool adapters for concrete legacy tools."""
     adapted: list[AgentTool] = []
     for tool in tools:
-        if isinstance(tool, AgentToolAdapter) or isinstance(tool, AgentTool):
+        if isinstance(tool, (AgentToolAdapter, AgentTool)):
             adapted.append(cast(AgentTool, tool))
         else:
             adapted.append(AgentToolAdapter(tool))

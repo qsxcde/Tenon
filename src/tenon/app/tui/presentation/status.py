@@ -6,6 +6,7 @@ import time
 from collections.abc import Callable
 from dataclasses import replace
 
+from ..state.runtime import RuntimePhase, RuntimeSnapshot, phase_label
 from .primitives import (
     Component,
     RichLine,
@@ -13,14 +14,13 @@ from .primitives import (
     _seg,
     _truncate_spans,
 )
-from ..state.runtime import RuntimePhase, RuntimeSnapshot, phase_label
-from .theme import ACCENT, DIM, STATUS_MODEL, STATUS_PATH, WARNING
 from .status_clock import TaskStatusClock
 from .status_context import render_context_spans
 from .status_footer import FooterInfo as FooterInfo
 from .status_subagents import render_subagent_counts
 from .status_tool_counts import render_tool_counts
 from .status_zones import zone_widths
+from .theme import ACCENT, DIM, STATUS_MODEL, STATUS_PATH, WARNING
 
 
 class StatusBar(Component):

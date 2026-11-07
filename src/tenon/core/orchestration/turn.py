@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from typing import Any
-from tenon.core.support.awaiting import await_if_needed
+
 from tenon.core.context.model import AgentContext
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.messages import Message, ToolResult
 from tenon.core.model.request import new_model_message
-from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.orchestration.batch import execute_tool_batch
+from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.orchestration.errors import RecursionLimitError
+from tenon.core.support.awaiting import await_if_needed
 
 
 async def run_turn(

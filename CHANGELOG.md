@@ -14,6 +14,7 @@
 
 - **项目更名为 `tenon`**：发行名、import 名与 CLI 入口统一为 `tenon`，配置目录由 `~/.codeagent` 更名为 `~/.tenon`。首次启动时若新目录不存在且旧目录存在，会把旧目录整体迁移过去，`.env`、`models.json`、`secrets.toml` 与会话记录一并保留；新旧目录并存时保持现状并告警，避免覆盖已写好的新配置。旧目录仍按敏感路径拒绝访问，未迁移期间不会因改名而失去保护。
 - **质量门禁收紧**：CI 覆盖率硬下限由 80% 提升至 88%，新增 `uv audit --locked` 与 `openspec validate --changes`，平台矩阵排除已由快速集覆盖的 contract 用例；mypy 类型基线清零（app 17 / session 5 → 0）。
+- **可维护性清理**：Ruff 启用导入排序、现代化语法、常见缺陷与部分 `SIM` 规则；TUI 退出生命周期拆分为 `tui/lifecycle/shutdown.py`；补 `config_migration` 与 shutdown mixin 的回归测试。
 
 ### Fixed
 

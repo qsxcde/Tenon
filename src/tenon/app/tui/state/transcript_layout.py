@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from .transcript_host import TranscriptHost
 from ..presentation.primitives import Component, RichLine
+from .transcript_host import TranscriptHost
 
 
 class TranscriptLayoutMixin(TranscriptHost):

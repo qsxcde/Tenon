@@ -1,12 +1,12 @@
 """Runtime lifecycle and snapshot tests for the observable TUI state."""
 
+from tenon.app.tui.presentation.status import StatusBar
 from tenon.app.tui.state.model import TuiModel
 from tenon.app.tui.state.runtime import (
     RuntimePhase,
     RuntimeReducer,
     RuntimeSnapshot,
 )
-from tenon.app.tui.presentation.status import StatusBar
 from tenon.core.contracts.events import AgentEvent, EventType
 
 

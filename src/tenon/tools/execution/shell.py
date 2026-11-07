@@ -10,7 +10,7 @@ __all__ = ["bash_env", "is_wsl_shim", "all_which", "resolve_bash"]
 _BASH_ENV_ALLOWLIST: frozenset[str] = frozenset(
     {
         "PATH",
-        "SystemRoot",
+        "SYSTEMROOT",
         "WINDIR",
         "SystemDrive",
         "COMSPEC",
@@ -47,7 +47,8 @@ def is_wsl_shim(path: str) -> bool:
     """判断 Windows 自带 WSL 转发器，而不把它当作真实 Bash。"""
     if os.name != "nt":
         return False
-    system_root = os.environ.get("SystemRoot") or r"C:\Windows"
+    # Windows 环境变量名大小写不敏感，保留注册表中的官方写法 SystemRoot。
+    system_root = os.environ.get("SystemRoot") or r"C:\Windows"  # noqa: SIM112
     local_appdata = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
     shims = {
         os.path.normcase(os.path.join(system_root, "System32", "bash.exe")),

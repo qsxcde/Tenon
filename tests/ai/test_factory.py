@@ -3,8 +3,8 @@
 测试直接使用自研客户端接口(``generate``/``bind_tools``),不依赖 langchain。
 """
 
-from tenon.ai.providers import FakeClient
 from tenon.ai.model.types import ChatMessage
+from tenon.ai.providers import FakeClient
 
 
 def _msgs(*contents: str) -> list[ChatMessage]:

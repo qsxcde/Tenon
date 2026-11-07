@@ -32,8 +32,8 @@ def _build_system_prompt(cfg: Any = None, skills: list[Any] | None = None) -> st
     base = build_system_prompt(read_base_prompt(), load_agents_files(_workspace(cfg), CONFIG_DIR))
     if skills is None:
         skills, _ = _load_skills(cfg)
-    from tenon.app.skills.runtime import build_bootstrap_prompt
     from tenon.app.skills.prompt import build_skills_prompt
+    from tenon.app.skills.runtime import build_bootstrap_prompt
     from tenon.tools.registry import builtin_tool_registry
 
     base = build_bootstrap_prompt(base, skills, tool_names=builtin_tool_registry().names())
@@ -42,8 +42,8 @@ def _build_system_prompt(cfg: Any = None, skills: list[Any] | None = None) -> st
 
 def agents_sources(cfg: Any = None) -> list[str]:
     """返回本次装配加载的上下文文件来源列表。"""
-    from tenon.app.context.agents import load_agents_files
     from tenon.app.config import CONFIG_DIR
+    from tenon.app.context.agents import load_agents_files
 
     return [path for path, _ in load_agents_files(_workspace(cfg), CONFIG_DIR)]
 

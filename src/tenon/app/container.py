@@ -9,27 +9,35 @@ from __future__ import annotations
 from tenon.app.composition.model.factory import (
     ChatModelPort,
     LlmSummarizer,
+)
+from tenon.app.composition.model.factory import (
     _usage_of as _usage_of,
 )
 from tenon.app.composition.policy import _create_policy as _create_policy
 from tenon.app.composition.prompts import (
     _build_system_prompt as _build_system_prompt,
+)
+from tenon.app.composition.prompts import (
     agents_sources,
     skills_view,
 )
+from tenon.app.composition.runtime.extensions import (
+    RuntimeExtensions,
+    normalize_runtime_extensions,
+)
 from tenon.app.composition.runtime.factory import (
     AgentRuntime,
-    _LazyConfig as _LazyConfig,
-    _LazySummarizer as _LazySummarizer,
     close_runtime_for_config,
     close_runtime_for_config_async,
     create_agent_config,
     create_agent_runtime,
     runtime_for_config,
 )
-from tenon.app.composition.runtime.extensions import (
-    RuntimeExtensions,
-    normalize_runtime_extensions,
+from tenon.app.composition.runtime.factory import (
+    _LazyConfig as _LazyConfig,
+)
+from tenon.app.composition.runtime.factory import (
+    _LazySummarizer as _LazySummarizer,
 )
 from tenon.app.composition.session.factory import (
     create_agent_session,

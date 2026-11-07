@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from typing import Any, cast
 
-_path_locks: dict[str, "PathLock"] = {}
+_path_locks: dict[str, PathLock] = {}
 _guard = threading.Lock()
 _DEFAULT_TIMEOUT = 30.0
 _RETRY_DELAY = 0.02
@@ -32,7 +32,7 @@ class PathLock:
         self._depth = 0
         self._fd: int | None = None
 
-    def __enter__(self) -> "PathLock":
+    def __enter__(self) -> PathLock:
         self.acquire()
         return self
 

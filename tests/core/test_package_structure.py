@@ -3,7 +3,6 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
-
 CORE_DIR = Path(__file__).parents[2] / "src" / "tenon" / "core"
 
 EXPECTED_FILES = {
@@ -65,7 +64,7 @@ def test_core_modules_are_grouped_by_responsibility() -> None:
         if "__pycache__" not in path.parts
     }
 
-    assert EXPECTED_FILES <= actual_files
+    assert actual_files >= EXPECTED_FILES
 
 
 def test_old_flat_core_modules_are_not_compatibility_entries() -> None:
@@ -83,7 +82,6 @@ def test_old_flat_core_modules_are_not_compatibility_entries() -> None:
 
 def test_core_facade_preserves_public_object_identity() -> None:
     import tenon.core as public
-
     from tenon.core.agent import Agent
     from tenon.core.context.budget import ContextBudgetInput
     from tenon.core.context.contracts import (

@@ -36,7 +36,7 @@ async def cancel_session(active: Any, *, timeout: float | None = None) -> None:
                     result = await _bounded(result, deadline)
                 if result is False:
                     mark_cleanup_uncertain(active, "取消子 Session 未进入空闲", None)
-            except asyncio.TimeoutError as exc:
+            except TimeoutError as exc:
                 mark_cleanup_uncertain(active, "取消子 Session 超时", exc)
             except Exception as exc:  # noqa: BLE001 - cancellation is diagnostic
                 mark_cleanup_uncertain(active, "取消子 Session", exc)
@@ -55,7 +55,7 @@ async def cancel_session(active: Any, *, timeout: float | None = None) -> None:
         except asyncio.CancelledError:
             # The child task reached the requested cancellation boundary.
             pass
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             mark_cleanup_uncertain(active, "等待子运行取消", exc)
     elif session is None:
         execution = getattr(active, "execution_task", None)
@@ -69,7 +69,7 @@ async def cancel_session(active: Any, *, timeout: float | None = None) -> None:
                 await _bounded(asyncio.shield(execution), deadline)
             except asyncio.CancelledError:
                 pass
-            except asyncio.TimeoutError as exc:
+            except TimeoutError as exc:
                 mark_cleanup_uncertain(active, "取消排队委派", exc)
 
 
@@ -84,7 +84,7 @@ async def close_active(active: Any, *, timeout: float | None = None) -> None:
     if active.event_tasks:
         try:
             await _bounded(asyncio.gather(*active.event_tasks, return_exceptions=True), deadline)
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             mark_cleanup_uncertain(active, "等待子事件观察任务", exc)
             for task in active.event_tasks:
                 if not task.done():

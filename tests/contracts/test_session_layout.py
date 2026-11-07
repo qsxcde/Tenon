@@ -6,7 +6,6 @@ import importlib
 import importlib.util
 from pathlib import Path
 
-
 SESSION_ROOT = Path(__file__).resolve().parents[2] / "src" / "tenon" / "session"
 
 

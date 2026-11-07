@@ -185,9 +185,9 @@ async def test_tui_async_rebuild_waits_for_old_runtime_close():
 
 def test_rebuild_config_syncs_model_context_window():
     with patch("tenon.app.composition.model.selection.create_llm") as mock_llm:
-        from tenon.ai.providers.fake import FakeClient
         from tenon.ai.catalog.registry import ModelRegistry
         from tenon.ai.catalog.spec import ModelSpec
+        from tenon.ai.providers.fake import FakeClient
         from tenon.app.container import create_tui_app
 
         mock_llm.return_value = FakeClient(response="测试回复")

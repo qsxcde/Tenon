@@ -7,36 +7,36 @@
 import unicodedata
 
 from tenon.app.tui.presentation.blocks import (
-    AssistantBlock,
     ActivityBlock,
+    AssistantBlock,
     CancelledBlock,
     ErrorBlock,
     ToolCallBlock,
     ToolGroupBlock,
     UserBlock,
 )
-from tenon.app.tui.state.model import TuiModel
 from tenon.app.tui.presentation.primitives import Span, _truncate, rich_to_plain
-from tenon.app.tui.state.runtime import RuntimePhase, RuntimeSnapshot
 from tenon.app.tui.presentation.status import FooterInfo, StatusBar
-from tenon.app.tui.state.transcript import Transcript
 from tenon.app.tui.presentation.theme import (
     ACCENT,
     ACTIVITY,
     ASSISTANT_PROMPT,
-    DIM,
-    ERROR,
     DIFF_ADD,
     DIFF_REMOVE,
-    SUCCESS,
+    DIM,
+    ERROR,
     STATUS_MODEL,
     STATUS_PATH,
+    SUCCESS,
     TEXT,
     TOOL_OUTPUT,
     USER_BG,
     USER_PROMPT,
     WARNING,
 )
+from tenon.app.tui.state.model import TuiModel
+from tenon.app.tui.state.runtime import RuntimePhase, RuntimeSnapshot
+from tenon.app.tui.state.transcript import Transcript
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.messages import Message, ToolCall
 

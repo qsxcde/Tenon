@@ -13,9 +13,9 @@ write+edit)会竞态丢更新。
 from __future__ import annotations
 
 import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
 __all__ = ["with_path_lock"]
 

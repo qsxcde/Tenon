@@ -7,20 +7,30 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from tenon.session.persistence.jsonl.host import JsonlStoreHost
+from tenon.session.persistence.jsonl.recovery_diagnostics import (
+    diagnostic as _diagnostic,
+)
+from tenon.session.persistence.jsonl.recovery_diagnostics import (
+    header_diagnostic as _header_diagnostic,
+)
+from tenon.session.persistence.jsonl.recovery_diagnostics import (
+    invalid_session_id as _invalid_session_id,
+)
+from tenon.session.persistence.jsonl.recovery_diagnostics import (
+    message_is_invalid as _message_is_invalid,
+)
+from tenon.session.persistence.jsonl.recovery_diagnostics import (
+    unavailable as _unavailable,
+)
+from tenon.session.persistence.jsonl.recovery_diagnostics import (
+    valid_compaction as _valid_compaction,
+)
 from tenon.session.persistence.models import (
     RecoveryDiagnostic,
     SessionRecoveryReport,
 )
 from tenon.session.persistence.subagent_records import record_from_entry
-from tenon.session.persistence.jsonl.host import JsonlStoreHost
-from tenon.session.persistence.jsonl.recovery_diagnostics import (
-    diagnostic as _diagnostic,
-    header_diagnostic as _header_diagnostic,
-    invalid_session_id as _invalid_session_id,
-    message_is_invalid as _message_is_invalid,
-    unavailable as _unavailable,
-    valid_compaction as _valid_compaction,
-)
 
 
 @dataclass(frozen=True)

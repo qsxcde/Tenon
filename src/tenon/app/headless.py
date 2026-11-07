@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from pathlib import Path
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from tenon.app.subagent_observability import SubagentLineProjector

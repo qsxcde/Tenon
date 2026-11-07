@@ -9,12 +9,12 @@ from tenon.app.composition.model.port import ChatModelPort
 from tenon.app.composition.tools.adapter import adapt_tools
 from tenon.app.tui.presentation.blocks import ToolCallBlock
 from tenon.app.tui.presentation.output import OutputBuffer
-from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.contracts.events import EventType
+from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.session import AgentSession, EventBus
 from tenon.session.persistence.jsonl import JsonFileStore
 from tenon.tools.base import AtomicTool
-from tenon.tools.shared import OutputPolicy, GovernedText, govern_text
+from tenon.tools.shared import GovernedText, OutputPolicy, govern_text
 
 
 class _ReportArgs(BaseModel):

@@ -3,18 +3,11 @@
 import json
 
 import pytest
-from tenon.ai.transport.openai_compat import OpenAICompatClient
 
-from tenon.ai.catalog.spec import ModelSpec
-from tenon.ai.catalog.store import ModelStore
 from tenon.ai.catalog.builtin import BUILTIN_CATALOGS
 from tenon.ai.catalog.registry import ModelRegistry
-from tenon.app.composition.model.selection import (
-    create_llm,
-    get_available_providers,
-    parse_model_pattern,
-    split_model_pattern,
-)
+from tenon.ai.catalog.spec import ModelSpec
+from tenon.ai.catalog.store import ModelStore
 from tenon.ai.providers import PROVIDERS, deepseek, fake, glm, kimi, minimax, qwen
 from tenon.ai.providers.deepseek import DeepSeekConfig
 from tenon.ai.providers.fake import FakeClient
@@ -22,6 +15,13 @@ from tenon.ai.providers.glm import GlmConfig
 from tenon.ai.providers.kimi import KimiConfig
 from tenon.ai.providers.minimax import MiniMaxConfig
 from tenon.ai.providers.qwen import QwenConfig
+from tenon.ai.transport.openai_compat import OpenAICompatClient
+from tenon.app.composition.model.selection import (
+    create_llm,
+    get_available_providers,
+    parse_model_pattern,
+    split_model_pattern,
+)
 from tenon.app.config import Settings
 
 

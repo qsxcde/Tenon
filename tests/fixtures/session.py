@@ -7,8 +7,8 @@ from collections.abc import Callable
 import pytest
 
 from tenon.ai.providers.fake import FakeClient
-from tenon.app.container import ChatModelPort
 from tenon.app.composition.tools.adapter import adapt_tools
+from tenon.app.container import ChatModelPort
 from tenon.core import AgentLoopConfig
 from tenon.session import AgentSession, EventBus
 from tenon.session.persistence import MemoryStore

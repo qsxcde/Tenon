@@ -9,8 +9,8 @@ from collections.abc import Callable
 from tenon.core.contracts.events import AgentEvent
 
 from .async_boundary import AsyncPersistenceBoundary
-from .subagent_record_model import SubagentRunRecord, fold_records
 from .subagent_record_codec import record_from_event
+from .subagent_record_model import SubagentRunRecord, fold_records
 
 
 class SubagentRecordCoordinator:

@@ -132,7 +132,7 @@ class OpenAICompatClient(OpenAICompatStreamingMixin):
             await self._client.aclose()
             self._client = None
 
-    def bind_tools(self, tools: list[ToolDefinition]) -> "OpenAICompatClient":
+    def bind_tools(self, tools: list[ToolDefinition]) -> OpenAICompatClient:
         """Return an isolated compatibility view with immutable default tools."""
         bound = copy.copy(self)
         bound._default_tools = tuple(tools)

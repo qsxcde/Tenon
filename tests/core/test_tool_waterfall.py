@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
+from tenon.core.context.model import AgentContext
 from tenon.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
 from tenon.core.contracts.ports import PolicyDecision, ToolDecision
-from tenon.core.context.model import AgentContext
 from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.orchestration.tool_call import new_tool_result

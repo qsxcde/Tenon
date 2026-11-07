@@ -17,6 +17,19 @@ from tenon.core.contracts.subagents import (
 )
 
 from .active import ActiveDelegation
+from .context import render_subagent_prompt
+from .event_diagnostics import (
+    make_progress_event,
+    make_started_event,
+    publish_event,
+)
+from .lifecycle import mark_running, mark_starting, observe_child_event
+from .result_extraction import extract_child_facts
+from .runner_results import (
+    budget_exceeded_result,
+    cancellation_result,
+    failure_result,
+)
 from .runner_support import (
     child_failure_code,
     child_outcome,
@@ -26,19 +39,6 @@ from .runner_support import (
     observe_event,
     record_diagnostic,
 )
-from .runner_results import (
-    budget_exceeded_result,
-    cancellation_result,
-    failure_result,
-)
-from .context import render_subagent_prompt
-from .event_diagnostics import (
-    make_progress_event,
-    make_started_event,
-    publish_event,
-)
-from .lifecycle import mark_running, mark_starting, observe_child_event
-from .result_extraction import extract_child_facts
 
 ChildSessionFactory = Callable[[SubagentRequest], Any]
 

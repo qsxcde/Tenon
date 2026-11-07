@@ -38,12 +38,9 @@ class OutputMetadata:
     unsupported_blocks: tuple[dict[str, Any], ...] = ()
 
     @classmethod
-    def from_value(cls, value: ToolOutputMetadata | dict[str, Any]) -> "OutputMetadata":
+    def from_value(cls, value: ToolOutputMetadata | dict[str, Any]) -> OutputMetadata:
         """Convert the core or event representation to a TUI snapshot."""
-        if isinstance(value, ToolOutputMetadata):
-            data = value.to_dict()
-        else:
-            data = dict(value)
+        data = value.to_dict() if isinstance(value, ToolOutputMetadata) else dict(value)
         return cls(
             total_bytes=data.get("total_bytes") or 0,
             total_lines=data.get("total_lines") or 0,

@@ -3,8 +3,8 @@
 from tenon.app.skills.models import Skill
 from tenon.app.skills.runtime import (
     BOOTSTRAP_TAG,
-    TenonAdapter,
     SkillRuntimeState,
+    TenonAdapter,
     build_bootstrap_prompt,
 )
 

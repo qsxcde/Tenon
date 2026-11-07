@@ -6,8 +6,8 @@ from typing import Any
 
 from tenon.core.contracts.events import AgentEvent, EventType
 
-from .host import TuiModelHost
 from ..presentation.blocks import SubagentBlock
+from .host import TuiModelHost
 
 _MAX_SUBAGENT_BLOCKS = 64
 _ACTIVE_STATUSES = frozenset(

@@ -6,9 +6,6 @@ import asyncio
 import inspect
 from typing import Any
 
-from tenon.core.execution.cleanup import CleanupResult, CleanupTracker
-from tenon.core.execution.result import normalize_tool_result
-from tenon.core.execution.state import OperationRegistry, ToolOperation
 from tenon.core.contracts.messages import (
     CleanupStatus,
     ToolCall,
@@ -17,6 +14,9 @@ from tenon.core.contracts.messages import (
     new_id,
 )
 from tenon.core.contracts.ports import AgentTool
+from tenon.core.execution.cleanup import CleanupResult, CleanupTracker
+from tenon.core.execution.result import normalize_tool_result
+from tenon.core.execution.state import OperationRegistry, ToolOperation
 
 __all__ = [
     "CleanupResult",
@@ -99,7 +99,7 @@ class ToolExecutionRuntime:
                 if timeout is None
                 else await asyncio.wait_for(invocation, timeout=timeout)
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return await self._timeout_result(tool, call, operation)
         except asyncio.CancelledError:
             await self._cancelled(tool, operation)

@@ -14,8 +14,8 @@ import pytest
 
 pytestmark = pytest.mark.contract
 
-from tenon.app.composition.tools.adapter import adapt_tools
 from tenon.ai.providers.fake import FakeClient
+from tenon.app.composition.tools.adapter import adapt_tools
 from tenon.app.container import ChatModelPort
 from tenon.core import (
     AgentContext,

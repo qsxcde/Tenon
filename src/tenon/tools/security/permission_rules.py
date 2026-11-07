@@ -25,7 +25,7 @@ class ThreeTierPermissionRules:
     allow: tuple[str, ...] = ()
 
     @classmethod
-    def empty(cls) -> "ThreeTierPermissionRules":
+    def empty(cls) -> ThreeTierPermissionRules:
         return cls()
 
     def decide(self, qualified_name: str) -> str | None:

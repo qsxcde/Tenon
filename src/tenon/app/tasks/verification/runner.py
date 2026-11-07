@@ -6,10 +6,10 @@ import asyncio
 import inspect
 import os
 import time
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from ..modes import is_mutating_command
-
 from .models import TaskStatus, VerificationResult
 
 ExecuteFn = Callable[[str, float], Awaitable[Any] | Any]
@@ -60,7 +60,7 @@ class VerificationRunner:
                 duration_ms=round((time.monotonic() - started) * 1000),
                 cancelled=True,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return VerificationResult(
                 TaskStatus.FAILED,
                 command=command,
@@ -101,7 +101,7 @@ class VerificationRunner:
         process = await self._spawn(command)
         try:
             output, _ = await asyncio.wait_for(process.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             process.kill()
             await process.communicate()
             return {

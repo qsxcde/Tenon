@@ -293,12 +293,12 @@ async def test_fake_client_child_turn_budget_returns_failure_and_parent_continue
 @pytest.mark.integration
 async def test_fake_client_confirmation_wait_is_woken_by_subagent_timeout() -> None:
     """子 Session 等待确认时，runner 超时应取消确认并完成关闭。"""
+    from tenon.app.composition.subagent.runner import SerialSubagentRunner
     from tenon.app.composition.tools.adapter import adapt_tools
     from tenon.app.container import ChatModelPort
     from tenon.core.orchestration.config import AgentLoopConfig
     from tenon.session import AgentSession, EventBus
     from tenon.tools.atomic import BashTool
-    from tenon.app.composition.subagent.runner import SerialSubagentRunner
 
     class AskPolicy:
         def decide(self, tool_name: str, args: dict) -> PolicyDecision:

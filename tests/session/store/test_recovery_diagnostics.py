@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 
-
 from tenon.core.contracts.messages import Message
 from tenon.session.persistence import (
     JsonFileStore,

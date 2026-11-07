@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from tenon.app.errors.reporting import report_unexpected_error
+
 from .host import TuiAppHost
 from .parser import Command
 

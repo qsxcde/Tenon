@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-
 _LABELS = (
     ("running", "运"),
     ("waiting", "等"),

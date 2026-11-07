@@ -97,7 +97,7 @@ class ToolStatusSnapshot:
         }
 
     @classmethod
-    def from_dict(cls, value: Any) -> "ToolStatusSnapshot":
+    def from_dict(cls, value: Any) -> ToolStatusSnapshot:
         """Read a current or legacy snapshot without requiring every field."""
         data = dict(value) if isinstance(value, dict) else {}
         return cls(

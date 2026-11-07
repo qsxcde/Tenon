@@ -4,15 +4,15 @@ import json
 import subprocess
 import sys
 
-from tenon.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
-from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.app.tui.benchmark.benchmark import BenchmarkConfig, build_fixture, run_benchmark
 from tenon.app.tui.benchmark.performance import (
     BenchmarkResult,
     MetricSummary,
     PerformanceRecorder,
 )
+from tenon.app.tui.presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
 from tenon.app.tui.state.model import TuiModel
-from tenon.app.tui.benchmark.benchmark import BenchmarkConfig, build_fixture, run_benchmark
+from tenon.core.contracts.events import AgentEvent, EventType
 from tests.tui.performance_helpers import assert_control_latency, assert_frame_budget
 
 

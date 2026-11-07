@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from typing import cast
 
 from tenon.core.contracts.messages import CleanupStatus
-from tenon.core.execution.state import ToolOperation
 from tenon.core.contracts.ports import AgentTool, ToolCleanupPort
+from tenon.core.execution.state import ToolOperation
 
 __all__ = ["CleanupResult", "CleanupTracker"]
 

@@ -8,13 +8,15 @@ from collections.abc import Callable
 from typing import Any
 
 from tenon.core import Agent
-from tenon.core.contracts.hooks import HookDiagnostic
-from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.context.model import AgentContext
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.hooks import HookDiagnostic
 from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.session.persistence.models import UsageStats
 from tenon.session.runtime.confirmation import ConfirmationCoordinator
+from tenon.session.runtime.event_lifecycle import RuntimeEventMixin
 from tenon.session.runtime.event_mapper import SideEffectObserver
+from tenon.session.runtime.execution import SessionExecutionMixin
 from tenon.session.runtime.state import (
     CommitStatus,
     RunOutcome,
@@ -22,8 +24,6 @@ from tenon.session.runtime.state import (
     RunState,
     RuntimeFailure,
 )
-from tenon.session.runtime.execution import SessionExecutionMixin
-from tenon.session.runtime.event_lifecycle import RuntimeEventMixin
 
 AgentFactory = Callable[[AgentContext, AgentLoopConfig, int], Agent]
 

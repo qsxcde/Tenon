@@ -14,8 +14,8 @@ from .registry import (
     PackageRecord,
     PackageRegistry,
     PackageValidationError,
-    parse_package_manifest,
     inside,
+    parse_package_manifest,
     validate_package_tree,
 )
 

@@ -15,15 +15,17 @@ from tenon.core.context.preflight import ContextPreflightResult
 from tenon.core.contracts.hooks import (
     HookDiagnostic,
     LifecycleHook,
+)
+from tenon.core.contracts.hooks import (
     LifecycleHookEvent as LifecycleHookEvent,
 )
-from tenon.core.contracts.ports import ApprovalPolicy
 from tenon.core.contracts.messages import Message
+from tenon.core.contracts.ports import ApprovalPolicy
 from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.orchestration.loop import DEFAULT_RECURSION_LIMIT
 from tenon.session.compaction import CompactionPolicyConfig
-from tenon.session.persistence_control import SessionPersistenceMixin
 from tenon.session.compaction.summarizer import Summarizer
+from tenon.session.compaction_runtime import SessionCompactionMixin
 from tenon.session.constants import (
     COMPACTION_RESERVE_TOKENS,
     DEFAULT_CONTEXT_WINDOW,
@@ -32,16 +34,16 @@ from tenon.session.constants import (
 )
 from tenon.session.contracts import SessionCloser
 from tenon.session.eventing import SessionEventMixin
+from tenon.session.events.bus import EventBus, Subscriber
 from tenon.session.lifecycle import SessionLifecycleMixin
 from tenon.session.persistence.models import SessionRecoveryReport, SessionStore, UsageStats
-from tenon.session.runtime.controller import SessionRuntime
-from tenon.session.runtime.state import CommitStatus, RunOutcome, SessionBudgetState
-from tenon.session.compaction_runtime import SessionCompactionMixin
+from tenon.session.persistence_control import SessionPersistenceMixin
 from tenon.session.run_coordinator import SessionRunCoordinator
+from tenon.session.runtime.controller import SessionRuntime
+from tenon.session.runtime.error_policy import friendly_error
+from tenon.session.runtime.state import CommitStatus, RunOutcome, SessionBudgetState
 from tenon.session.session_persistence import SessionPersistence
 from tenon.session.subagent import SessionSubagentMixin
-from tenon.session.runtime.error_policy import friendly_error
-from tenon.session.events.bus import EventBus, Subscriber
 
 
 class AgentSession(
@@ -78,7 +80,8 @@ class AgentSession(
         self._lifecycle_hooks = tuple(lifecycle_hooks) if lifecycle_hooks is not None else None
         if self._lifecycle_hooks is not None:
             if not is_dataclass(config):
-                getattr(config, "model")
+                # Lazy 配置代理：访问 model 触发惰性物化后再取真实配置。
+                _ = config.model
                 config = getattr(config, "_real", None)
             if config is None:  # pragma: no cover - defensive lazy-config guard
                 raise TypeError("lifecycle hooks require a materialized AgentLoopConfig")

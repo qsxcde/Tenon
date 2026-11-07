@@ -12,8 +12,8 @@
 from __future__ import annotations
 
 import shutil
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
 
 __all__ = [
     "SANDBOX_DANGER_FULL_ACCESS",

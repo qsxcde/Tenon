@@ -7,9 +7,10 @@
 
 from __future__ import annotations
 
-import json
 import copy
-from typing import Any, AsyncIterator
+import json
+from collections.abc import AsyncIterator
+from typing import Any
 
 from tenon.ai.model.protocols import ChatClient
 from tenon.ai.model.types import ChatMessage, ChatResponse, StreamEvent, ToolCall
@@ -62,7 +63,7 @@ class FakeClient(ChatClient):
             names.append(name)
         self.bound_tools = list(names)
 
-    def bind_tools(self, tools: list[Any]) -> "FakeClient":
+    def bind_tools(self, tools: list[Any]) -> FakeClient:
         """记录工具名并返回 self(框架无关;编排适配由组合根 ChatModelPort 负责)。
 
         - 记录工具名(无副作用,离线可测);

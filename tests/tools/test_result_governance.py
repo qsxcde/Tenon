@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from tenon.tools.shared.governance import (
-    OutputPolicy,
     GovernedText,
+    OutputPolicy,
     govern_text,
 )
 

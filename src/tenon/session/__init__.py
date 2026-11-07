@@ -3,8 +3,8 @@
 分层约束:session 不 import ai / tools / config,仅依赖 core 与 bus。
 """
 
-from tenon.session.events.bus import EventBus
 from tenon.session.compaction import CompactionPolicyConfig
+from tenon.session.events.bus import EventBus
 from tenon.session.manager import SessionManager
 from tenon.session.session import AgentSession
 

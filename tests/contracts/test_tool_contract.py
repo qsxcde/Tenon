@@ -7,8 +7,8 @@ import threading
 
 import pytest
 
-from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.core.contracts.messages import ToolCall, ToolExecutionStatus, ToolResult
+from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.tools.atomic import ReadTool
 
 
@@ -70,9 +70,10 @@ async def test_tool_contract_cancellation_clears_active_operation():
 
 
 async def test_sync_atomic_adapter_reports_uncertain_cleanup_on_cancellation():
+    from pydantic import BaseModel
+
     from tenon.app.composition.tools.adapter import adapt_tools
     from tenon.tools.base import AtomicTool
-    from pydantic import BaseModel
 
     class EmptyArgs(BaseModel):
         pass
@@ -113,10 +114,11 @@ async def test_sync_atomic_adapter_reports_uncertain_cleanup_on_cancellation():
 
 
 async def test_atomic_adapter_preserves_structured_async_tool_result():
+    from pydantic import BaseModel
+
     from tenon.app.composition.tools.adapter import adapt_tools
     from tenon.tools.atomic.bash import BashInvocationResult
     from tenon.tools.base import AtomicTool
-    from pydantic import BaseModel
 
     class EmptyArgs(BaseModel):
         pass

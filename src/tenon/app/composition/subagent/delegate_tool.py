@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import uuid
 import asyncio
+import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, cast
@@ -17,12 +17,6 @@ from tenon.core.contracts.subagents import (
     SubagentRunner,
 )
 
-from .context import (
-    MAX_CONTEXT_ITEM_CHARS,
-    MAX_CONTEXT_ITEMS,
-    parse_context,
-)
-from .profiles import DEFAULT_PROFILE, profile_error_message, profile_for, profile_names
 from .budget import (
     DEFAULT_MAX_CHILDREN_PER_RUN,
     MAX_MAX_OUTPUT_CHARS,
@@ -31,8 +25,14 @@ from .budget import (
     MAX_TIMEOUT_SECONDS,
     parse_budget,
 )
+from .context import (
+    MAX_CONTEXT_ITEM_CHARS,
+    MAX_CONTEXT_ITEMS,
+    parse_context,
+)
 from .delegate_result import error_result as _error_result
 from .delegate_result import tool_result as _tool_result
+from .profiles import DEFAULT_PROFILE, profile_error_message, profile_for, profile_names
 
 
 @dataclass(frozen=True)
@@ -128,7 +128,7 @@ class DelegateTool:
         self._quota_lock = asyncio.Lock()
         self._accepted_children = 0
 
-    def bind_parent_run_id(self, run_id: str) -> "DelegateTool":
+    def bind_parent_run_id(self, run_id: str) -> DelegateTool:
         """Return a per-run copy without mutating the configured template."""
         return type(self)(
             self._runner,

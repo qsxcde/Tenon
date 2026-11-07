@@ -8,6 +8,7 @@ import inspect
 from tenon.app.errors.reporting import report_unexpected_error
 from tenon.app.skills.models import Skill
 from tenon.app.skills.prompt import format_skill_invocation
+
 from .host import TuiAppHost
 from .parser import Command
 

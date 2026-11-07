@@ -9,14 +9,14 @@ from tenon.core.contracts.events import AgentEvent
 from tenon.core.contracts.messages import Message
 from tenon.session.persistence.async_boundary import AsyncPersistenceBoundary
 from tenon.session.persistence.commit import SessionCommitter
+from tenon.session.persistence.errors import SessionRecoveryError
 from tenon.session.persistence.models import (
     CompactionEntry,
-    SessionStore,
     SessionRecoveryReport,
+    SessionStore,
     SubagentRunRecord,
     UsageStats,
 )
-from tenon.session.persistence.errors import SessionRecoveryError
 from tenon.session.persistence.subagent_runtime import SubagentRecordCoordinator
 
 

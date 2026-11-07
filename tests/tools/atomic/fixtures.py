@@ -4,8 +4,11 @@ import asyncio
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import pytest
+
 from tenon.app.container import create_tools
+from tenon.core import ToolCall, ToolExecutionRuntime
 from tenon.tools.atomic import (
     BashTool,
     EditTool,
@@ -17,7 +20,6 @@ from tenon.tools.atomic import (
 )
 from tenon.tools.atomic.bash import DANGEROUS_PATTERNS, _semantically_ok
 from tenon.tools.base import AtomicTool
-from tenon.core import ToolCall, ToolExecutionRuntime
 
 
 def _invoke(tool: AtomicTool, **kwargs: object) -> str:

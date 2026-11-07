@@ -5,9 +5,9 @@
 
 from __future__ import annotations
 
-from .message_blocks import ActivityBlock, AssistantBlock, UserBlock
 from ..primitives import Component, RichLine, _plain, _wrap_rich
 from ..theme import ERROR, WARNING
+from .message_blocks import ActivityBlock, AssistantBlock, UserBlock
 from .tool_blocks import ToolCallBlock
 
 __all__ = [

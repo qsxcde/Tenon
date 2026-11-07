@@ -11,12 +11,13 @@ import subprocess
 import sys
 import tempfile
 import tomllib
+from collections.abc import Iterable
 from email.parser import Parser
 from pathlib import Path
-from tarfile import ReadError, open as open_tar
-from typing import Any, Iterable
+from tarfile import ReadError
+from tarfile import open as open_tar
+from typing import Any
 from zipfile import BadZipFile, ZipFile
-
 
 REQUIRED_RESOURCES = (
     "tenon/resources/prompts/system.md",

@@ -6,7 +6,7 @@ from .dispatch import TuiCommandDispatcher
 from .fuzzy import fuzzy_rank
 from .parser import Command, Literal, UnknownCommand, parse
 from .registry import _COMMANDS
-from .suggestions import TuiSuggestionRenderMixin, _MAX_SUGGESTIONS, _SUGGESTION_WINDOW
+from .suggestions import _MAX_SUGGESTIONS, _SUGGESTION_WINDOW, TuiSuggestionRenderMixin
 
 _PICKER_HINTS = {
     "provider": "/provider <name>: 切换模型提供方",

@@ -61,7 +61,7 @@ async def test_config_inject_system_prompt_with_agents(tmp_path, monkeypatch):
 
         model = FakeClient(response="测试回复")
         mock_llm.return_value = model
-        from tenon.app.container import create_agent_config, agents_sources
+        from tenon.app.container import agents_sources, create_agent_config
 
         ports = create_agent_config()
         sources = agents_sources()
@@ -158,8 +158,7 @@ async def test_bootstrap_is_reinjected_after_context_compaction(tmp_path, monkey
 
     from tenon.app.skills.packages.manager import PackageManager
     from tenon.app.skills.runtime import BOOTSTRAP_TAG
-    from tenon.session import EventBus
-    from tenon.session import AgentSession
+    from tenon.session import AgentSession, EventBus
 
     source = tmp_path / "superpowers"
     (source / "skills" / "using-superpowers").mkdir(parents=True)

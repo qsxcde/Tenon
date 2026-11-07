@@ -1,11 +1,14 @@
 """Shared helpers for split behavior tests."""
 
 from __future__ import annotations
+
 import asyncio
 from pathlib import Path
 from unittest.mock import patch
+
 import httpx
 import pytest
+
 from tenon.ai.transport.openai_compat import OpenAICompatClient
 
 

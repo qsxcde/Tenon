@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 
-from .transcript_host import TranscriptHost
 from ..presentation.primitives import RichLine
+from .transcript_host import TranscriptHost
 
 
 class ProgressiveTranscriptMixin(TranscriptHost):

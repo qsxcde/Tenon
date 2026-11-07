@@ -12,8 +12,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Callable, Protocol
+from collections.abc import Callable, Iterable
+from typing import Protocol
 
 from ..presentation.primitives import RichLine
 

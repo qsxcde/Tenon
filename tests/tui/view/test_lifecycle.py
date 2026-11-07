@@ -1,9 +1,8 @@
 """TUI view lifecycle behavior tests."""
 
-from tests.tui.view.fixtures import *  # noqa: F401,F403
-
 from tenon.app.tasks.supervisor import TaskSupervisor
 from tenon.app.tui.presentation.blocks import ErrorBlock
+from tests.tui.view.fixtures import *  # noqa: F401,F403
 
 
 def test_fake_backend_regression_contract_covers_top_level_interactions():

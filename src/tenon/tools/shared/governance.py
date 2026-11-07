@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import re
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from .truncate import DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, truncate_head, truncate_tail
@@ -43,7 +43,7 @@ class GovernedText(str):
     output_metadata: dict[str, Any]
     content: str
 
-    def __new__(cls, content: str, output_metadata: dict[str, Any]) -> "GovernedText":
+    def __new__(cls, content: str, output_metadata: dict[str, Any]) -> GovernedText:
         value = str.__new__(cls, content)
         value.content = content
         value.output_metadata = dict(output_metadata)

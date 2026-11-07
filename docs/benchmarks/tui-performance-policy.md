@@ -107,8 +107,12 @@ uv run python scripts/compare_benchmark.py \
 
 ## 5. 当前状态
 
-当前 main 在 macOS 上按同一基础 fixture 的观测结果为：`history`、`restore`、
-`tool-output`、`scroll-resize` 的 frame p95 分别约为 `0.984`、`0.418`、`0.502`、
-`0.729 ms`；`stream` 的 frame p95 为 `8.004 ms`，控制事件 p95 为 `0.040 ms`，
-提交回显 p95 为 `0.469 ms`，首个可见 token p95 为 `0.927 ms`，丢帧和超预算帧均为 `0`。
-这些数值低于硬上限，但因为平台是 macOS，只能作为观测，不能替代 Linux v2 正式基线。
+当前 main 在 macOS 上按同一基础 fixture 的观测结果（2026-11-08 复核）为：`history`、
+`restore`、`tool-output` 的 frame p95 分别约为 `0.610`、`0.506`、`0.549 ms`；`stream`
+的 frame p95 为 `14.25 ms`，控制事件 p95 为 `0.060 ms`，提交回显 p95 为 `0.637 ms`，
+首个可见 token p95 为 `1.226 ms`，丢帧和超预算帧均为 `0`。
+这些数值低于硬上限，但因为平台是 macOS，只能作为观测，不能替代 Linux v2 正式基线；
+macOS 报告也无法通过 `scripts/update_tui_baseline.py` 的平台校验。
+
+正式 Linux/Python 3.12 v2 基线仍须按 §4 流程由 CI artifact 生成并人工复核后提交，
+在此之前 `docs/benchmarks/tui-baseline.json` 保持 schema v1 历史基线不变。

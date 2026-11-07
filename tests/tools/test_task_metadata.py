@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from tenon.core import ToolCall, ToolExecutionRuntime
 from tenon.tools.atomic.bash import BashArgs, BashInvocationResult, BashTool
 

@@ -55,10 +55,15 @@ target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
-# The first CI gate deliberately starts with correctness checks. Style cleanup
-# can be introduced independently without turning the existing test suite into
-# a formatting migration.
-select = ["E9", "F821", "F841"]
+# 正确性检查 (E9/F) 是必须始终通过的基线;在此基础上启用导入排序 (I)、
+# 现代化语法 (UP)、常见缺陷 (B) 与部分 SIM 简化规则。仍存在人工判断的
+# 子规则 (B904/SIM105/SIM102/B905/UP04x) 暂不纳入,避免一次性大范围重构。
+select = ["E9", "F821", "F841", "I", "UP037", "UP035", "UP041", "UP012", "SIM114", "SIM117", "SIM300", "SIM905", "SIM101", "SIM103", "SIM108", "SIM211", "B004", "B009", "B010"]
+
+[tool.ruff.lint.per-file-ignores]
+# 测试和脚本允许 assert 与临时路径;仅生产层参与更严格规则。
+"tests/**" = ["S101"]
+
 
 [tool.mypy]
 # 类型门禁按层棘轮推进，见 scripts/type_scan.py 与 docs/type-baseline.json。

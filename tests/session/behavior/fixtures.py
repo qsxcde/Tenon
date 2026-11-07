@@ -1,14 +1,17 @@
 """Shared helpers for split behavior tests."""
 
 from __future__ import annotations
+
 import asyncio
+
 import pytest
+
 from tenon.ai.providers.fake import FakeClient
-from tenon.app.container import ChatModelPort
 from tenon.app.composition.tools.adapter import adapt_tools
+from tenon.app.container import ChatModelPort
 from tenon.core import AgentLoopConfig, EventType, Message, RecursionLimitError
-from tenon.session.compaction import CompactionPolicyConfig
 from tenon.session import AgentSession, EventBus
+from tenon.session.compaction import CompactionPolicyConfig
 from tenon.session.persistence import MemoryStore
 from tenon.tools.atomic import (
     BashTool,

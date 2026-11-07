@@ -7,8 +7,8 @@ from typing import Any
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.tool_status import ToolLifecycleStatus
 
-from .host import TuiModelHost
 from ..presentation.blocks import CancelledBlock, ToolCallBlock, ToolGroupBlock
+from .host import TuiModelHost
 from .tool_lifecycle import is_terminal, normalize_status
 
 

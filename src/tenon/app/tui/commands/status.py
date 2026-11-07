@@ -7,10 +7,10 @@ from typing import Any
 from tenon.app.context_diagnostics import format_context_diagnostics
 from tenon.core.context.diagnostics import ContextDiagnostics
 
-from .host import TuiAppHost
-from .parser import Command
-from .model_capabilities import append_model_capability_lines
 from ..state.runtime import phase_label
+from .host import TuiAppHost
+from .model_capabilities import append_model_capability_lines
+from .parser import Command
 
 
 class TuiStatusCommandCoordinator(TuiAppHost):

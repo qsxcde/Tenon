@@ -34,7 +34,7 @@ def tool_result(tool_call_id: str, result: SubagentResult) -> ToolResult:
         or (result.failure is not None and result.failure.cleanup_uncertain)
     )
     details["cleanup_uncertain"] = cleanup_uncertain
-    cleanup_confirmed = False if cleanup_uncertain else True
+    cleanup_confirmed = not cleanup_uncertain
     cleanup_status = "uncertain" if cleanup_uncertain else "confirmed"
 
     if result.status is SubagentStatus.COMPLETED:

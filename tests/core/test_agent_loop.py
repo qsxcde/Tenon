@@ -3,9 +3,7 @@ from __future__ import annotations
 import asyncio
 
 from tenon.core.context.model import AgentContext
-from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.core.contracts.events import EventType
-from tenon.core.orchestration.loop import run_agent_loop, run_agent_loop_continue
 from tenon.core.contracts.messages import (
     Message,
     OutputCompleteness,
@@ -13,7 +11,9 @@ from tenon.core.contracts.messages import (
     ToolResult,
 )
 from tenon.core.contracts.ports import StreamEvent, ToolDecision
+from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.loop import run_agent_loop, run_agent_loop_continue
 
 
 class _Model:

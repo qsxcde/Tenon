@@ -17,7 +17,6 @@ from ..primitives import (
 )
 from ..theme import ACTIVITY, ASSISTANT_PROMPT, TEXT, USER_BG, USER_PROMPT
 
-
 _FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})(.*)$")
 
 

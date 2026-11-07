@@ -5,7 +5,6 @@ from __future__ import annotations
 import ast
 import importlib
 
-
 TARGET_MODULES = (
     "tenon.session.runtime",
     "tenon.session.events",

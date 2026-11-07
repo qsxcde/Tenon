@@ -22,7 +22,7 @@ class McpPermissionRules:
     allow: tuple[str, ...] = ()
 
     @classmethod
-    def empty(cls) -> "McpPermissionRules":
+    def empty(cls) -> McpPermissionRules:
         return cls()
 
     def decide(self, qualified_name: str) -> str | None:

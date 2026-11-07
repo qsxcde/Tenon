@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, TypeAlias
+from typing import Any, TypeAlias
 
 from tenon.ai.model.protocols import ChatClient
 from tenon.ai.transport.shapes import DEFAULT_API_SHAPE, resolve_api_shape

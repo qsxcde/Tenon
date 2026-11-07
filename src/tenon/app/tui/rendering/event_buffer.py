@@ -42,10 +42,10 @@ class TuiEventBuffer:
         payload = str(event.payload or "")
         if self._pending is None:
             self._start(event, payload)
-        elif self._pending.type != event.type:
-            self.flush()
-            self._start(event, payload)
-        elif self._pending_chars + len(payload) > self.MAX_PENDING_CHARS:
+        elif (
+            self._pending.type != event.type
+            or self._pending_chars + len(payload) > self.MAX_PENDING_CHARS
+        ):
             self.flush()
             self._start(event, payload)
         else:

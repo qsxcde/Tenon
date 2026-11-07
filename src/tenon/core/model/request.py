@@ -11,7 +11,6 @@ import asyncio
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from tenon.core.support.awaiting import await_if_needed
 from tenon.core.context.budget import (
     ContextBudgetInput,
     estimate_context_budget,
@@ -22,20 +21,21 @@ from tenon.core.context.contracts import (
     ContextToolDefinition,
 )
 from tenon.core.context.preflight import evaluate_context_preflight
-from tenon.core.contracts.errors import (
-    ContextPreparationError,
-    ContextPreflightError,
-)
-from tenon.core.contracts.events import AgentEvent, EventType
-from tenon.core.contracts.messages import Message, ToolCall, new_id
-from tenon.core.contracts.ports import AgentTool
 from tenon.core.context.transform import (
     clone_context_messages,
     clone_message,
     invoke_context_extension,
     materialize_context_messages,
 )
+from tenon.core.contracts.errors import (
+    ContextPreflightError,
+    ContextPreparationError,
+)
+from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.messages import Message, ToolCall, new_id
+from tenon.core.contracts.ports import AgentTool
 from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.support.awaiting import await_if_needed
 
 
 def neutral_tool_definitions(

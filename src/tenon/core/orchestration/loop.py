@@ -9,15 +9,15 @@ from typing import Any
 
 from tenon.core.context.model import AgentContext
 from tenon.core.contracts.errors import (
-    ContextPreparationError,
     ContextPreflightError,
+    ContextPreparationError,
     ContextTransformTimeoutError,
 )
 from tenon.core.contracts.events import AgentEvent, EventType
-from tenon.core.execution.runtime import ToolExecutionRuntime
-from tenon.core.orchestration.errors import RecursionLimitError
 from tenon.core.contracts.messages import CleanupStatus, Message, new_id
+from tenon.core.execution.runtime import ToolExecutionRuntime
 from tenon.core.orchestration.config import AgentLoopConfig
+from tenon.core.orchestration.errors import RecursionLimitError
 from tenon.core.orchestration.turn import run_turn
 
 DEFAULT_RECURSION_LIMIT = 50

@@ -16,11 +16,12 @@ if TYPE_CHECKING:
     from collections import OrderedDict
     from collections.abc import Callable
 
+    from tenon.core.context.diagnostics import ContextDiagnostics
+
     from ..presentation.blocks import AssistantBlock, SubagentBlock, ToolCallBlock
     from ..presentation.status import StatusBar
     from .runtime import RuntimeReducer, RuntimeSnapshot
     from .transcript import Transcript
-    from tenon.core.context.diagnostics import ContextDiagnostics
 
 
 class TuiModelHost:

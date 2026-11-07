@@ -18,18 +18,18 @@ from tenon.core.contracts.ports import ApprovalPolicy
 from tenon.core.orchestration.config import AgentLoopConfig
 
 if TYPE_CHECKING:
+    from tenon.core.context.budget import ContextBudgetSnapshot
+    from tenon.core.context.contracts import ContextTransformer
     from tenon.core.contracts.events import AgentEvent
     from tenon.core.contracts.hooks import HookDiagnostic
     from tenon.core.contracts.messages import Message
-    from tenon.core.context.budget import ContextBudgetSnapshot
-    from tenon.core.context.contracts import ContextTransformer
     from tenon.session.compaction import CompactionPolicyConfig
     from tenon.session.compaction.summarizer import Summarizer
     from tenon.session.contracts import SessionCloser
     from tenon.session.events.bus import EventBus
+    from tenon.session.run_coordinator import SessionRunCoordinator
     from tenon.session.runtime.controller import SessionRuntime
     from tenon.session.runtime.state import SessionBudgetState
-    from tenon.session.run_coordinator import SessionRunCoordinator
     from tenon.session.session_persistence import SessionPersistence
 
 

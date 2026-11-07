@@ -3,14 +3,14 @@
 from pathlib import Path
 
 from tenon.app.tui.presentation.output import OutputBuffer, OutputMetadata
-from tenon.core.contracts.messages import ToolResult
 from tenon.app.tui.state.model import TuiModel
 from tenon.core.contracts.events import AgentEvent, EventType
+from tenon.core.contracts.messages import ToolResult
 
 
 def test_tool_result_carries_non_persistent_output_statistics() -> None:
     result = ToolResult("call-1", "a\nb\n", name="bash")
-    assert result.total_bytes == len("a\nb\n".encode())
+    assert result.total_bytes == len(b"a\nb\n")
     assert result.total_lines == 2
     assert result.shown_lines == 2
     assert result.truncated_by is None

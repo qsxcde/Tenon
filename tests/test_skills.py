@@ -7,16 +7,16 @@
 
 from pathlib import Path
 
+from tenon.app.skills.models import (
+    Skill,
+    parse_skill_frontmatter,
+)
+from tenon.app.skills.packages.manager import PackageManager
 from tenon.app.skills.prompt import (
     build_skills_prompt,
     format_skill_invocation,
     load_skills,
 )
-from tenon.app.skills.models import (
-    parse_skill_frontmatter,
-    Skill,
-)
-from tenon.app.skills.packages.manager import PackageManager
 from tenon.tools.atomic import SkillTool
 
 _BLOCK_HEAD = "<skill name="

@@ -7,7 +7,6 @@ import re
 from typing import Any
 
 from ..output import OutputBuffer, OutputMetadata
-from .tool_lifecycle import ToolLifecycleMixin
 from ..primitives import (
     Component,
     RichLine,
@@ -28,6 +27,7 @@ from ..theme import (
     TOOL_OUTPUT,
     WARNING,
 )
+from .tool_lifecycle import ToolLifecycleMixin
 
 _MAX_ARG_SUMMARY = 60
 _SUMMARY_SCAN_CHARS = _MAX_ARG_SUMMARY * 4
@@ -153,9 +153,12 @@ class ToolCallBlock(ToolLifecycleMixin, Component):
             summary = f"Ran command ({result or 'completed'}{suffix})"
             return summary + self._diagnostic_suffix()
         summary = completed.get(self.name, f"Ran {self.name}")
-        if self.output_buffer is not None and self.output_buffer.truncated:
-            summary += f" · {self.output_buffer.diagnostic}"
-        elif self.output_buffer is not None and self.execution_status == "unknown":
+        if (
+            self.output_buffer is not None
+            and self.output_buffer.truncated
+            or self.output_buffer is not None
+            and self.execution_status == "unknown"
+        ):
             summary += f" · {self.output_buffer.diagnostic}"
         elif self.output_buffer is not None:
             summary += _structured_output_suffix(self.output_buffer.metadata, path)

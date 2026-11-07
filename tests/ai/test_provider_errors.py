@@ -97,8 +97,8 @@ def test_transport_and_timeout_errors_are_retryable() -> None:
 
 @pytest.mark.anyio
 async def test_openai_compat_generate_raises_classified_http_error() -> None:
-    from tenon.ai.transport.openai_compat import OpenAICompatClient
     from tenon.ai.errors import ProviderError
+    from tenon.ai.transport.openai_compat import OpenAICompatClient
 
     response = httpx.Response(
         403,

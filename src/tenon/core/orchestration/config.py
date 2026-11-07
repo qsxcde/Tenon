@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-import math
 
 from tenon.core.context.budget import (
     DEFAULT_CONTEXT_WINDOW,
@@ -20,12 +20,12 @@ from tenon.core.context.contracts import (
     identity_context,
 )
 from tenon.core.context.preflight import ContextPreflightConfig
+from tenon.core.contracts.hooks import LifecycleHook
 from tenon.core.contracts.ports import (
     AgentTool,
     ModelPort,
     ToolExecutionRuntimePort,
 )
-from tenon.core.contracts.hooks import LifecycleHook
 
 __all__ = ["AgentLoopConfig"]
 

@@ -3,12 +3,14 @@
 import asyncio
 from types import SimpleNamespace
 from typing import Any
+
 import pytest
-from tenon.app.tui.presentation.blocks import ToolCallBlock
+
+from tenon.app.tui.application import TuiApp
 from tenon.app.tui.commands.parser import Command
+from tenon.app.tui.presentation.blocks import ToolCallBlock
 from tenon.app.tui.presentation.primitives import rich_to_plain
 from tenon.app.tui.presentation.status import FooterInfo
-from tenon.app.tui.application import TuiApp
 from tenon.core.contracts.events import AgentEvent, EventType
 from tenon.core.contracts.messages import Message
 from tenon.session.persistence import SessionQuery, UsageStats

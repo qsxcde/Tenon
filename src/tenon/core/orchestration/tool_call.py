@@ -17,7 +17,6 @@ from tenon.core.contracts.ports import AgentTool
 from tenon.core.orchestration.config import AgentLoopConfig
 from tenon.core.orchestration.tool_hooks import run_post_chain, run_pre_chain
 
-
 #: 安全警告前缀:单行、固定格式,便于订阅方按行剥离。
 _WARNING_PREFIX = "[安全提示] "
 NEWLINE = chr(10)

@@ -16,11 +16,11 @@ from tenon.core.subagent.policy import (  # noqa: F401  (re-exported for callers
     DEFAULT_MAX_TOOL_CALLS,
     DEFAULT_MAX_TURNS,
     DEFAULT_TIMEOUT_SECONDS,
-    EffectiveSubagentBudget,
     MAX_MAX_OUTPUT_CHARS,
     MAX_MAX_TOOL_CALLS,
     MAX_MAX_TURNS,
     MAX_TIMEOUT_SECONDS,
+    EffectiveSubagentBudget,
     resolve_budget,
 )
 

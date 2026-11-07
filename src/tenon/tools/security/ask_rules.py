@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from tenon.tools.security.interpreters import (
     INTERPRETER_FAMILIES,

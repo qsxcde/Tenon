@@ -6,6 +6,7 @@ import asyncio
 from typing import Any
 
 from tenon.app.errors.reporting import report_unexpected_error
+
 from ..commands.host import TuiAppHost
 from ..commands.parser import Command
 

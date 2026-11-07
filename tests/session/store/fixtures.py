@@ -5,7 +5,9 @@ import os
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import pytest
+
 from tenon.core.contracts.messages import Message, ToolCall
 from tenon.session.persistence import (
     CURRENT_VERSION,

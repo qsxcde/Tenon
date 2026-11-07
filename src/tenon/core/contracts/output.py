@@ -113,7 +113,7 @@ class ToolOutputMetadata:
         }
 
     @classmethod
-    def from_dict(cls, value: Any) -> "ToolOutputMetadata":
+    def from_dict(cls, value: Any) -> ToolOutputMetadata:
         """Decode optional session metadata, ignoring unknown future fields."""
         if not isinstance(value, dict):
             return cls(source="legacy")

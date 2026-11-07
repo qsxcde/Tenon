@@ -1,7 +1,7 @@
 """FakeClient 测试:脚本消费、usage 注入、bind_tools 占位、离线不联网。"""
 
-from tenon.ai.providers.fake import FakeClient
 from tenon.ai.model.types import ChatMessage
+from tenon.ai.providers.fake import FakeClient
 
 
 def _msg(content: str = "hi") -> list[ChatMessage]:

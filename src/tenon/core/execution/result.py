@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from tenon.core.execution.cleanup import CleanupResult
-from tenon.core.execution.state import ToolOperation
 from tenon.core.contracts.messages import (
     CleanupStatus,
     OutputCompleteness,
@@ -14,6 +12,8 @@ from tenon.core.contracts.messages import (
     ToolOutputMetadata,
     ToolResult,
 )
+from tenon.core.execution.cleanup import CleanupResult
+from tenon.core.execution.state import ToolOperation
 
 __all__ = ["normalize_tool_result"]
 

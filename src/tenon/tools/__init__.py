@@ -5,7 +5,6 @@
 core 不直接调用具体工具。
 """
 
-from tenon.tools.base import AtomicTool
 from tenon.tools.atomic import (
     BashTool,
     EditTool,
@@ -15,17 +14,18 @@ from tenon.tools.atomic import (
     ReadTool,
     WriteTool,
 )
+from tenon.tools.base import AtomicTool
+from tenon.tools.capabilities import (
+    ToolCapabilities,
+    ToolCapability,
+    detect_tool_capabilities,
+)
 from tenon.tools.registry import (
     ToolBuildContext,
     ToolRegistry,
     ToolSpec,
     builtin_tool_registry,
     make_tools,
-)
-from tenon.tools.capabilities import (
-    ToolCapabilities,
-    ToolCapability,
-    detect_tool_capabilities,
 )
 from tenon.tools.shared import ToolResourceLimits
 

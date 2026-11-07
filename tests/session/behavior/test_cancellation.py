@@ -1,8 +1,8 @@
 """cancellation behavior tests."""
 
-from tests.session.behavior.fixtures import *  # noqa: F401,F403
-
 import threading
+
+from tests.session.behavior.fixtures import *  # noqa: F401,F403
 
 
 async def test_abort_cancels_and_emits_run_cancelled():

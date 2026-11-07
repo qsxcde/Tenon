@@ -2,8 +2,8 @@
 
 import asyncio
 
-from tenon.app.tui.presentation.primitives import Component, RichLine, Span
 from tenon.app.tui.presentation.blocks import AssistantBlock
+from tenon.app.tui.presentation.primitives import Component, RichLine, Span
 from tenon.app.tui.rendering.coordinator import TuiRenderCoordinator
 from tenon.app.tui.rendering.scheduler import FrameScheduler, ResizeDebouncer
 from tenon.app.tui.state.model import TuiModel

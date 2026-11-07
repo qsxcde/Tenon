@@ -6,8 +6,8 @@ from collections import OrderedDict
 
 from ..presentation.blocks import Component
 from ..presentation.primitives import RichLine
-from .transcript_layout import TranscriptLayoutMixin
 from .transcript_index import TranscriptLayoutIndex
+from .transcript_layout import TranscriptLayoutMixin
 from .transcript_progressive import ProgressiveTranscriptMixin
 
 

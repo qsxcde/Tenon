@@ -37,7 +37,7 @@ uv run tenon --tui             # 交互式终端
 
 | 门禁 | 命令 | 说明 |
 | --- | --- | --- |
-| 正确性静态检查 | `uv run ruff check src tests evals scripts` | 仅启用 `E9`（语法错误）、`F821`（未定义名）、`F841`（未使用局部变量） |
+| 正确性静态检查 | `uv run ruff check src tests evals scripts` | `E9`/`F821`/`F841` 加导入排序 `I`、现代化语法 `UP037`/`UP035`/`UP041`/`UP012`、常见缺陷 `B004`/`B009`/`B010` 与部分 `SIM` 规则 |
 | 格式化 | `uv run ruff format --check src tests evals scripts` | 唯一方案（不引入 Black），行宽 100 |
 | 类型棘轮 | `uv run python scripts/type_scan.py` | mypy 按 core/ai/tools/session/app 五层统计，与 `docs/type-baseline.json` 比较，回升即失败；债务下降后用 `--update` 固化基线 |
 | 规模门禁 | `uv run python scripts/scale_scan.py` | 生产层单文件 ≤ 300 行、单函数 ≤ 80 行；豁免仅在 `COMPATIBILITY_EXCEPTIONS` 逐项登记 |

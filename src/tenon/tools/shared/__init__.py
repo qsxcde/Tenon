@@ -4,11 +4,25 @@
 和文件系统抽象,不依赖外部编排框架。
 """
 
-from tenon.tools.shared.fsops import FsOps, LocalFsOps
 from tenon.tools.shared.checkpoints import CheckpointEntry, CheckpointStore
+from tenon.tools.shared.fsops import FsOps, LocalFsOps
+from tenon.tools.shared.governance import (
+    GovernedOutput,
+    GovernedText,
+    OutputPolicy,
+    govern_text,
+    redact_metadata_text,
+)
 from tenon.tools.shared.ignore import NOISE_DIRS, prune_noise_dirs
 from tenon.tools.shared.mutation_queue import with_path_lock
 from tenon.tools.shared.paths import normalize_path, resolve_to_cwd
+from tenon.tools.shared.resource_limits import (
+    DEFAULT_TOOL_CLEANUP_TIMEOUT,
+    DEFAULT_TOOL_CONCURRENCY,
+    DEFAULT_TOOL_MAX_TIMEOUT,
+    DEFAULT_TOOL_MEMORY_BYTES,
+    ToolResourceLimits,
+)
 from tenon.tools.shared.textfile import (
     detect_line_ending,
     normalize_to_lf,
@@ -21,20 +35,6 @@ from tenon.tools.shared.truncate import (
     TruncationResult,
     truncate_head,
     truncate_tail,
-)
-from tenon.tools.shared.governance import (
-    GovernedOutput,
-    GovernedText,
-    OutputPolicy,
-    govern_text,
-    redact_metadata_text,
-)
-from tenon.tools.shared.resource_limits import (
-    DEFAULT_TOOL_CLEANUP_TIMEOUT,
-    DEFAULT_TOOL_CONCURRENCY,
-    DEFAULT_TOOL_MAX_TIMEOUT,
-    DEFAULT_TOOL_MEMORY_BYTES,
-    ToolResourceLimits,
 )
 
 __all__ = [

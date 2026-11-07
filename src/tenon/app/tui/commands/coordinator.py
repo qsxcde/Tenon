@@ -7,11 +7,12 @@ import inspect
 from typing import Any
 
 from tenon.app.tasks.modes import TaskMode
+
 from .admin import TuiAdminCommandCoordinator
+from .interaction import _COMMANDS
+from .parser import Command, help_text
 from .skills import TuiSkillCommandCoordinator
 from .status import TuiStatusCommandCoordinator
-from .parser import Command, help_text
-from .interaction import _COMMANDS
 
 
 class TuiCommandCoordinator(

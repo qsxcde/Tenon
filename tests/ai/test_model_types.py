@@ -3,12 +3,12 @@
 import pytest
 
 from tenon.ai.model.types import ToolDefinition
+from tenon.ai.providers.fake import FakeClient
+from tenon.app.composition.model.factory import ChatModelPort
 from tenon.app.composition.tools.definitions import (
     ToolDefinitionConversionError,
     tool_definition_for,
 )
-from tenon.ai.providers.fake import FakeClient
-from tenon.app.composition.model.factory import ChatModelPort
 from tenon.core.contracts.messages import Message
 
 

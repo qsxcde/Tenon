@@ -10,6 +10,8 @@ from pathlib import Path
 from tenon.app import container
 from tenon.app.headless import (
     _format_usage_line as _format_usage_line,
+)
+from tenon.app.headless import (
     _headless_loop,
     _headless_once,
     _print_context_diagnostics,

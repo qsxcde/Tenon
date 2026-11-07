@@ -6,7 +6,6 @@ import asyncio
 from collections.abc import Callable
 from typing import TypeVar
 
-
 ResultT = TypeVar("ResultT")
 
 

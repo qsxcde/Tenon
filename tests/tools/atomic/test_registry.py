@@ -1,7 +1,5 @@
 """registry behavior tests."""
 
-from tests.tools.atomic.fixtures import *  # noqa: F401,F403
-
 from pydantic import BaseModel
 
 from tenon.tools.atomic import SkillTool, TodoTool, WebFetchTool, WebSearchTool
@@ -13,6 +11,7 @@ from tenon.tools.registry import (
     make_tools,
 )
 from tenon.tools.shared import ToolResourceLimits
+from tests.tools.atomic.fixtures import *  # noqa: F401,F403
 
 BUILTIN_ORDER = (
     "read",

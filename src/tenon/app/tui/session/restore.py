@@ -8,10 +8,11 @@ from typing import Any
 
 from tenon.app.errors.reporting import report_unexpected_error
 from tenon.app.session_recovery import format_recovery_report
+from tenon.core.context.diagnostics import ContextDiagnostics
+from tenon.core.contracts.events import AgentEvent, EventType
+
 from ..commands.host import TuiAppHost
 from ..state.model import TuiModel
-from tenon.core.contracts.events import AgentEvent, EventType
-from tenon.core.context.diagnostics import ContextDiagnostics
 
 
 @dataclass(frozen=True)

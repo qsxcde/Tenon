@@ -7,8 +7,8 @@ session facade remains responsible for events and publishing the new state.
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 import inspect
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Literal
 

@@ -11,8 +11,8 @@ from tenon.session.compaction import CompactionPolicyConfig
 from tenon.tools.shared import ToolResourceLimits
 
 from ..model.factory import _resolve_context_window
-from ..runtime.factory import create_agent_config, runtime_for_config
 from ..runtime.extensions import RuntimeExtensions, normalize_runtime_extensions
+from ..runtime.factory import create_agent_config, runtime_for_config
 from ..subagent.factory import make_child_session_factory
 
 
