@@ -8,8 +8,10 @@ license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
-    "mcp>=2.0.0",
+    "mcp>=2.2.0",
     "pydantic-settings>=2.14.2",
+    # mcp 的传递依赖；显式下限避免安装时解析到存在 JWT 校验漏洞的旧版本。
+    "pyjwt>=2.15.0",
     "pyyaml>=6.0.3",
     "textual>=2.1.0",
 ]
