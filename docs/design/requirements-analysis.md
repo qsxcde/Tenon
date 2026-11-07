@@ -59,7 +59,7 @@
 | 安全确认环(FR-8.2 / NFR-S3) | 🔲 v0.2 | ✅ 已落地(`security-permissions`:ApprovalPolicy + tools/security/ 三档分类器,headless 缺省 fail closed) |
 | AGENTS.md 分层(F-16) | 🔲 v0.2 规划 | ✅ 已落地(`app/context/agents.py`,全局→项目→子目录分层注入) |
 | 平台部署 `langgraph.json`(F-24 / IR-10) | 📝 P2 | **永久调整**:随自研编排改写为 HTTP/事件订阅入口(F-27);**2026-08-22 定案:Web/HTTP 入口移出 v0.3(E12)**——平台向无真实消费者,价值被 CLI/TUI 事件流订阅覆盖,推迟远期按需重估 |
-| 测试基线(附录 B) | 336(2026-08-14) | 当前权威基线见 §0.3（2026-10-28 复核：**2141 passed**）；§0.2 记录 2026-08-30 的 v0.4 快照为 **1532 passed**（macOS），均为历史快照；测试零网络零密钥，跨平台结果以 CI artifact 为准 |
+| 测试基线(附录 B) | 336(2026-08-14) | 当前权威基线见 §0.3（2026-11-08 复核：**2189 passed**）；§0.2 记录 2026-08-30 的 v0.4 快照为 **1532 passed**（macOS），均为历史快照；测试零网络零密钥，跨平台结果以 CI artifact 为准 |
 | 解耦扫描测试(NFR-M1 / AR-4) | 已移除待恢复 | ✅ 已重写恢复(`tests/test_decoupling.py`,2026-08-14,AST 扫描 + anti-wargaming 守卫) |
 
 > 历史架构描述见 [architecture.md](./architecture.md)(当时为 v0.3);当前权威架构描述见 [architecture.md](./architecture.md)(v0.7)，迭代与验收见 `docs/iteration/v0.7.md`；历史审计修复结论见 `docs/iteration/v0.3.md` §6.5。
@@ -86,10 +86,10 @@
 
 ## 0.3 当前代码树与 v0.7 验证状态(2026-10-28)
 
-> 本节覆盖并 supersede §0.2 与旧版 §0.3 的当前性描述；§0.2、附录 B.1~B.7 保留为 v0.1~v0.5 的历史快照。复核环境为 Linux / Python 3.12（2026-10-28），项目已更名为 `tenon`（发行名、import 名、CLI 入口与配置目录统一为 `~/.tenon`）。
+> 本节覆盖并 supersede §0.2 与旧版 §0.3 的当前性描述；§0.2、附录 B.1~B.7 保留为 v0.1~v0.5 的历史快照。复核环境为 macOS / Python 3.12（2026-11-08），项目已更名为 `tenon`（发行名、import 名、CLI 入口与配置目录统一为 `~/.tenon`）。
 
 - v0.5、v0.6 与 v0.7 的功能范围均已完成实现、验收与归档：Subagent 串行只读委派与父子事件诊断（v0.5）；安全分类语义化、只读搜索边界、合并输出上限、中英 token 估算与会话索引增量（v0.6）；工具注册表数据化、审批封闭枚举、`web_fetch` / `web_search` / `todo`、工具执行瀑布管线、扩展插件 v1、Subagent 有界并发与 `implement` 受限可写 profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint + `tenon undo`、缓存诊断与离线评测（v0.7）。
-- 本地全量离线测试：`uv run pytest -q` 为 **2141 passed**（2141 collected，无 skipped）；快速质量集（unit/contract）为 **1977 passed，164 deselected**，覆盖率 **90%**（19757 statements / 1978 missing，CI 硬下限 80%）；离线评测 `python -m evals` 为 **4/4**。
+- 本地全量离线测试：`uv run pytest -q` 为 **2189 passed**（2189 collected，无 skipped）；快速质量集（unit/contract）为 **2025 passed，164 deselected**，覆盖率 **90%**（20323 statements / 1994 missing，CI 硬下限 80%）；离线评测 `python -m evals` 为 **4/4**。
 - 规格与门禁：主规格 **25 份**，`openspec/changes/` 无未归档变更；`openspec validate --specs` 本地复验 **25/25**（OpenSpec 1.8.0），CI 同样校验；`uv run ruff check src tests evals scripts`、`uv run ruff format --check src tests evals scripts`、`uv run python scripts/type_scan.py`（当前基线合计 22：app 17 / session 5，其余层 0）与 `uv run python scripts/scale_scan.py` 均通过。
 - 构建与版本：包版本 `pyproject.toml` 与 `tenon.__version__` 均为 `0.7.0`；`uv build` 成功产出 wheel 与 sdist；发布说明与升级指南见 [`docs/releases/`](../releases/)。
 - 范围更新（2026-10-28）：Web/HTTP 事件订阅、工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、自动化任务与 Web UI 仍不属于当前版本；`steer` 运行中注入的会话 API 已存在，但尚未接入 TUI 输入路径；headless 无 JSON 事件流导出；TUI schema v2 正式基线仍待人工复核。
@@ -604,7 +604,7 @@ class AgentSession:
 | 编号 | 指标 | 要求 | 验收口径 | 状态 |
 |---|---|---|---|---|
 | NFR-M1 | 分层解耦 | 跨层 import 仅发生在 `app/container.py` / `app/main.py` / `app/composition/**` | `tests/test_decoupling.py` AST 强制校验(2026-08-14 重写,当前 369 个参数化用例) | ✅ |
-| NFR-M2 | 测试覆盖 | 核心编排层 100% 离线可测,总体覆盖率 ≥ 80% | `FakeClient` 注入；当前快速质量集覆盖率 **90%**，全量测试 **2141 passed**（§0.3，2026-10-28，Linux / Python 3.12） | ✅（超过 80% 目标；CI 硬下限为 80%） |
+| NFR-M2 | 测试覆盖 | 核心编排层 100% 离线可测,总体覆盖率 ≥ 80% | `FakeClient` 注入；当前快速质量集覆盖率 **90%**，全量测试 **2189 passed**（§0.3，2026-11-08，macOS / Python 3.12） | ✅（超过 80% 目标；CI 硬下限为 80%） |
 | NFR-M3 | 可替换性 | provider/工具/存储更换不动编排层 | 端口-适配器契约(`AgentLoopConfig` / `AgentClient`) | ✅ |
 | NFR-M4 | 代码规范 | 类型注解完整、中文 docstring | 分层职责单一,无循环 import | ✅ |
 | NFR-M5 | 变更影响面 | 新增 provider=1 文件;新增工具=0 处 core 改动 | AR-4 判据 | ✅ |
@@ -772,7 +772,7 @@ v0.7(✅ 2026-10-24):        工具注册表+插件 v1+瀑布管线+三档沙箱
 
 ### 12.1 全局验收基线(每个版本发布前必须满足)
 
-1. **测试无失败**:`uv run pytest -q` 当前全量基线见 §0.3（2026-10-28 复核：**2141 passed**，2141 collected）;核心编排层零网络、零密钥(`FakeClient`)可跑通全量;
+1. **测试无失败**:`uv run pytest -q` 当前全量基线见 §0.3（2026-11-08 复核：**2189 passed**，2189 collected）;核心编排层零网络、零密钥(`FakeClient`)可跑通全量;
 2. **解耦判据**:解耦扫描测试强制校验跨层 import 仅出现在 `app/container.py` / `app/main.py`(2026-08-14 已重写恢复);
 3. **离线可体验**:无任何 API Key 时以 `fake` provider 完整跑通"对话→工具调用→事件流"闭环;
 4. **配置隔离**:全部配置类 `extra="ignore"`,防回归测试通过;
@@ -826,7 +826,7 @@ v0.7(✅ 2026-10-24):        工具注册表+插件 v1+瀑布管线+三档沙箱
 - ✅ v0.6 正确性硬化：安全分类的包装器/命令替换绕过已封堵，搜索工具与 `read` 共用文件边界，越界警告进入模型可见结果；bash 合并输出二次截断并标记 `merged_budget`；CJK token 按字计价且预算与压缩共用估算器；会话索引追加由 O(n²) 降至 1000 次 0.37s。
 - ✅ v0.7 扩展与运行期安全：11 个内建工具与声明式注册表、审批结果封闭枚举、工具执行瀑布管线、插件 v1、Subagent 有界并发与 `implement`、API 形状注册表、三档 bash 沙箱、写前 checkpoint + `tenon undo`、缓存诊断与 `python -m evals`。
 - ✅ v0.7 TUI 维护能力：`/undo`、`/export`、`/subagents`、`/context-window`、`/mcp reload` 与 `--tui -c` 启动恢复。
-- ✅ 质量门禁（2026-10-28）：全量 2141 passed、快速集 1977 passed / 覆盖率 90%、评测 4/4、Ruff / 格式 / 类型棘轮 / 规模门禁与构建通过。
+- ✅ 质量门禁（2026-11-08）：全量 2189 passed、快速集 2025 passed / 覆盖率 90%、评测 4/4、Ruff / 格式 / 类型棘轮 / 规模门禁与构建通过。
 - ⏭ 未纳入：`steer` 的 TUI 接线、后台作业、headless JSON 事件流、程序化工具编排、跨进程恢复与自动重试、长期记忆、工作区合并、费用估算与 Web UI。
 
 ---
