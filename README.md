@@ -191,7 +191,7 @@ openspec validate --specs                                 # 规格校验
 uv build                                                  # 构建 wheel / sdist
 ```
 
-CI 由 `quality-fast`（Ruff、快速测试、覆盖率下限 80%、类型棘轮、OpenSpec）、三平台离线测试矩阵、`package-smoke`（构建、干净安装、fake provider CLI 冒烟）与非阻塞性能报告组成。测试标记与分层说明见 [docs/testing.md](docs/testing.md)。
+CI 由 `quality-fast`（Ruff、快速测试、覆盖率下限 88%、类型棘轮、OpenSpec）、三平台离线测试矩阵、`package-smoke`（构建、干净安装、fake provider CLI 冒烟）与非阻塞性能报告组成。测试标记与分层说明见 [docs/testing.md](docs/testing.md)。
 
 ## 版本与路线图
 

@@ -4,9 +4,9 @@
 
 截至 2026-11-08 复核（macOS / Python 3.12，项目更名为 `tenon` 后）：
 
-- `uv run pytest -q`：**2189 passed**（2189 collected，无 skipped），行覆盖率 **93%**（20323 statements，1430 missing）。
-- 本地快速质量集：`uv run pytest -m "unit or contract" -q` → **2025 passed，164 deselected**（37.58s，含覆盖率插桩），覆盖率为 **90%**（20323 statements，1994 missing），硬下限仍为 **80%**（CI `--cov-fail-under=80`）。
-- 分层批次：`integration or e2e or platform or compatibility` → **180 passed，2009 deselected**（15.80s）。跨平台测试和 CI 质量结果以对应 GitHub Actions artifact 为准。
+- `uv run pytest -q`：**2189 passed**（2189 collected，无 skipped），行覆盖率 **93%**（20349 statements，1436 missing）。
+- 本地快速质量集：`uv run pytest -m "unit or contract" -q` → **2025 passed，164 deselected**（36.13s，含覆盖率插桩），覆盖率为 **90%**（20349 statements，2000 missing），硬下限仍为 **88%**（CI `--cov-fail-under=88`）。
+- 分层批次：`(integration or e2e or platform or compatibility) and not contract` → **154 passed，2035 deselected**（15.47s）。跨平台测试和 CI 质量结果以对应 GitHub Actions artifact 为准。
 - 历史基线（仅作趋势参考，不代表当前口径）：v0.5.0 发布 `1695 passed / 3 skipped`（1698 collected）、**84.40%**（2026-10-10，Windows）；v0.4 `1532 passed`、**83.61%**（2026-08-30，macOS）；v0.7 能力收口时为 `1870 passed` / 快速集 `1718 passed`（2026-10-24）。用例数的持续增长来自测试拆分、契约补充、Subagent 全链路、运行期安全、TUI 维护命令与新增模块的覆盖补齐。
 - `test-foundation-stability` 与 `test-structure-coverage` 均已归档；当前测试结构和 `last_activity_at` 跨层契约已落地。
 - **marker 分层修正**：`tests/conftest.py` 现在让显式主分类（模块级 `pytestmark` 或函数装饰器）优先于目录兜底。`tests/app/container/test_assembly.py` 整体标 `contract`（用 fake provider 与 stub backend，不启外部进程），其中真正启动 MCP 子进程的 `test_config_append_mcp_tools` 单独标 `integration`。效果：`app/composition/policy.py` 的覆盖率从快速口径 **20%** 升至 **84%**，三个决策分支（deny / interactive / allow）与文件边界回归从此进入每次 `quality-fast`；矩阵批次相应从 212 降到 161，移出的纯装配用例由快速批次接管。
@@ -155,8 +155,8 @@ openspec validate --specs
 
 `.github/workflows/ci.yml` 将门禁分为四类：
 
-- `quality-fast`：Ruff、unit/contract、覆盖率报告、版本一致性、补丁格式和 OpenSpec 校验。
-- `test-matrix`：Ubuntu、Windows、macOS 上执行 integration/e2e/platform/compatibility，统一使用 fake provider；失败时保留 JUnit 和跳过原因。
+- `quality-fast`：Ruff、`uv audit --locked`、unit/contract、覆盖率报告（硬下限 88%）、版本一致性、补丁格式和 OpenSpec 规格/变更校验。
+- `test-matrix`：Ubuntu、Windows、macOS 上执行 integration/e2e/platform/compatibility（排除已由快速集覆盖的 contract 用例），统一使用 fake provider；失败时保留 JUnit 和跳过原因。
 - `package-smoke`：运行 release check，构建并检查 wheel/sdist，在干净虚拟环境安装后检查 CLI 和内建 resources 可用。
 - `performance`：运行离线 TUI 基准并上传 JSON；性能回归目前只告警，不阻断普通 PR。报告使用 schema v2，包含提交/首 token 延迟、帧 p50/p95、控制事件 p95、峰值 Python 分配和协调器帧计数。硬上限与发布候选判定见 [`TUI 性能边界与回归判定`](benchmarks/tui-performance-policy.md)。
 
@@ -188,4 +188,4 @@ done
 `unavailable_metrics`，`not_measured` 则会使比较结果为 `incomplete`。1,000/5,000/10,000
 block 扩展报告用于趋势观察，不与 100 block 的正式 Linux 基线直接比较，也不作为跨机器绝对 SLO。
 
-当前 `quality-fast` 与平台矩阵之间仍有 26 个测试因同时带 `contract` 与 `platform`/`compatibility` 标签而重复执行；这不影响正确性，边界保护可保留，若后续要消除重复需要为这些文件指定唯一主分类。覆盖率硬下限当前为 **80%**（快速口径实测 90%）。TUI 性能采用双门槛：帧/控制事件/丢帧使用硬上限，同环境渲染、恢复和内存指标使用 20% 相对回归线；普通 PR 只告警，发布候选使用 `--fail-on-regression`。
+平台矩阵通过 `and not contract` 排除已由快速集覆盖的契约测试，不再重复执行；覆盖率硬下限当前为 **88%**（快速口径实测 90%）。TUI 性能采用双门槛：帧/控制事件/丢帧使用硬上限，同环境渲染、恢复和内存指标使用 20% 相对回归线；普通 PR 只告警，发布候选使用 `--fail-on-regression`。

@@ -43,10 +43,14 @@ class SessionRuntimeHost:
     agent: Agent | None
     _hook_diagnostics: list[HookDiagnostic]
 
-    # 宿主以只读 property 暴露的派生属性；mypy 不支持"只读属性"注解，
-    # 这里的普通注解会在宿主处产生已知的 override 提示，但不改变运行时行为。
-    phase: RunPhase
-    active_run_id: str | None
+    # 宿主以只读 property 暴露的派生属性。
+    @property
+    def phase(self) -> RunPhase:
+        raise NotImplementedError
+
+    @property
+    def active_run_id(self) -> str | None:
+        raise NotImplementedError
 
     # 定义在 ``RuntimeEventMixin``、由 ``SessionExecutionMixin`` 调用的方法。
     _handle_event: Callable[[AgentEvent, str], None]

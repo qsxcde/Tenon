@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import Any
+from collections.abc import Mapping
+from typing import Any, cast
 
 from tenon.app.errors.reporting import report_unexpected_error
 from tenon.core.contracts.messages import (
@@ -26,7 +27,7 @@ class AgentToolAdapter:
         self.name = str(getattr(tool, "name", ""))
         self.description = str(getattr(tool, "description", ""))
         definition = tool_definition_for(tool)
-        self.parameters = definition.parameters
+        self.parameters: Mapping[str, Any] = definition.parameters
 
     @property
     def supports_cancellation(self) -> bool:
@@ -165,6 +166,7 @@ def _metadata_from_value(value: Any, semantic_success: bool | None) -> ToolOutpu
 
 def _call_with_hooks(method: Any, args: Any, signal: Any, on_update: Any) -> Any:
     """Pass optional runtime hooks only when a concrete tool accepts them."""
+    parameters: Mapping[str, inspect.Parameter]
     try:
         parameters = inspect.signature(method).parameters
     except (TypeError, ValueError):
@@ -182,12 +184,13 @@ def _call_with_hooks(method: Any, args: Any, signal: Any, on_update: Any) -> Any
 
 def adapt_tools(tools: list[Any]) -> list[AgentTool]:
     """Return explicit AgentTool adapters for concrete legacy tools."""
-    return [
-        tool
-        if isinstance(tool, AgentToolAdapter) or isinstance(tool, AgentTool)
-        else AgentToolAdapter(tool)
-        for tool in tools
-    ]
+    adapted: list[AgentTool] = []
+    for tool in tools:
+        if isinstance(tool, AgentToolAdapter) or isinstance(tool, AgentTool):
+            adapted.append(cast(AgentTool, tool))
+        else:
+            adapted.append(AgentToolAdapter(tool))
+    return adapted
 
 
 __all__ = ["AgentToolAdapter", "adapt_tools"]

@@ -5,10 +5,11 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from ..presentation.blocks import AssistantBlock, ToolCallBlock, UserBlock
 from ..presentation.primitives import RichLine
+from ..ports.backend import TuiBackend
 from ..rendering.coordinator import TuiEventBuffer, TuiRenderCoordinator
 from ..state.model import TuiModel
 
@@ -136,7 +137,8 @@ def build_fixture(
         tool_output="t" * config.tool_output_bytes,
         restore_history=restore_history,
         event_buffer=TuiEventBuffer(model.apply),
-        coordinator=TuiRenderCoordinator(model, backend),
+        # FakeBackend 实现了协调器使用的 transcript_size/render/set_status 子集。
+        coordinator=TuiRenderCoordinator(model, cast(TuiBackend, backend)),
     )
 
 

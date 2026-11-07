@@ -70,7 +70,7 @@
 - 静态检查：Ruff 已接入，首阶段阻断语法错误、未定义名称和未使用局部变量。
  - 发布前检查：CI 已配置 release check，统一验证 wheel/sdist 构建、产物内容、版本、敏感文件、干净虚拟环境安装、fake provider CLI 和内建 resources，并上传机器可读报告与完整日志。
 - 跨平台检查：CI 已配置 Ubuntu、Windows、macOS 矩阵，统一使用离线测试集；当前三平台的具体结果以对应 CI artifact 为准。
- - 覆盖率/性能：§0.2 记录的快速质量集覆盖率为 **83.61%**（2026-08-30）；覆盖率硬下限已于 2026-10-18 由 77.9% 上调至 **80%**，当前口径见 §0.3；TUI schema v1 JSON 为历史基线，schema v2 候选由 CI 生成，性能暂只告警。
+ - 覆盖率/性能：§0.2 记录的快速质量集覆盖率为 **83.61%**（2026-08-30）；覆盖率硬下限已于 2026-10-18 由 77.9% 上调至 80%，并于 2026-11-08 上调至 **88%**，当前口径见 §0.3；TUI schema v1 JSON 为历史基线，schema v2 候选由 CI 生成，性能暂只告警。
 
 ---
 
@@ -89,7 +89,7 @@
 > 本节覆盖并 supersede §0.2 与旧版 §0.3 的当前性描述；§0.2、附录 B.1~B.7 保留为 v0.1~v0.5 的历史快照。复核环境为 macOS / Python 3.12（2026-11-08），项目已更名为 `tenon`（发行名、import 名、CLI 入口与配置目录统一为 `~/.tenon`）。
 
 - v0.5、v0.6 与 v0.7 的功能范围均已完成实现、验收与归档：Subagent 串行只读委派与父子事件诊断（v0.5）；安全分类语义化、只读搜索边界、合并输出上限、中英 token 估算与会话索引增量（v0.6）；工具注册表数据化、审批封闭枚举、`web_fetch` / `web_search` / `todo`、工具执行瀑布管线、扩展插件 v1、Subagent 有界并发与 `implement` 受限可写 profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint + `tenon undo`、缓存诊断与离线评测（v0.7）。
-- 本地全量离线测试：`uv run pytest -q` 为 **2189 passed**（2189 collected，无 skipped）；快速质量集（unit/contract）为 **2025 passed，164 deselected**，覆盖率 **90%**（20323 statements / 1994 missing，CI 硬下限 80%）；离线评测 `python -m evals` 为 **4/4**。
+- 本地全量离线测试：`uv run pytest -q` 为 **2189 passed**（2189 collected，无 skipped）；快速质量集（unit/contract）为 **2025 passed，164 deselected**，覆盖率 **90%**（20349 statements / 2000 missing，CI 硬下限 88%）；离线评测 `python -m evals` 为 **4/4**。
 - 规格与门禁：主规格 **25 份**，`openspec/changes/` 无未归档变更；`openspec validate --specs` 本地复验 **25/25**（OpenSpec 1.8.0），CI 同样校验；`uv run ruff check src tests evals scripts`、`uv run ruff format --check src tests evals scripts`、`uv run python scripts/type_scan.py`（当前基线合计 22：app 17 / session 5，其余层 0）与 `uv run python scripts/scale_scan.py` 均通过。
 - 构建与版本：包版本 `pyproject.toml` 与 `tenon.__version__` 均为 `0.7.0`；`uv build` 成功产出 wheel 与 sdist；发布说明与升级指南见 [`docs/releases/`](../releases/)。
 - 范围更新（2026-10-28）：Web/HTTP 事件订阅、工作区合并、跨进程恢复与自动重试、长期记忆、费用估算、自动化任务与 Web UI 仍不属于当前版本；`steer` 运行中注入的会话 API 已存在，但尚未接入 TUI 输入路径；headless 无 JSON 事件流导出；TUI schema v2 正式基线仍待人工复核。
@@ -604,7 +604,7 @@ class AgentSession:
 | 编号 | 指标 | 要求 | 验收口径 | 状态 |
 |---|---|---|---|---|
 | NFR-M1 | 分层解耦 | 跨层 import 仅发生在 `app/container.py` / `app/main.py` / `app/composition/**` | `tests/test_decoupling.py` AST 强制校验(2026-08-14 重写,当前 369 个参数化用例) | ✅ |
-| NFR-M2 | 测试覆盖 | 核心编排层 100% 离线可测,总体覆盖率 ≥ 80% | `FakeClient` 注入；当前快速质量集覆盖率 **90%**，全量测试 **2189 passed**（§0.3，2026-11-08，macOS / Python 3.12） | ✅（超过 80% 目标；CI 硬下限为 80%） |
+| NFR-M2 | 测试覆盖 | 核心编排层 100% 离线可测,总体覆盖率 ≥ 80% | `FakeClient` 注入；当前快速质量集覆盖率 **90%**，全量测试 **2189 passed**（§0.3，2026-11-08，macOS / Python 3.12） | ✅（超过 80% 目标；CI 硬下限为 88%） |
 | NFR-M3 | 可替换性 | provider/工具/存储更换不动编排层 | 端口-适配器契约(`AgentLoopConfig` / `AgentClient`) | ✅ |
 | NFR-M4 | 代码规范 | 类型注解完整、中文 docstring | 分层职责单一,无循环 import | ✅ |
 | NFR-M5 | 变更影响面 | 新增 provider=1 文件;新增工具=0 处 core 改动 | AR-4 判据 | ✅ |

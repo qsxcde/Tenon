@@ -104,8 +104,17 @@ async def _start_child(
 
 
 async def _await_child(active: ActiveDelegation) -> Any | SubagentResult:
+    task = active.task
+    if task is None:
+        return failure_result(
+            active,
+            SubagentStatus.FAILED,
+            SubagentReasonCode.EXECUTION_FAILED,
+            SubagentFailurePhase.RUNNING,
+            RuntimeError("子 Agent 任务尚未启动"),
+        )
     try:
-        returned = await asyncio.shield(active.task)
+        returned = await asyncio.shield(task)
     except asyncio.CancelledError:
         if active.cancel_requested:
             return cancellation_result(active)

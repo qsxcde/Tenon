@@ -96,7 +96,7 @@ class _KeyInput(Input):
     def __init__(self, placeholder: str = "") -> None:
         super().__init__(password=True, placeholder=placeholder)
 
-    def action_submit(self) -> None:
+    async def action_submit(self) -> None:
         if self.value.strip():
             self.post_message(InputSubmitted(self.value))
         self.value = ""
@@ -210,14 +210,12 @@ class _Composer(VerticalGroup):
     def _refresh_height(self) -> None:
         lines = min(self.MAX_HEIGHT, max(1, self._input_lines, self.input.virtual_size.height))
         self.input.styles.height = lines
-        self.styles.height = (
-            lines
-            + 2
-            + sum(
-                int(widget.styles.height.value)
-                for widget in (self.confirmation, self.suggestions, self.login_hint)
-            )
-        )
+        extra_height = 0
+        for widget in (self.confirmation, self.suggestions, self.login_hint):
+            height = widget.styles.height
+            if height is not None:
+                extra_height += int(height.value)
+        self.styles.height = lines + 2 + extra_height
 
     def on_text_area_changed(self, event: TextArea.Changed) -> None:
         self._input_lines = event.text_area.document.line_count

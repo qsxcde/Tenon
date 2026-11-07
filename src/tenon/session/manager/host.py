@@ -53,9 +53,10 @@ class SessionManagerHost:
     _current_id: str | None
     _subscribers: list[tuple[Subscriber, list[Callable[[], None]]]]
 
-    # 宿主以只读 property 暴露的派生属性；mypy 不支持"只读属性"注解，
-    # 这里的普通注解会在宿主处产生一条已知的 override 提示，但不改变运行时行为。
-    current: AgentSession | None
+    # 宿主以只读 property 暴露的派生属性。
+    @property
+    def current(self) -> AgentSession | None:
+        raise NotImplementedError
 
     # 定义在其他 mixin、但被本组合内多处调用的方法；用 Callable 声明避免
     # 各实现签名差异引发的 override 检查噪声。

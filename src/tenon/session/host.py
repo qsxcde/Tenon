@@ -69,9 +69,10 @@ class AgentSessionHost:
     _summary_entry_id: str | None
     _prev_details: dict[str, Any]
 
-    # 宿主以只读 property 暴露的派生属性；mypy 不支持"只读属性"注解，
-    # 这里的普通注解会在宿主处产生一条已知的 override 提示，但不改变运行时行为。
-    model_id: str | None
+    # 宿主以只读 property 暴露的派生属性。
+    @property
+    def model_id(self) -> str | None:
+        raise NotImplementedError
 
     # 定义在其他 mixin（或宿主）、但被多个 mixin 调用的方法。
     _emit: Callable[[AgentEvent, str | None], None]

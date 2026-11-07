@@ -6,7 +6,7 @@ import uuid
 import asyncio
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from tenon.core.contracts.messages import ToolExecutionStatus, ToolResult
 from tenon.core.contracts.subagents import (
@@ -48,7 +48,7 @@ class DelegateTool:
 
     name = "delegate"
     description = "将一个边界明确的只读任务交给独立的子 Agent，并返回有限的执行摘要。"
-    parameters = {
+    parameters: Mapping[str, Any] = {
         "type": "object",
         "properties": {
             "task": {
@@ -225,7 +225,8 @@ class DelegateTool:
     def _build_request(self, arguments: _DelegateArguments) -> SubagentRequest:
         request = SubagentRequest(
             delegation_id=str(uuid.uuid4()),
-            parent_run_id=self._parent_run_id,
+            # _parse_arguments 已在调用前校验父运行标识非空。
+            parent_run_id=cast(str, self._parent_run_id),
             task=arguments.task,
             profile=arguments.profile,
             depth=1,

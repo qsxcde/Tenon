@@ -103,7 +103,7 @@ def hook_name(hook: LifecycleHook | None) -> str:
 
 def make_hook_diagnostic(
     event: AgentEvent,
-    exception: Exception,
+    exception: BaseException,
     *,
     stage: HookFailureStage,
     hook: LifecycleHook | None = None,

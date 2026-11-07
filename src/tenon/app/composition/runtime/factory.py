@@ -62,7 +62,9 @@ class AgentRuntime:
         """Run the single shared close sequence for all concurrent callers."""
         try:
             if self.tool_runtime is not None:
-                await self.tool_runtime.cancel_all()
+                cancel_all = getattr(self.tool_runtime, "cancel_all", None)
+                if callable(cancel_all):
+                    await cancel_all()
             close_mcp = None
             try:
                 from tenon.tools.mcp.loader import close_mcp_tools
@@ -227,9 +229,9 @@ def create_agent_config(
         lifecycle_hooks=runtime_extensions.lifecycle_hooks,
     )
     # Keep environment and AI metadata at the composition boundary.
-    config.tool_capabilities = detect_tool_capabilities()
-    config.tool_resource_limits = resolved_limits
-    config.model_capabilities = config.model.capabilities
+    setattr(config, "tool_capabilities", detect_tool_capabilities())
+    setattr(config, "tool_resource_limits", resolved_limits)
+    setattr(config, "model_capabilities", getattr(config.model, "capabilities", None))
     AgentRuntime(config, _create_policy(cfg, approval_mode), client, mcp_tools, tool_runtime)
     return config
 

@@ -50,7 +50,7 @@ class _TextualApp(App):
     def action_interrupt(self) -> None:
         self._backend._notify_interrupt()
 
-    def action_quit(self) -> None:
+    async def action_quit(self) -> None:
         self._backend._notify_quit()
 
     def action_page_up(self) -> None:

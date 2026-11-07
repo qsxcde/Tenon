@@ -130,7 +130,7 @@ class SessionEventMixin(AgentSessionHost):
     def _record_lifecycle_hook_failure(
         self,
         event: AgentEvent,
-        exception: Exception,
+        exception: BaseException,
         *,
         stage: HookFailureStage,
         hook: LifecycleHook | None = None,

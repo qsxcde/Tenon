@@ -218,7 +218,8 @@ class OutputBuffer:
             raise ValueError("原始输出已在工具层截断,无法恢复或导出")
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
-        source = Path(self.metadata.artifact_path) if self.truncated else None
+        artifact_path = self.metadata.artifact_path
+        source = Path(artifact_path) if self.truncated and artifact_path else None
         if source is not None and source.is_file() and source.resolve() != target.resolve():
             target.write_bytes(source.read_bytes())
         else:

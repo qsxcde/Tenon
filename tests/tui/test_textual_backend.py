@@ -271,7 +271,7 @@ async def test_ctrl_c_and_ctrl_q_quit():
         quits: list[str] = []
         backend.on_quit(lambda: quits.append("q"))
         async with app.run_test(size=(80, 24)):
-            app.action_quit()
+            await app.action_quit()
             assert quits == ["q"]
             # 应用绑定优先级覆盖系统绑定:ctrl+c 指向 quit 而非 help_quit
             keymap = app._bindings.get_bindings_for_key("ctrl+c")
@@ -396,7 +396,7 @@ async def test_key_input_submits_plaintext_and_clears():
 
             key_input = backend._app.composer.key_input
             key_input.value = "sk-secret-123"
-            key_input.action_submit()
+            await key_input.action_submit()
             await pilot.pause()  # post_message 异步分发
             assert submits == ["sk-secret-123"]  # 提交的是原文
             assert key_input.value == ""  # 提交后清空
@@ -422,7 +422,7 @@ async def test_key_input_empty_submit_ignored():
         async with backend._app.run_test(size=(80, 24)):
             key_input = backend._app.composer.key_input
             key_input.value = "   "
-            key_input.action_submit()
+            await key_input.action_submit()
             assert submits == []
 
     await _run()

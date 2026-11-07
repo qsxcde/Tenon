@@ -15,8 +15,8 @@ def _create_policy(cfg: Any = None, approval_mode: str = "deny") -> Any:
     from tenon.tools.plugins.permissions import parse_extension_permissions
     from tenon.tools.security import classify_tool
 
-    workspace = getattr(cfg, "cwd", None) if cfg is not None else None
-    workspace = str(Path(workspace or Path.cwd()).expanduser().resolve())
+    raw_workspace = getattr(cfg, "cwd", None) if cfg is not None else None
+    workspace = str(Path(raw_workspace or Path.cwd()).expanduser().resolve())
     mcp_rules = parse_mcp_permissions(CONFIG_DIR)
     ext_rules = parse_extension_permissions(CONFIG_DIR)
 
