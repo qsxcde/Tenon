@@ -109,7 +109,7 @@ uv run python scripts/scale_scan.py
 # 文档相对链接检查
 uv run python scripts/check_doc_links.py
 
-# 生成覆盖率报告（不设置高比例硬门槛）
+# 生成覆盖率报告（快速口径硬下限 88%，见下方 quality-fast 与 CI --cov-fail-under）
 uv run pytest -m "unit or contract" -q --strict-markers --cov=tenon --cov-report=term-missing
 
 # 发布检查：构建、检查产物、干净环境安装并运行 fake provider

@@ -56,7 +56,7 @@ openspec validate --specs                                # 验证 OpenSpec 规�
 - `session/` 负责会话状态和持久化，不依赖 `ai`、`tools` 或 `config` 的具体实现。
 - `ai/` 负责模型和传输，不把 UI 行为或会话编排塞入提供商实现。
 - `tools/` 负责工具适配，不把工具细节泄漏到核心领域层。`tools/` 不得 import `core/`（由 `tests/test_decoupling.py` 强制），需要 core 契约的桥接只发生在 `app/composition/*`。
-- Subagent 的领域规则（预算与硬上限、深度与配额、准入顺序、终态归因、委派槽位仲裁）位于 `core/subagent/`；子 Session 创建、事件发布与资源收尾等装配留在 `app/composition/subagent/`。应用层不得自行维护第二份预算默认值或上限常量。
+- Subagent 的领域规则（预算与硬上限、深度与配额、准入顺序、终态归因、委派槽位仲裁）位于 `core/subagent/`；子 Session 创建、事件发布与资源收尾等装配留在 `app/composition/subagent/`。应用层通过 `default_run_policy()` 读取这些默认值（包括深度上限与每父运行配额），不得自行写死常量或在 `delegate` 工具里另存一份会漂移的副本；配额计数与准入校验的时机虽在 `delegate` 工具边界执行，但取值必须来自 `core/subagent`。`tests/contracts/test_subagent_policy_ownership.py` 强制这一归属。
 - 配置、领域逻辑、外部适配和展示逻辑必须保持分离；跨层依赖只能沿既定方向流动。
 - 外部依赖应通过接口、协议或工厂注入；核心代码不得为了测试直接绑定真实网络、用户目录或外部进程。
 

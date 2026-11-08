@@ -16,9 +16,9 @@ from tenon.core.contracts.subagents import (
     SubagentRequest,
     SubagentRunner,
 )
+from tenon.core.subagent import default_run_policy
 
 from .budget import (
-    DEFAULT_MAX_CHILDREN_PER_RUN,
     MAX_MAX_OUTPUT_CHARS,
     MAX_MAX_TOOL_CALLS,
     MAX_MAX_TURNS,
@@ -120,11 +120,18 @@ class DelegateTool:
         runner: SubagentRunner,
         *,
         parent_run_id: str | None = None,
-        max_children_per_run: int = DEFAULT_MAX_CHILDREN_PER_RUN,
+        max_children_per_run: int | None = None,
     ) -> None:
         self._runner = runner
         self._parent_run_id = parent_run_id
-        self._max_children_per_run = max_children_per_run
+        # Derive the quota/depth from core's domain policy so the delegate tool
+        # never carries a second copy that could silently drift from it.
+        self._policy = default_run_policy()
+        self._max_children_per_run = (
+            self._policy.max_children_per_run
+            if max_children_per_run is None
+            else max_children_per_run
+        )
         self._quota_lock = asyncio.Lock()
         self._accepted_children = 0
 
@@ -229,8 +236,9 @@ class DelegateTool:
             parent_run_id=cast(str, self._parent_run_id),
             task=arguments.task,
             profile=arguments.profile,
+            # Depth ceiling comes from core's policy, not a hard-coded literal.
             depth=1,
-            max_depth=1,
+            max_depth=self._policy.max_depth,
             budget=arguments.budget,
             context=arguments.context,
         )

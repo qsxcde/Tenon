@@ -36,7 +36,7 @@
 | **可感知** | 会话过程以事件流暴露，CLI / TUI / 测试 / CI 都能订阅 |
 | **可测试** | 核心层零网络、零密钥即可运行，注入 `FakeClient` 即可跑通全量测试 |
 
-当前状态：`v0.7.0` · Python 3.12+ · 全量离线测试 **2213 passed** · 快速质量集 **2049 passed** · OpenSpec **25/25**。
+当前状态：`v0.7.0`（已发布）· 已完成的 [v0.8 收口](docs/iteration/v0.8.md)（未升版）· Python 3.12+ · 全量离线测试 **2213 passed** · 快速质量集 **2049 passed** · OpenSpec **25/25**。
 
 ## 核心特性
 
@@ -200,6 +200,7 @@ CI 由 `quality-fast`（Ruff、`uv audit --locked`、快速测试、覆盖率下
 
 - **已发布**：`v0.1.0` → `v0.7.0`，当前 [v0.7.0 发布说明](docs/releases/v0.7.0.md)。
 - **v0.7.0**：工具注册表数据化、审批结果封闭枚举、`web_fetch` / `web_search` / `todo`、工具执行瀑布管线、扩展插件目录、Subagent 有界并发与 `implement` profile、API 形状注册表、三档 bash 沙箱、写前 checkpoint + `undo`、缓存诊断、离线评测框架；同时包含 v0.6 正确性硬化。
+- **v0.8 收口（已完成，未升版）**：依赖安全升级、质量门禁收紧（覆盖率 88%、`uv audit`、OpenSpec 变更校验）、类型债务清零与 Ruff 规则扩展；明细见 [v0.8 迭代记录](docs/iteration/v0.8.md) 与 CHANGELOG `[Unreleased]`。
 - **后续评估**：执行控制（steer 接入 UI、后台作业、事件流导出）、程序化工具编排、跨进程恢复与自动重试、长期记忆、TUI schema v2 正式基线。Web UI 暂不规划。
 - **明确不做**：费用估算、Web/HTTP 事件订阅、轻量记忆、自动化任务调度、`tester` profile。
 
