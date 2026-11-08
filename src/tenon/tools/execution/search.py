@@ -10,9 +10,16 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from tenon.tools.execution.argv_runner import run_argv_async
 from tenon.tools.shared import ToolResourceLimits
 
-__all__ = ["ExternalSearchResult", "run_optional_search", "run_rg"]
+__all__ = [
+    "ExternalSearchResult",
+    "run_optional_search",
+    "run_optional_search_async",
+    "run_rg",
+    "run_rg_async",
+]
 
 
 @dataclass(frozen=True)
@@ -79,6 +86,36 @@ def _terminate(process: subprocess.Popen[bytes], timeout: float) -> bool:
     return True
 
 
+async def run_optional_search_async(
+    name: str,
+    args: list[str],
+    cwd: str | Path,
+    *,
+    timeout: float,
+    max_output_bytes: int,
+    cleanup_timeout: float,
+) -> ExternalSearchResult | None:
+    """可取消的可选检索器异步路径；不可用时返回 ``None`` 供回退纯 Python。
+
+    取消或超时都会经 ``ProcessRunner.arun_argv`` 杀掉整棵进程树；取消以
+    ``CancelledError`` 向上传播，超时则返回 ``None``。
+    """
+    executable = shutil.which(name)
+    if not executable or max_output_bytes < 1:
+        return None
+    try:
+        _, raw, truncated = await run_argv_async(
+            [executable, *args],
+            cwd=str(cwd),
+            timeout=timeout,
+            max_output_bytes=max_output_bytes,
+            cleanup_timeout=cleanup_timeout,
+        )
+    except OSError:
+        return None
+    return ExternalSearchResult(raw, truncated=truncated)
+
+
 def run_rg(
     target: Path,
     pattern: str,
@@ -90,6 +127,54 @@ def run_rg(
     limits: ToolResourceLimits,
 ) -> tuple[list[str], bool] | None:
     """使用 rg 加速；任何不完整或不可解析结果均交给 Python fallback。"""
+    run_cwd, args = _build_rg_args(target, pattern, glob, ignore_case, literal, context)
+    result = run_optional_search(
+        "rg",
+        args,
+        run_cwd,
+        timeout=_search_timeout(limits),
+        max_output_bytes=limits.effective_output_bytes,
+        cleanup_timeout=limits.cleanup_timeout,
+    )
+    if result is None or result.truncated:
+        return None
+    return _select_rg_lines(result.stdout, target, run_cwd, context, limit)
+
+
+async def run_rg_async(
+    target: Path,
+    pattern: str,
+    glob: str | None,
+    ignore_case: bool,
+    literal: bool,
+    context: int,
+    limit: int,
+    limits: ToolResourceLimits,
+) -> tuple[list[str], bool] | None:
+    """可取消的 rg 异步路径；不可用/不完整时返回 ``None`` 交给 Python fallback。"""
+    run_cwd, args = _build_rg_args(target, pattern, glob, ignore_case, literal, context)
+    result = await run_optional_search_async(
+        "rg",
+        args,
+        run_cwd,
+        timeout=_search_timeout(limits),
+        max_output_bytes=limits.effective_output_bytes,
+        cleanup_timeout=limits.cleanup_timeout,
+    )
+    if result is None or result.truncated:
+        return None
+    return _select_rg_lines(result.stdout, target, run_cwd, context, limit)
+
+
+def _build_rg_args(
+    target: Path,
+    pattern: str,
+    glob: str | None,
+    ignore_case: bool,
+    literal: bool,
+    context: int,
+) -> tuple[Path, list[str]]:
+    """构造 rg argv 与运行目录(同步/异步共享)。"""
     args = [
         "--json",
         "--color",
@@ -110,18 +195,15 @@ def run_rg(
         args.extend(["-C", str(context)])
     run_cwd, target_arg = _rg_target(target)
     args.extend(["--", pattern, target_arg])
-    result = run_optional_search(
-        "rg",
-        args,
-        run_cwd,
-        timeout=_search_timeout(limits),
-        max_output_bytes=limits.effective_output_bytes,
-        cleanup_timeout=limits.cleanup_timeout,
-    )
-    if result is None or result.truncated:
-        return None
+    return run_cwd, args
+
+
+def _select_rg_lines(
+    stdout: bytes, target: Path, run_cwd: Path, context: int, limit: int
+) -> tuple[list[str], bool] | None:
+    """把 rg 原始输出解析为命中行(同步/异步共享);不可解析返回 ``None``。"""
     try:
-        records = _parse_rg_records(result.stdout, target, run_cwd)
+        records = _parse_rg_records(stdout, target, run_cwd)
     except (UnicodeDecodeError, KeyError, TypeError, ValueError):
         return None
     matches = [record for record in records if record[0] == "match"]

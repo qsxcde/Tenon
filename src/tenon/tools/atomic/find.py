@@ -11,14 +11,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import fnmatch
+import os
 import re
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from tenon.tools.base import AtomicTool
-from tenon.tools.execution.search import run_optional_search
+from tenon.tools.execution.search import run_optional_search, run_optional_search_async
 from tenon.tools.shared import (
     GovernedText,
     ToolResourceLimits,
@@ -134,6 +136,11 @@ class FindTool(AtomicTool[FindArgs]):
     description = "按 glob 模式查找文件;支持 ** 递归,返回相对路径,自动跳过噪声目录。"
     Args = FindArgs
 
+    @property
+    def supports_cancellation(self) -> bool:
+        """POSIX 进程组可验证；Windows 树杀不可靠，如实上报不支持。"""
+        return os.name != "nt"
+
     def _invoke(self, args: FindArgs) -> str:
         try:
             results = find_files(
@@ -146,7 +153,28 @@ class FindTool(AtomicTool[FindArgs]):
             )
         except OSError as exc:
             raise ValueError(f"查找失败: {exc}")
+        return self._format_results(args, results)
 
+    async def ainvoke(self, args: FindArgs) -> str:
+        """可取消路径：优先用 fd 的异步子进程，否则回退线程内纯 Python 遍历。"""
+        external = await _try_fd_async(args, self._cwd, self.resource_limits)
+        if external is not None:
+            return self._format_results(args, external)
+        try:
+            results = await asyncio.to_thread(
+                find_files,
+                self._ops,
+                self._cwd,
+                args.pattern,
+                args.path,
+                args.limit,
+                resource_limits=self.resource_limits,
+            )
+        except OSError as exc:
+            raise ValueError(f"查找失败: {exc}")
+        return self._format_results(args, results)
+
+    def _format_results(self, args: FindArgs, results: list[str]) -> str:
         limit = args.limit if args.limit is not None else DEFAULT_LIMIT
         body = "\n".join(results) if results else "(无匹配文件)"
         body, trunc = truncate_head(
@@ -177,30 +205,27 @@ class FindTool(AtomicTool[FindArgs]):
         )
 
 
-def _try_fd(
-    base: Path,
-    matcher: re.Pattern[str],
-    full_path: bool,
-    limit: int | None,
-    limits: ToolResourceLimits,
-) -> list[str] | None:
-    """使用 fd 加速文件枚举；失败或不完整时返回 None 触发 Python fallback。"""
+def _fd_args() -> list[str]:
+    """构造 fd 的 argv(同步/异步共享)。"""
     args = ["--type", "f", "--hidden", "--no-ignore", "--print0"]
     for noise in (".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build"):
         args.extend(["--exclude", noise])
     args.extend(["--", ".", "."])
-    result = run_optional_search(
-        "fd",
-        args,
-        base,
-        timeout=_search_timeout(limits),
-        max_output_bytes=limits.effective_output_bytes,
-        cleanup_timeout=limits.cleanup_timeout,
-    )
-    if result is None or result.truncated or not result.stdout.endswith(b"\0"):
+    return args
+
+
+def _parse_fd_output(
+    stdout: bytes,
+    base: Path,
+    matcher: re.Pattern[str],
+    full_path: bool,
+    limit: int | None,
+) -> list[str] | None:
+    """解析 fd 的 NUL 分隔输出(同步/异步共享);不完整返回 ``None``。"""
+    if not stdout.endswith(b"\0"):
         return None
     results: list[str] = []
-    for raw in result.stdout.split(b"\0"):
+    for raw in stdout.split(b"\0"):
         if not raw:
             continue
         try:
@@ -219,6 +244,52 @@ def _try_fd(
             if limit is not None and len(results) >= limit:
                 break
     return results
+
+
+def _try_fd(
+    base: Path,
+    matcher: re.Pattern[str],
+    full_path: bool,
+    limit: int | None,
+    limits: ToolResourceLimits,
+) -> list[str] | None:
+    """使用 fd 加速文件枚举；失败或不完整时返回 None 触发 Python fallback。"""
+    result = run_optional_search(
+        "fd",
+        _fd_args(),
+        base,
+        timeout=_search_timeout(limits),
+        max_output_bytes=limits.effective_output_bytes,
+        cleanup_timeout=limits.cleanup_timeout,
+    )
+    if result is None or result.truncated:
+        return None
+    return _parse_fd_output(result.stdout, base, matcher, full_path, limit)
+
+
+async def _try_fd_async(
+    args: FindArgs,
+    cwd: str | Path | None,
+    limits: ToolResourceLimits,
+) -> list[str] | None:
+    """可取消的 fd 异步枚举；不可用/不完整返回 ``None`` 触发线程内 Python 回退。"""
+    pattern = args.pattern.strip()
+    if not pattern:
+        return None  # 交给回退路径抛出与同步一致的错误
+    base = resolve_to_cwd(args.path or ".", cwd)
+    full_path = "/" in pattern
+    matcher = _glob_to_regex(pattern) if full_path else re.compile(fnmatch.translate(pattern))
+    result = await run_optional_search_async(
+        "fd",
+        _fd_args(),
+        base,
+        timeout=_search_timeout(limits),
+        max_output_bytes=limits.effective_output_bytes,
+        cleanup_timeout=limits.cleanup_timeout,
+    )
+    if result is None or result.truncated:
+        return None
+    return _parse_fd_output(result.stdout, base, matcher, full_path, args.limit)
 
 
 def _search_timeout(limits: ToolResourceLimits) -> float:

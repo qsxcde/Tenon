@@ -11,14 +11,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import bisect
 import fnmatch
+import os
 import re
 
 from pydantic import BaseModel, Field
 
 from tenon.tools.base import AtomicTool
-from tenon.tools.execution.search import run_rg
+from tenon.tools.execution.search import run_rg, run_rg_async
 from tenon.tools.shared import (
     GovernedText,
     ToolResourceLimits,
@@ -210,10 +212,33 @@ def grep_files(
         return _grep_str(ops, target, str_matcher, glob, context, limit)
 
 
+async def _grep_files_async(
+    ops, cwd, args: GrepArgs, limits: ToolResourceLimits
+) -> tuple[list[str], bool]:
+    """可取消的 grep:优先 rg 异步子进程,否则在线程内跑纯 Python 搜索。"""
+    pattern = args.pattern.strip()
+    target = resolve_to_cwd(args.path or ".", cwd)
+    limit = args.limit if args.limit is not None else DEFAULT_LIMIT
+    if pattern and ops.exists(target):
+        external = await run_rg_async(
+            target, pattern, args.glob, args.ignore_case, args.literal, args.context, limit, limits
+        )
+        if external is not None:
+            return external
+    pos = [ops, cwd, args.pattern, args.path, args.glob]
+    pos += [args.ignore_case, args.literal, args.context, args.limit]
+    return await asyncio.to_thread(grep_files, *pos, resource_limits=limits)
+
+
 class GrepTool(AtomicTool[GrepArgs]):
     name = "grep"
     description = "在目录/文件中按正则或字面量搜索;返回 路径:行号: 内容,支持上下文行,自动跳过噪声目录与二进制文件。"
     Args = GrepArgs
+
+    @property
+    def supports_cancellation(self) -> bool:
+        """POSIX 进程组可验证；Windows 树杀不可靠，如实上报不支持。"""
+        return os.name != "nt"
 
     def _invoke(self, args: GrepArgs) -> str:
         try:
@@ -231,7 +256,14 @@ class GrepTool(AtomicTool[GrepArgs]):
             )
         except OSError as exc:
             raise ValueError(f"搜索失败: {exc}")
+        return self._format_result(args, lines, limit_hit)
 
+    async def ainvoke(self, args: GrepArgs) -> str:
+        """可取消路径：优先用 rg 的异步子进程，否则回退线程内纯 Python 搜索。"""
+        lines, limit_hit = await _grep_files_async(self._ops, self._cwd, args, self.resource_limits)
+        return self._format_result(args, lines, limit_hit)
+
+    def _format_result(self, args: GrepArgs, lines: list[str], limit_hit: bool) -> str:
         body = "\n".join(lines) if lines else "(无匹配)"
         body, trunc = truncate_head(
             body, max_lines=self.output_max_lines, max_bytes=self.output_max_bytes

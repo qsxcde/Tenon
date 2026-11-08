@@ -13,7 +13,7 @@ from tenon.tools.execution.posix import PosixProcessBackend
 from tenon.tools.execution.windows import WindowsProcessBackend
 from tenon.tools.shared import DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES
 
-__all__ = ["ProcessRequest", "ProcessResult", "ProcessRunner"]
+__all__ = ["ProcessRequest", "ProcessResult", "ProcessRunner", "default_backend"]
 
 
 class _ProcessBackend(Protocol):
@@ -79,6 +79,11 @@ class ProcessResult:
 
 def _default_backend() -> _ProcessBackend:
     return WindowsProcessBackend() if os.name == "nt" else PosixProcessBackend()
+
+
+def default_backend() -> _ProcessBackend:
+    """Expose the platform backend for helpers that spawn bare argv processes."""
+    return _default_backend()
 
 
 class ProcessRunner:

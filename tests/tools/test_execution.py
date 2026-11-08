@@ -105,3 +105,40 @@ def test_windows_backend_declares_process_group_and_cleanup_uncertainty(monkeypa
     assert kwargs["env"] == {"Path": "C:\\bin"}
     assert kwargs["creationflags"] == group_flag | no_window_flag
     assert backend.kill_tree(12345) is False
+
+
+async def test_run_argv_async_captures_stdout_and_avoids_duplicate_cwd(tmp_path):
+    """argv 助手真的能 spawn(不重复传 cwd),并捕获 stdout。"""
+    from tenon.tools.execution.argv_runner import run_argv_async
+
+    rc, out, truncated = await run_argv_async(
+        ["python3", "-c", "print('hi-argv')"],
+        cwd=str(tmp_path),
+        timeout=10,
+        max_output_bytes=4096,
+        cleanup_timeout=2,
+    )
+    assert rc == 0
+    assert out.strip() == b"hi-argv"
+    assert truncated is False
+
+
+async def test_run_argv_async_cancellation_kills_process(tmp_path):
+    """取消会让正在运行的 argv 进程树被终止并向上抛出 CancelledError。"""
+    import asyncio
+
+    from tenon.tools.execution.argv_runner import run_argv_async
+
+    task = asyncio.create_task(
+        run_argv_async(
+            ["python3", "-c", "import time; time.sleep(30)"],
+            cwd=str(tmp_path),
+            timeout=60,
+            max_output_bytes=1024,
+            cleanup_timeout=2,
+        )
+    )
+    await asyncio.sleep(0.3)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
